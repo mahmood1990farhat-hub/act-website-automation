@@ -1,0 +1,144 @@
+{
+  "aside": [
+    { "name": "My Trips", "href": "/en/driver" },
+    { "name": "New Requests", "href": "/en/driver/new-requests" },
+    { "name": "Acceptable trips", "href": "/en/driver/acceptable-trips" },
+    { "name": "Upcoming trips", "href": "/en/driver/upcoming-trips" },
+    { "name": "Monitor trip", "href": "/en/driver/monitor-trip" },
+    { "name": "Profile", "href": "/en/driver/profile" }
+  ],
+  "sidebar": {
+    "brandTitle": "Airport City Group",
+    "logoAlt": "Logo",
+    "logout": "Logout",
+    "loggingOut": "Logging out..."
+  },
+  "myTrips": {
+    "tableHeaders": [
+      "Passenger Name",
+      "Trip ID",
+      "PickUp/DropOff",
+      "Trip Date",
+      "Distance",
+      "Cost",
+      "Status",
+      "Action "
+    ],
+    "status": [
+      { "title": "Pending", "value": "pending" },
+      { "title": "Accepted", "value": "accepted" },
+      { "title": "Active", "value": "active" },
+
+      { "title": "Upcoming", "value": "driver_on_the_way" },
+      { "title": "Completed", "value": "completed" },
+      { "title": "Canceled", "value": "cancelled" }
+    ],
+    "tripDetails": {
+      "completedTrips": "Completed trips",
+      "pinnedTrips": "Pinned trips",
+      "canceledTrips": "Canceled trips",
+      "tripDetails": "Trip Details",
+      "id": "ID",
+      "date": "Date",
+      "time": "Time",
+      "pickupLocation": "Pick-up location",
+      "dropoffLocation": "Drop-off location",
+      "passengerCount": "Passenger count",
+      "largeBagsCount": "Large bags count",
+      "smallBagsCount": "Small bags count",
+      "carType": "Car type",
+      "calendar": "Calendar",
+      "totalCost": "Total cost",
+      "back": "Back",
+      "table": "Table",
+      "tables": "Tables",
+      "of": "of",
+      "btuAccept": "Accept",
+      "btuStartTrip": "Start trip",
+      "btuMoveToPicku": "Move to Pickup",
+      "btuEndTrip": "End trip",
+      "btuContact": " Contact",
+      "modal": {
+        "moveToPickup": {
+          "title": "Move to Pickup ?",
+          "decs_1": "Are you sure you want to move to pickup for trip ID ",
+          "decs_2": " now?",
+          "btuStartTrip": "Move to Pickup",
+          "btuCancel": "Cancel"
+        },
+        "startTrip": {
+          "title": "Start the trip?",
+          "decs": "Please do not start the trip until all passengers have boarded.",
+          "btuCancel": "Cancel"
+        },
+        "endTrip": {
+          "title": "End the trip?",
+          "desc": "Please make sure all passengers have arrived before ending the trip.",
+          "btuCancel": "Cancel"
+        },
+        "theTripHasStarted": {
+          "title": "The trip has started.",
+          "desc": "You can monitor the trip or chat with the passenger through the system",
+          "btuMonitorTrip": "Monitor trip",
+          "btuCancel": "Cancel"
+        }
+      }
+    },
+    "newRequests": {
+      "title": "New requests",
+      "TripsAwaitingApproval": "Trips Awaiting Approval"
+    },
+    "upcomingTrips": {
+      "title": "Upcoming trips"
+    },
+    "monitorTrip": {
+      "title": "Monitor trip"
+    },
+    "noTrips": {
+      "title": "No trips available at the moment",
+      "desc": "You can browse the available trips and choose the one that suits you from the list."
+    },
+    "noNewRequest": {
+      "title": "No trips available at the moment",
+      "desc": "You will be notified as soon as a new trip is assigned to you!"
+    }
+  },
+  "adminVerification": {
+    "title": "Account Under Review",
+    "desc": "Your driver account is being reviewed by our admin team"
+  },
+  "documentUpload": {
+    "title": "Upload Required Documents",
+    "subtitle": "Please provide clear photos or scans of each document below. These are needed to verify your eligibility as a private hire driver.",
+    "section": {
+      "title": "Upload your compliance documents",
+      "description": "Upload clear photos or scans for each required document. These are needed to verify your eligibility as a private hire driver."
+    },
+    "notes": {
+      "pcoLicence": {
+        "label": "PCO driver licence issued by TfL (mandatory)",
+        "description": "Upload the front of your TfL private hire driver licence showing your name, badge number, expiry date, and photo."
+      },
+      "dbsCertificate": {
+        "label": "DBS enhanced certificate (background check)",
+        "description": "Provide a recent Disclosure and Barring Service certificate (issued within the last 6 months)."
+      },
+      "dvlaLicence": {
+        "label": "UK DVLA driving licence (both sides)",
+        "description": "Upload a clear photo of the front and back of your UK driving licence, showing all details."
+      },
+      "phvLicence": {
+        "label": "Vehicle PHV licence (if you own the vehicle)",
+        "description": "Upload the Transport for London PHV licence for the vehicle you’ll be using. If you rent, ask the operator for this document."
+      },
+      "vehicleInsurance": {
+        "label": "Private hire vehicle insurance certificate",
+        "description": "Provide proof that the vehicle is insured for private hire work (hire & reward cover)."
+      },
+      "motCertificate": {
+        "label": "MOT certificate (vehicle less than 6 months old exempt)",
+        "description": "Upload the latest MOT certificate for the vehicle."
+      }
+    }
+  }
+}

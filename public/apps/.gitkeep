@@ -1,0 +1,15 @@
+# APK Files Directory
+
+Place your Android APK files in this directory.
+
+## Current Setup:
+- The download page expects: `driver-app.apk`
+- File path in code: `/apps/driver-app.apk`
+
+## To add your APK:
+1. Place your APK file in this directory (`public/apps/`)
+2. Name it `driver-app.apk` (or update the filename in `src/components/_components/download-app/DownloadButton.tsx`)
+
+## Example:
+- `public/apps/driver-app.apk` → accessible at `/apps/driver-app.apk`
+

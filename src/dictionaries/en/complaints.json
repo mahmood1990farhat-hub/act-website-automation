@@ -1,0 +1,112 @@
+{
+  "title": "Complaints",
+  "subtitle": "Submit and track your complaints",
+  "tabs": {
+    "my_complaints": "My Complaints",
+    "submit_complaint": "Submit Complaint"
+  },
+  "stats": {
+    "total": "Total Complaints",
+    "pending": "Pending",
+    "under_review": "Under Review",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "complaint_list": {
+    "title": "My Complaints",
+    "empty": "No complaints found",
+    "filter": {
+      "all": "All",
+      "status_label": "Filter by Status",
+      "type_label": "Filter by Type"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "Complaint ID",
+    "type": "Type",
+    "title": "Title",
+    "description": "Description",
+    "status": "Status",
+    "trip_date": "Trip Date",
+    "created_at": "Submitted On",
+    "admin_response": "Admin Response",
+    "resolved_at": "Resolved At",
+    "view_trip": "View Trip Details",
+    "resolved": "Resolved",
+    "not_resolved": "Not Resolved",
+    "leave_review": "Leave a Review",
+    "show_details": "Show Details",
+    "close": "Close",
+    "complaint_details": "Complaint Details",
+    "complainant": "Complainant",
+    "passenger": "Passenger",
+    "driver": "Driver",
+    "complainant_info": "Complainant Information",
+    "trip_info": "Trip Information",
+    "trip_id": "Trip ID",
+    "trip_time": "Trip Time",
+    "distance": "Distance",
+    "duration": "Expected Duration",
+    "passenger_info": "Passenger Information",
+    "driver_info": "Driver Information",
+    "full_name": "Full Name",
+    "phone_number": "Phone Number",
+    "email": "Email",
+    "account_type": "Account Type",
+    "name": "Name",
+    "respond": "Respond",
+    "resolve": "Resolve",
+    "respond_to_complaint": "Respond to Complaint",
+    "resolve_complaint": "Resolve Complaint",
+    "response_required": "Response is required",
+    "response_placeholder": "Enter your response...",
+    "sending": "Sending...",
+    "send_response": "Send Response",
+    "resolving": "Resolving...",
+    "cancel": "Cancel",
+    "update_status": "Update Status",
+    "update": "Update",
+    "updating": "Updating...",
+    "resolution_placeholder": "Enter resolution details...",
+    "complaint_info": "Complaint Information",
+    "complaint_content": "Complaint Content",
+    "downloadPdf": "Download PDF"
+  },
+  "submit_form": {
+    "title": "Submit a Complaint",
+    "subtitle": "Please provide details about your complaint",
+    "fields": {
+      "trip": "Select Trip",
+      "trip_placeholder": "Choose the trip related to your complaint",
+      "complaint_type": "Complaint Type",
+      "complaint_type_placeholder": "Select complaint type",
+      "title": "Title",
+      "title_placeholder": "Brief summary of your complaint",
+      "description": "Description",
+      "description_placeholder": "Provide detailed information about your complaint"
+    },
+    "button": "Add Complaint",
+    "button_loading": "Adding...",
+    "success_message": "Complaint submitted successfully!",
+    "error_message": "Failed to submit complaint. Please try again.",
+    "validation": {
+      "trip_required": "Please select a trip",
+      "type_required": "Please select a complaint type",
+      "title_required": "Please provide a title",
+      "title_min": "Title must be at least 5 characters",
+      "description_required": "Please provide a description",
+      "description_min": "Description must be at least 20 characters"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "Trip Issue",
+    "driver_issue": "Driver Issue"
+  },
+  "statuses": {
+    "pending": "Pending",
+    "under_review": "Under Review",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  }
+}
+
