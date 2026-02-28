@@ -222,7 +222,6 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                 />
               ) : step === 4 ? (
                 <>
-
                   <PaymentDsetails
                     policy_and_terms={policy_and_terms}
                     clientSecret={clientSecret}

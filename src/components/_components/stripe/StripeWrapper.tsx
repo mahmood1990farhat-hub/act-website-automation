@@ -11,7 +11,6 @@ export default function StripeWrapper({ clientSecret, children }: { clientSecret
   };
   const options = {
     clientSecret,
-
   };
   if (!clientSecret) return null;
 
