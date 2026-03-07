@@ -134,7 +134,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
     largeSuitcase: 0,
     numberOfPassengers: 1,
   });
-  const [SelectedCar, setSelectedCar] = useState<VehicleType | undefined>();
+  const [SelectedCar, setSelectedCar] = useState<any | undefined>();
   const [rideOptions, setRideOptions] = useState<calculatTripCost | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('')
   const [step, setStep] = useState<number>(1);
@@ -146,6 +146,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
 
   }, [step]);
 
+  
   const heroImage = locale === 'ar' ? `bg-[linear-gradient(rgba(0,0,0,0.85),rgba(0,0,0,0.85)),url('/images/act-hero-bg-skewed.jpg')]` : `bg-[linear-gradient(rgba(0,0,0,0.85),rgba(0,0,0,0.85)),url('/images/act-hero-bg.webp')]`;
 
 
@@ -214,6 +215,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     total_cost: SelectedCar
                       ? SelectedCar.total_cost
                       : undefined,
+                      trip_duration_minutes: SelectedCar?.expected_trip_duration_minutes
                   }}
                   setStep={(e) => setStep(e)}
                   step={step}

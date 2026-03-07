@@ -161,7 +161,7 @@ export default function ModernChooseCar({
                 }`}
                 onClick={() => {
                   if (!isDisabled) {
-                    handleCarSelect(car);
+                    handleCarSelect({...car, ...rideOptions});
                   }
                 }}
                 aria-disabled={isDisabled}
