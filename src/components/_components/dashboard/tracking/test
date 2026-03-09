@@ -1,0 +1,140 @@
+import React, { useEffect, useRef, useState } from "react";
+import { GoogleMap, Polyline, Marker } from "@react-google-maps/api";
+import { decode } from "@googlemaps/polyline-codec";
+
+type Props = {
+  routePolyline: string;
+  speed?: number; // سرعة الحركة (0.01-0.05)
+};
+
+const MapViewCarSmoothFollow = ({ routePolyline, speed = 0.02 }: Props) => {
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const [path, setPath] = useState<google.maps.LatLngLiteral[]>([]);
+  const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 0, lng: 0 });
+  const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
+  const [heading, setHeading] = useState<number>(0);
+  const [traveledPath, setTraveledPath] = useState<google.maps.LatLngLiteral[]>([]);
+
+  const pointIndexRef = useRef(0);
+  const tRef = useRef(0);
+  const lastCenterRef = useRef<google.maps.LatLngLiteral | null>(null);
+  const animationFrameRef = useRef<number>();
+
+  // فك تشفير المسار
+  useEffect(() => {
+    if (routePolyline) {
+      const decodedPath = decode(routePolyline, 5);
+      const formattedPath = decodedPath.map(([lat, lng]) => ({ lat, lng }));
+      setPath(formattedPath);
+      if (formattedPath.length > 0) {
+        const mid = Math.floor(formattedPath.length / 2);
+        setCenter(formattedPath[mid]);
+        setCurrentLocation(formattedPath[0]);
+        setTraveledPath([formattedPath[0]]);
+        lastCenterRef.current = formattedPath[mid];
+      }
+    }
+  }, [routePolyline]);
+
+  // حركة سلسة باستخدام requestAnimationFrame
+  useEffect(() => {
+    if (path.length < 2) return;
+
+    const animate = () => {
+      const i = pointIndexRef.current;
+      const start = path[i];
+      const end = path[i + 1];
+
+      tRef.current += speed;
+      if (tRef.current >= 1) {
+        tRef.current = 0;
+        pointIndexRef.current = i + 1 < path.length - 1 ? i + 1 : path.length - 2;
+
+        // أضف النقطة النهائية الجديدة إلى المسار المقطوع
+        setTraveledPath((prev) => [...prev, end]);
+      }
+
+      const lat = start.lat + (end.lat - start.lat) * tRef.current;
+      const lng = start.lng + (end.lng - start.lng) * tRef.current;
+
+      // حساب الزاوية بدقة
+      const angle = Math.atan2(end.lng - start.lng, end.lat - start.lat) * (180 / Math.PI);
+
+      const newLocation = { lat, lng };
+      setHeading(angle);
+      setCurrentLocation(newLocation);
+
+      // تتبع المركبة بسلاسة
+      if (
+        !lastCenterRef.current ||
+        Math.hypot(newLocation.lat - lastCenterRef.current.lat, newLocation.lng - lastCenterRef.current.lng) > 0.0001
+      ) {
+        mapRef.current?.panTo(newLocation);
+        lastCenterRef.current = newLocation;
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, [path, speed]);
+
+  return (
+    <GoogleMap
+      mapContainerStyle={{ width: "100%", height: "500px", borderRadius: "8px" }}
+      center={center}
+      zoom={15}
+      onLoad={(map) => {
+        mapRef.current = map;
+        if (path.length > 0) {
+          const bounds = new window.google.maps.LatLngBounds();
+          path.forEach((point) => bounds.extend(point));
+          map.fitBounds(bounds);
+        }
+      }}
+    >
+      {/* المسار الكامل */}
+      {path.length > 0 && (
+        <Polyline
+          path={path}
+          options={{ strokeColor: "#317daf", strokeOpacity: 0.5, strokeWeight: 4, geodesic: true }}
+        />
+      )}
+
+      {/* المسار المقطوع */}
+      {traveledPath.length > 1 && (
+        <Polyline
+          path={traveledPath}
+          options={{ strokeColor: "#FF5733", strokeOpacity: 1, strokeWeight: 5, geodesic: true }}
+        />
+      )}
+
+      {/* البداية والنهاية */}
+      {path.length > 0 && (
+        <Marker position={path[0]} icon={{ url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }} />
+      )}
+      {path.length > 1 && (
+        <Marker position={path[path.length - 1]} icon={{ url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png" }} />
+      )}
+
+      {/* السيارة Top-Down */}
+      {currentLocation && (
+        <Marker
+          position={currentLocation}
+          icon={{
+            url: "https://img.icons8.com/ios-filled/50/000000/car-top-view.png",
+            scaledSize: new google.maps.Size(40, 40),
+            anchor: new google.maps.Point(20, 20),
+            rotation: heading,
+          }}
+        />
+      )}
+    </GoogleMap>
+  );
+};
+
+export default MapViewCarSmoothFollow;
