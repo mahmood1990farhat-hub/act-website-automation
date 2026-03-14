@@ -311,7 +311,7 @@ export default function AllPassengersDashboard({
                   </tbody>
                 </table>
               </div>
-              {pagination.num_pages > 1 && (
+              { passengersLoading ?null:pagination.num_pages > 1 && (
                 <div className="flex items-center justify-between px-6 border-t-2 border-border">
                   <div className="text-sm mx-auto text-muted-foreground">
                     {trans.pagination?.table || "Page"} {page} {trans.pagination?.of || "of"}{" "}

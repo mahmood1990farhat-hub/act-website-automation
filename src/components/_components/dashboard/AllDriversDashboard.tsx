@@ -78,7 +78,8 @@ export default function AllDriversDashboard({
   const payload = driversData?.data || driversData || {};
   const drivers = payload.drivers || [];
   const stats = payload.stats?.all_time || {};
-  const pagination = payload.pagination || {};
+  const pagination = driversData?.pagination || {};
+  
 
   const handleActivate = async (userId: number) => {
     setActionLoading(true);
@@ -412,7 +413,9 @@ export default function AllDriversDashboard({
                   </tbody>
                 </table>
               </div>
-              {pagination.num_pages > 1 && (
+              {
+               driversLoading ?null: ( 
+               driversData?.pagination.num_pages > 0 && (
                 <div className="flex items-center justify-between px-6 border-t-2 border-border">
                   <div className="text-sm mx-auto text-muted-foreground">
                     {trans.pagination?.table || "Table"} {page} {trans.pagination?.of || "of"}{" "}
@@ -425,7 +428,7 @@ export default function AllDriversDashboard({
                     totalPages={pagination.num_pages || 1}
                   />
                 </div>
-              )}
+              ) )}
             </div>
           </div>
 

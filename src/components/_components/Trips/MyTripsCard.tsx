@@ -137,7 +137,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data.driver_info.first_name } ${data.driver_info.last_name }`  } 
+							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
 						</p>
 					</div>
 
@@ -164,7 +164,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data.driver_info.first_name } ${data.driver_info.last_name }`  } 
+							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
 						</p>
 					</div>
 
@@ -404,7 +404,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data.driver_info.first_name } ${data.driver_info.last_name }`  } 
+							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
 						</p>
 					</div>
 
