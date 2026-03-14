@@ -1201,8 +1201,8 @@ export default function TripsDashboard({
 										variant="dashboard"
 									/>
 								</div>
-								<div className="md:w-1/2 bg-muted border-2 border-blue-400/50 rounded-xl p-2 md:p-3 w-full min-h-[300px] max-md:max-h-[400px] overflow-hidden">
-									{detailsTrips.status === "accepted" ||
+								<div className="md:w-1/2 bg-muted border-2 text-[] border-blue-400/50 rounded-xl p-2 md:p-3 w-full min-h-[300px] max-md:max-h-[400px] overflow-hidden">
+									{detailsTrips.status === "active" ||
 									detailsTrips.status === "driver_on_the_way" ? (
 										<MapViewtest
 											tripId={detailsTrips.id}

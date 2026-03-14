@@ -19,7 +19,8 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 		[],
 	);
 	const lastCenterRef = useRef<google.maps.LatLngLiteral | null>(null);
-
+	console.log("sddd");
+	
 	const targetLocationRef = useRef<google.maps.LatLngLiteral | null>(null);
 	const targetHeadingRef = useRef<number | null>(null);
 	const animationFrameRef = useRef<number | null>(null);
@@ -192,24 +193,24 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 				/>
 			)}
 			{/* المسار المقطوع */}
-			{traveledPath.length > 1 && (
+			{/* {traveledPath.length > 1 && (
 				<Polyline
 					path={traveledPath}
 					options={{
-						strokeColor: "#FF5733",
+						strokeColor: "#5E84B3",
 						strokeOpacity: 1,
 						strokeWeight: 5,
 						geodesic: true,
 					}}
 				/>
-			)}
+			)} */}
 
 			{/* السيارة */}
 			{currentLocation && (
 				<Marker
 					position={currentLocation}
 					icon={{
-						url: "/images/car.svg",
+						url: "/images/car2.svg",
 						scaledSize: new google.maps.Size(40, 40),
 						anchor: new google.maps.Point(20, 20),
 						rotation: heading,

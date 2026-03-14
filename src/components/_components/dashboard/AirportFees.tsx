@@ -181,7 +181,7 @@ export default function AirportFees({
   });
 
   // Use static vehicle types (no API endpoint for vehicle types)
-  const vehicleTypes = VEHICLE_TYPES;
+  const vehicleTypes = useQuery<{name_ar:string,name_en:string,id:number}[]>({queryKey:["vehicle-types"], queryFn: async () => fetchData({endpoint: "/api/vehicle/vehicle-types/"})}).data || [];
 
   const airports = airportsData || [];
 

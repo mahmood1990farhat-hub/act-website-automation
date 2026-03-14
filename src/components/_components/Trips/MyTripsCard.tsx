@@ -10,6 +10,7 @@ import { postData } from "@/lib/api/postData";
 import { Locale } from "../../../../i18n.config";
 import { Button } from "@/components/ui/button";
 import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
+import MapViewtest from "../dashboard/tracking/trip-tracking-provider";
 
 type typeProps = {
 	data: any;
@@ -450,8 +451,18 @@ export default function MyTripsCard({
 								{/* Right Side - Map */}
 								<div className="lg:w-1/2 min-h-[300px] lg:min-h-full">
 									<div className="h-full rounded-xl overflow-hidden border border-muted/20 shadow-lg">
-										<MapView routePolyline={data.route_polyline} />
-									</div>
+										
+										{data.status === "active" ||
+									data.status === "driver_on_the_way" ? (
+										<MapViewtest
+											tripId={data.id}
+											routePolyline={data.route_polyline}
+										/>
+									) : (
+										<div className="h-full rounded overflow-hidden">
+											<MapView routePolyline={data.route_polyline} />
+										</div>
+									)}</div>
 								</div>
 							</div>
 						</div>
