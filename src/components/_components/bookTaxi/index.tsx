@@ -204,6 +204,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                         `name_${locale}` as keyof VehicleType
                       ] as string)
                       : "",
+                      carImage: SelectedCar ? SelectedCar.icon_url : "",
                     cartype: SelectedCar?.id,
                     cost: SelectedCar ? SelectedCar.base_trip_cost : undefined,
                     airport_vat: SelectedCar

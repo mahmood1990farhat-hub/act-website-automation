@@ -64,12 +64,12 @@
       "button": "Next"
     },
     "Confir_flight_details": {
-      "title": "Confirm Flight Details",
+      "title": "Confirm Booking Details",
       "Distance": "Distance",
       "Trip": "Trip ",
       "Car_type": "Car type",
       "Cost": "Cost",
-      "airport_vat": "Airport VAT",
+      "airport_vat": "Airport Charges",
       "VAT": "VAT",
       "Edit": "Edit",
       "details": "details",
@@ -93,7 +93,7 @@
     "Booking_Confirmation": {
       "title": "Booking Confirmed!",
       "desc": {
-        "span_1": "Your trip has been successfully booked. You will receive the driver's information shortly — this may take up to ",
+        "span_1": "You will receive an email confirmation . You will receive the driver's information shortly — this may take up to ",
         "hour": " 1 ",
         "hour_5": " 5 ",
         "span_2": " hour at most."

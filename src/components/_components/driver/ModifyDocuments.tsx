@@ -181,7 +181,7 @@ export default function ModifyDocuments({
         throw result;
       }
 
-      console.log("Success:", result);
+
       setIsLoading(false);
       setOpenModal(true);
     } catch (error) {

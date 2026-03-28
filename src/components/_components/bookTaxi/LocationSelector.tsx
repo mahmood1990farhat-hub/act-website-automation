@@ -310,7 +310,6 @@ export default function LocationSelector({
     try {
       const coordinates = await fetchPlaceDetails(location.place_id);
       if (coordinates) {
-        console.log(coordinates)
         // Verify the location is within the appropriate bounds
         let isValidLocation = false;
         let errorMessage = "";

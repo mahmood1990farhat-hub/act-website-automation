@@ -106,7 +106,6 @@ export default function CreateCaptainAccount({
   };
 
   const onSubmit = async (data: FormData) => {
-    console.log(selectedDate);
     if (!selectedDate || !selectedTime) {
       setDateTimeError(true);
       return;
@@ -165,7 +164,6 @@ export default function CreateCaptainAccount({
         return result;
       })
       .then((data) => {
-        console.log("Success:", data);
         setIsLoading(false);
         setOpenModal(true)
      

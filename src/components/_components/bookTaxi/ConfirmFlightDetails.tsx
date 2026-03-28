@@ -24,6 +24,7 @@ import CarLoading from "../loading/CarLoading";
 import MapView from "./MapView";
 import { Locale } from "../../../../i18n.config";
 import { MinutesToTimeString } from "@/lib/minutesToTimeString";
+import Image from "next/image";
 
 type typeProps = {
 	trans: home;
@@ -34,6 +35,7 @@ type typeProps = {
 		time: string;
 		carName: string;
 		date: string;
+		carImage: string;
 		distance: string;
 		smallSuitcase: number;
 		largeSuitcase: number;
@@ -97,7 +99,7 @@ export default function ModernConfirmFlightDetails({
 
 	// Arabic text alternatives
 	const texts = {
-		confirmDetails: isRTL ? "تأكيد تفاصيل الرحلة" : "Confirm Flight Details",
+		confirmDetails: isRTL ? "تأكيد تفاصيل الحجز" : "Confirm Booking Details",
 		tripDetails: isRTL ? "تفاصيل الرحلة" : "Trip Details",
 		passengerInfo: isRTL ? "معلومات الركاب" : "Passenger Information",
 		vehicleDetails: isRTL ? "تفاصيل المركبة" : "Vehicle Details",
@@ -116,9 +118,9 @@ export default function ModernConfirmFlightDetails({
 		smallLuggage: isRTL ? "حقائب صغيرة" : "Small Luggage",
 		largeLuggage: isRTL ? "حقائب كبيرة" : "Large Luggage",
 		vehicleType: isRTL ? "نوع المركبة" : "Vehicle Type",
-		baseCost: isRTL ? "التكلفة الأساسية" : "Base Cost",
-		airportVAT: isRTL ? "ضريبة المطار" : "Airport VAT",
-		regularVAT: isRTL ? "الضريبة(20%)" : "VAT (20%)",
+		baseCost: isRTL ? "تكلفة الرحلة" : "Trip Cost",
+		airportVAT: isRTL ? "رسوم المطار" : "Airport Charges",
+		regularVAT: isRTL ? "الضريبة 20%" : "Vat 20%",
 		totalCost: isRTL ? "التكلفة الإجمالية" : "Total Cost",
 		routeMap: isRTL ? "خريطة المسار" : "Route Map",
 	};
@@ -320,7 +322,7 @@ export default function ModernConfirmFlightDetails({
 											</span>
 										</div>
 										<p className="text-white text-sm">
-											{new Date(data.date).toLocaleDateString(locale, {
+											{new Date(data.date).toLocaleDateString(locale ?? "en", {
 												day: "numeric",
 												month: "short",
 												year: "numeric",
@@ -420,7 +422,18 @@ export default function ModernConfirmFlightDetails({
 								<div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-xl p-2 flex-shrink-0">
 									<div className="w-full h-full relative">
 										{/* You can add car image here if available */}
-										<Car className="w-full h-full text-white/40" />
+										{data.carImage ? (
+											<div className="relative h-16 w-16">
+												<Image
+													src={data.carImage}
+													alt="car"
+													fill
+													className="object-contain"
+												/>
+											</div>
+										) : (
+											<Car className="w-full h-full text-white/40" />
+										)}
 									</div>
 								</div>
 								<div className="flex-1">
@@ -515,15 +528,21 @@ export default function ModernConfirmFlightDetails({
 							)}
 						</Button>
 
-						<div className="flex items-center justify-center gap-4 text-white/60 text-xs sm:text-sm">
-							<div className="flex items-center gap-1">
-								<CheckCircle className="w-4 h-4 text-green-400" />
-								<span>{isRTL ? "دفع آمن" : "Secure Payment"}</span>
+						<div className="flex flex-col  items-center justify-center gap-2 sm:gap-4 text-white/60 text-xs sm:text-sm text-center sm:text-left">
+					
+
+							
+							<div className="flex items-center justify-center gap-1 max-w-xs sm:max-w-none">
+								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+								<span>
+									{isRTL
+										? "استمتع بإلغاء مجاني حتى 24 ساعة قبل موعد الاستلام المحدد"
+										: "Enjoy free cancellation up to 24 hours before your scheduled pickup"}
+								</span>
 							</div>
-							<div className="w-px h-4 bg-white/20"></div>
-							<div className="flex items-center gap-1">
-								<CheckCircle className="w-4 h-4 text-green-400" />
-								<span>{isRTL ? "إلغاء مجاني" : "Free Cancellation"}</span>
+									<div className="flex items-center justify-center gap-1 text-nowrap">
+								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+								<span>{isRTL ? "دفع آمن" : "Secure Payment"}</span>
 							</div>
 						</div>
 					</div>
