@@ -267,7 +267,7 @@ export default function TripsDashboard({
 			});
 		},
 		onSuccess: async (response) => {
-			console.log("Status transition response:", response);
+			
 			const newStatus = selectedNewStatus; // Store before clearing
 			setShowStatusModal(false);
 			setSelectedNewStatus(null);
@@ -278,18 +278,15 @@ export default function TripsDashboard({
 				typeof response.data === "object" &&
 				"id" in response.data
 			) {
-				console.log("Updating detailsTrips from response.data:", response.data);
 				setDetailsTrips(response.data);
 			} else if (
 				response?.trip &&
 				typeof response.trip === "object" &&
 				"id" in response.trip
 			) {
-				console.log("Updating detailsTrips from response.trip:", response.trip);
 				setDetailsTrips(response.trip);
 			} else if (newStatus && detailsTrips) {
 				// If response doesn't contain trip data, manually update the status
-				console.log("Manually updating status to:", newStatus);
 				setDetailsTrips({
 					...detailsTrips,
 					status: newStatus,
@@ -338,10 +335,7 @@ export default function TripsDashboard({
 						(t: any) => t.id === detailsTrips?.id,
 					);
 					if (updatedTrip) {
-						console.log(
-							"Updating detailsTrips from refetched list:",
-							updatedTrip,
-						);
+
 						setDetailsTrips(updatedTrip);
 					}
 				}

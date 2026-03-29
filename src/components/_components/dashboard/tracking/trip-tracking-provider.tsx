@@ -19,7 +19,6 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 		[],
 	);
 	const lastCenterRef = useRef<google.maps.LatLngLiteral | null>(null);
-	console.log("sddd");
 	
 	const targetLocationRef = useRef<google.maps.LatLngLiteral | null>(null);
 	const targetHeadingRef = useRef<number | null>(null);

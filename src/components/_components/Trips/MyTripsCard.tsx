@@ -63,8 +63,7 @@ export default function MyTripsCard({
 			setOpenModal(false);
 		} catch (error) {}
 	};
-  console.log(data);
-  
+	console.log(data);
 
 	return (
 		<>
@@ -108,7 +107,8 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{(data.distance_miles * 1.61).toFixed(2)} km
+							{data.distance_miles.toFixed(2)}{" "}
+							{locale === "ar" ? "ميل" : "Mile"}
 						</p>
 					</div>
 
@@ -126,22 +126,20 @@ export default function MyTripsCard({
 					</div>
 				</div>
 
-        {/* Trip Details Drviver Grid */}
+				{/* Trip Details Drviver Grid */}
 				<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4">
-				
 					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 						<div className="flex items-center gap-2 mb-1">
-						
 							<span className="text-gray-400 text-xs font-medium">
 								{tripCardTrans?.name_of_driver || "Distance"}
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
+							{data?.guest_driver_name ??
+								`${data?.driver_info?.first_name} ${data?.driver_info?.last_name}`}
 						</p>
 					</div>
 
-		
 					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 						<div className="flex items-center gap-2 mb-1">
 							<span className="text-gray-400 text-xs font-medium">
@@ -149,48 +147,70 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data.data?.guest_driver_phone || "-"}
+							{data?.guest_driver_phone || "-"}
 						</p>
 					</div>
 				</div>
-				
-				<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4">
-				
+			<div className="border-t border-muted/20 pt-4 mb-4 border-b">
+						<div className="text-lg font-semibold mb-1">
+						{tripCardTrans.carInfo }
+					</div>
+				<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4 ">
 					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 						<div className="flex items-center gap-2 mb-1">
-						
 							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.name_of_driver || "Distance"}
+								{tripCardTrans?.registrationNumber || "Registration Number"}
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
+							{data?.vehicle_info?.vehicle_number}
 						</p>
 					</div>
 
-		
 					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 						<div className="flex items-center gap-2 mb-1">
 							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.phone_of_driver || "Duration"}
+								{tripCardTrans?.brand || "Brand"}
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data.data?.guest_driver_phone || "-"}
+							{data?.vehicle_info?.vehicle_type?.[`name_${locale}`] || "-"}
+						</p>
+					</div>
+					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+						<div className="flex items-center gap-2 mb-1">
+							<span className="text-gray-400 text-xs font-medium">
+								{tripCardTrans?.year || "Year"}
+							</span>
+						</div>
+						<p className="text-white font-semibold text-sm md:text-base">
+							{data?.vehicle_info?.year_of_manufacture || "-"}
 						</p>
 					</div>
 				</div>
+			</div>
 
 				{/* Destination */}
 				<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
 					<div className="flex items-center gap-2 mb-1">
 						<TiLocation className="text-primary text-base" />
 						<span className="text-gray-400 text-xs font-medium">
-							{tripCardTrans?.destination || "Destination"}
+							{tripCardTrans?.dropoff || "Drop-off"}
 						</span>
 					</div>
 					<p className="text-white font-medium text-sm md:text-base truncate">
-						{data.destination || "London"}
+						{data.dropoff_str || "-"}
+					</p>
+				</div>
+				<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
+					<div className="flex items-center gap-2 mb-1">
+						<TiLocation className="text-primary text-base" />
+						<span className="text-gray-400 text-xs font-medium">
+							{tripCardTrans?.pickup || "Pickup"}
+						</span>
+					</div>
+					<p className="text-white font-medium text-sm md:text-base truncate">
+						{data.pickup_str || "-"}
 					</p>
 				</div>
 
@@ -395,31 +415,30 @@ export default function MyTripsCard({
 												{data.expected_trip_duration_minutes || "0"} m
 											</p>
 										</div>
-				
-					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
-						<div className="flex items-center gap-2 mb-1">
-						
-							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.name_of_driver || "Distance"}
-							</span>
-						</div>
-						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name?? `${data?.driver_info?.first_name } ${data?.driver_info?.last_name }`  } 
-						</p>
-					</div>
 
-		
-					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.phone_of_driver || "Duration"}
-							</span>
-						</div>
-						<p className="text-white font-semibold text-sm md:text-base">
-							{data.data?.guest_driver_phone || "-"}
-						</p>
-					</div>
-				
+										<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+											<div className="flex items-center gap-2 mb-1">
+												<span className="text-gray-400 text-xs font-medium">
+													{tripCardTrans?.name_of_driver || "Distance"}
+												</span>
+											</div>
+											<p className="text-white font-semibold text-sm md:text-base">
+												{data?.guest_driver_name ??
+													`${data?.driver_info?.first_name} ${data?.driver_info?.last_name}`}
+											</p>
+										</div>
+
+										<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+											<div className="flex items-center gap-2 mb-1">
+												<span className="text-gray-400 text-xs font-medium">
+													{tripCardTrans?.phone_of_driver || "Duration"}
+												</span>
+											</div>
+											<p className="text-white font-semibold text-sm md:text-base">
+												{data.data?.guest_driver_phone || "-"}
+											</p>
+										</div>
+
 										{/* Cost */}
 										<div className="bg-background/30 rounded-lg p-4 border border-muted/10">
 											<div className="flex items-center gap-2 mb-2">
@@ -434,35 +453,45 @@ export default function MyTripsCard({
 										</div>
 									</div>
 
-									{/* Destination */}
-									<div className="bg-background/30 rounded-lg p-4 border border-muted/10 sm:col-span-2">
-										<div className="flex items-center gap-2 mb-2">
-											<TiLocation className="text-primary text-xl" />
-											<span className="text-gray-400 text-sm font-medium">
-												{tripCardTrans?.destination || "Destination"}
-											</span>
-										</div>
-										<p className="text-white font-semibold">
-											{data.destination || "London"}
-										</p>
-									</div>
+									<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
+					<div className="flex items-center gap-2 mb-1">
+						<TiLocation className="text-primary text-base" />
+						<span className="text-gray-400 text-xs font-medium">
+							{tripCardTrans?.dropoff || "Drop-off"}
+						</span>
+					</div>
+					<p className="text-white font-medium text-sm md:text-base truncate">
+						{data.dropoff_str || "-"}
+					</p>
+				</div>
+				<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
+					<div className="flex items-center gap-2 mb-1">
+						<TiLocation className="text-primary text-base" />
+						<span className="text-gray-400 text-xs font-medium">
+							{tripCardTrans?.pickup || "Pickup"}
+						</span>
+					</div>
+					<p className="text-white font-medium text-sm md:text-base truncate">
+						{data.pickup_str || "-"}
+					</p>
+				</div>
 								</div>
 
 								{/* Right Side - Map */}
 								<div className="lg:w-1/2 min-h-[300px] lg:min-h-full">
 									<div className="h-full rounded-xl overflow-hidden border border-muted/20 shadow-lg">
-										
 										{data.status === "active" ||
-									data.status === "driver_on_the_way" ? (
-										<MapViewtest
-											tripId={data.id}
-											routePolyline={data.route_polyline}
-										/>
-									) : (
-										<div className="h-full rounded overflow-hidden">
-											<MapView routePolyline={data.route_polyline} />
-										</div>
-									)}</div>
+										data.status === "driver_on_the_way" ? (
+											<MapViewtest
+												tripId={data.id}
+												routePolyline={data.route_polyline}
+											/>
+										) : (
+											<div className="h-full rounded overflow-hidden">
+												<MapView routePolyline={data.route_polyline} />
+											</div>
+										)}
+									</div>
 								</div>
 							</div>
 						</div>

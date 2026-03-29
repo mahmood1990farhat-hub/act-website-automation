@@ -31,7 +31,6 @@ export default function Navber({ navbar, locale }: tpyeProps) {
   };
   const pathname=usePathname()
   const pathn=pathname.split("/").slice(-1)[0]
-  console.log(pathname);
   
 
   return (

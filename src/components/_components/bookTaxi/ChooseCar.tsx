@@ -15,7 +15,7 @@ import { Locale } from "../../../../i18n.config";
 import { calculatTripCost, Choose_car, VehicleType } from ".";
 import { Button } from "@/components/ui/button";
 
-const disabledCarEnv = process.env.NEXT_PUBLIC_DISABLED_CAR_TYPES ?? "";
+const disabledCarEnv = process.env.NEXT_PUBLIC_DISABLED_CAR_TYPES ?? ""; 
 const disabledCarIndices = disabledCarEnv
   .split(",")
   .map((index) => {
@@ -145,7 +145,8 @@ export default function ModernChooseCar({
           </>
         ) : (
           rideOptions?.car_type?.map((car, index) => {
-            const isDisabled = disabledCarIndices.includes(index);
+            // const isDisabled = disabledCarIndices.includes(index);
+            const isDisabled = false
 
             return (
               <Card

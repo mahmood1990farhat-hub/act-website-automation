@@ -20,9 +20,7 @@ export default function GetMyLocation() {
           if (isMounted) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
-            setLocation({ lat, lng });
-            console.log("موقعي الحالي:", { lat, lng });
-          }
+            setLocation({ lat, lng });}
         },
         (err) => {
           console.error("خطأ في جلب الموقع:", err);
