@@ -171,7 +171,7 @@ export default function ModernChooseCar({
                   <div className={`flex items-center gap-3 sm:gap-6`}>
                     {/* Car Image */}
                     <div className="relative self-start flex-shrink-0">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 relative rounded-xl overflow-hidden bg-white/5 p-1 sm:p-2">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 relative rounded-xl overflow-hidden bg-white p-1 sm:p-2">
                         <Image
                           src={car.icon_url}
                           alt={car[`name_${locale}`]}

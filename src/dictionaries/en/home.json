@@ -51,8 +51,8 @@
         "time": "Time",
         "is_required": "This field is required.",
         "button": "Get a Price Now",
-        "smallSuitcase": " small suitcases",
-        "largeSuitcase": "large suitcases ",
+        "smallSuitcase": " Small suitcase",
+        "largeSuitcase": "Large suitcase ",
 
         "NumberOfPassenger": "Number of passenger",
         "error_message": "Sorry, we couldn't calculate directions.",

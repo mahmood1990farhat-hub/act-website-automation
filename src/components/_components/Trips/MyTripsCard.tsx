@@ -151,44 +151,51 @@ export default function MyTripsCard({
 						</p>
 					</div>
 				</div>
-			<div className="border-t border-muted/20 pt-4 mb-4 border-b">
-						<div className="text-lg font-semibold mb-1">
-						{tripCardTrans.carInfo }
+			{data?.vehicle_info &&
+					<div className="border-t border-muted/20 pt-4 mb-4 border-b">
+					<div className="text-lg font-semibold mb-1">
+						{tripCardTrans.carInfo}
 					</div>
-				<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4 ">
-					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.registrationNumber || "Registration Number"}
-							</span>
-						</div>
-						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.vehicle_info?.vehicle_number}
-						</p>
-					</div>
-
-					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.brand || "Brand"}
-							</span>
-						</div>
-						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.vehicle_info?.vehicle_type?.[`name_${locale}`] || "-"}
-						</p>
-					</div>
-					<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-gray-400 text-xs font-medium">
-								{tripCardTrans?.year || "Year"}
-							</span>
-						</div>
-						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.vehicle_info?.year_of_manufacture || "-"}
-						</p>
+					<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4 ">
+						{data?.vehicle_info?.vehicle_number && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.registrationNumber || "Registration Number"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.vehicle_number}
+								</p>
+							</div>
+						)}
+						{data?.vehicle_info?.vehicle_type && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.brand || "Brand"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.vehicle_type?.[`name_${locale}`] || "-"}
+								</p>
+							</div>
+						)}
+						{data?.vehicle_info?.year_of_manufacture && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.year || "Year"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.year_of_manufacture || "-"}
+								</p>
+							</div>
+						)}
 					</div>
 				</div>
-			</div>
+			}
 
 				{/* Destination */}
 				<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
@@ -454,27 +461,27 @@ export default function MyTripsCard({
 									</div>
 
 									<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
-					<div className="flex items-center gap-2 mb-1">
-						<TiLocation className="text-primary text-base" />
-						<span className="text-gray-400 text-xs font-medium">
-							{tripCardTrans?.dropoff || "Drop-off"}
-						</span>
-					</div>
-					<p className="text-white font-medium text-sm md:text-base truncate">
-						{data.dropoff_str || "-"}
-					</p>
-				</div>
-				<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
-					<div className="flex items-center gap-2 mb-1">
-						<TiLocation className="text-primary text-base" />
-						<span className="text-gray-400 text-xs font-medium">
-							{tripCardTrans?.pickup || "Pickup"}
-						</span>
-					</div>
-					<p className="text-white font-medium text-sm md:text-base truncate">
-						{data.pickup_str || "-"}
-					</p>
-				</div>
+										<div className="flex items-center gap-2 mb-1">
+											<TiLocation className="text-primary text-base" />
+											<span className="text-gray-400 text-xs font-medium">
+												{tripCardTrans?.dropoff || "Drop-off"}
+											</span>
+										</div>
+										<p className="text-white font-medium text-sm md:text-base truncate">
+											{data.dropoff_str || "-"}
+										</p>
+									</div>
+									<div className="bg-background/30 rounded-lg p-3 border border-muted/10 mb-4">
+										<div className="flex items-center gap-2 mb-1">
+											<TiLocation className="text-primary text-base" />
+											<span className="text-gray-400 text-xs font-medium">
+												{tripCardTrans?.pickup || "Pickup"}
+											</span>
+										</div>
+										<p className="text-white font-medium text-sm md:text-base truncate">
+											{data.pickup_str || "-"}
+										</p>
+									</div>
 								</div>
 
 								{/* Right Side - Map */}
@@ -505,6 +512,7 @@ export default function MyTripsCard({
 								>
 									<IoChatbubbleEllipsesSharp className="text-xl" />
 									{tripCardTrans?.contactDriver || "Contact Driver"}
+									<span dir="ltr">{data?.guest_driver_phone}</span>
 								</Button>
 								<Button
 									variant="secondary"

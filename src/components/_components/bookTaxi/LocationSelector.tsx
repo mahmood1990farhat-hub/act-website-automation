@@ -68,6 +68,11 @@ const PICKUP_EXCEPTION_KEYWORDS = [
   "luton airport",
   "london stansted airport",
   "stansted airport",
+    "guildford",
+  "windsor",
+  "slough",
+  "woking",
+  "bagshot",
 ];
 
 const isPickupExceptionLocation = (description: string) => {
@@ -150,6 +155,7 @@ const isUKRelated = (description: string) => {
     "south west",
     "south east",
     "greater london",
+
   ];
   const lowerDescription = description.toLowerCase();
   return ukKeywords.some((keyword) => lowerDescription.includes(keyword));
