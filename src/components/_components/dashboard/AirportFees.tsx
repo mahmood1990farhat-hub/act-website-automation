@@ -16,6 +16,7 @@ import { extract_error } from "@/lib/api/errorApi";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import Pagination from "../Pagination";
 import { VEHICLE_TYPES } from "@/lib/constants/vehicleTypes";
+import CustomSelectInput from "../ControlledFields/CustomSelectInput";
 
 type AirportFee = {
   id: number;
@@ -64,7 +65,7 @@ type VehicleTypesResponse = {
 
 type AirportFeesFormData = {
   airport_id: number;
-  vehicle_type_id: number;
+  vehicle_type_ids: number[];
   pickup_fee: string;
   dropoff_fee: string;
 };
@@ -117,6 +118,7 @@ export default function AirportFees({
     retry: 1,
     refetchOnWindowFocus: false,
   });
+
 
   // Fetch all airport fees for validation (to check duplicates)
   const { data: allFeesData } = useQuery<AirportFeesResponse>({
@@ -181,20 +183,33 @@ export default function AirportFees({
   });
 
   // Use static vehicle types (no API endpoint for vehicle types)
-  const vehicleTypes = useQuery<{name_ar:string,name_en:string,id:number}[]>({queryKey:["vehicle-types"], queryFn: async () => fetchData({endpoint: "/api/vehicle/vehicle-types/"})}).data || [];
-
-  const airports = airportsData || [];
+const { data: vehicleTypes =[] ,isLoading :isLoadingVehicleTypes } =
+  useQuery({
+    queryKey: ["vehicle-types"],
+    queryFn: async () =>
+      fetchData<{ name_ar: string; name_en: string; id: number }[]>({ endpoint: "/api/vehicle/vehicle-types/" }),
+    select: (data) =>
+      data.map((item) => ({
+        label: item.name_en,
+        value: item.id.toString(),
+      })),
+  }) || [];
+  const airports = airportsData?.map((airport) => ({
+    label: locale === "ar" ? airport.name_ar : airport.name_en,
+    value: airport.id.toString(),
+  })  ) || [];
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors },
   } = useForm<AirportFeesFormData>({
     defaultValues: {
       airport_id: 0,
-      vehicle_type_id: 0,
+      vehicle_type_ids: [],
       pickup_fee: "0.00",
       dropoff_fee: "0.00",
     },
@@ -202,7 +217,7 @@ export default function AirportFees({
 
   // Watch the selected airport to filter vehicle types
   const selectedAirportId = watch("airport_id");
-  const selectedVehicleTypeId = watch("vehicle_type_id");
+
 
   // Get vehicle types that are already used for the selected airport
   const getDisabledVehicleTypes = (): number[] => {
@@ -225,21 +240,6 @@ export default function AirportFees({
   const disabledVehicleTypeIds = getDisabledVehicleTypes();
 
   // Reset vehicle type if it becomes disabled when airport changes
-  useEffect(() => {
-    if (selectedAirportId && selectedAirportId > 0 && selectedVehicleTypeId && selectedVehicleTypeId > 0) {
-      if (disabledVehicleTypeIds.includes(selectedVehicleTypeId)) {
-        // Only reset if we're not editing the current item (which should keep its vehicle type)
-        if (!isEditing || !selectedFee || selectedFee.vehicle_type.id !== selectedVehicleTypeId) {
-          const currentValues = watch();
-          reset({
-            ...currentValues,
-            vehicle_type_id: 0,
-          });
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAirportId, disabledVehicleTypeIds]);
 
   // Create mutation
   const createMutation = useMutation({
@@ -316,7 +316,7 @@ export default function AirportFees({
     setSelectedFee(null);
     reset({
       airport_id: 0,
-      vehicle_type_id: 0,
+      vehicle_type_ids: [],
       pickup_fee: "0.00",
       dropoff_fee: "0.00",
     });
@@ -328,7 +328,7 @@ export default function AirportFees({
     setSelectedFee(fee);
     reset({
       airport_id: fee.airport.id,
-      vehicle_type_id: fee.vehicle_type.id,
+      vehicle_type_ids:[],
       pickup_fee: fee.pickup_fee,
       dropoff_fee: fee.dropoff_fee,
     });
@@ -363,32 +363,17 @@ export default function AirportFees({
       return;
     }
     
-    if (!data.vehicle_type_id || data.vehicle_type_id === 0) {
+    if (!data.vehicle_type_ids || data.vehicle_type_ids.length === 0) {
       toast.error(trans.airportFees?.vehicleTypeRequired || "Please select a vehicle type");
       return;
     }
 
     // Check for duplicate combination
     const isDuplicate = isEditing && selectedFee
-      ? checkDuplicate(data.airport_id, data.vehicle_type_id, selectedFee.id)
-      : checkDuplicate(data.airport_id, data.vehicle_type_id);
+      ? checkDuplicate(data.airport_id, data.vehicle_type_ids[0], selectedFee.id)
+      : checkDuplicate(data.airport_id, data.vehicle_type_ids[0]);
 
-    if (isDuplicate) {
-      const airportName = airports.find(a => a.id === data.airport_id);
-      const vehicleTypeName = vehicleTypes.find(vt => vt.id === data.vehicle_type_id);
-      const airportDisplay = airportName 
-        ? (locale === "ar" ? airportName.name_ar : airportName.name_en)
-        : `Airport ID ${data.airport_id}`;
-      const vehicleDisplay = vehicleTypeName
-        ? (locale === "ar" ? vehicleTypeName.name_ar : vehicleTypeName.name_en)
-        : `Vehicle Type ID ${data.vehicle_type_id}`;
-      
-      toast.error(
-        trans.airportFees?.duplicateError || 
-        `A fee already exists for ${airportDisplay} and ${vehicleDisplay}. Please choose a different combination.`
-      );
-      return;
-    }
+
 
     if (isEditing && selectedFee) {
       updateMutation.mutate({ id: selectedFee.id, data });
@@ -641,27 +626,16 @@ export default function AirportFees({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {/* Airport */}
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {trans.airportFees?.airport || "Airport"}
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  {...register("airport_id", {
-                    required: trans.airportFees?.airportRequired || "Airport is required",
-                    valueAsNumber: true,
-                    validate: (value) => value > 0 || trans.airportFees?.airportRequired || "Please select an airport",
-                  })}
-                  className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-                >
-                  <option value={0}>
-                    {trans.airportFees?.selectAirport || "Select airport..."}
-                  </option>
-                  {airports.map((airport) => (
-                    <option key={airport.id} value={airport.id}>
-                      {locale === "ar" ? airport.name_ar : airport.name_en}
-                    </option>
-                  ))}
-                </select>
+                		<CustomSelectInput
+									name="airport_id"
+									label={trans.airportFees?.airport || "Airport"}
+									control={control}
+									options={airports || []}
+                  isLoading={isLoadingVehicleTypes}
+									required
+									containerClassName="col-span-1 md:col-span-2"
+								/>
+           
                 {errors.airport_id && (
                   <p className="text-error text-sm mt-1">
                     {errors.airport_id.message}
@@ -671,58 +645,22 @@ export default function AirportFees({
 
               {/* Vehicle Type */}
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {trans.airportFees?.vehicleType || "Vehicle Type"}
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  {...register("vehicle_type_id", {
-                    required: trans.airportFees?.vehicleTypeRequired || "Vehicle type is required",
-                    valueAsNumber: true,
-                    validate: (value) => {
-                      if (value === 0) {
-                        return trans.airportFees?.vehicleTypeRequired || "Please select a vehicle type";
-                      }
-                      // Check if the selected vehicle type is disabled
-                      if (disabledVehicleTypeIds.includes(value)) {
-                        return trans.airportFees?.vehicleTypeAlreadyUsed || "This vehicle type already has a fee for the selected airport";
-                      }
-                      return true;
-                    },
-                  })}
-                  className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-                  disabled={!selectedAirportId || selectedAirportId === 0}
-                >
-                  <option value={0}>
-                    {!selectedAirportId || selectedAirportId === 0
-                      ? trans.airportFees?.selectAirportFirst || "Please select an airport first"
-                      : trans.airportFees?.selectVehicleType || "Select vehicle type..."}
-                  </option>
-                  {vehicleTypes.map((vt) => {
-                    const isDisabled = disabledVehicleTypeIds.includes(vt.id);
-                    return (
-                      <option 
-                        key={vt.id} 
-                        value={vt.id}
-                        disabled={isDisabled}
-                        style={isDisabled ? { color: '#999', fontStyle: 'italic' } : {}}
-                      >
-                        {locale === "ar" ? vt.name_ar : vt.name_en}
-                        {isDisabled && ` ${trans.airportFees?.alreadyUsed || "(Already used)"}`}
-                      </option>
-                    );
-                  })}
-                </select>
-                {errors.vehicle_type_id && (
+            		<CustomSelectInput  
+									name="vehicle_type_ids"
+									label={trans.airportFees?.vehicleType || "Vehicle Type"}
+									control={control}
+									options={vehicleTypes || []}
+                  isLoading={isLoadingVehicleTypes}
+									required
+									containerClassName="col-span-1 md:col-span-2"
+									isMulti
+								/>
+                {errors.vehicle_type_ids && (
                   <p className="text-error text-sm mt-1">
-                    {errors.vehicle_type_id.message}
+                    {errors.vehicle_type_ids.message}
                   </p>
                 )}
-                {selectedAirportId && selectedAirportId > 0 && disabledVehicleTypeIds.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {trans.airportFees?.disabledVehicleTypesNote || "Some vehicle types are disabled because they already have fees for this airport."}
-                  </p>
-                )}
+            
               </div>
 
               {/* Pickup Fee */}
