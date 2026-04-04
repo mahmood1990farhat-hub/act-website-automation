@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import ServiceImage1 from '@/../public/images/service1.jpg';
+import ServiceImage1 from '@/../public/images/service1.webp';
 import ServiceImage2 from '@/../public/images/service2.webp';
 import DriverPic from '@/../public/images/driver.png';
 import { Button } from "../ui/button";
@@ -249,12 +249,12 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
               </div>
 
               <div className={`relative ${isRTL ? 'lg:order-1' : ''}`}>
-                <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-2xl">
+                <div className="relative w-full aspect-[4/2.65] rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src={ServiceImage2}
                     alt="Premium transport service"
                     fill
-                    className="object-cover sepia-50"
+                    className="object-contain sepia-50"
                     sizes="(max-width: 768px) 100vw, 50vw"
                     quality={100}
                   />
@@ -270,12 +270,12 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
             {/* Second Row - Image on left, Benefits on right */}
             <div className={`grid lg:grid-cols-2 gap-16 items-center ${isRTL ? 'lg:grid-cols-2' : ''}`}>
               <div className={`relative ${isRTL ? 'lg:order-2' : ''}`}>
-                <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-2xl">
+                <div className="relative w-full aspect-[4/2.65] rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src={ServiceImage1}
                     alt="Professional chauffeur service"
                     fill
-                    className="object-cover sepia-50"
+                    className="object-contain sepia-50"
                     sizes="(max-width: 768px) 100vw, 50vw"
                     quality={100}
                   />
