@@ -16,6 +16,7 @@ import { extract_error } from "@/lib/api/errorApi";
 import { FaEdit, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Pagination from "../Pagination";
 import { VEHICLE_TYPES } from "@/lib/constants/vehicleTypes";
+import CustomSelectInput from "../ControlledFields/CustomSelectInput";
 
 type PeakTimeRule = {
   id: number;
@@ -63,7 +64,7 @@ type PeakTimeRuleFormData = {
   end_time: string;
   days_of_week: number[];
   multiplier: string;
-  vehicle_type_id: number;
+  vehicle_type_ids: number [];
   priority: number;
 };
 
@@ -138,13 +139,12 @@ export default function PeakTimeRules({
     refetchOnWindowFocus: false,
   });
 
-  // Use static vehicle types (no API endpoint for vehicle types)
-  const vehicleTypes = VEHICLE_TYPES;
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     watch,
     formState: { errors },
   } = useForm<PeakTimeRuleFormData>({
@@ -155,7 +155,7 @@ export default function PeakTimeRules({
       end_time: "18:00",
       days_of_week: [],
       multiplier: "1.000",
-      vehicle_type_id: 0,
+      vehicle_type_ids: [],
       priority: 1,
     },
   });
@@ -216,6 +216,17 @@ export default function PeakTimeRules({
     },
   });
 
+  const { data: vehicleTypes =[] ,isLoading :isLoadingVehicleTypes } =
+    useQuery({
+      queryKey: ["vehicle-types"],
+      queryFn: async () =>
+        fetchData<{ name_ar: string; name_en: string; id: number }[]>({ endpoint: "/api/vehicle/vehicle-types/" }),
+      select: (data) =>
+        data.map((item) => ({
+          label: item.name_en,
+          value: item.id.toString(),
+        })),
+    }) || [];
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
@@ -247,7 +258,7 @@ export default function PeakTimeRules({
       end_time: "18:00",
       days_of_week: [],
       multiplier: "1.000",
-      vehicle_type_id: 0,
+      vehicle_type_ids: [],
       priority: 1,
     });
     setShowFormModal(true);
@@ -266,7 +277,7 @@ export default function PeakTimeRules({
       end_time: endTime,
       days_of_week: rule.days_of_week,
       multiplier: rule.multiplier,
-      vehicle_type_id: rule.vehicle_type.id,
+      vehicle_type_ids: [],
       priority: rule.priority,
     });
     setShowFormModal(true);
@@ -647,30 +658,20 @@ export default function PeakTimeRules({
 
               {/* Vehicle Type */}
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {trans.peakTime?.vehicleType || "Vehicle Type"}
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  {...register("vehicle_type_id", {
-                    required: trans.peakTime?.vehicleTypeRequired || "Vehicle type is required",
-                    valueAsNumber: true,
-                    validate: (value) => value > 0 || trans.peakTime?.vehicleTypeRequired || "Please select a vehicle type",
-                  })}
-                  className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-                >
-                  <option value={0}>
-                    {trans.peakTime?.selectVehicleType || "Select vehicle type..."}
-                  </option>
-                  {vehicleTypes.map((vt) => (
-                    <option key={vt.id} value={vt.id}>
-                      {locale === "ar" ? vt.name_ar : vt.name_en}
-                    </option>
-                  ))}
-                </select>
-                {errors.vehicle_type_id && (
+                    <CustomSelectInput  
+                                  name="vehicle_type_ids"
+                                  label=               {trans.peakTime?.vehicleType || "Vehicle Type"}
+                                  control={control}
+                                  options={vehicleTypes || []}
+                                  isLoading={isLoadingVehicleTypes}
+                                  required
+                                  containerClassName="col-span-1 md:col-span-2"
+                                  isMulti
+                                />
+             
+                {errors.vehicle_type_ids && (
                   <p className="text-error text-sm mt-1">
-                    {errors.vehicle_type_id.message}
+                    {errors.vehicle_type_ids.message}
                   </p>
                 )}
               </div>

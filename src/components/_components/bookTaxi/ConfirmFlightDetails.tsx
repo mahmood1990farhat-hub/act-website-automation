@@ -471,16 +471,11 @@ export default function ModernConfirmFlightDetails({
 								<div className={`flex justify-between items-center`}>
 									<span className="text-white/80">{texts.baseCost}</span>
 									<span className="text-white font-semibold">
-										£{cost.toFixed(2)}
+										£{cost.toFixed(2) + (airport_vat.toFixed(2)?? 0) }
 									</span>
 								</div>
 
-								<div className={`flex justify-between items-center`}>
-									<span className="text-white/80">{texts.airportVAT}</span>
-									<span className="text-white font-semibold">
-										£{airport_vat.toFixed(2)}
-									</span>
-								</div>
+							
 
 								{vat > 0 && (
 									<div className={`flex justify-between items-center`}>

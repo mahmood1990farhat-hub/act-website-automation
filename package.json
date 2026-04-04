@@ -37,6 +37,7 @@
     "react-icons": "^5.5.0",
     "react-leaflet": "^5.0.0",
     "react-phone-number-input": "^3.4.12",
+    "react-select": "^5.10.2",
     "react-time-picker": "^7.0.0",
     "react-time-picker-typescript": "^1.2.5",
     "react-toastify": "^11.0.5",
