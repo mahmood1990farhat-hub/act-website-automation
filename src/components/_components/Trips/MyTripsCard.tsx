@@ -135,8 +135,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_name ??
-								`${data?.driver_info?.first_name} ${data?.driver_info?.last_name}`}
+							{data?.guest_driver_name ?? data?.driver_info?.first_name ??"-"}
 						</p>
 					</div>
 
@@ -157,7 +156,32 @@ export default function MyTripsCard({
 						{tripCardTrans.carInfo}
 					</div>
 					<div className="grid md:grid-cols-2 gap-3 md:gap-4 mb-4 ">
-						{data?.vehicle_info?.vehicle_number && (
+							{data?.vehicle_info?.model && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.model || "Model"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.model || "-"}
+								</p>
+							</div>
+						)}
+				
+						{data?.vehicle_info?.brand && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.brand || "Brand"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.brand || "-"}
+								</p>
+							</div>
+						)}
+						{data?.vehicle_info?.registration_number && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
@@ -165,7 +189,7 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.vehicle_number}
+									{data?.vehicle_info?.registration_number}
 								</p>
 							</div>
 						)}
@@ -181,7 +205,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-						{data?.vehicle_info?.year_of_manufacture && (
+						{data?.vehicle_info?.year && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
@@ -189,7 +213,32 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.year_of_manufacture || "-"}
+									{data?.vehicle_info?.year || "-"}
+								</p>
+							</div>
+						)}
+					
+								{data?.vehicle_info?.color && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.color || "Color"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.color || "-"}
+								</p>
+							</div>
+						)}
+								{data?.vehicle_info?.additional_notes && (
+							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-gray-400 text-xs font-medium">
+										{tripCardTrans?.additional_notes || "additional_notes"}
+									</span>
+								</div>
+								<p className="text-white font-semibold text-sm md:text-base">
+									{data?.vehicle_info?.additional_notes || "-"}
 								</p>
 							</div>
 						)}
@@ -442,7 +491,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold text-sm md:text-base">
-												{data.data?.guest_driver_phone || "-"}
+												{data?.driver_info?.phone_number || "-"}
 											</p>
 										</div>
 
@@ -512,7 +561,7 @@ export default function MyTripsCard({
 								>
 									<IoChatbubbleEllipsesSharp className="text-xl" />
 									{tripCardTrans?.contactDriver || "Contact Driver"}
-									<span dir="ltr">{data?.guest_driver_phone}</span>
+									<span dir="ltr">{data?.driver_info?.phone_number}</span>
 								</Button>
 								<Button
 									variant="secondary"

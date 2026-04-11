@@ -62,7 +62,7 @@ type VehicleTypesResponse = {
 };
 
 type TierFormData = {
-	vehicle_type_ids: number[];
+	vehicle_type_ids: number[] |string[];
 	min_distance_miles: string;
 	max_distance_miles: string;
 	rate_per_mile: string;
@@ -238,7 +238,7 @@ const { data: vehicleTypes =[] ,isLoading :isLoadingVehicleTypes } =
 		setIsEditing(true);
 		setSelectedTier(tier);
 		reset({
-			vehicle_type_ids: [],
+			vehicle_type_ids: [tier.vehicle_type.id.toString()],
 			min_distance_miles: tier.min_distance_miles,
 			max_distance_miles: tier.max_distance_miles,
 			rate_per_mile: tier.rate_per_mile,

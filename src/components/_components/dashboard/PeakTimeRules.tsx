@@ -64,7 +64,7 @@ type PeakTimeRuleFormData = {
   end_time: string;
   days_of_week: number[];
   multiplier: string;
-  vehicle_type_ids: number [];
+  vehicle_type_ids: number [] | string[];
   priority: number;
 };
 
@@ -277,7 +277,7 @@ export default function PeakTimeRules({
       end_time: endTime,
       days_of_week: rule.days_of_week,
       multiplier: rule.multiplier,
-      vehicle_type_ids: [],
+      vehicle_type_ids: [rule.vehicle_type.id.toString()],
       priority: rule.priority,
     });
     setShowFormModal(true);
