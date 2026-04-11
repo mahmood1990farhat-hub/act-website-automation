@@ -65,7 +65,7 @@ type VehicleTypesResponse = {
 
 type AirportFeesFormData = {
   airport_id: number;
-  vehicle_type_ids: number[];
+  vehicle_type_ids: number[] |string[];
   pickup_fee: string;
   dropoff_fee: string;
 };
@@ -328,7 +328,7 @@ const { data: vehicleTypes =[] ,isLoading :isLoadingVehicleTypes } =
     setSelectedFee(fee);
     reset({
       airport_id: fee.airport.id,
-      vehicle_type_ids:[],
+      vehicle_type_ids:[ fee.vehicle_type.id.toString()],
       pickup_fee: fee.pickup_fee,
       dropoff_fee: fee.dropoff_fee,
     });
@@ -370,8 +370,8 @@ const { data: vehicleTypes =[] ,isLoading :isLoadingVehicleTypes } =
 
     // Check for duplicate combination
     const isDuplicate = isEditing && selectedFee
-      ? checkDuplicate(data.airport_id, data.vehicle_type_ids[0], selectedFee.id)
-      : checkDuplicate(data.airport_id, data.vehicle_type_ids[0]);
+      ? checkDuplicate(data.airport_id, parseInt(String(data.vehicle_type_ids[0])), selectedFee.id)
+      : checkDuplicate(data.airport_id, parseInt(String(data.vehicle_type_ids[0])));
 
 
 
