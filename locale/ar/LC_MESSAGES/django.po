@@ -1,0 +1,160 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-13 09:23+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgid "Passwords do not match."
+msgstr "كلمتا المرور غير متطابقتين."
+
+msgid "Phone number already exists."
+msgstr "رقم الهاتف موجود بالفعل."
+
+msgid "Email already exists."
+msgstr "البريد الإلكتروني موجود بالفعل."
+
+msgid "account_type Incorrect"
+msgstr "نوع الحساب غير صحيح."
+
+msgid "Failed to send verification code. Please try again."
+msgstr "فشل في إرسال رمز التحقق. الرجاء المحاولة مرة أخرى."
+
+msgid "You must provide either email or phone number."
+msgstr "يجب عليك إدخال البريد الإلكتروني أو رقم الهاتف."
+
+msgid "This is already your current email."
+msgstr "هذا هو بريدك الإلكتروني الحالي بالفعل."
+
+msgid "This is already your current phone number."
+msgstr "هذا هو رقم هاتفك الحالي بالفعل."
+
+msgid "Interview date must be greater than today."
+msgstr "يجب أن يكون تاريخ المقابلة بعد تاريخ اليوم."
+
+msgid "Missing Data"
+msgstr "بيانات مفقودة"
+
+msgid "Wrong data"
+msgstr "بيانات غير صحيحة"
+
+msgid "You need to activate your account"
+msgstr "تحتاج إلى تفعيل حسابك"
+
+msgid "Login Successful"
+msgstr "تم تسجيل الدخول بنجاح"
+
+msgid "phone number is required"
+msgstr "رقم الهاتف مطلوب"
+
+msgid "This number is not registered yet"
+msgstr "هذا الرقم غير مسجل بعد"
+
+msgid "This number is already activated"
+msgstr "هذا الرقم مفعل بالفعل"
+
+msgid "Code sent"
+msgstr "تم إرسال الرمز"
+
+msgid "Verified successfully"
+msgstr "تم التحقق بنجاح"
+
+msgid "Incorrect code"
+msgstr "الرمز غير صحيح"
+
+msgid "account created successfully"
+msgstr "تم إنشاء الحساب بنجاح"
+
+msgid "Your information is complete"
+msgstr "معلوماتك مكتملة"
+
+msgid "Driver info updated successfully."
+msgstr "تم تحديث معلومات السائق بنجاح."
+
+msgid "Driver created successfully"
+msgstr "تم إنشاء السائق بنجاح"
+
+msgid "Vehicle created successfully"
+msgstr "تم إنشاء المركبة بنجاح"
+
+msgid "Account created successfully"
+msgstr "تم إنشاء الحساب بنجاح"
+
+msgid "Account updated successfully"
+msgstr "تم تحديث الحساب بنجاح"
+
+msgid "Time and date in the past"
+msgstr "الوقت والتاريخ في الماضي"
+
+msgid "You must choose the type of vehicle."
+msgstr "يجب عليك اختيار نوع المركبة."
+
+#, python-brace-format
+msgid ""
+"Passengers count ({passengers_count}) exceeds max capacity for car type "
+"'{car_type.name_en}' ({car_type.max_passengers_count})."
+msgstr "عدد الركاب ({passengers_count}) يتجاوز الحد الأقصى لسعة نوع السيارة '{car_type.name_en}' ({car_type.max_passengers_count})."
+
+msgid "Trip ID is required"
+msgstr "معرف الرحلة مطلوب"
+
+msgid "Trip not found"
+msgstr "لم يتم العثور على الرحلة"
+
+msgid "Trip is not available for acceptance"
+msgstr "الرحلة غير متاحة للقبول"
+
+msgid "Trip has already been assigned to a driver"
+msgstr "تم تعيين الرحلة إلى سائق بالفعل"
+
+msgid "Trip accepted successfully"
+msgstr "تم قبول الرحلة بنجاح"
+
+msgid "Your trip booked successfully"
+msgstr "تم حجز رحلتك بنجاح"
+
+msgid "Unsupported account type"
+msgstr "نوع الحساب غير مدعوم"
+
+msgid "Invalid trip status"
+msgstr "حالة الرحلة غير صالحة"
+
+msgid "Trip not found or not accessible"
+msgstr "لم يتم العثور على الرحلة أو لا يمكن الوصول إليها"
+
+#, python-brace-format
+msgid "Year of manufacture must be between 1950 and {current_year}."
+msgstr "سنة التصنيع يجب أن تكون بين 1950 و {current_year}."
+
+msgid "No route found"
+msgstr "لم يتم العثور على مسار"
+
+msgid "Phone number is not valid."
+msgstr "رقم الهاتف غير صالح."
+
+msgid "Invalid phone number format."
+msgstr "تنسيق رقم الهاتف غير صحيح."
+
+
+msgid "Trip completed successfully."
+msgstr "تمت الرحلة بنجاح." 
+
+
+msgid "Trip cancelled successfully."
+msgstr "تم إلغاء الرحلة بنجاح."
+
+
