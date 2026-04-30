@@ -1,0 +1,146 @@
+{
+  "title": "المفقودات",
+  "subtitle": "أبلغ عن العناصر المفقودة وتتبع تقاريرك",
+  "tabs": {
+    "my_reports": "تقاريري",
+    "submit_report": "إرسال تقرير"
+  },
+  "stats": {
+    "total": "إجمالي التقارير",
+    "reported": "مُبلغ عنها",
+    "under_investigation": "قيد التحقيق",
+    "found": "تم العثور عليها",
+    "returned": "تم الإرجاع",
+    "not_found": "لم يتم العثور عليها",
+    "closed": "مغلق"
+  },
+  "report_list": {
+    "title": "تقارير المفقودات",
+    "empty": "لم يتم العثور على تقارير مفقودات",
+    "filter": {
+      "all": "الكل",
+      "status_label": "تصفية حسب الحالة",
+      "item_type_label": "تصفية حسب نوع العنصر"
+    },
+    "item_types": {
+      "all": "جميع العناصر",
+      "luggage": "أمتعة / حقيبة سفر",
+      "bag": "حقيبة / حقيبة يد",
+      "wallet": "محفظة",
+      "phone": "هاتف محمول",
+      "keys": "مفاتيح",
+      "documents": "مستندات / هوية",
+      "clothing": "ملابس",
+      "other": "عناصر أخرى"
+    }
+  },
+  "report_card": {
+    "report_id": "رقم التقرير",
+    "item_type": "نوع العنصر",
+    "description": "الوصف",
+    "color": "اللون",
+    "brand": "العلامة التجارية",
+    "additional_notes": "ملاحظات إضافية",
+    "lost_location": "مكان الفقدان",
+    "contact_preference": "طريقة الاتصال المفضلة",
+    "status": "الحالة",
+    "trip_date": "تاريخ الرحلة",
+    "created_at": "تم الإبلاغ في",
+    "updated_at": "آخر تحديث",
+    "admin_notes": "ملاحظات الإدارة",
+    "found_at": "تم العثور عليه في",
+    "returned_at": "تم الإرجاع في",
+    "view_trip": "عرض تفاصيل الرحلة",
+    "show_details": "عرض التفاصيل",
+    "report_details": "تفاصيل تقرير المفقودات",
+    "close": "إغلاق",
+    "update_status": "تحديث الحالة",
+    "item_details": "تفاصيل العنصر",
+    "reporter_info": "معلومات المبلغ",
+    "trip_info": "معلومات الرحلة",
+    "trip_id": "رقم الرحلة",
+    "trip_time": "وقت الرحلة",
+    "distance": "المسافة",
+    "duration": "المدة المتوقعة",
+    "passenger_info": "معلومات الراكب",
+    "driver_info": "معلومات السائق",
+    "name": "الاسم",
+    "phone_number": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "full_name": "الاسم الكامل",
+    "photo": "صورة",
+    "report_info": "معلومات التقرير",
+    "downloadPdf": "تحميل PDF",
+    "updateReportTitle": "تحديث تقرير المفقودات"
+  },
+  "submit_form": {
+    "title": "الإبلاغ عن مفقودات",
+    "subtitle": "يرجى تقديم تفاصيل حول العنصر المفقود",
+    "fields": {
+      "trip": "اختر الرحلة",
+      "trip_placeholder": "اختر الرحلة التي فقدت فيها العنصر",
+      "item_type": "نوع العنصر",
+      "item_description": "وصف العنصر",
+      "item_description_placeholder": "قدم وصفاً تفصيلياً للعنصر",
+      "item_color": "لون العنصر",
+      "item_color_placeholder": "مثال: أسود، أزرق، أحمر",
+      "item_brand": "العلامة التجارية (اختياري)",
+      "item_brand_placeholder": "مثال: Samsonite، Apple، Nike",
+      "lost_location": "أين فقدته؟",
+      "lost_location_placeholder": "مثال: في السيارة، في نقطة الاستلام",
+      "contact_preference": "طريقة الاتصال المفضلة",
+      "contact_options": {
+        "phone": "مكالمة هاتفية",
+        "email": "بريد إلكتروني",
+        "sms": "رسالة نصية"
+      },
+      "photo": "صورة (اختياري)",
+      "photo_description": "قم برفع صورة للعنصر المفقود إن أمكن",
+      "selected_photo": "المحدد"
+    },
+    "button": "إضافة تقرير",
+    "button_loading": "جاري الإضافة...",
+    "success_message": "تم إرسال تقرير المفقودات بنجاح!",
+    "error_message": "فشل إرسال التقرير. يرجى المحاولة مرة أخرى.",
+    "validation": {
+      "trip_required": "يرجى اختيار رحلة",
+      "item_type_required": "يرجى اختيار نوع العنصر",
+      "item_type_invalid": "يرجى اختيار نوع عنصر صالح من القائمة",
+      "description_required": "يرجى تقديم وصف",
+      "description_min": "يجب أن يكون الوصف 10 أحرف على الأقل",
+      "color_required": "يرجى تحديد لون العنصر",
+      "lost_location_required": "يرجى تحديد مكان الفقدان",
+      "contact_preference_required": "يرجى اختيار طريقة الاتصال",
+      "contact_preference_invalid": "يرجى اختيار طريقة اتصال صالحة"
+    }
+  },
+  "statuses": {
+    "reported": "مُبلغ عنه",
+    "under_investigation": "قيد التحقيق",
+    "found": "تم العثور عليه",
+    "returned": "تم الإرجاع",
+    "not_found": "لم يتم العثور عليه",
+    "closed": "مغلق"
+  },
+  "contact_preferences": {
+    "phone": "مكالمة هاتفية",
+    "email": "بريد إلكتروني",
+    "sms": "رسالة نصية"
+  },
+  "lost_locations": {
+    "in_vehicle": "في السيارة",
+    "at_pickup": "في نقطة الاستلام",
+    "at_dropoff": "في نقطة التوصيل",
+    "unsure": "غير متأكد"
+  },
+  "download": "تحميل",
+  "choose_file": "اختر ملف",
+  "no_file_chosen": "لم يتم اختيار ملف",
+  "click_to_view": "انقر للعرض",
+  "image_downloaded": "تم تحميل الصورة بنجاح",
+  "image_download_failed": "فشل تحميل الصورة",
+  "file_read_failed": "فشل قراءة ملف الصورة",
+  "select_item_type": "اختر نوع العنصر",
+  "select_contact_method": "اختر طريقة الاتصال"
+}
+

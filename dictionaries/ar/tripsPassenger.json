@@ -1,0 +1,76 @@
+{
+	"title": "رحلاتي",
+	"section_1": {
+		"title": "كل الرحلات",
+		"tpes": [
+			{ "title": "الكل", "value": "" },
+			{ "title": "قيد الانتظار", "value": "pending" },
+			{ "title": "المقبولة", "value": "accepted" },
+			{ "title": "النشطة", "value": "active" },
+			{ "title": "القادمة", "value": "driver_on_the_way" },
+			{ "title": "المكتملة", "value": "completed" },
+			{ "title": "الملغاة", "value": "cancelled" }
+		]
+	},
+	"section_2": {
+		"title": "الأحدث",
+		"desc": "لا تتردد في التواصل مع سائقي الرحلات التي قمت بها خلال آخر 24 ساعة في حال وجود أي استفسار أو لتقديم شكوى."
+	},
+	"tripsCount": "عدد الرحلات:",
+	"noTrips": {
+		"title": "لم يتم العثور على رحلات",
+		"tryDifferentFilter": "جرب اختيار فلتر مختلف",
+		"willAppearHere": "ستظهر رحلاتك هنا"
+	},
+	"noRecentTrips": {
+		"title": "لا توجد رحلات حديثة",
+		"desc": "ستظهر الرحلات من آخر 24 ساعة هنا"
+	},
+	"deleteTrip": {
+		"title": "حذف الرحلة؟",
+		"desc": "هل أنت متأكد أنك تريد إلغاء هذه الرحلة؟ لا يمكن التراجع عن هذا الإجراء.",
+		"btuCancel": "إلغاء",
+		"btuConfirm": "حذف الرحلة"
+	},
+	"tripCard": {
+		"name_of_driver": "اسم السائق",
+		"phone_of_driver": "رقم السائق",
+		"modle_car": "نوع السيارة",
+		"color_car": "لون السيارة",
+		"number_car": "رقم السيارة",
+
+
+		"tripId": "رقم الرحلة:",
+		"distance": "المسافة",
+		"duration": "المدة",
+		"destination": "الوجهة",
+		"carInfo": "معلومات السيارة",
+		"brand": "العلامة التجارية",
+		"additional_notes": "ملاحظات إضافية",
+		"model": "النموذج",
+		"color": "اللون",
+		"registrationNumber": "رقم التسجيل",
+		"year": "السنة",
+		"pickup": "مكان الانطلاق",
+		"dropoff": "مكان النزول",
+		"gbp": "جنيه إسترليني",
+		"seeDetails": "عرض التفاصيل",
+		"details": "التفاصيل",
+		"cancel": "إلغاء",
+		"tripDetails": "تفاصيل الرحلة",
+		"status": "الحالة:",
+		"date": "التاريخ",
+		"cost": "التكلفة",
+		"contactDriver": "اتصل بالسائق",
+		"close": "إغلاق",
+		"statusLabels": {
+			"pending": "قيد الانتظار",
+			"accepted": "مقبولة",
+			"active": "نشطة",
+			"driver_on_the_way": "السائق في الطريق",
+			"completed": "مكتملة",
+
+			"cancelled": "ملغاة"
+		}
+	}
+}

@@ -1,0 +1,112 @@
+{
+  "title": "الشكاوى",
+  "subtitle": "قدم شكواك وتابعها",
+  "tabs": {
+    "my_complaints": "شكاواي",
+    "submit_complaint": "تقديم شكوى"
+  },
+  "stats": {
+    "total": "إجمالي الشكاوى",
+    "pending": "قيد الانتظار",
+    "under_review": "قيد المراجعة",
+    "resolved": "تم الحل",
+    "closed": "مغلق"
+  },
+  "complaint_list": {
+    "title": "شكاواي",
+    "empty": "لم يتم العثور على شكاوى",
+    "filter": {
+      "all": "الكل",
+      "status_label": "تصفية حسب الحالة",
+      "type_label": "تصفية حسب النوع"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "رقم الشكوى",
+    "type": "النوع",
+    "title": "العنوان",
+    "description": "الوصف",
+    "status": "الحالة",
+    "trip_date": "تاريخ الرحلة",
+    "created_at": "تم التقديم في",
+    "admin_response": "رد الإدارة",
+    "resolved_at": "تم الحل في",
+    "view_trip": "عرض تفاصيل الرحلة",
+    "resolved": "تم الحل",
+    "not_resolved": "لم يتم الحل",
+    "leave_review": "اترك تقييمًا",
+    "show_details": "عرض التفاصيل",
+    "close": "إغلاق",
+    "complaint_details": "تفاصيل الشكوى",
+    "complainant": "المشتكي",
+    "passenger": "الراكب",
+    "driver": "السائق",
+    "complainant_info": "معلومات المشتكي",
+    "trip_info": "معلومات الرحلة",
+    "trip_id": "رقم الرحلة",
+    "trip_time": "وقت الرحلة",
+    "distance": "المسافة",
+    "duration": "المدة المتوقعة",
+    "passenger_info": "معلومات الراكب",
+    "driver_info": "معلومات السائق",
+    "full_name": "الاسم الكامل",
+    "phone_number": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "account_type": "نوع الحساب",
+    "name": "الاسم",
+    "respond": "الرد",
+    "resolve": "حل",
+    "respond_to_complaint": "الرد على الشكوى",
+    "resolve_complaint": "حل الشكوى",
+    "response_required": "الرد مطلوب",
+    "response_placeholder": "أدخل ردك...",
+    "sending": "جاري الإرسال...",
+    "send_response": "إرسال الرد",
+    "resolving": "جاري الحل...",
+    "cancel": "إلغاء",
+    "update_status": "تحديث الحالة",
+    "update": "تحديث",
+    "updating": "جاري التحديث...",
+    "resolution_placeholder": "أدخل تفاصيل الحل...",
+    "complaint_info": "معلومات الشكوى",
+    "complaint_content": "محتوى الشكوى",
+    "downloadPdf": "تحميل PDF"
+  },
+  "submit_form": {
+    "title": "تقديم شكوى",
+    "subtitle": "يرجى تقديم تفاصيل حول شكواك",
+    "fields": {
+      "trip": "اختر الرحلة",
+      "trip_placeholder": "اختر الرحلة المتعلقة بالشكوى",
+      "complaint_type": "نوع الشكوى",
+      "complaint_type_placeholder": "اختر نوع الشكوى",
+      "title": "العنوان",
+      "title_placeholder": "ملخص موجز لشكواك",
+      "description": "الوصف",
+      "description_placeholder": "قدم معلومات تفصيلية حول شكواك"
+    },
+    "button": "إضافة شكوى",
+    "button_loading": "جاري الإضافة...",
+    "success_message": "تم تقديم الشكوى بنجاح!",
+    "error_message": "فشل تقديم الشكوى. يرجى المحاولة مرة أخرى.",
+    "validation": {
+      "trip_required": "يرجى اختيار رحلة",
+      "type_required": "يرجى اختيار نوع الشكوى",
+      "title_required": "يرجى تقديم عنوان",
+      "title_min": "يجب أن يكون العنوان 5 أحرف على الأقل",
+      "description_required": "يرجى تقديم وصف",
+      "description_min": "يجب أن يكون الوصف 20 حرفًا على الأقل"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "مشكلة في الرحلة",
+    "driver_issue": "مشكلة في السائق"
+  },
+  "statuses": {
+    "pending": "قيد الانتظار",
+    "under_review": "قيد المراجعة",
+    "resolved": "تم الحل",
+    "closed": "مغلق"
+  }
+}
+

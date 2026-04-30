@@ -1,0 +1,75 @@
+{
+	"title": "My trips",
+	"section_1": {
+		"title": "All trips",
+		"tpes": [
+			{ "title": "All", "value": "" },
+			{ "title": "Pending", "value": "pending" },
+			{ "title": "Accepted", "value": "accepted" },
+			{ "title": "Active", "value": "active" },
+
+			{ "title": "Upcoming", "value": "driver_on_the_way" },
+			{ "title": "Completed", "value": "completed" },
+			{ "title": "Canceled", "value": "cancelled" }
+		]
+	},
+	"section_2": {
+		"title": "Latest",
+		"desc": "Feel free to contact the drivers of trips you made in the past 24 hours for any questions or to file a complaint."
+	},
+	"tripsCount": "Trips count:",
+	"noTrips": {
+		"title": "No trips found",
+		"tryDifferentFilter": "Try selecting a different filter",
+		"willAppearHere": "Your trips will appear here"
+	},
+	"noRecentTrips": {
+		"title": "No recent trips",
+		"desc": "Trips from the last 24 hours will appear here"
+	},
+	"deleteTrip": {
+		"title": "Delete trip?",
+		"desc": "Are you sure you want to cancel this trip? This action cannot be undone.",
+		"btuCancel": "Cancel",
+		"btuConfirm": "Delete trip"
+	},
+	"tripCard": {
+		"name_of_driver": "Name of driver",
+		"phone_of_driver": "Phone of driver",
+		"model_car": "Car model",
+		"color_car": "Car color",
+		"number_car": "Car number",
+		"tripId": "Trip ID:",
+		"distance": "Distance",
+		"duration": "Duration",
+		"destination": "Destination",
+		"carInfo": "Car Information",
+		"brand": "Brand",
+		"additional_notes": "Additional notes",
+		"model": "Model",
+		"color": "Color",
+		"registrationNumber": "Registration Number",
+		"year": "Year",
+
+		"pickup": "Pickup",
+		"dropoff": "Drop-off",
+		"gbp": "GBP",
+		"seeDetails": "See Details",
+		"details": "Details",
+		"cancel": "Cancel",
+		"tripDetails": "Trip Details",
+		"status": "Status:",
+		"date": "Date",
+		"cost": "Cost",
+		"contactDriver": "Contact Driver",
+		"close": "Close",
+		"statusLabels": {
+			"pending": "Pending",
+			"accepted": "Accepted",
+			"active": "Active",
+			"driver_on_the_way": "Driver on the way",
+			"completed": "Completed",
+			"cancelled": "Cancelled"
+		}
+	}
+}

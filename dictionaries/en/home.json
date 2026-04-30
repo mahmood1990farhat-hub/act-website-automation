@@ -1,0 +1,461 @@
+{
+  "navbar": {
+    "navLinks": [
+      { "name": "Home", "url": "/en", "protected": false },
+      { "name": "About us", "url": "/en/about-us", "protected": false },
+      { "name": "Contact us", "url": "/en/about-us#contact-us", "protected": false },
+      { "name": "My trips", "url": "/en/my-trips", "protected": true },
+      { "name": "download app", "url": "/en/download-app", "protected": false },
+      { "name": "Lost Property", "url": "/en/lost-property", "protected": true },
+      { "name": "Complaints", "url": "/en/complaints", "protected": true }
+     
+    ],
+    "languages": {
+      "English": "English",
+      "Arabic": "Arabic"
+    },
+    "menuToggle": "Toggle menu",
+    "auth": {
+      "login": "Login",
+      "logout": "Logout",
+      "profile": "Profile",
+      "deleteAccount": "Delete Account",
+      "changePassword": "Change Password",
+      "logoutConfirmTitle": "Confirm Logout",
+      "logoutConfirmMessage": "Are you sure you want to logout?",
+      "profileDescription": "Manage your account",
+      "logoutDescription": "Sign out of your account",
+      "logoutSuccess": "Logged out successfully",
+      "logoutError": "Error during logout",
+      "loggingOut": "Logging out...",
+      "deleteAccountConfirmTitle": "Delete Account",
+      "deleteAccountConfirmMessage": "This action cannot be undone. Please enter your password to permanently delete your account.",
+      "passwordLabel": "Password",
+      "passwordRequired": "Password is required",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    }
+  },
+  "home": {
+    "Book_Taxi": {
+      "title": "Effortless Airport & City Transfer",
+      "subtitle": "Book your ride in seconds — enjoy comfort, reliability, and peace of mind from pickup to drop-off.",
+      "fromAirport": "From Airport",
+      "toAirport": "To Airport",
+      "form": {
+        "PickUp_location": "Pick-up location",
+        "stop_ponit": " Stop Point",
+        "DropOff_location": "Drop-off location ",
+        "error": "The location is invalid",
+        "date": "Date",
+        "time": "Time",
+        "is_required": "This field is required.",
+        "button": "Get a Price Now",
+        "smallSuitcase": " Small suitcase",
+        "largeSuitcase": "Large suitcase ",
+
+        "NumberOfPassenger": "Number of passenger",
+        "error_message": "Sorry, we couldn't calculate directions.",
+        "error_button": "Close"
+      }
+    },
+    "Choose_car": {
+      "title": "Choose a car",
+      "button": "Next"
+    },
+    "Confir_flight_details": {
+      "title": "Confirm Booking Details",
+      "Distance": "Distance",
+      "Trip": "Trip ",
+      "Car_type": "Car type",
+      "Cost": "Cost",
+      "airport_vat": "Airport Charges",
+      "VAT": "VAT",
+      "Edit": "Edit",
+      "details": "details",
+      "Total_Cost": "Total Cost",
+      "button": "Confirm"
+    },
+    "Payments_details": {
+      "title": "Payments Details",
+      "subtitle": "Please enter your payment details",
+      "form": {
+        "Card_Number": "Card Number",
+        "Expired_date": "Expired date",
+        "check": {
+          "Agree": "Agree",
+          "privacy_policy": " privacy policy",
+          "terms_of_use": " terms of use"
+        },
+        "button": "Book Now"
+      }
+    },
+    "Booking_Confirmation": {
+      "title": "Booking Confirmed!",
+      "desc": {
+        "span_1": "You will receive an email confirmation . You will receive the driver's information shortly — this may take up to ",
+        "hour": " 1 ",
+        "hour_5": " 5 ",
+        "span_2": " hour at most."
+      },
+      "button": "Show my trips",
+      "button_Back_to_home": "Back to home"
+    }
+  },
+  "about_us": {
+    "about_us_title": "About us:",
+    "ourStory": "Our Story",
+    "customers": "Happy Customers",
+    "rating": "Rating",
+    "available": "Available",
+    "readyTitle": "Ready to Book Your Next Journey?",
+    "readySubtitle": "Experience the convenience and comfort of our premium transport service",
+    "company_description_1": {
+      "title": "Airport & City",
+      "titlespan": "Transfer",
+      "desc": "is a London-based private hire transport company specialising in reliable airport and city transfers. Our mission is to redefine travel convenience through professionalism, punctuality, and personalised service. Whether you're heading to the airport, returning home, or travelling across the city, we ensure a seamless experience from start to finish."
+    },
+    "company_description_2": {
+      "desc1": "We are fully licensed by",
+      "desc2": "Transport for London (TfL)",
+      "desc3": " and committed to the highest standards of safety, compliance, and customer care. Every driver in our network is DBS-checked, fully insured, and professionally trained to represent the quality our brand stands for."
+    },
+    "company_description_3": "Our operations are supported by advanced booking and dispatch systems that allow passengers to pre-book, track their rides, and communicate easily. We prioritise transparency, and our clear pricing structure means no surprises — just straightforward, dependable service.",
+    "company_description_4": "At Airport & City Transfer, we don’t just offer a ride — we deliver peace of mind.",
+
+    "get_in_touch": {
+      "title": "Send a ",
+      "titlespan": "message",
+      "subtitle": "Ready to experience premium transport? Get in touch with us today.",
+      "form": {
+        "FullName": "Full Name",
+        "mail": "E-mail",
+        "Yourmessage": "Your message",
+        "button": "Send message"
+      }
+    },
+    "btns": {
+      "bookNow": "Book Now",
+      "learnMore": "Learn More",
+      "callUs": "Contact Us"
+    },
+    "whyUs": {
+      "title": "Why Choose Us",
+      "subtitle": "Experience the difference with our premium transport service",
+      "steps": [
+        { "title": "Safety First", "desc": "Professional drivers, fully insured vehicles" },
+        { "title": "24/7 Service", "desc": "Available round the clock for your convenience" },
+        { "title": "Premium Experience", "desc": "Luxury vehicles and exceptional service" },
+        { "title": "London Coverage", "desc": "Complete coverage across Greater London" }
+      ]
+    },
+
+    "booking_title": { "span": "Simple booking Process", "title": "Booking a ", "titlespan": "trip", "subtitle": "Book your premium transport in just a few clicks. Experience luxury, reliability, and professional service." },
+
+    "joinUs": {
+      "title": "Join the ride in seconds",
+      "subtitle": "Sign up as a passenger or register your PCO vehicle and start earning today.",
+      "passenger": "Passenger",
+      "driver": "PCO Driver"
+    },
+
+    "howToWork": [
+      {"title": "Choose Location", "desc": "Select your pickup and drop-off locations"},
+      {"title": "Pick Date & Time", "desc": "Schedule your trip at your convenience"},
+      {"title": "Select Vehicle", "desc": "Choose from our premium fleet"},
+      {"title": "Confirm Booking", "desc": "Secure payment and instant confirmation"}
+    ],
+
+    "services": {"title": "Our Services", "subtitle": "Discover our comprehensive transport solutions designed for your comfort and convenience"},
+
+    "sections": [
+      {
+        "title": "Arriving in a New City LIKE LONDON?",
+        "text": "Landing in a new city can be exciting, but navigating transportation can be stressful. Don't worry, we've got you covered."
+      },
+      {
+        "title": "Private Hire Taxi: Your Best Option",
+        "text": "Forget long taxi queues and confusing public transport. Opt for a private hire airport transfer for a smooth and comfortable journey to your destination."
+      },
+      {
+        "title": "Benefits of Pre-Booking",
+        "text": "Pre-booking with Airport & City Transfer ensures a driver is waiting for you upon arrival. No haggling over fares, no language barriers, just a direct ride to your hotel or accommodation."
+      },
+      {
+        "title": "How It Works",
+        "text": "Simply visit our website book your private hire taxi online before you travel. Provide your flight details and destination, and we'll handle the rest. Do not forget to sign up for promotions."
+      },
+      {
+        "title": "Stress-Free Travel",
+        "text": "Enjoy a relaxing start to your trip with our reliable and professional service. Let us take the hassle out of airport transportation, so you can focus on exploring your new surroundings."
+      },
+      {
+        "title": "Book Your Ride Today",
+        "text": "Visit our website now ATG to book your private hire airport transfer. Start your adventure the right way!"
+      }
+    ]
+  },
+  "footer": {
+    "Our_Company": {
+      "title": "Our Company",
+      "Elements": [
+        {
+          "name": "About us",
+          "href": "/en/about-us"
+        },
+        {
+          "name": "Booking a trip",
+          "href": "/en"
+        },
+        {
+          "name": "Apps",
+          "href": "/download-app"
+        }
+      ]
+    },
+    "Call_us": {
+      "title": "Contact details ",
+      "phone_numbers": {
+        "title": "By phone :📞",
+        "Elements": [ "+44 746 494 0000","+44 208 153 0303"]
+      },
+      "Email_us": {
+        "title": "Email us @:",
+        "Elements": ["Info@airportandcitytransfer.com"]
+      }
+    },
+    "Policies": {
+      "title": "Policies",
+      "Elements": [
+
+
+        {
+          "name": "Apps",
+          "href": "/download-app"
+        }
+      ]
+    },
+    "location": {
+      "title": "Location:",
+      "Elements": [
+        "ACT - 450 Bath Road Heathrow",
+        "Farhat Trading Solutions Ltd",
+        "Office 218",
+        "London",
+        "West Drayton",
+        "UB7 0EB"
+      ]
+    },
+    "logoAlt": "Airport & City Transfer logo",
+    "registeredCompany": "Registered Company: Farhat Trading Solutions Ltd",
+    "copyright": "All Copyright © {year} Airport taxi Transfer Company"
+  },
+  "policy_and_terms":{
+ "policy": {
+    "Open_button":"Privacy Policy",
+    "title": "Privacy Policy – Airport & City Transfer",
+    "desc": "Airport & City Transfer (“we”, “our”, “us”) is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.",
+    "elements": [
+      {
+        "title": " Information We Collect:",
+        "subDesc": [
+          " Contact details: name, phone number, email",
+          " Booking information: pickup/drop-off locations, dates, times",
+          " Payment information: processed securely through third-party providers",
+          " Driver and vehicle information: for regulatory compliance",
+          " Feedback and complaint information"
+        ]
+      },
+      {
+        "title": "  How We Use Your Data:",
+        "subDesc": [
+          " To process bookings and deliver transport services",
+          " To communicate with customers and drivers",
+          " For internal record-keeping and legal compliance",
+          " To respond to queries, feedback, or complaints",
+          " To comply with Transport for London (TfL) reporting requirements"
+        ]
+      },
+      {
+        "title": "Lawful Basis for Processing:",
+
+        "desc": "We collect and process personal data under the legal basis of contract performance, legal obligation, or legitimate interest. Consent is obtained where required."
+      },
+      {
+        "title": "Sharing Your Information:",
+
+        "desc": "We only share data when necessary:",
+        "subDesc": [
+          " With TfL or other regulators when required by law",
+          " With third-party service providers (e.g. payment processors) under strict confidentiality"
+        ],
+        "descEnd": "We never sell your data to third parties."
+      },
+      {
+        "title": "Data Retention:",
+
+        "desc": "Personal data is retained only as long as necessary to fulfil legal, operational, or financial obligations. Once no longer required, it is securely deleted or anonymised."
+      },
+      {
+        "title": "Your Rights:",
+
+        "desc": "You have the right to access, correct, erase, or object to the processing of your personal data. Requests can be made in writing to our Data Protection Officer."
+      },
+      {
+        "title": "Security Measures:",
+
+        "desc": "We use encrypted systems, secure storage, and access controls to protect your data. Our staff and drivers are trained in data protection procedures."
+      }
+    ],
+    "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+    "button": "Done"
+  },
+  "terms": {
+    "Open_button":"Terms & Conditions",
+    "title": "Terms and Conditions – Airport & City Transfer",
+    "elements": [
+      {
+        "title": " Bookings and Confirmations",
+      "desc": "All bookings must be made via our app, website, phone, or authorised partners. Confirmation is provided electronically. It is the customer’s responsibility to ensure all booking details are accurate."
+      },
+      {
+        "title": " Payments and Charges",
+      "desc": "All fares are quoted in GBP (£). Additional fees may apply for extra stops, waiting time, or out-of-hours service. Payments must be made at booking unless agreed otherwise."
+      },
+      {
+        "title": " Cancellations and Refunds",
+      "desc": "Cancellations made more than 24 hours in advance are fully refundable. No-shows and late cancellations are non-refundable."
+      },
+      {
+        "title": " Use of TfL-Licensed Personnel",
+      "desc": "All journeys are carried out exclusively by drivers and vehicles licensed by Transport for London. We conduct regular checks to ensure compliance."
+      },
+      {
+        "title": " Safety and Conduct",
+      "desc": "All drivers are DBS-checked and follow our code of conduct. Passengers are expected to behave respectfully and comply with UK safety regulations."
+      },
+      {
+        "title": " Lost Property",
+      "desc": "Items left in vehicles are logged and stored for up to 6 weeks. Customers can contact us to arrange retrieval. Unclaimed items are either securely disposed of or donated."
+      },
+
+      {
+        "title": "Complaints Procedure",
+      "desc": "Complaints can be submitted via our website, phone, or email. A Compliance Officer investigates and responds within 5 working days. Relevant issues are reported to TfL where applicable."
+      },
+
+      {
+        "title": "Liability ",
+      "desc": "Airport & City Transfer is not liable for delays due to unforeseen circumstances such as traffic or weather. Our liability is limited to the fare paid."
+      },
+      {
+        "title": "Data Protection ",
+      "desc": "We comply with all UK GDPR requirements. Please refer to our Privacy Policy for full details."
+      },
+      {
+        "title": "Governing Law ",
+      "desc": "These terms are governed by the laws of England and Wales."
+      }
+
+    ],
+    "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+    "button": "Done"
+  }
+  }
+ ,
+  "faqs": {
+      "Open_button":"FAQ’s",
+    "title": "Frequently Asked Questions – Airport & City Transfer",
+    "elements": [
+      {
+        "question": "How do I book a taxi with Airport & City Transfer?",
+        "answer": "You can book online through our website, via our mobile app, or by calling our booking line. All bookings are confirmed by email or SMS."
+      },
+      {
+        "question": "Can I book a taxi in advance?",
+        "answer": "Yes. We accept advance bookings up to several weeks ahead to ensure your transfer is planned and guaranteed."
+      },
+      {
+        "question": "How will I know my driver has arrived?",
+        "answer": "You will receive a notification when your driver is en route and another once they have arrived. The notification will include driver and vehicle details."
+      },
+      {
+        "question": "What happens if my flight is delayed?",
+        "answer": "We monitor major airports for delays. If your flight is late, we’ll adjust your pickup time accordingly. You can also inform us of delays using the app or by contacting support."
+      },
+      {
+        "question": "Are your drivers licensed and DBS-checked?",
+        "answer": "Yes. All of our drivers are fully licensed by Transport for London (TfL) and have passed enhanced DBS checks for your safety."
+      },
+      {
+        "question": "Can I cancel or change my booking?",
+        "answer": "Yes. You can cancel or modify your booking by contacting us at least 24 hours before your scheduled pickup. Cancellations within 24 hours may not be refundable."
+      },
+      {
+        "question": "What if I’ve left something in the vehicle?",
+        "answer": "Contact our team as soon as possible. Lost items are logged, stored securely for up to 6 weeks, and can be collected or returned by arrangement."
+      },
+      {
+        "question": "Do you offer child seats or accessible vehicles?",
+        "answer": "Yes. Please request these at the time of booking, and we will do our best to accommodate your needs."
+      },
+      {
+        "question": "How do I make a complaint?",
+        "answer": "You can submit a complaint via our website or email. All complaints are handled by our Compliance & Customer Experience Officer and responded to within 5 working days."
+      },
+      {
+        "question": "Is my personal information safe with you?",
+        "answer": "Absolutely. We are fully GDPR-compliant and use encrypted systems to store and protect your data. Please see our Privacy Policy for more details."
+      }
+    ],
+    "warning": "Please make sure to read these FAQs carefully. Using our services indicates your acceptance of the information provided.",
+    "button": "Done"
+  },
+  "download_app": {
+    "title": "Download Our Apps",
+    "subtitle": "Get the official Airport & City Transfer apps",
+    "downloading": "Downloading...",
+    "driver": {
+      "title": "Driver App",
+      "subtitle": "Get the official Airport & City Transfer driver app to manage your trips and earnings",
+      "description": "Download and install the app to start accepting trips, track your earnings, and manage your driver account.",
+      "downloadButton": "Download Driver APK",
+      "logoAlt": "Driver App",
+      "instructions": {
+        "title": "Installation Instructions",
+        "downloadButton": "Download Instructions",
+        "downloadFileName": "driver-instructions.pdf",
+        "step1": "Download the APK file to your Android device",
+        "step2": "Enable 'Install from Unknown Sources' in your device settings",
+        "step3": "Open the downloaded APK file and follow the installation prompts",
+        "step4": "Launch the app and log in with your driver credentials"
+      },
+      "note": "Note: This app is for Android devices only. Make sure you have sufficient storage space before downloading."
+    },
+    "passenger": {
+      "title": "Passenger App",
+      "subtitle": "Get the official Airport & City Transfer passenger app to book rides and manage your trips",
+      "description": "Download and install the app to book rides, track your trips, and manage your passenger account.",
+      "downloadButton": "Download Passenger APK",
+      "logoAlt": "Passenger App",
+      "instructions": {
+        "title": "Installation Instructions",
+        "downloadButton": "Download Instructions",
+        "downloadFileName": "passenger-instructions.pdf",
+        "step1": "Download the APK file to your Android device",
+        "step2": "Enable 'Install from Unknown Sources' in your device settings",
+        "step3": "Open the downloaded APK file and follow the installation prompts",
+        "step4": "Launch the app and log in with your passenger credentials"
+      },
+      "note": "Note: This app is for Android devices only. Make sure you have sufficient storage space before downloading."
+    }
+  },
+  "errorPage": {
+    "code": "404",
+    "title": "Page Not Found",
+    "description": "Sorry, we couldn't find the page you're looking for. The page might have been moved, deleted, or doesn't exist.",
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "helpText": "If you believe this is an error, please contact our support team."
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "title": "Lost Property",
+  "subtitle": "Report lost items and track your submissions",
+  "tabs": {
+    "my_reports": "My Reports",
+    "submit_report": "Submit Report"
+  },
+  "stats": {
+    "total": "Total Reports",
+    "reported": "Reported",
+    "under_investigation": "Under Investigation",
+    "found": "Found",
+    "returned": "Returned",
+    "not_found": "Not Found",
+    "closed": "Closed"
+  },
+  "report_list": {
+    "title": "Lost Property Reports",
+    "empty": "No lost property reports found",
+    "filter": {
+      "all": "All",
+      "status_label": "Filter by Status",
+      "item_type_label": "Filter by Item Type"
+    },
+    "item_types": {
+      "all": "All Items",
+      "luggage": "Luggage / Suitcase",
+      "bag": "Bag / Handbag",
+      "wallet": "Wallet / Purse",
+      "phone": "Mobile Phone",
+      "keys": "Keys",
+      "documents": "Documents / ID",
+      "clothing": "Clothing Items",
+      "other": "Other Items"
+    }
+  },
+  "report_card": {
+    "report_id": "Report ID",
+    "item_type": "Item Type",
+    "description": "Description",
+    "color": "Color",
+    "brand": "Brand",
+    "lost_location": "Lost Location",
+    "contact_preference": "Contact Preference",
+    "status": "Status",
+    "trip_date": "Trip Date",
+    "created_at": "Reported On",
+    "updated_at": "Last Updated",
+    "admin_notes": "Admin Notes",
+    "found_at": "Found At",
+    "returned_at": "Returned At",
+    "view_trip": "View Trip Details",
+    "show_details": "Show Details",
+    "report_details": "Lost Property Report Details",
+    "close": "Close",
+    "update_status": "Update Status",
+    "item_details": "Item Details",
+    "reporter_info": "Reporter Information",
+    "trip_info": "Trip Information",
+    "trip_id": "Trip ID",
+    "trip_time": "Trip Time",
+    "distance": "Distance",
+    "duration": "Expected Duration",
+    "passenger_info": "Passenger Information",
+    "driver_info": "Driver Information",
+    "name": "Name",
+    "phone_number": "Phone Number",
+    "email": "Email",
+    "full_name": "Full Name",
+    "photo": "Photo",
+    "report_info": "Report Information",
+    "downloadPdf": "Download PDF",
+    "updateReportTitle": "Update Lost Property Report"
+  },
+  "submit_form": {
+    "title": "Report Lost Property",
+    "subtitle": "Please provide details about your lost item",
+    "fields": {
+      "trip": "Select Trip",
+      "trip_placeholder": "Choose the trip where you lost the item",
+      "item_type": "Item Type",
+      "item_description": "Item Description",
+      "item_description_placeholder": "Provide a detailed description of the item",
+      "item_color": "Item Color",
+      "item_color_placeholder": "e.g., Black, Blue, Red",
+      "item_brand": "Brand (Optional)",
+      "item_brand_placeholder": "e.g., Samsonite, Apple, Nike",
+      "lost_location": "Where did you lose it?",
+      "lost_location_placeholder": "e.g., In the vehicle, At pickup point",
+      "contact_preference": "Preferred Contact Method",
+      "contact_options": {
+        "phone": "Phone Call",
+        "email": "Email",
+        "sms": "SMS"
+      },
+      "photo": "Photo (Optional)",
+      "photo_description": "Upload a photo of the lost item if available",
+      "selected_photo": "Selected"
+    },
+    "button": "Add Report",
+    "button_loading": "Adding...",
+    "success_message": "Lost property report submitted successfully!",
+    "error_message": "Failed to submit report. Please try again.",
+    "validation": {
+      "trip_required": "Please select a trip",
+      "item_type_required": "Please select an item type",
+      "item_type_invalid": "Please choose a valid item type from the list",
+      "description_required": "Please provide a description",
+      "description_min": "Description must be at least 10 characters",
+      "color_required": "Please specify the item color",
+      "lost_location_required": "Please specify where you lost the item",
+      "contact_preference_required": "Please select a contact preference",
+      "contact_preference_invalid": "Please choose a valid contact preference"
+    }
+  },
+  "statuses": {
+    "reported": "Reported",
+    "under_investigation": "Under Investigation",
+    "found": "Found",
+    "returned": "Returned",
+    "not_found": "Not Found",
+    "closed": "Closed"
+  },
+  "contact_preferences": {
+    "phone": "Phone Call",
+    "email": "Email",
+    "sms": "SMS"
+  },
+  "lost_locations": {
+    "in_vehicle": "In the Vehicle",
+    "at_pickup": "At Pickup Point",
+    "at_dropoff": "At Drop-off Point",
+    "unsure": "Unsure"
+  },
+  "download": "Download",
+  "choose_file": "Choose File",
+  "no_file_chosen": "No file chosen",
+  "click_to_view": "Click to view",
+  "image_downloaded": "Image downloaded successfully",
+  "image_download_failed": "Failed to download image",
+  "file_read_failed": "Failed to read image file",
+  "select_item_type": "Select item type",
+  "select_contact_method": "Select contact method"
+}
+
