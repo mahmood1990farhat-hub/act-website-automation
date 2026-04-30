@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>New Booking Received – {{ booking_ref }}</title>
+    <style type="text/css">
+      body,
+      table,
+      td,
+      a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        outline: none;
+        text-decoration: none;
+      }
+      table {
+        border-collapse: collapse !important;
+      }
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background-color: #e8e8e8;
+      }
+      @media only screen and (max-width: 600px) {
+        .main-wrap {
+          width: 100% !important;
+        }
+        .inner-pad {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        .stack-label,
+        .stack-value {
+          display: block !important;
+          width: 100% !important;
+        }
+        .stack-value {
+          padding-bottom: 12px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #e8e8e8">
+    <table
+      role="presentation"
+      width="100%"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #e8e8e8"
+    >
+      <tr>
+        <td align="center" style="padding: 24px 12px">
+          <table
+            role="presentation"
+            class="main-wrap"
+            width="640"
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            style="width: 100%; max-width: 640px; background-color: #ffffff"
+          >
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 28px 32px 8px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    font-size: 13px;
+                    color: #555555;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                  "
+                >
+                  Admin booking notification
+                </p>
+                <h1
+                  style="
+                    margin: 0 0 16px 0;
+                    font-size: 22px;
+                    line-height: 1.25;
+                    color: #111111;
+                    font-weight: bold;
+                  "
+                >
+                  New booking received
+                </h1>
+                <p
+                  style="
+                    margin: 0 0 28px 0;
+                    font-size: 15px;
+                    line-height: 1.55;
+                    color: #333333;
+                  "
+                >
+                  A new booking has been received via the website.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Booking Details -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 20px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Booking details
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 12px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        width: 42%;
+                        vertical-align: top;
+                      "
+                    >
+                      Booking number
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 12px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        font-weight: bold;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ booking_ref }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Booking date
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ booking_date }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Status
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ payment_status }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 12px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Amount paid
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 12px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ amount_paid }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Customer Details -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 20px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Customer details
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 12px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        width: 42%;
+                        vertical-align: top;
+                      "
+                    >
+                      Name
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 12px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ customer_name }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Phone
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ customer_phone }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 12px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Email
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 12px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {% if customer_email %}<a
+                        href="mailto:{{ customer_email }}"
+                        style="color: #204f8f; text-decoration: none"
+                        >{{ customer_email }}</a
+                      >{% else %}—{% endif %}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Journey Details -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 20px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Journey details
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 12px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        width: 42%;
+                        vertical-align: top;
+                      "
+                    >
+                      Pick-up location
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 12px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ pickup }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Drop-off location
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ dropoff }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Date
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ journey_date }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Time
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ journey_time }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Passengers
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ passengers_count }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 12px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Luggage
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 12px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ luggage_label }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Vehicle -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 20px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Vehicle requirement
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      style="padding: 12px 0; font-size: 14px; color: #111111"
+                    >
+                      {{ vehicle_label }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Payment -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 24px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Payment details
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 12px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        width: 42%;
+                        vertical-align: top;
+                      "
+                    >
+                      Payment status
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 12px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ payment_status }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Amount paid
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ amount_paid }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Payment method
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ payment_method }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 12px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Transaction ID
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 12px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        word-break: break-all;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ transaction_id }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- System line + footer image -->
+            <tr>
+              <td
+                style="
+                  padding: 0;
+                  background-color: #f0f0f0;
+                  border-top: 1px solid #dddddd;
+                "
+              >
+                <p
+                  style="
+                    margin: 0;
+                    padding: 16px 32px;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 13px;
+                    color: #444444;
+                    text-align: center;
+                  "
+                >
+                  Airport &amp; City Transfer system
+                </p>
+                {% if footer_logo_url %}
+                <a
+                  href="https://airportandcitytransfer.com/"
+                  target="_blank"
+                  style="text-decoration: none; display: block"
+                >
+                  <img
+                    src="{{ footer_logo_url }}"
+                    alt="Airport &amp; City Transfer"
+                    width="640"
+                    style="
+                      width: 100%;
+                      max-width: 640px;
+                      height: auto;
+                      display: block;
+                    "
+                  />
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

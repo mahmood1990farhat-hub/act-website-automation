@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>Trip Cancellation - Airport &amp; City Transfer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #eef2f6;
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      @media only screen and (max-width: 620px) {
+        .container {
+          width: 100% !important;
+          margin: 0 !important;
+          border-radius: 0 !important;
+        }
+
+        .padding {
+          padding: 16px !important;
+        }
+
+        .text {
+          font-size: 16px !important;
+          line-height: 1.7 !important;
+        }
+
+        .btn {
+          width: 100% !important;
+          display: block !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="center">
+          <table
+            class="container"
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              width: 100%;
+              max-width: 600px;
+              background: #ffffff;
+              margin: 20px auto;
+              border-radius: 10px;
+              overflow: hidden;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            "
+          >
+            <tr>
+              <td align="center" style="padding: 30px 20px">
+                {% if cancellation_image_url %}
+                <img
+                  src="{{ cancellation_image_url }}"
+                  alt="Cancellation"
+                  style="
+                    max-width: 500px;
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                  "
+                />
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="padding text"
+                style="
+                  padding: 25px;
+                  font-size: 16px;
+                  line-height: 1.7;
+                  color: #333;
+                "
+              >
+                <p style="font-size: 18px; margin-bottom: 10px">
+                  Hello {{ first_name }},
+                </p>
+
+                <p>
+                  Your booking with <strong>Airport &amp; City Transfer</strong> has
+                  been successfully cancelled.
+                </p>
+
+                <p>
+                  While we are sorry to see your journey cancelled, we remain
+                  committed to providing a premium private hire service whenever
+                  you choose to travel with us.
+                </p>
+
+                {% if refund_message %}
+                <p>{{ refund_message }}</p>
+                {% endif %}
+
+                <p>If you would like to arrange a new journey:</p>
+
+                <p>
+                  <a
+                    href="{{ website_url }}"
+                    style="
+                      color: #0e2841;
+                      font-weight: bold;
+                      text-decoration: none;
+                    "
+                  >
+                    Rebook your journey here
+                  </a>
+                </p>
+
+                <p style="margin-top: 20px">
+                  Thank you for choosing
+                  <strong>Airport &amp; City Transfer</strong>.
+                </p>
+
+                <p style="font-weight: bold">
+                  Yours sincerely,<br />
+                  Team Airport &amp; City Transfer
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  background: #0e2841;
+                  color: #fff;
+                  padding: 14px 20px;
+                  font-size: 16px;
+                  font-weight: bold;
+                "
+              >
+                Booking Details
+              </td>
+            </tr>
+
+            <tr>
+              <td class="padding" style="padding: 20px">
+                <div
+                  style="
+                    background: #f7f9fc;
+                    padding: 15px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    color: #333;
+                    line-height: 1.6;
+                    border: 1px solid #e6eaf0;
+                  "
+                >
+                  <p><strong>Booking Number:</strong> {{ trip_id }}</p>
+                  <p><strong>Passenger Name:</strong> {{ passenger_name }}</p>
+                  <p><strong>Passengers:</strong> {{ passenger_count }}</p>
+                  <p><strong>Vehicle:</strong> {{ vehicle_type }}</p>
+                  <p><strong>Amount Paid:</strong> GBP {{ cost }}</p>
+
+                  <hr
+                    style="
+                      border: none;
+                      border-top: 1px solid #e1e6ee;
+                      margin: 15px 0;
+                    "
+                  />
+
+                  <p style="font-weight: bold">Journey</p>
+
+                  <p><strong>Pickup:</strong> {{ origin }}</p>
+                  <p><strong>Drop-off:</strong> {{ destination }}</p>
+                  <p><strong>Date:</strong> {{ date }}</p>
+                  <p><strong>Time:</strong> {{ time }}</p>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 25px">
+                <a
+                  href="{{ website_url }}"
+                  class="btn"
+                  style="
+                    background: #0e2841;
+                    color: #fff;
+                    padding: 14px 24px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-weight: bold;
+                    letter-spacing: 0.3px;
+                  "
+                >
+                  Book New Journey
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="padding"
+                style="
+                  padding: 20px;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #777;
+                "
+              >
+                <p>Please double-check your booking details carefully.</p>
+
+                <p>
+                  Your support through follows, likes, and donations helps us
+                  give back to those in need.
+                </p>
+
+                {% if charity_image_url %}
+                <p style="text-align: center">
+                  <img
+                    src="{{ charity_image_url }}"
+                    alt="Charity"
+                    style="
+                      max-width: 500px;
+                      width: 100%;
+                      height: auto;
+                      display: block;
+                      margin: auto;
+                    "
+                  />
+                </p>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

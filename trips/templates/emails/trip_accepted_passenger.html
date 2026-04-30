@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Your Booking Confirmation – Airport & City Transfer</title>
+    <style>
+      body,
+      table,
+      td,
+      a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        outline: none;
+        text-decoration: none;
+        display: block;
+      }
+
+      table {
+        border-collapse: collapse !important;
+      }
+
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background-color: #e5e5e5;
+      }
+
+      .main-container {
+        width: 100%;
+        max-width: 800px;
+      }
+
+      .fluid-img {
+        width: 100% !important;
+        max-width: 100%;
+        height: auto !important;
+        display: block;
+      }
+
+      .desktop-pad {
+        padding-left: 32px;
+        padding-right: 32px;
+      }
+
+      .text-main {
+        font-family: Georgia, "Times New Roman", serif;
+        color: #111111;
+        font-size: 22px;
+        line-height: 1.6;
+      }
+
+      .text-bold {
+        font-weight: bold;
+      }
+
+      .blue-bar {
+        background-color: #204f8f;
+        color: #ffffff;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        line-height: 1.2;
+        font-weight: bold;
+      }
+
+      .download-btn {
+        display: inline-block;
+        width: 100%;
+        max-width: 486px;
+        background-color: #234f8f;
+        color: #ffffff !important;
+        text-decoration: none;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 29px;
+        line-height: 1.2;
+        font-weight: bold;
+        padding: 12px 20px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      .social-icon {
+        width: 39px;
+        max-width: 39px;
+        height: auto;
+        display: inline-block;
+      }
+
+      .social-link {
+        display: inline-block;
+        margin: 0 14px;
+        text-decoration: none;
+        vertical-align: middle;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .main-container {
+          width: 100% !important;
+        }
+
+        .desktop-pad {
+          padding-left: 18px !important;
+          padding-right: 18px !important;
+        }
+
+        .text-main {
+          font-size: 18px !important;
+          line-height: 1.6 !important;
+        }
+
+        .blue-bar {
+          font-size: 22px !important;
+        }
+
+        .download-btn {
+          font-size: 24px !important;
+          max-width: 100% !important;
+        }
+
+        .stack-column,
+        .stack-column td {
+          display: block !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        .mobile-center {
+          text-align: center !important;
+        }
+
+        .mobile-p-20 {
+          padding: 20px !important;
+        }
+
+        .mobile-px-18 {
+          padding-left: 18px !important;
+          padding-right: 18px !important;
+        }
+
+        .mobile-pt-16 {
+          padding-top: 16px !important;
+        }
+
+        .social-icon {
+          width: 30px !important;
+          max-width: 30px !important;
+        }
+
+        .social-link {
+          margin: 10px 6px !important;
+        }
+
+        .store-badge {
+          margin-bottom: 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #e5e5e5">
+    <table
+      role="presentation"
+      width="100%"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #e5e5e5"
+    >
+      <tr>
+        <td align="center" style="padding: 20px 10px">
+          <table
+            role="presentation"
+            width="800"
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            class="main-container"
+            style="width: 100%; max-width: 800px; background-color: #cfcfcf"
+          >
+            <!-- PAGE 1 -->
+            <tr>
+              <td class="desktop-pad text-main" style="padding-top: 42px">
+                Hi {{ first_name }},
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 22px 32px 22px 32px">
+                <a
+                  href="https://airportandcitytransfer.com/en/auth"
+                  target="_blank"
+                  style="text-decoration: none"
+                >
+                  {% if header_image_url %}
+                  <img
+                    src="{{ header_image_url }}"
+                    alt="Booking Confirmation"
+                    width="713"
+                    class="fluid-img"
+                    style="max-width: 713px; width: 100%; height: auto"
+                  />
+                  {% endif %}
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="desktop-pad text-main">
+                Thank you for booking with
+                <strong>Airport &amp; City Transfer</strong>.
+              </td>
+            </tr>
+
+            <tr>
+              <td class="desktop-pad text-main" style="padding-top: 18px">
+                We are committed to providing a premium private hire service,
+                ensuring a safe, comfortable, and reliable journey every time
+                you travel with us.
+              </td>
+            </tr>
+
+            <tr>
+              <td class="desktop-pad text-main" style="padding-top: 18px">
+                It is important that you download your booking confirmation
+                using the link below and check that all details are correct.
+              </td>
+            </tr>
+
+            <tr>
+              <td class="desktop-pad text-main" style="padding-top: 18px">
+                Your booking confirmation acts as your
+                <strong>travel reference</strong>. Please keep it accessible, as
+                it contains all the essential information for your journey. No
+                additional tickets are required.
+              </td>
+            </tr>
+
+            <tr>
+              <td class="desktop-pad text-main" style="padding-top: 18px">
+                Thank you again for choosing
+                <strong>Airport &amp; City Transfer</strong>.<br />
+                We look forward to welcoming you on your journey.
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="desktop-pad text-main"
+                style="padding-top: 18px; padding-bottom: 34px"
+              >
+                <strong>Yours sincerely,</strong><br />
+                <strong>Airport &amp; City Transfer Team</strong>
+              </td>
+            </tr>
+
+            <!-- PAGE 2 -->
+            <tr>
+              <td style="padding: 0">
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td style="padding: 14px 24px 0 24px">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                      >
+                        <tr>
+                          <td
+                            class="blue-bar"
+                            style="
+                              padding: 10px 16px;
+                              border: 4px solid #111111;
+                            "
+                          >
+                            Booking Details
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      class="text-main text-bold mobile-px-18"
+                      style="
+                        padding: 12px 38px 0 38px;
+                        font-size: 24px;
+                        line-height: 1.5;
+                      "
+                    >
+                      Booking Number: {{ trip_id }}<br />
+                      Passengers: {{ passenger_count }}<br />
+                      Vehicle: {{ vehicle_type }}<br />
+                      Amount Paid: £{{ cost }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      class="text-main text-bold mobile-px-18"
+                      style="
+                        padding: 38px 38px 0 38px;
+                        font-size: 24px;
+                        line-height: 1.5;
+                      "
+                    >
+                      JOURNEY
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      class="text-main text-bold mobile-px-18"
+                      style="
+                        padding: 20px 38px 0 38px;
+                        font-size: 24px;
+                        line-height: 1.45;
+                      "
+                    >
+                      Pickup: {{ origin }}<br />
+                      Drop-off: {{ destination }}<br />
+                      Date: {{ date }}<br />
+                      Time: {{ time }}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td align="center" style="padding: 26px 20px 0 20px">
+                      <a
+                        href="{{ map_url }}"
+                        target="_blank"
+                        style="text-decoration: none"
+                      >
+                        {% if map_image_url %}
+                        <img
+                          src="{{ map_image_url }}"
+                          alt="Route Map"
+                          width="365"
+                          style="
+                            width: 100%;
+                            max-width: 365px;
+                            height: auto;
+                            display: block;
+                          "
+                        />
+                        {% else %}
+                        <span
+                          style="
+                            display: inline-block;
+                            font-family:
+                              Georgia, &quot;Times New Roman&quot;, serif;
+                            font-size: 20px;
+                            color: #1a4fd2;
+                            text-decoration: underline;
+                          "
+                          >View Route on Google Maps</span
+                        >
+                        {% endif %}
+                      </a>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td align="center" style="padding: 26px 20px 0 20px">
+                      <a
+                        href="{{ download_confirmation_url }}"
+                        target="_blank"
+                        class="download-btn"
+                      >
+                        Download Confirmation
+                      </a>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      align="center"
+                      class="text-main mobile-px-18"
+                      style="
+                        padding: 28px 40px 0 40px;
+                        font-size: 23px;
+                        line-height: 1.5;
+                      "
+                    >
+                      Please check your booking details carefully and<br />
+                      ensure all booking details are correct
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td align="center" style="padding: 38px 0 0 0">
+                      {% if footer_logo_image_url %}
+                      <img
+                        src="{{ footer_logo_image_url }}"
+                        alt="Airport & City Transfer"
+                        width="800"
+                        class="fluid-img"
+                        style="max-width: 800px; width: 100%; height: auto"
+                      />
+                      {% endif %}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td><br /></td>
+            </tr>
+            <!-- PAGE 3 -->
+            <tr>
+              <td
+                class="desktop-pad text-main"
+                style="padding-top: 34px; font-size: 21px; line-height: 1.55"
+              >
+                Make an impact without spending a penny. Your support through
+                follows, likes, and “Donate” comments helps us give back and
+                support those in need.
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="desktop-pad text-main"
+                style="padding-top: 22px; font-size: 21px; line-height: 1.55"
+              >
+                If you’re interested in supporting charity, this is an easy way
+                to help. A simple follow, like, and “Donate” comment can make a
+                real difference.
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                class="desktop-pad text-main"
+                style="padding-top: 22px; font-size: 21px; line-height: 1.55"
+              >
+                Click below to take part.
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 24px 32px 0 32px">
+                <a
+                  href="https://www.facebook.com/share/1AX3gYL5v4/?mibextid=wwXIfr"
+                  target="_blank"
+                  style="text-decoration: none"
+                >
+                  {% if charity_image_url %}
+                  <img
+                    src="{{ charity_image_url }}"
+                    alt="Support Charity"
+                    width="476"
+                    style="
+                      width: 100%;
+                      max-width: 476px;
+                      height: auto;
+                      display: block;
+                    "
+                  />
+                  {% else %}
+                  <span
+                    style="
+                      display: inline-block;
+                      font-family: Georgia, &quot;Times New Roman&quot;, serif;
+                      font-size: 22px;
+                      color: #1a4fd2;
+                      text-decoration: underline;
+                    "
+                    >Support Our Charity Campaign</span
+                  >
+                  {% endif %}
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 28px 0 0 0">
+                {% if footer_logo_image_url %}
+                <img
+                  src="{{ footer_logo_image_url }}"
+                  alt="Airport & City Transfer"
+                  width="800"
+                  class="fluid-img"
+                  style="max-width: 800px; width: 100%; height: auto"
+                />
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <td><br /></td>
+            </tr>
+            <!-- PAGE 4 -->
+            <tr>
+              <td style="padding: 34px 18px 0 18px">
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td
+                      class="text-main"
+                      style="
+                        padding: 0 10px;
+                        font-size: 21px;
+                        line-height: 1.55;
+                      "
+                    >
+                      Thank you for choosing Airport &amp; City Transfer. We
+                      look forward to delivering a first-class travel experience
+                      and ensuring every aspect of your journey meets the
+                      highest standards.
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      class="text-main"
+                      style="
+                        padding: 38px 10px 0 10px;
+                        font-size: 21px;
+                        line-height: 1.55;
+                      "
+                    >
+                      Support Service:<br />
+                      {{ support_phone_primary }}<br />
+                      {{ support_phone_secondary }}<br />
+                      <a
+                        href="mailto:{{ support_email }}"
+                        style="color: #1a4fd2; text-decoration: underline"
+                        >{{ support_email }}</a
+                      ><br />
+                      <a
+                        href="{{ website_url }}"
+                        target="_blank"
+                        style="color: #1a4fd2; text-decoration: underline"
+                        >{{ website_url }}</a
+                      >
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding: 30px 0 0 0">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                      >
+                        <tr>
+                          <td class="blue-bar" style="padding: 12px 14px">
+                            Manage or cancel your booking
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding: 26px 12px 0 12px">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                      >
+                        <tr class="stack-column">
+                          <td
+                            width="220"
+                            valign="top"
+                            class="stack-column mobile-center"
+                            style="width: 220px"
+                          >
+                            <a
+                              href="https://airportandcitytransfer.com/en/my-trips"
+                              target="_blank"
+                              style="text-decoration: none"
+                            >
+                              <img
+                                src="{{ manage_booking_image_url }}"
+                                alt="Manage Booking"
+                                width="209"
+                                style="
+                                  width: 100%;
+                                  max-width: 209px;
+                                  height: auto;
+                                  display: block;
+                                "
+                              />
+                            </a>
+                          </td>
+                          <td
+                            valign="top"
+                            class="stack-column mobile-pt-16"
+                            style="padding-left: 16px"
+                          >
+                            <table
+                              role="presentation"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              style="background-color: #dddddd"
+                            >
+                              <tr>
+                                <td
+                                  class="text-main"
+                                  style="
+                                    padding: 24px 18px;
+                                    font-size: 21px;
+                                    line-height: 1.5;
+                                  "
+                                >
+                                  Take full control of your journey with our
+                                  seamless booking management. Make changes,
+                                  track your driver, and stay updated—all in one
+                                  place.
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding: 22px 10px 0 10px">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        style="background-color: #e8edf2"
+                      >
+                        <tr>
+                          <td align="center" style="padding: 14px 6px">
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ facebook_icon_url }}"
+                                alt="Facebook"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ instagram_icon_url }}"
+                                alt="Instagram"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ x_icon_url }}"
+                                alt="X"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ youtube_icon_url }}"
+                                alt="YouTube"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ blogger_icon_url }}"
+                                alt="Blogger"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                            <a target="_blank" class="social-link">
+                              <img
+                                src="{{ tiktok_icon_url }}"
+                                alt="TikTok"
+                                width="39"
+                                class="social-icon"
+                              />
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      align="center"
+                      class="text-main text-bold"
+                      style="
+                        padding: 40px 10px 0 10px;
+                        font-size: 23px;
+                        line-height: 1.3;
+                      "
+                    >
+                      DOWNLOAD OUR APP
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding: 28px 14px 0 14px">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                      >
+                        <tr class="stack-column">
+                          <td
+                            align="center"
+                            valign="middle"
+                            class="stack-column mobile-center store-badge"
+                          >
+                            <a target="_blank" style="text-decoration: none">
+                              {% if google_play_badge_url %}
+                              <img
+                                src="{{ google_play_badge_url }}"
+                                alt="Get it on Google Play"
+                                width="150"
+                                style="
+                                  width: 100%;
+                                  max-width: 150px;
+                                  height: auto;
+                                  display: block;
+                                "
+                              />
+                              {% else %}
+                              <span
+                                style="
+                                  display: inline-block;
+                                  font-family:
+                                    Georgia, &quot;Times New Roman&quot;, serif;
+                                  font-size: 20px;
+                                  color: #1a4fd2;
+                                  text-decoration: underline;
+                                "
+                                >Get it on Google Play</span
+                              >
+                              {% endif %}
+                            </a>
+                          </td>
+                          <td
+                            align="center"
+                            valign="middle"
+                            class="stack-column mobile-center"
+                          >
+                            <a target="_blank" style="text-decoration: none">
+                              {% if app_store_badge_url %}
+                              <img
+                                src="{{ app_store_badge_url }}"
+                                alt="Download on the App Store"
+                                width="150"
+                                style="
+                                  width: 100%;
+                                  max-width: 150px;
+                                  height: auto;
+                                  display: block;
+                                "
+                              />
+                              {% else %}
+                              <span
+                                style="
+                                  display: inline-block;
+                                  font-family:
+                                    Georgia, &quot;Times New Roman&quot;, serif;
+                                  font-size: 20px;
+                                  color: #1a4fd2;
+                                  text-decoration: underline;
+                                "
+                                >Download on the App Store</span
+                              >
+                              {% endif %}
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      align="center"
+                      class="text-main"
+                      style="
+                        padding: 32px 20px 0 20px;
+                        font-size: 18px;
+                        line-height: 1.5;
+                      "
+                    >
+                      <a
+                        target="_blank"
+                        style="
+                          color: #1a4fd2;
+                          text-decoration: underline;
+                          font-weight: bold;
+                        "
+                        >Terms &amp; conditions</a
+                      >
+                      |
+                      <a
+                        target="_blank"
+                        style="
+                          color: #1a4fd2;
+                          text-decoration: underline;
+                          font-weight: bold;
+                        "
+                        >Privacy policy</a
+                      >
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      align="center"
+                      class="text-main"
+                      style="
+                        padding: 26px 28px 0 28px;
+                        font-size: 20px;
+                        line-height: 1.5;
+                      "
+                    >
+                      You are receiving this email as it contains information
+                      related to your booking with Airport and City Transfer.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 28px 0 0 0">
+                {% if footer_logo_image_url %}
+                <img
+                  src="{{ footer_logo_image_url }}"
+                  alt="Airport & City Transfer"
+                  width="800"
+                  class="fluid-img"
+                  style="max-width: 800px; width: 100%; height: auto"
+                />
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
