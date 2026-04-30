@@ -1,0 +1,311 @@
+{
+  "note": "This file contains the previous static data for Policy, Terms, and FAQ that was used before API integration. You can copy this data if needed.",
+  "english": {
+    "policy_and_terms": {
+      "policy": {
+        "Open_button": "Privacy Policy",
+        "title": "Privacy Policy – Airport & City Transfer",
+        "desc": "Airport & City Transfer (\"we\", \"our\", \"us\") is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.",
+        "elements": [
+          {
+            "title": " Information We Collect:",
+            "subDesc": [
+              " Contact details: name, phone number, email",
+              " Booking information: pickup/drop-off locations, dates, times",
+              " Payment information: processed securely through third-party providers",
+              " Driver and vehicle information: for regulatory compliance",
+              " Feedback and complaint information"
+            ]
+          },
+          {
+            "title": "  How We Use Your Data:",
+            "subDesc": [
+              " To process bookings and deliver transport services",
+              " To communicate with customers and drivers",
+              " For internal record-keeping and legal compliance",
+              " To respond to queries, feedback, or complaints",
+              " To comply with Transport for London (TfL) reporting requirements"
+            ]
+          },
+          {
+            "title": "Lawful Basis for Processing:",
+            "desc": "We collect and process personal data under the legal basis of contract performance, legal obligation, or legitimate interest. Consent is obtained where required."
+          },
+          {
+            "title": "Sharing Your Information:",
+            "desc": "We only share data when necessary:",
+            "subDesc": [
+              " With TfL or other regulators when required by law",
+              " With third-party service providers (e.g. payment processors) under strict confidentiality"
+            ],
+            "descEnd": "We never sell your data to third parties."
+          },
+          {
+            "title": "Data Retention:",
+            "desc": "Personal data is retained only as long as necessary to fulfil legal, operational, or financial obligations. Once no longer required, it is securely deleted or anonymised."
+          },
+          {
+            "title": "Your Rights:",
+            "desc": "You have the right to access, correct, erase, or object to the processing of your personal data. Requests can be made in writing to our Data Protection Officer."
+          },
+          {
+            "title": "Security Measures:",
+            "desc": "We use encrypted systems, secure storage, and access controls to protect your data. Our staff and drivers are trained in data protection procedures."
+          }
+        ],
+        "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+        "button": "Done"
+      },
+      "terms": {
+        "Open_button": "Terms & Conditions",
+        "title": "Terms and Conditions – Airport & City Transfer",
+        "elements": [
+          {
+            "title": " Bookings and Confirmations",
+            "desc": "All bookings must be made via our app, website, phone, or authorised partners. Confirmation is provided electronically. It is the customer's responsibility to ensure all booking details are accurate."
+          },
+          {
+            "title": " Payments and Charges",
+            "desc": "All fares are quoted in GBP (£). Additional fees may apply for extra stops, waiting time, or out-of-hours service. Payments must be made at booking unless agreed otherwise."
+          },
+          {
+            "title": " Cancellations and Refunds",
+            "desc": "Cancellations made more than 24 hours in advance are fully refundable. No-shows and late cancellations are non-refundable."
+          },
+          {
+            "title": " Use of TfL-Licensed Personnel",
+            "desc": "All journeys are carried out exclusively by drivers and vehicles licensed by Transport for London. We conduct regular checks to ensure compliance."
+          },
+          {
+            "title": " Safety and Conduct",
+            "desc": "All drivers are DBS-checked and follow our code of conduct. Passengers are expected to behave respectfully and comply with UK safety regulations."
+          },
+          {
+            "title": " Lost Property",
+            "desc": "Items left in vehicles are logged and stored for up to 6 weeks. Customers can contact us to arrange retrieval. Unclaimed items are either securely disposed of or donated."
+          },
+          {
+            "title": "Complaints Procedure",
+            "desc": "Complaints can be submitted via our website, phone, or email. A Compliance Officer investigates and responds within 5 working days. Relevant issues are reported to TfL where applicable."
+          },
+          {
+            "title": "Liability ",
+            "desc": "Airport & City Transfer is not liable for delays due to unforeseen circumstances such as traffic or weather. Our liability is limited to the fare paid."
+          },
+          {
+            "title": "Data Protection ",
+            "desc": "We comply with all UK GDPR requirements. Please refer to our Privacy Policy for full details."
+          },
+          {
+            "title": "Governing Law ",
+            "desc": "These terms are governed by the laws of England and Wales."
+          }
+        ],
+        "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+        "button": "Done"
+      }
+    },
+    "faqs": {
+      "Open_button": "FAQ's",
+      "title": "Frequently Asked Questions – Airport & City Transfer",
+      "elements": [
+        {
+          "question": "How do I book a taxi with Airport & City Transfer?",
+          "answer": "You can book online through our website, via our mobile app, or by calling our booking line. All bookings are confirmed by email or SMS."
+        },
+        {
+          "question": "Can I book a taxi in advance?",
+          "answer": "Yes. We accept advance bookings up to several weeks ahead to ensure your transfer is planned and guaranteed."
+        },
+        {
+          "question": "How will I know my driver has arrived?",
+          "answer": "You will receive a notification when your driver is en route and another once they have arrived. The notification will include driver and vehicle details."
+        },
+        {
+          "question": "What happens if my flight is delayed?",
+          "answer": "We monitor major airports for delays. If your flight is late, we'll adjust your pickup time accordingly. You can also inform us of delays using the app or by contacting support."
+        },
+        {
+          "question": "Are your drivers licensed and DBS-checked?",
+          "answer": "Yes. All of our drivers are fully licensed by Transport for London (TfL) and have passed enhanced DBS checks for your safety."
+        },
+        {
+          "question": "Can I cancel or change my booking?",
+          "answer": "Yes. You can cancel or modify your booking by contacting us at least 24 hours before your scheduled pickup. Cancellations within 24 hours may not be refundable."
+        },
+        {
+          "question": "What if I've left something in the vehicle?",
+          "answer": "Contact our team as soon as possible. Lost items are logged, stored securely for up to 6 weeks, and can be collected or returned by arrangement."
+        },
+        {
+          "question": "Do you offer child seats or accessible vehicles?",
+          "answer": "Yes. Please request these at the time of booking, and we will do our best to accommodate your needs."
+        },
+        {
+          "question": "How do I make a complaint?",
+          "answer": "You can submit a complaint via our website or email. All complaints are handled by our Compliance & Customer Experience Officer and responded to within 5 working days."
+        },
+        {
+          "question": "Is my personal information safe with you?",
+          "answer": "Absolutely. We are fully GDPR-compliant and use encrypted systems to store and protect your data. Please see our Privacy Policy for more details."
+        }
+      ],
+      "warning": "Please make sure to read these FAQs carefully. Using our services indicates your acceptance of the information provided.",
+      "button": "Done"
+    }
+  },
+  "arabic": {
+    "policy_and_terms": {
+      "policy": {
+        "Open_button": "سياسة الخصوصية",
+        "title": "سياسة الخصوصية – مجموعة Airport & City",
+        "desc": "تلتزم مجموعة Airport & City (\"نحن\"، \"لنا\"، \"خاصتنا\") بحماية خصوصيتك. توضح هذه السياسة كيف نقوم بجمع واستخدام وتخزين وحماية بياناتك الشخصية وفقًا للائحة العامة لحماية البيانات في المملكة المتحدة (UK GDPR) وقانون حماية البيانات لعام 2018.",
+        "elements": [
+          {
+            "title": "المعلومات التي نجمعها:",
+            "subDesc": [
+              "بيانات الاتصال: الاسم، رقم الهاتف، البريد الإلكتروني",
+              "معلومات الحجز: مواقع الاستلام/التوصيل، التواريخ، الأوقات",
+              "معلومات الدفع: تتم معالجتها بشكل آمن عبر مزودي خدمات خارجيين",
+              "معلومات السائق والمركبة: للامتثال للوائح التنظيمية",
+              "معلومات التعليقات والشكاوى"
+            ]
+          },
+          {
+            "title": "كيفية استخدامنا لبياناتك:",
+            "subDesc": [
+              "لإتمام الحجوزات وتقديم خدمات النقل",
+              "للتواصل مع العملاء والسائقين",
+              "لحفظ السجلات الداخلية والامتثال القانوني",
+              "للرد على الاستفسارات أو التعليقات أو الشكاوى",
+              "للامتثال لمتطلبات هيئة النقل في لندن (TfL)"
+            ]
+          },
+          {
+            "title": "الأساس القانوني للمعالجة:",
+            "desc": "نقوم بجمع ومعالجة البيانات الشخصية استنادًا إلى تنفيذ العقد، أو الالتزام القانوني، أو المصلحة المشروعة. ويتم الحصول على الموافقة عندما يكون ذلك مطلوبًا."
+          },
+          {
+            "title": "مشاركة معلوماتك:",
+            "desc": "نشارك البيانات فقط عند الضرورة:",
+            "subDesc": [
+              "مع هيئة النقل في لندن (TfL) أو الجهات التنظيمية الأخرى عند الطلب القانوني",
+              "مع مزودي الخدمات الخارجيين (مثل معالجي الدفع) تحت شروط سرية صارمة"
+            ],
+            "descEnd": "لا نقوم أبدًا ببيع بياناتك لأطراف ثالثة."
+          },
+          {
+            "title": "الاحتفاظ بالبيانات:",
+            "desc": "يتم الاحتفاظ بالبيانات الشخصية فقط طالما كان ذلك ضروريًا للوفاء بالالتزامات القانونية أو التشغيلية أو المالية. وبعد ذلك، يتم حذفها أو إخفاؤها بشكل آمن."
+          },
+          {
+            "title": "حقوقك:",
+            "desc": "لديك الحق في الوصول إلى بياناتك الشخصية أو تصحيحها أو محوها أو الاعتراض على معالجتها. يمكن تقديم الطلبات كتابيًا إلى مسؤول حماية البيانات لدينا."
+          },
+          {
+            "title": "تدابير الأمان:",
+            "desc": "نستخدم أنظمة مشفرة، وتخزينًا آمنًا، وضوابط وصول لحماية بياناتك. كما يتلقى موظفونا وسائقونا تدريبًا على إجراءات حماية البيانات."
+          }
+        ],
+        "warning": "يرجى التأكد من قراءة سياسة الخصوصية وشروط الاستخدام بعناية قبل المتابعة، حيث أن استخدامك لخدماتنا يُعد موافقة كاملة منك.",
+        "button": "تم"
+      },
+      "terms": {
+        "Open_button": "الشروط والأحكام",
+        "title": "الشروط والأحكام – مجموعة Airport & City",
+        "elements": [
+          {
+            "title": "الحجز والتأكيدات",
+            "desc": "يجب إجراء جميع الحجوزات عبر تطبيقنا أو موقعنا الإلكتروني أو الهاتف أو من خلال شركائنا المعتمدين. يتم إرسال التأكيد إلكترونيًا. تقع على عاتق العميل مسؤولية التأكد من دقة جميع تفاصيل الحجز."
+          },
+          {
+            "title": "المدفوعات والرسوم",
+            "desc": "جميع الأجور مذكورة بالجنيه الإسترليني (£). قد تُطبق رسوم إضافية للتوقفات الإضافية أو وقت الانتظار أو الخدمة خارج ساعات العمل. يجب دفع المبلغ عند الحجز ما لم يتم الاتفاق على خلاف ذلك."
+          },
+          {
+            "title": "الإلغاء والاسترداد",
+            "desc": "الإلغاءات التي تتم قبل أكثر من 24 ساعة قابلة للاسترداد بالكامل. الحجوزات التي لا يحضر فيها العميل أو الإلغاءات المتأخرة غير قابلة للاسترداد."
+          },
+          {
+            "title": "استخدام أفراد مرخّصين من TfL",
+            "desc": "جميع الرحلات يتم تنفيذها حصريًا بواسطة سائقين ومركبات مرخّصين من قبل هيئة النقل في لندن (TfL). نقوم بإجراء فحوصات منتظمة لضمان الامتثال."
+          },
+          {
+            "title": "السلامة والسلوك",
+            "desc": "جميع السائقين خضعوا لفحص السجل الجنائي (DBS) ويلتزمون بميثاق السلوك الخاص بنا. يُتوقع من الركاب التصرف باحترام والامتثال للوائح السلامة في المملكة المتحدة."
+          },
+          {
+            "title": "المفقودات",
+            "desc": "يتم تسجيل العناصر التي تُترك في المركبات وتخزينها لمدة تصل إلى 6 أسابيع. يمكن للعملاء التواصل معنا لترتيب استرجاعها. يتم التخلص من العناصر غير المطالب بها بأمان أو التبرع بها."
+          },
+          {
+            "title": "إجراءات الشكاوى",
+            "desc": "يمكن تقديم الشكاوى عبر موقعنا الإلكتروني أو الهاتف أو البريد الإلكتروني. يقوم مسؤول الامتثال بالتحقيق والرد خلال 5 أيام عمل. يتم إبلاغ هيئة النقل في لندن (TfL) بالقضايا ذات الصلة عند الاقتضاء."
+          },
+          {
+            "title": "المسؤولية",
+            "desc": "مجموعة Airport & City غير مسؤولة عن التأخيرات الناتجة عن ظروف غير متوقعة مثل حركة المرور أو الطقس. تقتصر مسؤوليتنا على الأجرة المدفوعة فقط."
+          },
+          {
+            "title": "حماية البيانات",
+            "desc": "نحن نلتزم بجميع متطلبات اللائحة العامة لحماية البيانات في المملكة المتحدة (UK GDPR). يرجى الرجوع إلى سياسة الخصوصية الخاصة بنا للحصول على التفاصيل الكاملة."
+          },
+          {
+            "title": "القانون الحاكم",
+            "desc": "تخضع هذه الشروط لأحكام قوانين إنجلترا وويلز."
+          }
+        ],
+        "warning": "يرجى التأكد من قراءة سياسة الخصوصية وشروط الاستخدام بعناية قبل المتابعة، حيث إن استخدام خدماتنا يعني موافقتك الكاملة.",
+        "button": "تم"
+      }
+    },
+    "faqs": {
+      "Open_button": "الأسئلة الشائعة",
+      "title": "الأسئلة الشائعة – مجموعة Airport & City",
+      "elements": [
+        {
+          "question": "كيف يمكنني حجز سيارة أجرة مع مجموعة Airport & City؟",
+          "answer": "يمكنك الحجز عبر موقعنا الإلكتروني، من خلال تطبيق الهاتف المحمول، أو بالاتصال بخط الحجز. يتم تأكيد جميع الحجوزات عبر البريد الإلكتروني أو رسالة نصية."
+        },
+        {
+          "question": "هل يمكنني الحجز مسبقًا؟",
+          "answer": "نعم. نقبل الحجوزات المسبقة قبل عدة أسابيع لضمان تنظيم وتنفيذ رحلتك حسب الخطة."
+        },
+        {
+          "question": "كيف سأعرف أن السائق قد وصل؟",
+          "answer": "ستتلقى إشعارًا عند توجه السائق إليك، وإشعارًا آخر عند وصوله. يتضمن الإشعار معلومات عن السائق والمركبة."
+        },
+        {
+          "question": "ماذا يحدث إذا تأخرت رحلتي؟",
+          "answer": "نقوم بمراقبة الرحلات في المطارات الرئيسية. إذا تأخرت رحلتك، سنقوم بضبط وقت الاستلام تلقائيًا. يمكنك أيضًا إبلاغنا بالتأخير عبر التطبيق أو من خلال الدعم."
+        },
+        {
+          "question": "هل السائقون مرخصون وخضعوا لفحص DBS؟",
+          "answer": "نعم. جميع سائقينا مرخصون بالكامل من قبل هيئة النقل في لندن (TfL) وقد اجتازوا فحوصات DBS المحسّنة لضمان سلامتك."
+        },
+        {
+          "question": "هل يمكنني إلغاء أو تعديل الحجز؟",
+          "answer": "نعم. يمكنك إلغاء أو تعديل الحجز بالتواصل معنا قبل 24 ساعة على الأقل من موعد الاستلام. قد لا تكون الإلغاءات خلال 24 ساعة قابلة للاسترداد."
+        },
+        {
+          "question": "ماذا لو نسيت شيئًا في السيارة؟",
+          "answer": "يرجى التواصل معنا في أقرب وقت ممكن. يتم تسجيل العناصر المفقودة وتخزينها بأمان لمدة تصل إلى 6 أسابيع، ويمكن استلامها أو ترتيب إعادتها."
+        },
+        {
+          "question": "هل تقدمون مقاعد أطفال أو مركبات مخصصة لذوي الاحتياجات الخاصة؟",
+          "answer": "نعم. يُرجى طلب ذلك عند الحجز، وسنبذل قصارى جهدنا لتلبية احتياجاتك."
+        },
+        {
+          "question": "كيف يمكنني تقديم شكوى؟",
+          "answer": "يمكنك تقديم شكوى عبر موقعنا الإلكتروني أو البريد الإلكتروني. يتولى مسؤول الامتثال وتجربة العملاء مراجعة الشكوى والرد خلال 5 أيام عمل."
+        },
+        {
+          "question": "هل معلوماتي الشخصية آمنة لديكم؟",
+          "answer": "بكل تأكيد. نحن نلتزم تمامًا باللائحة العامة لحماية البيانات (GDPR)، ونستخدم أنظمة مشفّرة لحفظ وحماية بياناتك. يُرجى مراجعة سياسة الخصوصية لدينا لمزيد من التفاصيل."
+        }
+      ],
+      "warning": "يرجى مراجعة الأسئلة الشائعة بعناية قبل استخدام خدماتنا، حيث أن استخدامك يُعد موافقة ضمنية على السياسات والإجابات المذكورة.",
+      "button": "تم"
+    }
+  }
+}

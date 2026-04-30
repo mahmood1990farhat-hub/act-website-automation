@@ -1,0 +1,27 @@
+@keyframes bounceSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes smoke {
+  0% {
+    opacity: 0.5;
+    transform: translateX(0) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px) translateY(-10px) scale(1.2);
+  }
+}
+
+.bounce-slow {
+  animation: bounceSlow 2.5s infinite;
+}
+
+.smoke {
+  animation: smoke 1.5s ease-out infinite;
+}
