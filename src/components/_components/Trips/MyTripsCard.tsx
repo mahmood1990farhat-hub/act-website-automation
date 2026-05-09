@@ -333,8 +333,8 @@ export default function MyTripsCard({
                          hover:scale-105 active:scale-95"
 								title="Cancel Trip"
 							>
-								<HiTrash className="text-lg" />
-								<span className="max-sm:hidden">
+							
+								<span className="">
 									{tripCardTrans?.cancel || "Cancel"}
 								</span>
 							</button>

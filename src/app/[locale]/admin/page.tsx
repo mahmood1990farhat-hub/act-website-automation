@@ -1,5 +1,5 @@
 import React from "react";
-import { Locale } from "../../../../../i18n.config";
+import { Locale } from "../../../../i18n.config";
 import Auth from "@/components/_components/auth/Auth";
 import getTrans from "@/lib/translation";
 

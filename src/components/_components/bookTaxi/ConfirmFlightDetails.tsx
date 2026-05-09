@@ -471,7 +471,7 @@ export default function ModernConfirmFlightDetails({
 								<div className={`flex justify-between items-center`}>
 									<span className="text-white/80">{texts.baseCost}</span>
 									<span className="text-white font-semibold">
-										£{cost.toFixed(2) + (airport_vat.toFixed(2)?? 0) }
+										£{Number(cost + (airport_vat ?? 0)).toFixed(2) }
 									</span>
 								</div>
 
