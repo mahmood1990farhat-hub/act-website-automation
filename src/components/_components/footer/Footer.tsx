@@ -161,13 +161,22 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
         <div className="lg:w-1/2 flex max-md:items-center flex-col space-y-4">
           <div className="flex items-center gap-9 text-black text-3xl">
             {" "}
+            <Link href={process.env.NEXT_PUBLIC_FACEBOOK_REVIEW_URL || "https://www.facebook.com"} target="_blank"> 
             <FaFacebookF className="bg-primary p-1 rounded cursor-pointer" />
+            </Link>
+            <Link href={process.env.NEXT_PUBLIC_INSTAGRAM_REVIEW_URL || "https://www.instagram.com"} target="_blank">
             <FaInstagram className="bg-primary p-1 rounded cursor-pointer" />
+            </Link>
+            <Link href={process.env.NEXT_PUBLIC_TWITTER_REVIEW_URL || "https://www.twitter.com"} target="_blank">
             <FaXTwitter className="bg-primary  p-1 rounded cursor-pointer" />
+            </Link>
+            <Link href={process.env.NEXT_PUBLIC_LINKEDIN_REVIEW_URL || "https://www.linkedin.com"} target="_blank">
             <FaLinkedinIn className="bg-primary p-1 rounded cursor-pointer" />
-            <Link href={'https://wa.me/message/VJH5RVGO3E2CH1'} target="_blank">
+            </Link>
+            <Link href={process.env.NEXT_PUBLIC_WHATSAPP_REVIEW_URL || "https://wa.me/message/VJH5RVGO3E2CH1"} target="_blank">
               <FaWhatsapp className="bg-primary p-1 rounded cursor-pointer" />
             </Link>
+           
           </div>
           {/* <div className="md:w-1/2 max-md:text-center">
             Farhat Trading Solution Ltd, Airport House, Office 106, Purley Way,
