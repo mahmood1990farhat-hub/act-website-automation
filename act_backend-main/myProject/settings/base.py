@@ -231,3 +231,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
 TRIP_BUFFER_MINUTES = env.int('TRIP_BUFFER_MINUTES', default=60)
 
+# n8n outbound webhook integration
+N8N_ENABLED = env.bool("N8N_ENABLED", default=True)
+N8N_WEBHOOK_URL = env("N8N_WEBHOOK_URL", default="https://airportandcitytransfer.app.n8n.cloud/webhook-test/driver-onboarding")
+N8N_SECRET = env("N8N_SECRET", default="act-n8n-secret-dev")
