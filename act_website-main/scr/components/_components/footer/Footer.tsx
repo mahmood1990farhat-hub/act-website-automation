@@ -133,6 +133,37 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
             })}
           </ul>
         </div>
+        {/* Airports */}
+        <div className="">
+          <h1 className="font-bold text-white">Airports</h1>
+          <ul className="text-muted text-sm space-y-3 mt-5">
+            <li>
+              <Link href={`/${locale}/heathrow-airport-transfer`} className="cursor-pointer hover:text-gray-400">
+                Heathrow Airport Transfer
+              </Link>
+            </li>
+            <li>
+              <Link href={`/${locale}/gatwick-airport-transfer`} className="cursor-pointer hover:text-gray-400">
+                Gatwick Airport Transfer
+              </Link>
+            </li>
+            <li>
+              <Link href={`/${locale}/stansted-airport-transfer`} className="cursor-pointer hover:text-gray-400">
+                Stansted Airport Transfer
+              </Link>
+            </li>
+            <li>
+              <Link href={`/${locale}/luton-airport-transfer`} className="cursor-pointer hover:text-gray-400">
+                Luton Airport Transfer
+              </Link>
+            </li>
+            <li>
+              <Link href={`/${locale}/london-city-airport-transfer`} className="cursor-pointer hover:text-gray-400">
+                London City Airport Transfer
+              </Link>
+            </li>
+          </ul>
+        </div>
         {/*  */}
         <div className="max-md:mx-auto">
           <h1 className="font-bold text-white">{footer.location.title}</h1>
