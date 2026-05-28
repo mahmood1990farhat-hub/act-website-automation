@@ -2,7 +2,7 @@ import React from 'react';
 
 export const metadata = {
   title: 'ACT',
-  description: 'Airport & City Group',
+  description: 'Airport & City Transfer',
 };
 
 export default function RootLayout({
