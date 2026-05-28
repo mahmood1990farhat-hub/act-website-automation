@@ -56,8 +56,29 @@ const faqs = [
 ];
 
 export default function HeathrowAirportTransferPage() {
+   const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Heathrow Airport Transfer London",
+    serviceType: "Airport Transfer",
+    provider: {
+      "@type": "LocalBusiness",
+      name: "Airport & City Transfer",
+      url: "https://airportandcitytransfer.com",
+    },
+    areaServed: ["London", "Heathrow Airport"],
+    url: "https://airportandcitytransfer.com/en/heathrow-airport-transfer",
+    description:
+      "Private Heathrow airport transfer service across London with fixed pricing, professional drivers, executive vehicles, flight monitoring and 24/7 booking.",
+  };
   return (
     <main className="bg-black text-white">
+            <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceSchema),
+        }}
+      />
       <section className="px-6 py-20 md:px-12 lg:px-20">
         <div className="mx-auto max-w-6xl">
           <Badge className="mb-6 bg-yellow-500 text-black">
