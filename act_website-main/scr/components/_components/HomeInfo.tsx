@@ -308,10 +308,105 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
             </div>
           </div>
 
+                {/* Popular Airport Transfers SEO Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
+              Popular Airport Transfers
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              Reliable airport taxi and chauffeur services across London with professional drivers, fixed pricing, and 24/7 availability.
+            </p>
+          </div>
 
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-black">
+                  Heathrow Airport Transfer
+                </h3>
+                <p className="text-gray-600">
+                  Executive and standard Heathrow airport transfers with meet and greet service, flight monitoring, and professional drivers.
+                </p>
+                <Link href={`/${locale}/heathrow-airport-transfer`}>
+                  <Button className="cursor-pointer">
+                    View Heathrow Transfers
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-black">
+                  Gatwick Airport Transfer
+                </h3>
+                <p className="text-gray-600">
+                  Comfortable Gatwick airport taxi services for business and leisure travel with fixed fares and reliable pickups.
+                </p>
+                <Link href={`/${locale}/gatwick-airport-transfer`}>
+                  <Button className="cursor-pointer">
+                    View Gatwick Transfers
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-black">
+                  Stansted Airport Transfer
+                </h3>
+                <p className="text-gray-600">
+                  Professional Stansted airport transfer services with punctual drivers and easy online booking across London.
+                </p>
+                <Link href={`/${locale}/stansted-airport-transfer`}>
+                  <Button className="cursor-pointer">
+                    View Stansted Transfers
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-black">
+                  Luton Airport Transfer
+                </h3>
+                <p className="text-gray-600">
+                  Affordable and executive Luton airport taxi services available 24 hours a day with experienced chauffeurs.
+                </p>
+                <Link href={`/${locale}/luton-airport-transfer`}>
+                  <Button className="cursor-pointer">
+                    View Luton Transfers
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-black">
+                  London City Airport Transfer
+                </h3>
+                <p className="text-gray-600">
+                  Fast and reliable London City Airport transfers for corporate and private passengers across Greater London.
+                </p>
+                <Link href={`/${locale}/london-city-airport-transfer`}>
+                  <Button className="cursor-pointer">
+                    View London City Transfers
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+          </div>
         </div>
       </section>
-      {/* CTA Section */}
+          
+          {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-primary to-primary/80 text-foreground">
         <div className="container mx-auto px-6 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
