@@ -149,6 +149,10 @@ export function middleware(request: NextRequest) {
   //   return NextResponse.redirect(new URL(`/${locale}/driver`, request.url));
   // }
 
+    if (pathname.endsWith('.html')) {
+    return NextResponse.next();
+  }
+  
   if (pathnameIsMissingLocale) {
     return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
   }
