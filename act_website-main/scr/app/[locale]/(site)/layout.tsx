@@ -17,6 +17,40 @@ export default async function RootLayout({
 
   return (
     <>
+          <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Airport & City Transfer",
+          url: "https://airportandcitytransfer.com",
+          image: "https://airportandcitytransfer.com/images/logo.png",
+          description:
+            "Airport & City Transfer provides private airport transfers, executive transfers, chauffeur services and city transport across London.",
+          areaServed: [
+            "London",
+            "Heathrow Airport",
+            "Gatwick Airport",
+            "Stansted Airport",
+            "Luton Airport",
+            "London City Airport",
+          ],
+          serviceType: [
+            "Airport Transfer",
+            "Private Hire Transfer",
+            "Executive Airport Transfer",
+            "Chauffeur Service",
+            "7 Seater Airport Transfer",
+          ],
+          provider: {
+            "@type": "Organization",
+            name: "Airport & City Transfer",
+            url: "https://airportandcitytransfer.com",
+          },
+        }),
+      }}
+    />
       <main
         className="relative overflow-clip bg-cover bg-center text-white min-h-[700px]">
         <Header navbar={navbar} locale={locale} token={token} />
