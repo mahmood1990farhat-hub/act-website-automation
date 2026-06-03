@@ -1,8 +1,6 @@
-import React from 'react';
-
 export const metadata = {
-  title: 'ACT',
-  description: 'Airport & City Transfer',
+  title: "ACT",
+  description: "Airport & City Transfer",
 };
 
 export default function RootLayout({
@@ -10,16 +8,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta
-          name="google-site-verification"
-          content="-JqU021-FySgKIvmSaumQHIfWj7G5DqRJurNdON7xOc"
-        />
-      </head>
-
-      <body>{children}</body>
-    </html>
-  );
+  return children;
 }
