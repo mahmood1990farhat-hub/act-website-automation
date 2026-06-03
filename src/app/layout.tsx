@@ -45,6 +45,10 @@ export default async function RootLayout({
       className={manrope.className}
     >
       <head>
+        <meta
+          name="google-site-verification"
+          content="-JqU021-FySgKIvmSaumQHIfWj7G5DqRJurNdON7xOc"
+        />
         <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />
       </head>
       <body>
