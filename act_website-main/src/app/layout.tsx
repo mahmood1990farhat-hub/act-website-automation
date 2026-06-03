@@ -28,7 +28,10 @@ const getLocaleFromHeaders = async (): Promise<Locale> => {
 
 export const metadata = {
   title: "ACT",
-  description: "Airport & City Group",
+  description: "Airport & City Transfer",
+  verification: {
+    google: "-JqU021-FySgKIvmSaumQHIfWj7G5DqRJurNdON7xOc",
+  },
 };
 
 export default async function RootLayout({
