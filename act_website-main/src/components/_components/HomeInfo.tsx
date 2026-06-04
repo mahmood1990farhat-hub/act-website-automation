@@ -405,6 +405,8 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
           </div>
         </div>
       </section>
+        </div>
+      </section>
           
           {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-primary to-primary/80 text-foreground">
