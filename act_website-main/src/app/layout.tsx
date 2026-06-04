@@ -1,4 +1,3 @@
-import { Poppins } from "next/font/google";
 import { headers } from "next/headers";
 import { i18n, Locale } from "../../i18n.config";
 import ReactQueryProvider from "@/providers/Provider";
@@ -6,12 +5,6 @@ import ProviderMap from "@/providers/ProviderMap";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
-
-const manrope = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 const getLocaleFromHeaders = async (): Promise<Locale> => {
   const headersList = await headers();
@@ -45,7 +38,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "en" ? "ltr" : "rtl"}
-      className={manrope.className}
+      className="font-sans"
     >
       <head>
         <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />

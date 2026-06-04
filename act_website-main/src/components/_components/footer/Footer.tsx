@@ -228,7 +228,6 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
   Airport and City Transfer, 450 Bath Road, Heathrow, London,
   West Drayton, UB7 0EB, United Kingdom
 </div> */}
-        </div>
         <div className="max-sm:hidden   ">
           {" "}
           <div className="relative lg:w-[350px] w-[200px] h-[190px]    ">
