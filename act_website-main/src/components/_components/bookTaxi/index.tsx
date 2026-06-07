@@ -12,6 +12,10 @@ import BookingConfirmation from "./BookingConfirmation";
 import MapView from "./MapView";
 import Auth from "../auth/Auth";
 import Link from "next/link";
+import PassengerDetails from "./PassengerDetails";
+import ChildInfantTravelInfo from "./ChildInfantTravelInfo";
+import FlightDetails from "./FlightDetails";
+import AdditionalRequirements from "./AdditionalRequirements";
 
 
 export type book_Taxi = {
@@ -74,6 +78,40 @@ export type RoutePoint = {
   point: PlaceSuggestion | any | null;
 };
 
+export type PassengerCounts = {
+  adults: number;
+  children: number;
+  infants: number;
+  numberOfPassengers: number;
+};
+
+export type PassengerDetailsForm = {
+  fullName: string;
+  email: string;
+  countryCode: string;
+  mobileNumber: string;
+};
+
+export type ChildInfantTravelForm = {
+  infantSeatOption: string;
+  childSeatOption: string;
+};
+
+export type FlightDetailsForm = {
+  flightType: "" | "arrival" | "departure";
+  flightNumber: string;
+  airline: string;
+  landingTime: string;
+  departureTime: string;
+  pickupSignName: string;
+};
+
+export type AdditionalRequirementsForm = {
+  meetAndGreet: boolean;
+  foldableWheelchair: boolean;
+  notesToDriver: string;
+};
+
 export type booking_Confirmation = {
   title: string;
   desc: {
@@ -132,7 +170,33 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
     time: "",
     smallSuitcase: 0,
     largeSuitcase: 0,
+    adults: 1,
+    children: 0,
+    infants: 0,
     numberOfPassengers: 1,
+  });
+  const [passengerDetails, setPassengerDetails] = useState<PassengerDetailsForm>({
+    fullName: "",
+    email: "",
+    countryCode: "+44 United Kingdom",
+    mobileNumber: "",
+  });
+  const [childInfantTravel, setChildInfantTravel] = useState<ChildInfantTravelForm>({
+    infantSeatOption: "",
+    childSeatOption: "",
+  });
+  const [flightDetails, setFlightDetails] = useState<FlightDetailsForm>({
+    flightType: "",
+    flightNumber: "",
+    airline: "",
+    landingTime: "",
+    departureTime: "",
+    pickupSignName: "",
+  });
+  const [additionalRequirements, setAdditionalRequirements] = useState<AdditionalRequirementsForm>({
+    meetAndGreet: false,
+    foldableWheelchair: false,
+    notesToDriver: "",
   });
   const [SelectedCar, setSelectedCar] = useState<any | undefined>();
   const [rideOptions, setRideOptions] = useState<calculatTripCost | null>(null);
@@ -151,8 +215,8 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
 
 
   return (
-    <div className={`${heroImage} bg-cover bg-no-repeat bg-center ${step !== 6 && 'py-16 lg:py-36'}`} id="book-now">
-      {step !== 6 && (
+    <div className={`${heroImage} bg-cover bg-no-repeat bg-center ${step !== 10 && 'py-16 lg:py-36'}`} id="book-now">
+      {step !== 10 && (
         <div>
           <div
             className="flex items-center max-md:flex-col gap-5 py-5 w-full lg:px-24 px-5"
@@ -184,6 +248,39 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   prevStep={() => setStep(1)}
                 />
               ) : step === 3 ? (
+                <PassengerDetails
+                  locale={locale}
+                  passengerDetails={passengerDetails}
+                  setPassengerDetails={setPassengerDetails}
+                  nextStep={() => setStep(formDetails.children > 0 || formDetails.infants > 0 ? 4 : 5)}
+                  prevStep={() => setStep(2)}
+                />
+              ) : step === 4 ? (
+                <ChildInfantTravelInfo
+                  locale={locale}
+                  passengerCounts={formDetails}
+                  childInfantTravel={childInfantTravel}
+                  setChildInfantTravel={setChildInfantTravel}
+                  nextStep={() => setStep(5)}
+                  prevStep={() => setStep(3)}
+                />
+              ) : step === 5 ? (
+                <FlightDetails
+                  locale={locale}
+                  flightDetails={flightDetails}
+                  setFlightDetails={setFlightDetails}
+                  nextStep={() => setStep(6)}
+                  prevStep={() => setStep(formDetails.children > 0 || formDetails.infants > 0 ? 4 : 3)}
+                />
+              ) : step === 6 ? (
+                <AdditionalRequirements
+                  locale={locale}
+                  additionalRequirements={additionalRequirements}
+                  setAdditionalRequirements={setAdditionalRequirements}
+                  nextStep={() => setStep(7)}
+                  prevStep={() => setStep(5)}
+                />
+              ) : step === 7 ? (
                 <ConfirmFlightDetails
                   trans={home}
                   rideOptions={rideOptions!}
@@ -198,7 +295,14 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                       }  `,
                     largeSuitcase: formDetails.largeSuitcase,
                     smallSuitcase: formDetails.smallSuitcase,
+                    adults: formDetails.adults,
+                    children: formDetails.children,
+                    infants: formDetails.infants,
                     numberOfPassengers: formDetails.numberOfPassengers,
+                    passengerDetails,
+                    childInfantTravel,
+                    flightDetails,
+                    additionalRequirements,
                     carName: SelectedCar
                       ? (SelectedCar[
                         `name_${locale}` as keyof VehicleType
@@ -223,17 +327,17 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   setClientSecret={(Secret) => setClientSecret(Secret)}
                   editDatelis={() => setStep(1)}
                 />
-              ) : step === 4 ? (
+              ) : step === 8 ? (
                 <>
                   <PaymentDsetails
                     policy_and_terms={policy_and_terms}
                     clientSecret={clientSecret}
                     trans={home.Payments_details}
-                    nextStep={() => setStep(5)}
-                    prevStep={() => setStep(3)}
+                    nextStep={() => setStep(9)}
+                    prevStep={() => setStep(7)}
                     locale={locale}
                   /></>
-              ) : step === 5 ? (
+              ) : step === 9 ? (
                 <div className="flex items-center justify-center ">
                   <BookingConfirmation trans={home.Booking_Confirmation} locale={locale} />
                 </div>
@@ -242,8 +346,8 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
           </div>
         </div>
       )}
-      {step === 6 && (
-        <Auth locale={locale} trans={auth} setStep={() => setStep(3)} isBookingFlow={true} />
+      {step === 10 && (
+        <Auth locale={locale} trans={auth} setStep={() => setStep(7)} isBookingFlow={true} />
       )}
     </div>
   );
