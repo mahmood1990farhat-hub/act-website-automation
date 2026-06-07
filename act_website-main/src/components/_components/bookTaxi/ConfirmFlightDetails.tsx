@@ -17,7 +17,15 @@ import {
 	CheckCircle,
 	Navigation,
 } from "lucide-react";
-import { calculatTripCost, home, RoutePoint } from ".";
+import {
+	AdditionalRequirementsForm,
+	calculatTripCost,
+	ChildInfantTravelForm,
+	FlightDetailsForm,
+	home,
+	PassengerDetailsForm,
+	RoutePoint,
+} from ".";
 import { postData } from "@/lib/api/postData";
 import { getCookie } from "cookies-next";
 import CarLoading from "../loading/CarLoading";
@@ -39,7 +47,14 @@ type typeProps = {
 		distance: string;
 		smallSuitcase: number;
 		largeSuitcase: number;
+		adults: number;
+		children: number;
+		infants: number;
 		numberOfPassengers: number;
+		passengerDetails: PassengerDetailsForm;
+		childInfantTravel: ChildInfantTravelForm;
+		flightDetails: FlightDetailsForm;
+		additionalRequirements: AdditionalRequirementsForm;
 		cartype?: number;
 		cost: number | undefined;
 		airport_vat?: number;
@@ -73,7 +88,7 @@ export default function ModernConfirmFlightDetails({
 
 	useEffect(() => {
 		if (
-			step === 3 &&
+			step === 7 &&
 			token &&
 			typeof window !== "undefined" &&
 			window.sessionStorage.getItem("resumeBookingAfterLogin") === "true"
@@ -132,7 +147,7 @@ export default function ModernConfirmFlightDetails({
 				window.sessionStorage.setItem("resumeBookingAfterLogin", "true");
 			}
 			setIsLoading(false);
-			setStep(6);
+			setStep(10);
 		} else {
 			const stop_points = data.routePoints
 				.filter((p) => p.type === "stop")
@@ -199,7 +214,7 @@ export default function ModernConfirmFlightDetails({
 					},
 				});
 				setIsLoading(false);
-				setStep(4);
+				setStep(8);
 				// The API returns client_secret in the response
 				setClientSecret(res.client_secret);
 			} catch (error) {
@@ -226,7 +241,7 @@ export default function ModernConfirmFlightDetails({
 			{/* Back Button */}
 			<div className="mb-6">
 				<Button
-					onClick={() => setStep(2)}
+					onClick={() => setStep(6)}
 					variant="outline"
 					size="lg"
 					className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 cursor-pointer hover:text-white"
@@ -356,7 +371,7 @@ export default function ModernConfirmFlightDetails({
 						</CardContent>
 					</Card>
 
-					{/* Passenger & Luggage Info */}
+							{/* Passenger & Luggage Info */}
 					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
 						<CardHeader className="pb-4">
 							<CardTitle
@@ -403,6 +418,163 @@ export default function ModernConfirmFlightDetails({
 										{texts.largeLuggage}
 									</p>
 								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Passenger Details */}
+					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+								<Users className="w-5 h-5 text-[#ffd100]" />
+								Passenger Details
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Full Name</p>
+									<p className="text-white text-sm">{data.passengerDetails.fullName || "-"}</p>
+								</div>
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Email</p>
+									<p className="text-white text-sm break-words">{data.passengerDetails.email || "-"}</p>
+								</div>
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Mobile Number</p>
+									<p className="text-white text-sm">
+										{data.passengerDetails.countryCode || "-"} {data.passengerDetails.mobileNumber || ""}
+									</p>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Passenger Count */}
+					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+								<Users className="w-5 h-5 text-[#ffd100]" />
+								Passenger Count
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+								<div>
+									<p className="text-white font-bold text-lg sm:text-xl">{data.adults}</p>
+									<p className="text-white/60 text-xs sm:text-sm">Adults</p>
+								</div>
+								<div>
+									<p className="text-white font-bold text-lg sm:text-xl">{data.children}</p>
+									<p className="text-white/60 text-xs sm:text-sm">Children (4-11)</p>
+								</div>
+								<div>
+									<p className="text-white font-bold text-lg sm:text-xl">{data.infants}</p>
+									<p className="text-white/60 text-xs sm:text-sm">Infants (0-3)</p>
+								</div>
+								<div>
+									<p className="text-white font-bold text-lg sm:text-xl">{data.numberOfPassengers}</p>
+									<p className="text-white/60 text-xs sm:text-sm">Total passengers</p>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{(data.infants > 0 || data.children > 0) && (
+						<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+							<CardHeader className="pb-4">
+								<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+									<CheckCircle className="w-5 h-5 text-[#ffd100]" />
+									Child & Infant Travel Information
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-3">
+								{data.infants > 0 && (
+									<div>
+										<p className="text-white/60 text-xs sm:text-sm">Infant seat option selected</p>
+										<p className="text-white text-sm">{data.childInfantTravel.infantSeatOption || "-"}</p>
+									</div>
+								)}
+								{data.children > 0 && (
+									<div>
+										<p className="text-white/60 text-xs sm:text-sm">Child seat option selected</p>
+										<p className="text-white text-sm">{data.childInfantTravel.childSeatOption || "-"}</p>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Flight Details */}
+					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+								<Navigation className="w-5 h-5 text-[#ffd100]" />
+								Flight Details
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div>
+								<p className="text-white/60 text-xs sm:text-sm">Flight Type</p>
+								<p className="text-white text-sm">
+									{data.flightDetails.flightType === "arrival"
+										? "Arrival"
+										: data.flightDetails.flightType === "departure"
+											? "Departure"
+											: "-"}
+								</p>
+							</div>
+							<div>
+								<p className="text-white/60 text-xs sm:text-sm">Flight Number</p>
+								<p className="text-white text-sm">{data.flightDetails.flightNumber || "-"}</p>
+							</div>
+							<div>
+								<p className="text-white/60 text-xs sm:text-sm">Airline</p>
+								<p className="text-white text-sm">{data.flightDetails.airline || "-"}</p>
+							</div>
+							{data.flightDetails.flightType === "arrival" && (
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Landing Time</p>
+									<p className="text-white text-sm">{data.flightDetails.landingTime || "-"}</p>
+								</div>
+							)}
+							{data.flightDetails.flightType === "departure" && (
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Departure Time</p>
+									<p className="text-white text-sm">{data.flightDetails.departureTime || "-"}</p>
+								</div>
+							)}
+							<div>
+								<p className="text-white/60 text-xs sm:text-sm">Pick-up Sign Name</p>
+								<p className="text-white text-sm">{data.flightDetails.pickupSignName || "-"}</p>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Additional Requirements */}
+					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+								<CheckCircle className="w-5 h-5 text-[#ffd100]" />
+								Additional Requirements
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Meet & Greet Service</p>
+									<p className="text-white text-sm">{data.additionalRequirements.meetAndGreet ? "Yes" : "No"}</p>
+								</div>
+								<div>
+									<p className="text-white/60 text-xs sm:text-sm">Foldable Wheelchair</p>
+									<p className="text-white text-sm">{data.additionalRequirements.foldableWheelchair ? "Yes" : "No"}</p>
+								</div>
+							</div>
+							<div>
+								<p className="text-white/60 text-xs sm:text-sm">Notes to Driver</p>
+								<p className="text-white text-sm whitespace-pre-wrap">
+									{data.additionalRequirements.notesToDriver || "-"}
+								</p>
 							</div>
 						</CardContent>
 					</Card>

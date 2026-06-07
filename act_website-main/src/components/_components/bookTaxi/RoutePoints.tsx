@@ -37,6 +37,9 @@ type TaxiFormProps = {
     time: string;
     largeSuitcase: number;
     smallSuitcase: number;
+    adults: number;
+    children: number;
+    infants: number;
     numberOfPassengers: number;
   }) => void;
   locale: Locale;
@@ -45,6 +48,9 @@ type TaxiFormProps = {
     time: string;
     smallSuitcase: number;
     largeSuitcase: number;
+    adults: number;
+    children: number;
+    infants: number;
     numberOfPassengers: number;
   };
   setTripData: (rs: calculatTripCost) => void;
@@ -114,11 +120,18 @@ export default function RoutePoints({
     const smallSuitcase = parseInt(
       (document.getElementById("small_suitcase") as HTMLInputElement)?.value || "0"
     );
-    const numberOfPassengers = parseInt(
-      (document.getElementById("passenger-count") as HTMLInputElement)?.value || "1"
+    const adults = parseInt(
+      (document.getElementById("adult-count") as HTMLInputElement)?.value || "1"
     );
+    const children = parseInt(
+      (document.getElementById("child-count") as HTMLInputElement)?.value || "0"
+    );
+    const infants = parseInt(
+      (document.getElementById("infant-count") as HTMLInputElement)?.value || "0"
+    );
+    const numberOfPassengers = adults + children + infants;
 
-    return { largeSuitcase, smallSuitcase, numberOfPassengers };
+    return { largeSuitcase, smallSuitcase, adults, children, infants, numberOfPassengers };
   };
 
   const buildRequestBody = (inputValues: { largeSuitcase: number; smallSuitcase: number; numberOfPassengers: number }) => {
@@ -176,6 +189,11 @@ export default function RoutePoints({
 
     try {
       const inputValues = getFormInputValues();
+
+      if (inputValues.adults < 1 || inputValues.numberOfPassengers < 1) {
+        setIsRequired(true);
+        return;
+      }
 
       setValue({
         ...formDetails,
@@ -361,24 +379,62 @@ export default function RoutePoints({
               </div>
             </div>
 
-            <div className="flex items-center justify-between max-md:flex-col gap-4">
+            <div className="space-y-4">
               <div className="w-full">
-                <label htmlFor="passenger-count">
-                  <p>{book_Taxi.form.NumberOfPassenger}</p>
-                </label>
-                <input
-                  id="passenger-count"
-                  type="number"
-                  defaultValue={1}
-                  max={7}
-                  min={1}
-                  className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
-                />
+                <p>{book_Taxi.form.NumberOfPassenger}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label htmlFor="adult-count">
+                      <p className="text-sm text-muted">Adults</p>
+                    </label>
+                    <input
+                      id="adult-count"
+                      type="number"
+                      defaultValue={formDetails.adults}
+                      max={7}
+                      min={1}
+                      className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="child-count">
+                      <p className="text-sm text-muted">Children (4-11)</p>
+                    </label>
+                    <input
+                      id="child-count"
+                      type="number"
+                      defaultValue={formDetails.children}
+                      max={7}
+                      min={0}
+                      className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="infant-count">
+                      <p className="text-sm text-muted">Infants (0-3)</p>
+                    </label>
+                    <input
+                      id="infant-count"
+                      type="number"
+                      defaultValue={formDetails.infants}
+                      max={7}
+                      min={0}
+                      className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
+                    />
+                  </div>
+                </div>
+                {isRequired && formDetails.adults < 1 && (
+                  <span className="text-red-600 font-semibold text-sm">
+                    Adults must be at least 1.
+                  </span>
+                )}
               </div>
-              <div className="w-full flex items-center gap-1">
-                <div className="w-full">
+              <div className="w-full">
+                <p>Luggage</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
                   <label htmlFor="large_suitcase">
-                    <p>{book_Taxi.form.largeSuitcase}</p>
+                    <p className="text-sm text-muted">{book_Taxi.form.largeSuitcase}</p>
                   </label>
                   <input
                     id="large_suitcase"
@@ -388,9 +444,9 @@ export default function RoutePoints({
                     className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
                   />
                 </div>
-                <div className="w-full">
+                <div>
                   <label htmlFor="small_suitcase">
-                    <p>{book_Taxi.form.smallSuitcase}</p>
+                    <p className="text-sm text-muted">{book_Taxi.form.smallSuitcase}</p>
                   </label>
                   <input
                     id="small_suitcase"
@@ -399,6 +455,7 @@ export default function RoutePoints({
                     min="0"
                     className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
                   />
+                </div>
                 </div>
               </div>
             </div>
