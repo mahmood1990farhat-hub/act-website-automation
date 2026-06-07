@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.db.models import Q
-from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee
+from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee, ExtraServiceFee
 
 
 @admin.register(PricingSettings)
@@ -144,6 +144,43 @@ class AirportFeeAdmin(admin.ModelAdmin):
         }),
     )
     
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('airport', 'vehicle_type')
+
+
+@admin.register(ExtraServiceFee)
+class ExtraServiceFeeAdmin(admin.ModelAdmin):
+    """Admin interface for optional extra service fees."""
+
+    list_display = [
+        'service_name_en', 'service_key', 'airport_display', 'vehicle_type_display',
+        'direction', 'pricing_mode', 'fee_amount', 'is_active', 'order'
+    ]
+    list_filter = ['service_key', 'direction', 'pricing_mode', 'is_active', 'airport', 'vehicle_type']
+    search_fields = ['service_name_en', 'service_name_ar', 'airport__name_en', 'vehicle_type__name_en']
+    ordering = ['order', 'service_key']
+
+    fieldsets = (
+        ('Service', {
+            'fields': ('service_key', 'service_name_en', 'service_name_ar', 'is_active', 'order')
+        }),
+        ('Applicability', {
+            'fields': ('airport', 'vehicle_type', 'direction'),
+            'description': 'Leave airport or vehicle type empty to apply this rule broadly.'
+        }),
+        ('Pricing', {
+            'fields': ('fee_amount', 'pricing_mode')
+        }),
+    )
+
+    def airport_display(self, obj):
+        return obj.airport.name_en if obj.airport else 'All airports'
+    airport_display.short_description = 'Airport'
+
+    def vehicle_type_display(self, obj):
+        return obj.vehicle_type.name_en if obj.vehicle_type else 'All vehicles'
+    vehicle_type_display.short_description = 'Vehicle Type'
+
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('airport', 'vehicle_type')
 

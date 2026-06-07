@@ -237,3 +237,80 @@ class AirportFee(models.Model):
     def __str__(self):
         return f"{self.airport.name_en} - {self.vehicle_type.name_en}: Pickup £{self.pickup_fee}, Dropoff £{self.dropoff_fee}"
 
+
+class ExtraServiceFee(models.Model):
+    """Configurable fees for optional booking services."""
+
+    SERVICE_MEET_GREET = 'meet_greet'
+    SERVICE_CHILD_SEAT = 'child_seat'
+    SERVICE_INFANT_SEAT = 'infant_seat'
+    SERVICE_BOOSTER_SEAT = 'booster_seat'
+    SERVICE_WHEELCHAIR_ASSISTANCE = 'wheelchair_assistance'
+    SERVICE_CHOICES = [
+        (SERVICE_MEET_GREET, 'Meet & Greet Service'),
+        (SERVICE_CHILD_SEAT, 'Child Seat'),
+        (SERVICE_INFANT_SEAT, 'Infant Seat'),
+        (SERVICE_BOOSTER_SEAT, 'Booster Seat'),
+        (SERVICE_WHEELCHAIR_ASSISTANCE, 'Wheelchair Assistance'),
+    ]
+
+    DIRECTION_PICKUP = 'pickup'
+    DIRECTION_DROPOFF = 'dropoff'
+    DIRECTION_BOTH = 'both'
+    DIRECTION_CHOICES = [
+        (DIRECTION_PICKUP, 'Pickup'),
+        (DIRECTION_DROPOFF, 'Dropoff'),
+        (DIRECTION_BOTH, 'Both'),
+    ]
+
+    PRICING_FIXED_FEE = 'fixed_fee'
+    PRICING_PER_ITEM = 'per_item'
+    PRICING_MODE_CHOICES = [
+        (PRICING_FIXED_FEE, 'Fixed Fee'),
+        (PRICING_PER_ITEM, 'Per Item'),
+    ]
+
+    service_key = models.CharField(max_length=50, choices=SERVICE_CHOICES)
+    service_name_en = models.CharField(max_length=100)
+    service_name_ar = models.CharField(max_length=100)
+    airport = models.ForeignKey(
+        'trips.Airport',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='extra_service_fees',
+        help_text="Leave empty to apply to all airports."
+    )
+    vehicle_type = models.ForeignKey(
+        'vehicle.VehicleType',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='extra_service_fees',
+        help_text="Leave empty to apply to all vehicle types."
+    )
+    direction = models.CharField(max_length=10, choices=DIRECTION_CHOICES, default=DIRECTION_BOTH)
+    fee_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    pricing_mode = models.CharField(max_length=20, choices=PRICING_MODE_CHOICES, default=PRICING_FIXED_FEE)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'service_key', 'airport', 'vehicle_type', 'direction']
+        indexes = [
+            models.Index(fields=['service_key', 'is_active']),
+            models.Index(fields=['airport', 'vehicle_type']),
+        ]
+        verbose_name = "Extra Service Fee"
+        verbose_name_plural = "Extra Service Fees"
+
+    def clean(self):
+        if self.fee_amount < 0:
+            raise ValidationError({'fee_amount': 'Fee amount cannot be negative'})
+
+    def __str__(self):
+        airport = self.airport.name_en if self.airport else 'All airports'
+        vehicle = self.vehicle_type.name_en if self.vehicle_type else 'All vehicles'
+        return f"{self.service_name_en} - {airport} - {vehicle} - {self.direction}: GBP {self.fee_amount}"

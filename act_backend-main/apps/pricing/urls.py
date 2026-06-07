@@ -4,7 +4,8 @@ from .views import (
     PricingSettingsViewSet,
     PricingTierViewSet,
     PeakTimeRuleViewSet,
-    AirportFeeViewSet
+    AirportFeeViewSet,
+    ExtraServiceFeeViewSet
 )
 
 router = DefaultRouter()
@@ -12,6 +13,7 @@ router = DefaultRouter()
 router.register(r'tiers', PricingTierViewSet, basename='pricing-tier')
 router.register(r'peak-rules', PeakTimeRuleViewSet, basename='peak-time-rule')
 router.register(r'airport-fees', AirportFeeViewSet, basename='airport-fee')
+router.register(r'extra-services', ExtraServiceFeeViewSet, basename='extra-service-fee')
 
 # Custom URL patterns for singleton settings (works with or without ID)
 urlpatterns = [

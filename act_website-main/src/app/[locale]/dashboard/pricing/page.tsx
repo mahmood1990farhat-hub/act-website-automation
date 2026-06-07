@@ -6,6 +6,7 @@ import PricingSettings from '@/components/_components/dashboard/PricingSettings'
 import PricingTiers from '@/components/_components/dashboard/PricingTiers'
 import PeakTimeRules from '@/components/_components/dashboard/PeakTimeRules'
 import AirportFees from '@/components/_components/dashboard/AirportFees'
+import ExtraServices from '@/components/_components/dashboard/ExtraServices'
 import PricingAccordion, { AccordionItem } from '@/components/_components/dashboard/PricingAccordion'
 
 
@@ -28,6 +29,9 @@ export default async function DashboardPricingPage({params}:{params:Promise<{loc
         </AccordionItem>
         <AccordionItem title={dashboard.airportFees?.title || "Airport Fees Management"}>
           <AirportFees locale={locale} token={token} trans={dashboard} />
+        </AccordionItem>
+        <AccordionItem title={dashboard.extraServices?.title || "Extra Services Management"}>
+          <ExtraServices locale={locale} token={token} trans={dashboard} />
         </AccordionItem>
       </PricingAccordion>
     </div>
