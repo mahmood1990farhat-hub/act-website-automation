@@ -652,7 +652,7 @@ class AirportFeeViewSet(viewsets.ModelViewSet):
 class ExtraServiceFeeViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing optional extra service fees.
-    Supports filtering by service_key, airport_id, vehicle_type_id, direction, and is_active.
+    Supports filtering by service_key, airport_id, vehicle_type_id, direction, priority, and is_active.
     """
     serializer_class = ExtraServiceFeeSerializer
     permission_classes = [IsAdminUser]
@@ -664,6 +664,7 @@ class ExtraServiceFeeViewSet(viewsets.ModelViewSet):
         airport_id = self.request.query_params.get('airport_id')
         vehicle_type_id = self.request.query_params.get('vehicle_type_id')
         direction = self.request.query_params.get('direction')
+        priority = self.request.query_params.get('priority')
         is_active = self.request.query_params.get('is_active')
 
         if service_key:
@@ -674,11 +675,17 @@ class ExtraServiceFeeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(vehicle_type_id=vehicle_type_id)
         if direction:
             queryset = queryset.filter(direction=direction)
+        if priority:
+            try:
+                priority_int = int(priority)
+                queryset = queryset.filter(priority=priority_int)
+            except (TypeError, ValueError):
+                pass
         if is_active is not None:
             is_active_bool = is_active.lower() in ('true', '1', 'yes')
             queryset = queryset.filter(is_active=is_active_bool)
 
-        return queryset.order_by('order', 'service_key', 'airport', 'vehicle_type')
+        return queryset.order_by('-priority', 'order', 'service_key', 'airport', 'vehicle_type')
 
     def list(self, request, *args, **kwargs):
         locale = get_locale(request)

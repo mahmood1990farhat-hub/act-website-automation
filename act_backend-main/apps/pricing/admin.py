@@ -154,15 +154,15 @@ class ExtraServiceFeeAdmin(admin.ModelAdmin):
 
     list_display = [
         'service_name_en', 'service_key', 'airport_display', 'vehicle_type_display',
-        'direction', 'pricing_mode', 'fee_amount', 'is_active', 'order'
+        'direction', 'pricing_mode', 'fee_amount', 'priority', 'is_active', 'order'
     ]
-    list_filter = ['service_key', 'direction', 'pricing_mode', 'is_active', 'airport', 'vehicle_type']
+    list_filter = ['service_key', 'direction', 'pricing_mode', 'priority', 'is_active', 'airport', 'vehicle_type']
     search_fields = ['service_name_en', 'service_name_ar', 'airport__name_en', 'vehicle_type__name_en']
-    ordering = ['order', 'service_key']
+    ordering = ['-priority', 'order', 'service_key']
 
     fieldsets = (
         ('Service', {
-            'fields': ('service_key', 'service_name_en', 'service_name_ar', 'is_active', 'order')
+            'fields': ('service_key', 'service_name_en', 'service_name_ar', 'is_active', 'priority', 'order')
         }),
         ('Applicability', {
             'fields': ('airport', 'vehicle_type', 'direction'),

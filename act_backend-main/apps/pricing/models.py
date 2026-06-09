@@ -259,7 +259,7 @@ class ExtraServiceFee(models.Model):
     DIRECTION_BOTH = 'both'
     DIRECTION_CHOICES = [
         (DIRECTION_PICKUP, 'Pickup'),
-        (DIRECTION_DROPOFF, 'Dropoff'),
+        (DIRECTION_DROPOFF, 'Drop-off'),
         (DIRECTION_BOTH, 'Both'),
     ]
 
@@ -292,13 +292,17 @@ class ExtraServiceFee(models.Model):
     direction = models.CharField(max_length=10, choices=DIRECTION_CHOICES, default=DIRECTION_BOTH)
     fee_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     pricing_mode = models.CharField(max_length=20, choices=PRICING_MODE_CHOICES, default=PRICING_FIXED_FEE)
+    priority = models.PositiveIntegerField(
+        default=0,
+        help_text="Higher priority rules can override broader rules when pricing logic is added."
+    )
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['order', 'service_key', 'airport', 'vehicle_type', 'direction']
+        ordering = ['-priority', 'order', 'service_key', 'airport', 'vehicle_type', 'direction']
         indexes = [
             models.Index(fields=['service_key', 'is_active']),
             models.Index(fields=['airport', 'vehicle_type']),
@@ -309,6 +313,8 @@ class ExtraServiceFee(models.Model):
     def clean(self):
         if self.fee_amount < 0:
             raise ValidationError({'fee_amount': 'Fee amount cannot be negative'})
+        if self.priority < 0:
+            raise ValidationError({'priority': 'Priority cannot be negative'})
 
     def __str__(self):
         airport = self.airport.name_en if self.airport else 'All airports'

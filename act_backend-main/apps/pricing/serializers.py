@@ -363,13 +363,18 @@ class ExtraServiceFeeSerializer(serializers.ModelSerializer):
             'id', 'service_key', 'service_name_en', 'service_name_ar',
             'airport', 'airport_id', 'vehicle_type', 'vehicle_type_id',
             'direction', 'fee_amount', 'pricing_mode', 'is_active',
-            'order', 'created_at', 'updated_at'
+            'priority', 'order', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate_fee_amount(self, value):
         if value < 0:
             raise serializers.ValidationError("Fee amount cannot be negative")
+        return value
+
+    def validate_priority(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Priority cannot be negative")
         return value
 
     def validate(self, attrs):
