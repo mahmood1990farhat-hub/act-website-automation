@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 import json
 
-from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee
+from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee, ExtraServiceFee
 from apps.vehicle.models import VehicleType
 from apps.trips.models import Airport
 
@@ -335,3 +335,70 @@ class AirportFeeSerializer(serializers.ModelSerializer):
             instance.vehicle_type = vehicle_types[0]
             instance.save()
         return super().update(instance, validated_data)
+
+
+class ExtraServiceFeeSerializer(serializers.ModelSerializer):
+    """Serializer for configurable extra service fees."""
+
+    airport = AirportNestedSerializer(read_only=True, allow_null=True)
+    airport_id = serializers.PrimaryKeyRelatedField(
+        queryset=Airport.objects.all(),
+        source='airport',
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+    vehicle_type = VehicleTypeNestedSerializer(read_only=True, allow_null=True)
+    vehicle_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=VehicleType.objects.all(),
+        source='vehicle_type',
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = ExtraServiceFee
+        fields = [
+            'id', 'service_key', 'service_name_en', 'service_name_ar',
+            'airport', 'airport_id', 'vehicle_type', 'vehicle_type_id',
+            'direction', 'fee_amount', 'pricing_mode', 'is_active',
+            'priority', 'order', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate_fee_amount(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Fee amount cannot be negative")
+        return value
+
+    def validate_priority(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Priority cannot be negative")
+        return value
+
+    def validate(self, attrs):
+        instance = self.instance
+        service_key = attrs.get('service_key', getattr(instance, 'service_key', None))
+        airport = attrs.get('airport', getattr(instance, 'airport', None))
+        vehicle_type = attrs.get('vehicle_type', getattr(instance, 'vehicle_type', None))
+        direction = attrs.get('direction', getattr(instance, 'direction', None))
+        is_active = attrs.get('is_active', getattr(instance, 'is_active', True))
+
+        if is_active:
+            existing = ExtraServiceFee.objects.filter(
+                service_key=service_key,
+                airport=airport,
+                vehicle_type=vehicle_type,
+                direction=direction,
+                is_active=True,
+            )
+            if instance:
+                existing = existing.exclude(pk=instance.pk)
+
+            if existing.exists():
+                raise serializers.ValidationError({
+                    'service_key': 'An active extra service fee already exists for this service, airport, vehicle type, and direction.'
+                })
+
+        return attrs

@@ -6,12 +6,13 @@ from rest_framework.exceptions import ValidationError, MethodNotAllowed
 from django.db.models import Q
 from decimal import Decimal
 
-from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee
+from .models import PricingSettings, PricingTier, PeakTimeRule, AirportFee, ExtraServiceFee
 from .serializers import (
     PricingSettingsSerializer,
     PricingTierSerializer,
     PeakTimeRuleSerializer,
-    AirportFeeSerializer
+    AirportFeeSerializer,
+    ExtraServiceFeeSerializer
 )
 from utils.common.pagination import paginate_queryset
 from utils.common.locale_utils import get_locale
@@ -640,6 +641,158 @@ class AirportFeeViewSet(viewsets.ModelViewSet):
             locale
         )
         
+        return Response({
+            'success': True,
+            'message': message,
+            'data': None,
+            'pagination': None
+        }, status=status.HTTP_200_OK)
+
+
+class ExtraServiceFeeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing optional extra service fees.
+    Supports filtering by service_key, airport_id, vehicle_type_id, direction, priority, and is_active.
+    """
+    serializer_class = ExtraServiceFeeSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        queryset = ExtraServiceFee.objects.select_related('airport', 'vehicle_type').all()
+
+        service_key = self.request.query_params.get('service_key')
+        airport_id = self.request.query_params.get('airport_id')
+        vehicle_type_id = self.request.query_params.get('vehicle_type_id')
+        direction = self.request.query_params.get('direction')
+        priority = self.request.query_params.get('priority')
+        is_active = self.request.query_params.get('is_active')
+
+        if service_key:
+            queryset = queryset.filter(service_key=service_key)
+        if airport_id:
+            queryset = queryset.filter(airport_id=airport_id)
+        if vehicle_type_id:
+            queryset = queryset.filter(vehicle_type_id=vehicle_type_id)
+        if direction:
+            queryset = queryset.filter(direction=direction)
+        if priority:
+            try:
+                priority_int = int(priority)
+                queryset = queryset.filter(priority=priority_int)
+            except (TypeError, ValueError):
+                pass
+        if is_active is not None:
+            is_active_bool = is_active.lower() in ('true', '1', 'yes')
+            queryset = queryset.filter(is_active=is_active_bool)
+
+        return queryset.order_by('-priority', 'order', 'service_key', 'airport', 'vehicle_type')
+
+    def list(self, request, *args, **kwargs):
+        locale = get_locale(request)
+        activate(locale)
+
+        queryset = self.get_queryset()
+        page_obj, paginator = paginate_queryset(queryset, request)
+        serializer = self.get_serializer(page_obj, many=True)
+
+        message = get_bilingual_error_message(
+            'Extra service fees retrieved successfully.',
+            'Extra service fees retrieved successfully.',
+            locale
+        )
+
+        return Response({
+            'success': True,
+            'message': message,
+            'data': serializer.data,
+            'pagination': {
+                'count': paginator.count,
+                'num_pages': paginator.num_pages,
+                'current_page': page_obj.number if hasattr(page_obj, 'number') else 1,
+                'page_size': paginator.per_page,
+            }
+        }, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        locale = get_locale(request)
+        activate(locale)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            message = get_bilingual_error_message(
+                'Extra service fee created successfully.',
+                'Extra service fee created successfully.',
+                locale
+            )
+            return Response({
+                'success': True,
+                'message': message,
+                'data': serializer.data,
+                'pagination': None
+            }, status=status.HTTP_201_CREATED)
+
+        return create_validation_error_response(serializer.errors, locale)
+
+    def retrieve(self, request, *args, **kwargs):
+        locale = get_locale(request)
+        activate(locale)
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        message = get_bilingual_error_message(
+            'Extra service fee retrieved successfully.',
+            'Extra service fee retrieved successfully.',
+            locale
+        )
+
+        return Response({
+            'success': True,
+            'message': message,
+            'data': serializer.data,
+            'pagination': None
+        }, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        locale = get_locale(request)
+        activate(locale)
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        if serializer.is_valid():
+            serializer.save()
+            message = get_bilingual_error_message(
+                'Extra service fee updated successfully.',
+                'Extra service fee updated successfully.',
+                locale
+            )
+            return Response({
+                'success': True,
+                'message': message,
+                'data': serializer.data,
+                'pagination': None
+            }, status=status.HTTP_200_OK)
+
+        return create_validation_error_response(serializer.errors, locale)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        locale = get_locale(request)
+        activate(locale)
+
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        message = get_bilingual_error_message(
+            'Extra service fee deleted successfully.',
+            'Extra service fee deleted successfully.',
+            locale
+        )
+
         return Response({
             'success': True,
             'message': message,

@@ -1,0 +1,95 @@
+from decimal import Decimal
+
+from django.db import migrations, models
+import django.db.models.deletion
+from django.db.models import Q, F
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = []
+
+    operations = [
+        migrations.CreateModel(
+            name='PricingSettings',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('vat_rate', models.DecimalField(decimal_places=4, default=Decimal('0.20'), help_text='VAT rate as decimal (e.g., 0.20 for 20%)', max_digits=5)),
+                ('minimum_fare', models.DecimalField(decimal_places=2, default=Decimal('40.00'), help_text='Minimum fare amount in GBP', max_digits=10)),
+                ('maximum_distance_miles', models.DecimalField(decimal_places=2, default=Decimal('90.00'), help_text='Maximum supported trip distance in miles', max_digits=6)),
+                ('currency', models.CharField(default='GBP', help_text='Currency code (ISO 4217)', max_length=3)),
+                ('default_peak_multiplier', models.DecimalField(decimal_places=3, default=Decimal('1.0'), help_text='Default peak multiplier when no specific rule matches', max_digits=5)),
+                ('use_dynamic_pricing', models.BooleanField(default=False, help_text='Feature flag: Enable dynamic pricing engine (disable to use legacy hardcoded pricing)')),
+            ],
+            options={
+                'verbose_name': 'Pricing Settings',
+                'verbose_name_plural': 'Pricing Settings',
+            },
+        ),
+        migrations.CreateModel(
+            name='PricingTier',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('min_distance_miles', models.DecimalField(decimal_places=2, help_text='Minimum distance (inclusive) for this tier', max_digits=6)),
+                ('max_distance_miles', models.DecimalField(decimal_places=2, help_text='Maximum distance (exclusive) for this tier', max_digits=6)),
+                ('rate_per_mile', models.DecimalField(decimal_places=2, help_text='Rate per mile in GBP for this distance range', max_digits=10)),
+                ('order', models.PositiveIntegerField(default=0, help_text='Display order (lower numbers first)')),
+                ('is_active', models.BooleanField(default=True, help_text='Whether this tier is currently active')),
+                ('vehicle_type', models.ForeignKey(help_text='Vehicle type this pricing tier applies to', on_delete=django.db.models.deletion.CASCADE, related_name='pricing_tiers', to='vehicle.vehicletype')),
+            ],
+            options={
+                'ordering': ['vehicle_type', 'min_distance_miles'],
+                'unique_together': {('vehicle_type', 'min_distance_miles', 'max_distance_miles')},
+            },
+        ),
+        migrations.CreateModel(
+            name='PeakTimeRule',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(help_text="Descriptive name for this peak rule (e.g., 'Morning Rush Hour')", max_length=100)),
+                ('is_active', models.BooleanField(default=True, help_text='Whether this rule is currently active')),
+                ('start_time', models.TimeField(help_text='Start time for peak pricing (24-hour format)')),
+                ('end_time', models.TimeField(help_text='End time for peak pricing (24-hour format)')),
+                ('days_of_week', models.JSONField(default=list, help_text='Days of week: [0-6] where 0 = Monday')),
+                ('multiplier', models.DecimalField(decimal_places=3, default=Decimal('1.0'), help_text='Multiplier to apply to base rate (e.g., 1.2 for 20% increase)', max_digits=5)),
+                ('priority', models.PositiveIntegerField(default=0, help_text='Higher priority rules are checked first. Vehicle-specific rules typically have higher priority than global rules.')),
+                ('vehicle_type', models.ForeignKey(blank=True, help_text='If null, applies to all vehicles (global rule). If set, only applies to this vehicle type.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='peak_rules', to='vehicle.vehicletype')),
+            ],
+            options={
+                'ordering': ['-priority', 'start_time'],
+            },
+        ),
+        migrations.CreateModel(
+            name='AirportFee',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('pickup_fee', models.DecimalField(decimal_places=2, default=Decimal('0.00'), help_text='Additional fee for pickup at this airport', max_digits=10)),
+                ('dropoff_fee', models.DecimalField(decimal_places=2, default=Decimal('0.00'), help_text='Additional fee for dropoff at this airport', max_digits=10)),
+                ('airport', models.ForeignKey(help_text='Airport this fee applies to', on_delete=django.db.models.deletion.CASCADE, related_name='vehicle_fees', to='trips.airport')),
+                ('vehicle_type', models.ForeignKey(help_text='Vehicle type this fee applies to', on_delete=django.db.models.deletion.CASCADE, to='vehicle.vehicletype')),
+            ],
+            options={
+                'verbose_name': 'Airport Fee',
+                'verbose_name_plural': 'Airport Fees',
+                'unique_together': {('airport', 'vehicle_type')},
+            },
+        ),
+        migrations.AddIndex(
+            model_name='pricingtier',
+            index=models.Index(fields=['vehicle_type', 'min_distance_miles'], name='pricing_pri_vehicle_4c6b34_idx'),
+        ),
+        migrations.AddConstraint(
+            model_name='pricingtier',
+            constraint=models.CheckConstraint(check=Q(('max_distance_miles__gt', F('min_distance_miles'))), name='pricing_tier_max_gt_min_distance'),
+        ),
+        migrations.AddIndex(
+            model_name='peaktimerule',
+            index=models.Index(fields=['is_active', 'priority'], name='pricing_pea_is_acti_6c0cc6_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='peaktimerule',
+            index=models.Index(fields=['vehicle_type', 'is_active'], name='pricing_pea_vehicle_1b4927_idx'),
+        ),
+    ]
