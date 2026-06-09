@@ -32,6 +32,7 @@ type ExtraServiceFee = {
   direction: "pickup" | "dropoff" | "both";
   fee_amount: string;
   pricing_mode: "fixed_fee" | "per_item";
+  priority: number;
   is_active: boolean;
   order: number;
 };
@@ -69,6 +70,7 @@ type ExtraServiceFormData = {
   direction: "pickup" | "dropoff" | "both";
   fee_amount: string;
   pricing_mode: "fixed_fee" | "per_item";
+  priority: number;
   is_active: boolean;
   order: number;
 };
@@ -96,8 +98,15 @@ const defaultValues: ExtraServiceFormData = {
   direction: "pickup",
   fee_amount: "0.00",
   pricing_mode: "fixed_fee",
+  priority: 0,
   is_active: true,
   order: 0,
+};
+
+const directionLabels: Record<ExtraServiceFee["direction"], string> = {
+  pickup: "Pickup",
+  dropoff: "Drop-off",
+  both: "Both",
 };
 
 export default function ExtraServices({ trans, token, locale }: ExtraServicesProps) {
@@ -246,6 +255,7 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
       direction: fee.direction,
       fee_amount: fee.fee_amount,
       pricing_mode: fee.pricing_mode,
+      priority: fee.priority,
       is_active: fee.is_active,
       order: fee.order,
     });
@@ -266,6 +276,7 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
     direction: data.direction,
     fee_amount: data.fee_amount,
     pricing_mode: data.pricing_mode,
+    priority: data.priority,
     is_active: data.is_active,
     order: data.order,
   });
@@ -323,7 +334,7 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
                 <table className="w-full min-w-[900px] text-xs md:text-sm">
                   <thead>
                     <tr className="border-b-2 border-border bg-gray-100 dark:bg-gray-800">
-                      {["Service", "Airport", "Vehicle Type", "Direction", "Mode", "Fee", "Status", "Actions"].map((label) => (
+                      {["Service", "Airport", "Vehicle Type", "Direction", "Mode", "Fee", "Priority", "Status", "Actions"].map((label) => (
                         <th key={label} className="text-start py-4 px-4 text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
                           {label}
                         </th>
@@ -342,9 +353,10 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
                         <td className="py-3 px-4 text-foreground">
                           {fee.vehicle_type ? (locale === "ar" ? fee.vehicle_type.name_ar : fee.vehicle_type.name_en) : "All vehicles"}
                         </td>
-                        <td className="py-3 px-4 text-foreground capitalize">{fee.direction}</td>
+                        <td className="py-3 px-4 text-foreground">{directionLabels[fee.direction]}</td>
                         <td className="py-3 px-4 text-foreground">{fee.pricing_mode === "per_item" ? "Per item" : "Fixed fee"}</td>
                         <td className="py-3 px-4 text-foreground font-semibold">GBP {fee.fee_amount}</td>
+                        <td className="py-3 px-4 text-foreground font-semibold">{fee.priority}</td>
                         <td className="py-3 px-4">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold ${fee.is_active ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
                             {fee.is_active ? <FaCheckCircle className="mr-1" /> : <FaTimesCircle className="mr-1" />}
@@ -388,11 +400,15 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-muted/50 p-2 rounded-lg">
                     <p className="text-xs text-muted-foreground mb-1">Direction</p>
-                    <p className="font-semibold text-sm text-foreground capitalize">{fee.direction}</p>
+                    <p className="font-semibold text-sm text-foreground">{directionLabels[fee.direction]}</p>
                   </div>
                   <div className="bg-muted/50 p-2 rounded-lg">
                     <p className="text-xs text-muted-foreground mb-1">Fee</p>
                     <p className="font-semibold text-sm text-foreground">GBP {fee.fee_amount}</p>
+                  </div>
+                  <div className="bg-muted/50 p-2 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Priority</p>
+                    <p className="font-semibold text-sm text-foreground">{fee.priority}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
@@ -465,7 +481,7 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
                 <label className="block text-sm font-medium text-foreground mb-2">Direction</label>
                 <select {...register("direction", { required: true })} className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary">
                   <option value="pickup">Pickup</option>
-                  <option value="dropoff">Dropoff</option>
+                  <option value="dropoff">Drop-off</option>
                   <option value="both">Both</option>
                 </select>
               </div>
@@ -529,6 +545,16 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
                   {...register("order", { required: true, valueAsNumber: true, min: 0 })}
                   className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Priority</label>
+                <input
+                  type="number"
+                  {...register("priority", { required: true, valueAsNumber: true, min: 0 })}
+                  className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary"
+                />
+                {errors.priority && <p className="text-error text-sm mt-1">Priority must be 0 or higher</p>}
               </div>
 
               <div className="flex items-center pt-7">
