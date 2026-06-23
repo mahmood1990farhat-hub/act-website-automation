@@ -5,6 +5,7 @@ import ProviderMap from "@/providers/ProviderMap";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import Script from "next/script";
 
 const getLocaleFromHeaders = async (): Promise<Locale> => {
   const headersList = await headers();
@@ -44,6 +45,18 @@ export default async function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />
       </head>
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17641563982"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17641563982');
+          `}
+        </Script>
         <ReactQueryProvider>
           <ProviderMap>{children}</ProviderMap>
           <ToastContainer
