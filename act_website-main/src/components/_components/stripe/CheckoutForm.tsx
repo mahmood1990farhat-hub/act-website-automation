@@ -8,13 +8,19 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { FaArrowLeft } from "react-icons/fa";
 import MoneyCountingHand from "../loading/MoneyCountingHand";
 import Policy from "../Policy";
 import Terms from "../Terms";
 import { languageType, Locale } from "../../../../i18n.config";
+
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
 
 const ELEMENT_OPTIONS = {
   style: {
@@ -35,6 +41,8 @@ export default function CheckoutForm({
   nextStep,
   prevStep,
   clientSecret,
+  bookingTotal,
+  currency,
   trans,
   policy_and_terms,
   locale = "en" as languageType
@@ -43,6 +51,8 @@ export default function CheckoutForm({
   prevStep: () => void;
   trans: any;
   clientSecret: string;
+  bookingTotal: number;
+  currency: string;
   policy_and_terms:any;
   locale?: Locale;
 }) {
@@ -54,6 +64,38 @@ export default function CheckoutForm({
   const [expiryComplete, setExpiryComplete] = useState(false);
   const [cvcComplete, setCvcComplete] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const trackedPaymentIntentIds = useRef<Set<string>>(new Set());
+
+  const fireBookingCompletedEvents = (transactionId: string) => {
+    if (trackedPaymentIntentIds.current.has(transactionId)) return;
+
+    trackedPaymentIntentIds.current.add(transactionId);
+
+    if (typeof window === "undefined" || typeof window.gtag !== "function") {
+      return;
+    }
+
+    window.gtag("event", "conversion", {
+      send_to: "AW-17641563982/OJpcCMsREsQ_EM7Ok9xB",
+      value: bookingTotal,
+      currency,
+      transaction_id: transactionId,
+    });
+
+    window.gtag("event", "purchase", {
+      transaction_id: transactionId,
+      value: bookingTotal,
+      currency,
+      items: [
+        {
+          item_id: "airport-transfer",
+          item_name: "Airport Transfer Booking",
+          price: bookingTotal,
+          quantity: 1,
+        },
+      ],
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +116,7 @@ export default function CheckoutForm({
     if (result.error) {
       setErrorMsg(result.error.message || "Payment failed");
     } else if (result.paymentIntent.status === "succeeded") {
+      fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();
     }
 
