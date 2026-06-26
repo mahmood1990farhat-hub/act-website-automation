@@ -332,6 +332,8 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   <PaymentDsetails
                     policy_and_terms={policy_and_terms}
                     clientSecret={clientSecret}
+                    bookingTotal={SelectedCar?.total_cost ?? 0}
+                    currency="GBP"
                     trans={home.Payments_details}
                     nextStep={() => setStep(9)}
                     prevStep={() => setStep(7)}
