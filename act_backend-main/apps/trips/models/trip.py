@@ -59,6 +59,12 @@ class Trip(models.Model):
 
 
     passenger = models.ForeignKey(Passenger, on_delete=models.SET_NULL, null=True, related_name="trips")
+    passenger_name = models.CharField(max_length=255, blank=True, null=True)
+    passenger_email = models.EmailField(blank=True, null=True)
+    passenger_country_code = models.CharField(max_length=64, blank=True, null=True)
+    passenger_phone = models.CharField(max_length=32, blank=True, null=True)
+    booking_details = models.JSONField(default=dict, blank=True)
+    is_guest_checkout = models.BooleanField(default=False)
     base_driver = models.ForeignKey(BaseDriver, on_delete=models.SET_NULL, null=True, blank=True, related_name="trips")
     office = models.ForeignKey(Office, on_delete=models.SET_NULL, null=True, blank=True, related_name="trips")
 
