@@ -10,6 +10,7 @@ from django.utils import timezone as django_timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 
+from apps.trips.services.booking_details_formatter import format_booking_details_for_email
 from utils.common.google_map import place_to_string  
 
 logger = logging.getLogger(__name__)
@@ -170,6 +171,8 @@ def send_passenger_confirmation(user, trip) -> None:
         else:
             vehicle_label = "Private Transfer"
 
+        booking_details = format_booking_details_for_email(trip)
+
         context = {
             "first_name": first_name,
             "trip_id": trip.id,
@@ -180,6 +183,7 @@ def send_passenger_confirmation(user, trip) -> None:
             "cost": f"{trip.cost:.2f}",
             "passenger_count": getattr(trip, "passengers_count", None) or "N/A",
             "vehicle_type": vehicle_label,
+            "booking_details": booking_details,
             "website_url": "https://airportandcitytransfer.com/en",
             "download_confirmation_url": (
                 _absolute_app_url(trip.booking_confirmation_pdf.url)
@@ -419,6 +423,18 @@ def send_internal_notification(trip) -> None:
             else "—"
         )
         customer_email = passenger_user.email if passenger_user else ""
+        snapshot_phone = " ".join(
+            part
+            for part in [
+                getattr(trip, "passenger_country_code", ""),
+                getattr(trip, "passenger_phone", ""),
+            ]
+            if part
+        )
+        customer_name = getattr(trip, "passenger_name", "") or customer_name
+        customer_phone = snapshot_phone or customer_phone
+        customer_email = getattr(trip, "passenger_email", "") or customer_email
+        booking_details = format_booking_details_for_email(trip)
 
         journey_date = trip.trip_date.strftime("%d %B %Y")
         journey_time = trip.trip_time.strftime("%I:%M %p").lstrip("0").lower()
@@ -452,6 +468,7 @@ def send_internal_notification(trip) -> None:
             "passengers_count": trip.passengers_count,
             "luggage_label": _format_trip_luggage_label(trip),
             "vehicle_label": vehicle_label,
+            "booking_details": booking_details,
             "payment_method": payment_method,
             "transaction_id": transaction_id,
             "footer_logo_url": _email_asset_url("trip_accepted/footer-logo.png"),
@@ -475,6 +492,25 @@ def send_internal_notification(trip) -> None:
             f"Time: {journey_time}\n"
             f"Passengers: {trip.passengers_count}\n"
             f"Luggage: {_format_trip_luggage_label(trip)}\n\n"
+            f"Passenger breakdown\n"
+            f"Adults: {booking_details['passenger_counts']['adults']}\n"
+            f"Children: {booking_details['passenger_counts']['children']}\n"
+            f"Infants: {booking_details['passenger_counts']['infants']}\n"
+            f"Total: {booking_details['passenger_counts']['total']}\n\n"
+            f"Flight details\n"
+            f"Type: {booking_details['flight_details']['type']}\n"
+            f"Flight number: {booking_details['flight_details']['flight_number']}\n"
+            f"Airline: {booking_details['flight_details']['airline']}\n"
+            f"{booking_details['flight_details']['time_label']}: {booking_details['flight_details']['time']}\n"
+            f"Pick-up sign name: {booking_details['flight_details']['pickup_sign_name']}\n\n"
+            f"Child/infant travel\n"
+            f"Infant seat: {booking_details['child_infant_travel']['infant_seat_option']}\n"
+            f"Child seat: {booking_details['child_infant_travel']['child_seat_option']}\n\n"
+            f"Additional requirements\n"
+            f"Meet & Greet: {booking_details['additional_requirements']['meet_and_greet']}\n"
+            f"Foldable Wheelchair: {booking_details['additional_requirements']['foldable_wheelchair']}\n"
+            f"Notes to Driver: {booking_details['additional_requirements']['notes_to_driver']}\n"
+            f"Extra services: {booking_details['extra_services']}\n\n"
             f"Vehicle requirement\n"
             f"{vehicle_label}\n\n"
             f"Payment details\n"
