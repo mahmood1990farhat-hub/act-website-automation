@@ -102,6 +102,83 @@
           </div>
         </div>
       </div>
+
+      <div style="margin-top: 16px">
+        <h3 style="background-color: #fdf2ed; padding: 7px; margin: 0 0 6px 0">
+          Passenger & Travel Details
+        </h3>
+        <div
+          style="
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          "
+        >
+          <div>
+            <div>Passenger breakdown</div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div>Adults: {{ booking_details.passenger_counts.adults }}</div>
+              <div>Children: {{ booking_details.passenger_counts.children }}</div>
+              <div>Infants: {{ booking_details.passenger_counts.infants }}</div>
+              <div>Total: {{ booking_details.passenger_counts.total }}</div>
+            </div>
+          </div>
+
+          <div>
+            <div>Flight details</div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div>Type: {{ booking_details.flight_details.type }}</div>
+              <div>
+                Flight Number: {{ booking_details.flight_details.flight_number }}
+              </div>
+              <div>Airline: {{ booking_details.flight_details.airline }}</div>
+              <div>
+                {{ booking_details.flight_details.time_label }}:
+                {{ booking_details.flight_details.time }}
+              </div>
+              <div>
+                Pick-up Sign Name:
+                {{ booking_details.flight_details.pickup_sign_name }}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div>Child/infant travel</div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div>
+                Infant Seat:
+                {{ booking_details.child_infant_travel.infant_seat_option }}
+              </div>
+              <div>
+                Child Seat:
+                {{ booking_details.child_infant_travel.child_seat_option }}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div>Additional requirements</div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div>
+                Meet & Greet:
+                {{ booking_details.additional_requirements.meet_and_greet }}
+              </div>
+              <div>
+                Foldable Wheelchair:
+                {{ booking_details.additional_requirements.foldable_wheelchair }}
+              </div>
+              <div>
+                Notes to Driver:
+                {{ booking_details.additional_requirements.notes_to_driver }}
+              </div>
+              <div>Extra Services: {{ booking_details.extra_services }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <br style="line-height: 6px" />
       <hr
         style="

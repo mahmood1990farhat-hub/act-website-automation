@@ -10,6 +10,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
+from apps.trips.services.booking_details_formatter import format_booking_details_for_email
+
 
 def _money(value):
     try:
@@ -55,6 +57,7 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
         "vat_20": _money((trip.regular_vat or 0) + (trip.airport_vat or 0)),
         "total_cost": _money(trip.cost),
         "payment_method": payment_method,
+        "booking_details": format_booking_details_for_email(trip),
         "logo_uri": Path(logo_path).as_uri() if os.path.exists(logo_path) else "",
         "footer_logo_uri": Path(footer_logo_path).as_uri() if os.path.exists(footer_logo_path) else "",
         "booking": {
@@ -118,6 +121,7 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
         "booking_details_title": "Your Booking Details",
         "journey_title": "JOURNEY",
         "payment_title": "Payment Summery",
+        "booking_details": format_booking_details_for_email(trip),
         "booking": {
             "reference": trip.stripe_payment_intent,
             "passenger_name": passenger_name,
