@@ -32,6 +32,19 @@ export default function FlightDetails({
     setFlightDetails({ ...flightDetails, [key]: value });
   };
 
+  const skipFlightDetails = () => {
+    setFlightDetails({
+      flightType: "",
+      flightNumber: "",
+      airline: "",
+      landingTime: "",
+      departureTime: "",
+      pickupSignName: "",
+    });
+    setIsRequired(false);
+    nextStep();
+  };
+
   const onSubmit = () => {
     const missingArrivalTime =
       flightDetails.flightType === "arrival" && !flightDetails.landingTime.trim();
@@ -173,6 +186,14 @@ export default function FlightDetails({
             className="w-full bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold py-6 text-base sm:text-lg shadow-xl cursor-pointer"
           >
             Continue
+          </Button>
+          <Button
+            type="button"
+            onClick={skipFlightDetails}
+            variant="outline"
+            className="w-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white font-semibold py-6 text-base sm:text-lg cursor-pointer"
+          >
+            Skip — Not applicable for this journey
           </Button>
         </CardContent>
       </Card>
