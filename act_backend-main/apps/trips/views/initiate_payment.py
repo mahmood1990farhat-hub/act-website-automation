@@ -113,15 +113,42 @@ class InitiatePaymentView(EMADBaseView):
         )
 
         idempotency_key = f"payment_{pending_payment.id}"
+        def stripe_metadata_value(value, max_length=500):
+            if value is None:
+                return ""
+            return str(value)[:max_length]
+
+        passenger_name = " ".join(
+            part for part in [request.user.first_name, request.user.last_name] if part
+        ).strip()
+        payment_metadata = {
+            "pending_payment_id": stripe_metadata_value(pending_payment.id),
+            "passenger_id": stripe_metadata_value(request.user.passenger_profile.id),
+            "passenger_email": stripe_metadata_value(request.user.email),
+            "passenger_name": stripe_metadata_value(passenger_name),
+            "car_type_id": stripe_metadata_value(car_type.id),
+            "car_type": stripe_metadata_value(car_type.name_en),
+            "trip_date": stripe_metadata_value(trip_date),
+            "trip_time": stripe_metadata_value(trip_time_obj),
+            "passengers_count": stripe_metadata_value(data.get("passengers_count")),
+            "currency": "GBP",
+        }
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
-            metadata={
-                "pending_payment_id": str(pending_payment.id),
-                "passenger_id": str(request.user.passenger_profile.id),
-                "car_type_id": str(car_type.id),
-            },
+            metadata=payment_metadata,
             idempotency_key=idempotency_key
+        )
+
+        booking_reference = f"ACT-{payment_intent.id}"
+        stripe.PaymentIntent.modify(
+            payment_intent.id,
+            description=f"ACT booking {booking_reference}",
+            metadata={
+                **payment_metadata,
+                "act_booking_reference": booking_reference,
+                "act_invoice_number": booking_reference,
+            },
         )
 
         pending_payment.payment_intent_id = payment_intent.id
