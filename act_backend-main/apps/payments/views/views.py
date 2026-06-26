@@ -102,6 +102,12 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
     trip = Trip.objects.create(
         passenger=passenger,
+        passenger_name=pending_payment.passenger_name,
+        passenger_email=pending_payment.passenger_email,
+        passenger_country_code=pending_payment.passenger_country_code,
+        passenger_phone=pending_payment.passenger_phone,
+        booking_details=pending_payment.booking_details or {},
+        is_guest_checkout=False,
         car_type=car_type,
         airport=airport,
         stripe_payment_intent=payment_intent_id,
