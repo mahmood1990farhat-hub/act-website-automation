@@ -102,12 +102,20 @@ class InitiatePaymentView(EMADBaseView):
             trip_data_for_storage['airport'] = trip_data_for_storage['airport'].id
 
         trip_data_for_storage['car_type'] = car_type.id
+        booking_details = request.data.get('booking_details') or {}
+        if not isinstance(booking_details, dict):
+            booking_details = {}
 
         pending_payment = PendingPayment.objects.create(
             payment_intent_id=None,
             price_breakdown=price_breakdown,
             trip_data=trip_data_for_storage,
             passenger_id=request.user.passenger_profile.id,
+            passenger_name=request.data.get('passenger_name') or '',
+            passenger_email=request.data.get('passenger_email') or '',
+            passenger_country_code=request.data.get('passenger_country_code') or '',
+            passenger_phone=request.data.get('passenger_phone') or '',
+            booking_details=booking_details,
             currency='GBP',
             expires_at=timezone.now() + timedelta(minutes=15)
         )

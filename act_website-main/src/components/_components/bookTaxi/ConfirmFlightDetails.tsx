@@ -197,6 +197,36 @@ export default function ModernConfirmFlightDetails({
 				large_suitcase: data.largeSuitcase,
 				small_suitcase: data.smallSuitcase,
 				car_type: data.cartype,
+				passenger_name: data.passengerDetails.fullName,
+				passenger_email: data.passengerDetails.email,
+				passenger_country_code: data.passengerDetails.countryCode,
+				passenger_phone: data.passengerDetails.mobileNumber,
+				booking_details: {
+					passenger_counts: {
+						adults: data.adults,
+						children: data.children,
+						infants: data.infants,
+						total: data.numberOfPassengers,
+					},
+					flight_details: {
+						flight_type: data.flightDetails.flightType,
+						flight_number: data.flightDetails.flightNumber,
+						airline: data.flightDetails.airline,
+						landing_time: data.flightDetails.landingTime,
+						departure_time: data.flightDetails.departureTime,
+						pickup_sign_name: data.flightDetails.pickupSignName,
+					},
+					child_infant_travel: {
+						infant_seat_option: data.childInfantTravel.infantSeatOption,
+						child_seat_option: data.childInfantTravel.childSeatOption,
+					},
+					additional_requirements: {
+						meet_and_greet: data.additionalRequirements.meetAndGreet,
+						foldable_wheelchair: data.additionalRequirements.foldableWheelchair,
+						notes_to_driver: data.additionalRequirements.notesToDriver,
+					},
+					extra_services: [],
+				},
 			};
 
 			// Note: stop_points might not be needed for initiate-payment
