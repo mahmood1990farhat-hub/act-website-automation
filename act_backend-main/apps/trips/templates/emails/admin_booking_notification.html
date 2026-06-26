@@ -528,6 +528,176 @@
               </td>
             </tr>
 
+            <!-- Booking Details Snapshot -->
+            <tr>
+              <td
+                class="inner-pad"
+                style="
+                  padding: 0 32px 20px 32px;
+                  font-family: Arial, Helvetica, sans-serif;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #111111;
+                  "
+                >
+                  Booking details
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-top: 1px solid #cccccc"
+                >
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 12px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        width: 42%;
+                        vertical-align: top;
+                      "
+                    >
+                      Passenger breakdown
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 12px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      Adults: {{ booking_details.passenger_counts.adults }}<br />
+                      Children: {{ booking_details.passenger_counts.children }}<br />
+                      Infants: {{ booking_details.passenger_counts.infants }}<br />
+                      Total: {{ booking_details.passenger_counts.total }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Flight details
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      Type: {{ booking_details.flight_details.type }}<br />
+                      Flight Number:
+                      {{ booking_details.flight_details.flight_number }}<br />
+                      Airline: {{ booking_details.flight_details.airline }}<br />
+                      {{ booking_details.flight_details.time_label }}:
+                      {{ booking_details.flight_details.time }}<br />
+                      Pick-up Sign Name:
+                      {{ booking_details.flight_details.pickup_sign_name }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Child/infant travel
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      Infant Seat:
+                      {{ booking_details.child_infant_travel.infant_seat_option }}<br />
+                      Child Seat:
+                      {{ booking_details.child_infant_travel.child_seat_option }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 4px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Additional requirements
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 4px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      Meet & Greet:
+                      {{ booking_details.additional_requirements.meet_and_greet }}<br />
+                      Foldable Wheelchair:
+                      {{ booking_details.additional_requirements.foldable_wheelchair }}<br />
+                      Notes to Driver:
+                      {{ booking_details.additional_requirements.notes_to_driver }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="stack-label"
+                      style="
+                        padding: 8px 12px 12px 0;
+                        font-size: 14px;
+                        color: #555555;
+                        vertical-align: top;
+                      "
+                    >
+                      Extra services
+                    </td>
+                    <td
+                      class="stack-value"
+                      style="
+                        padding: 8px 0 12px 0;
+                        font-size: 14px;
+                        color: #111111;
+                        vertical-align: top;
+                      "
+                    >
+                      {{ booking_details.extra_services }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
             <!-- Vehicle -->
             <tr>
               <td

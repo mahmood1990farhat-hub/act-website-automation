@@ -346,6 +346,64 @@
                   </tr>
 
                   <tr>
+                    <td
+                      class="text-main text-bold mobile-px-18"
+                      style="
+                        padding: 34px 38px 0 38px;
+                        font-size: 24px;
+                        line-height: 1.5;
+                      "
+                    >
+                      PASSENGER & TRAVEL DETAILS
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      class="text-main mobile-px-18"
+                      style="
+                        padding: 18px 38px 0 38px;
+                        font-size: 20px;
+                        line-height: 1.55;
+                      "
+                    >
+                      Adults:
+                      {{ booking_details.passenger_counts.adults }}<br />
+                      Children:
+                      {{ booking_details.passenger_counts.children }}<br />
+                      Infants:
+                      {{ booking_details.passenger_counts.infants }}<br />
+                      Total passengers:
+                      {{ booking_details.passenger_counts.total }}<br /><br />
+
+                      Flight Type:
+                      {{ booking_details.flight_details.type }}<br />
+                      Flight Number:
+                      {{ booking_details.flight_details.flight_number }}<br />
+                      Airline:
+                      {{ booking_details.flight_details.airline }}<br />
+                      {{ booking_details.flight_details.time_label }}:
+                      {{ booking_details.flight_details.time }}<br />
+                      Pick-up Sign Name:
+                      {{ booking_details.flight_details.pickup_sign_name }}<br /><br />
+
+                      Infant Seat:
+                      {{ booking_details.child_infant_travel.infant_seat_option }}<br />
+                      Child Seat:
+                      {{ booking_details.child_infant_travel.child_seat_option }}<br /><br />
+
+                      Meet & Greet:
+                      {{ booking_details.additional_requirements.meet_and_greet }}<br />
+                      Foldable Wheelchair:
+                      {{ booking_details.additional_requirements.foldable_wheelchair }}<br />
+                      Notes to Driver:
+                      {{ booking_details.additional_requirements.notes_to_driver }}<br />
+                      Extra Services:
+                      {{ booking_details.extra_services }}
+                    </td>
+                  </tr>
+
+                  <tr>
                     <td align="center" style="padding: 26px 20px 0 20px">
                       <a
                         href="{{ map_url }}"
