@@ -86,18 +86,6 @@ export default function ModernConfirmFlightDetails({
 		setToken(getCookie("userToken") as string | undefined);
 	}, []);
 
-	useEffect(() => {
-		if (
-			step === 7 &&
-			token &&
-			typeof window !== "undefined" &&
-			window.sessionStorage.getItem("resumeBookingAfterLogin") === "true"
-		) {
-			window.sessionStorage.removeItem("resumeBookingAfterLogin");
-			onSubmit();
-		}
-	}, [step, token]);
-
 	const pickup =
 		data.routePoints.find((r) => r.type === "pickup")?.point?.description ||
 		"-";
@@ -142,115 +130,107 @@ export default function ModernConfirmFlightDetails({
 
 	const onSubmit = async () => {
 		setIsLoading(true);
-		if (!token) {
-			if (typeof window !== "undefined") {
-				window.sessionStorage.setItem("resumeBookingAfterLogin", "true");
-			}
-			setIsLoading(false);
-			setStep(10);
-		} else {
-			const stop_points = data.routePoints
-				.filter((p) => p.type === "stop")
-				.map((p) => {
-					return {
-						point_lat: p.point?.coordinates.lat || 0,
-						point_lng: p.point?.coordinates.lng || 0,
-					};
-				});
+		const stop_points = data.routePoints
+			.filter((p) => p.type === "stop")
+			.map((p) => {
+				return {
+					point_lat: p.point?.coordinates.lat || 0,
+					point_lng: p.point?.coordinates.lng || 0,
+				};
+			});
 
-			const dropoffPoint = data.routePoints.find((it) => it.type === "dropoff");
-			const pickupPoint = data.routePoints.find((it) => it.type === "pickup");
+		const dropoffPoint = data.routePoints.find((it) => it.type === "dropoff");
+		const pickupPoint = data.routePoints.find((it) => it.type === "pickup");
 
-			const dropoff_location = {
-				lat: dropoffPoint?.point?.coordinates?.lat,
-				lng: dropoffPoint?.point?.coordinates?.lng,
-			};
-			const pickup_location = {
-				lat: pickupPoint?.point?.coordinates?.lat,
-				lng: pickupPoint?.point?.coordinates?.lng,
-			};
+		const dropoff_location = {
+			lat: dropoffPoint?.point?.coordinates?.lat,
+			lng: dropoffPoint?.point?.coordinates?.lng,
+		};
+		const pickup_location = {
+			lat: pickupPoint?.point?.coordinates?.lat,
+			lng: pickupPoint?.point?.coordinates?.lng,
+		};
 
-			// if (data.routePoints[0].point?.id) {
-			//   pickup_location = {
-			//     airport_id: data.routePoints[0].point?.id,
-			//   };
-			//   dropoff_location = {
-			//     lat: dropoffPoint?.point?.coordinates?.lat,
-			//     lng: dropoffPoint?.point?.coordinates?.lng,
-			//   };
-			// } else {
-			//   pickup_location = {
-			//     lat: data.routePoints[0].point?.coordinates?.lat,
-			//     lng: data.routePoints[0].point?.coordinates?.lng,
-			//   };
-			//   dropoff_location = {
-			//     airport_id: dropoffPoint?.point?.id,
-			//   };
-			// }
+		// if (data.routePoints[0].point?.id) {
+		//   pickup_location = {
+		//     airport_id: data.routePoints[0].point?.id,
+		//   };
+		//   dropoff_location = {
+		//     lat: dropoffPoint?.point?.coordinates?.lat,
+		//     lng: dropoffPoint?.point?.coordinates?.lng,
+		//   };
+		// } else {
+		//   pickup_location = {
+		//     lat: data.routePoints[0].point?.coordinates?.lat,
+		//     lng: data.routePoints[0].point?.coordinates?.lng,
+		//   };
+		//   dropoff_location = {
+		//     airport_id: dropoffPoint?.point?.id,
+		//   };
+		// }
 
-			const bodyData: any = {
-				pickup_location,
-				dropoff_location,
-				trip_date: data.date,
-				trip_time: data.time,
-				passengers_count: data.numberOfPassengers,
-				large_suitcase: data.largeSuitcase,
-				small_suitcase: data.smallSuitcase,
-				car_type: data.cartype,
-				passenger_name: data.passengerDetails.fullName,
-				passenger_email: data.passengerDetails.email,
-				passenger_country_code: data.passengerDetails.countryCode,
-				passenger_phone: data.passengerDetails.mobileNumber,
-				booking_details: {
-					passenger_counts: {
-						adults: data.adults,
-						children: data.children,
-						infants: data.infants,
-						total: data.numberOfPassengers,
-					},
-					flight_details: {
-						flight_type: data.flightDetails.flightType,
-						flight_number: data.flightDetails.flightNumber,
-						airline: data.flightDetails.airline,
-						landing_time: data.flightDetails.landingTime,
-						departure_time: data.flightDetails.departureTime,
-						pickup_sign_name: data.flightDetails.pickupSignName,
-					},
-					child_infant_travel: {
-						infant_seat_option: data.childInfantTravel.infantSeatOption,
-						child_seat_option: data.childInfantTravel.childSeatOption,
-					},
-					additional_requirements: {
-						meet_and_greet: data.additionalRequirements.meetAndGreet,
-						foldable_wheelchair: data.additionalRequirements.foldableWheelchair,
-						notes_to_driver: data.additionalRequirements.notesToDriver,
-					},
-					extra_services: [],
+		const bodyData: any = {
+			pickup_location,
+			dropoff_location,
+			trip_date: data.date,
+			trip_time: data.time,
+			passengers_count: data.numberOfPassengers,
+			large_suitcase: data.largeSuitcase,
+			small_suitcase: data.smallSuitcase,
+			car_type: data.cartype,
+			passenger_name: data.passengerDetails.fullName,
+			passenger_email: data.passengerDetails.email,
+			passenger_country_code: data.passengerDetails.countryCode,
+			passenger_phone: data.passengerDetails.mobileNumber,
+			booking_details: {
+				passenger_counts: {
+					adults: data.adults,
+					children: data.children,
+					infants: data.infants,
+					total: data.numberOfPassengers,
 				},
-			};
+				flight_details: {
+					flight_type: data.flightDetails.flightType,
+					flight_number: data.flightDetails.flightNumber,
+					airline: data.flightDetails.airline,
+					landing_time: data.flightDetails.landingTime,
+					departure_time: data.flightDetails.departureTime,
+					pickup_sign_name: data.flightDetails.pickupSignName,
+				},
+				child_infant_travel: {
+					infant_seat_option: data.childInfantTravel.infantSeatOption,
+					child_seat_option: data.childInfantTravel.childSeatOption,
+				},
+				additional_requirements: {
+					meet_and_greet: data.additionalRequirements.meetAndGreet,
+					foldable_wheelchair: data.additionalRequirements.foldableWheelchair,
+					notes_to_driver: data.additionalRequirements.notesToDriver,
+				},
+				extra_services: [],
+			},
+		};
 
-			// Note: stop_points might not be needed for initiate-payment
-			// If the API requires it, uncomment the following:
-			// if (stop_points.length > 0) {
-			//   bodyData.stop_points = stop_points;
-			// }
+		// Note: stop_points might not be needed for initiate-payment
+		// If the API requires it, uncomment the following:
+		// if (stop_points.length > 0) {
+		//   bodyData.stop_points = stop_points;
+		// }
 
-			try {
-				const res = await postData<any>({
-					endpoint: "/api/trips/initiate-payment/",
-					token: token,
-					body: {
-						...bodyData,
-					},
-				});
-				setIsLoading(false);
-				setStep(8);
-				// The API returns client_secret in the response
-				setClientSecret(res.client_secret);
-			} catch (error) {
-				console.error(error);
-				setIsLoading(false);
-			}
+		try {
+			const res = await postData<any>({
+				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
+				token: token || undefined,
+				body: {
+					...bodyData,
+				},
+			});
+			setIsLoading(false);
+			setStep(8);
+			// The API returns client_secret in the response
+			setClientSecret(res.client_secret);
+		} catch (error) {
+			console.error(error);
+			setIsLoading(false);
 		}
 	};
 
