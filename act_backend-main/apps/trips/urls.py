@@ -1,10 +1,12 @@
 from django.urls import path
 from .views import * 
+from .views.initiate_payment import InitiateGuestPaymentView
 
 
 urlpatterns = [
     path('calculate-trip-cost/' , CalculateTripCostView.as_view()), 
     path('initiate-payment/', InitiatePaymentView.as_view()),
+    path('initiate-guest-payment/', InitiateGuestPaymentView.as_view()),
     path('create-trip/' , CreateTripView.as_view()),   
     path('<int:trip_id>/accept/', AcceptTripAPIView.as_view()), 
     path('<int:trip_id>/driver-on-the-way/' , MarkDriverOnTheWayView.as_view()),
