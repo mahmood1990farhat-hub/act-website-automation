@@ -86,7 +86,12 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
     if not pending_payment:
         raise Exception(f"PendingPayment not found for PI={payment_intent_id}")
 
-    passenger = Passenger.objects.get(id=pending_payment.passenger_id)
+    if pending_payment.passenger_id:
+        passenger = Passenger.objects.get(id=pending_payment.passenger_id)
+        is_guest_checkout = False
+    else:
+        passenger = None
+        is_guest_checkout = True
 
     trip_data = normalize_trip_data(pending_payment.trip_data)
     price = pending_payment.price_breakdown
@@ -107,7 +112,7 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
         passenger_country_code=pending_payment.passenger_country_code,
         passenger_phone=pending_payment.passenger_phone,
         booking_details=pending_payment.booking_details or {},
-        is_guest_checkout=False,
+        is_guest_checkout=is_guest_checkout,
         car_type=car_type,
         airport=airport,
         stripe_payment_intent=payment_intent_id,
