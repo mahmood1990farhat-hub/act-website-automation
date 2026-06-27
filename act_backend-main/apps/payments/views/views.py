@@ -255,12 +255,12 @@ def enrich_addresses(trip):
 def send_notifications(trip):
     try:
         passenger = trip.passenger
+        passenger_user = passenger.user if passenger and passenger.user else None
 
-        if passenger and passenger.user:
-            send_passenger_confirmation(passenger.user, trip)
-
+        send_passenger_confirmation(passenger_user, trip)
+        if passenger_user:
             notify_user(
-                user=passenger.user.id,
+                user=passenger_user.id,
                 title_en='Trip Created',
                 title_ar='تم إنشاء الرحلة',
                 desc_en=f'Your trip #{trip.id} has been created successfully.',

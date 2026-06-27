@@ -147,18 +147,28 @@ def send_passenger_registration_confirmation(user) -> None:
         logger.error(f"Failed to send passenger registration email to {user.email}: {str(e)}")
 
 
-def send_passenger_confirmation(user, trip) -> None:
+def send_passenger_confirmation(user, trip) -> bool:
     """
     Send trip confirmation email to passenger
     """
-    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user.id}")
+    user_id = getattr(user, "id", "guest")
+    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
-        if not user.email:
-            logger.warning(f"[EMAIL] Cannot send trip accepted email: user {user.id} has no email")
-            return
+        recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
+        if not recipient_email:
+            logger.warning(
+                f"[EMAIL] Cannot send trip accepted email: trip #{trip.id} has no passenger email"
+            )
+            return False
         pickup, dropoff = _trip_locations_for_email(trip)
         subject = _("Your Booking Confirmation – Airport & City Transfer")
-        first_name = user.first_name or user.get_full_name() or "Valued Customer"
+        user_full_name = user.get_full_name() if user and hasattr(user, "get_full_name") else ""
+        first_name = (
+            getattr(user, "first_name", "")
+            or user_full_name
+            or getattr(trip, "passenger_name", "")
+            or "Passenger"
+        )
         map_url = (
             "https://www.google.com/maps/dir/?api=1"
             f"&origin={quote(pickup)}"
@@ -214,12 +224,14 @@ def send_passenger_confirmation(user, trip) -> None:
         _send_mail_async(
             subject,
             message,
-            [user.email],
+            [recipient_email],
             html_message=html_message,
             fail_silently=True,
         )
+        return True
     except Exception as e:
         logger.error(f"[EMAIL] send_trip_accepted_to_passenger failed for trip #{trip.id}: {e}")
+        return False
 
 
 
