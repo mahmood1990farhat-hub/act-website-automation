@@ -73,6 +73,12 @@ export default function RoutePoints({
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const locationValidationMessage =
+    "Please select pickup and drop-off from the address suggestions and wait for them to load.";
+  const tripCalculationErrorMessage =
+    "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.";
 
   const addStopPoint = () => {
     const dropoff = routePoints.find((p) => p.type === "dropoff");
@@ -105,12 +111,34 @@ export default function RoutePoints({
     setRoutePoints(newRoutePoints);
   };
 
+  const hasValidCoordinates = (point: any) => {
+    const lat = point?.coordinates?.lat;
+    const lng = point?.coordinates?.lng;
+
+    return (
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      !(lat === 0 && lng === 0)
+    );
+  };
+
+  const isValidRoutePoint = (routePoint: RoutePoint) => {
+    const point = routePoint.point;
+
+    if (!point) return false;
+
+    const hasAirportId = Boolean(point.id);
+    const hasPlaceId = Boolean(point.place_id);
+
+    return hasAirportId || (hasPlaceId && hasValidCoordinates(point));
+  };
+
   const validateForm = () => {
-    const hasEmptyPoints = routePoints.some((point) => !point.point?.place_id);
+    const hasInvalidPoints = routePoints.some((point) => !isValidRoutePoint(point));
     const hasEmptyDate = formDetails.date === "";
     const hasEmptyTime = formDetails.time === "";
 
-    return !(hasEmptyPoints || hasEmptyDate || hasEmptyTime);
+    return !(hasInvalidPoints || hasEmptyDate || hasEmptyTime);
   };
 
   const getFormInputValues = () => {
@@ -180,8 +208,11 @@ export default function RoutePoints({
   };
 
   const onSubmit = async () => {
+    setSubmitError("");
+
     if (!validateForm()) {
       setIsRequired(true);
+      setSubmitError(locationValidationMessage);
       return;
     }
 
@@ -192,6 +223,7 @@ export default function RoutePoints({
 
       if (inputValues.adults < 1 || inputValues.numberOfPassengers < 1) {
         setIsRequired(true);
+        setSubmitError("Adults must be at least 1.");
         return;
       }
 
@@ -211,7 +243,8 @@ export default function RoutePoints({
       nextStep();
     } catch (error) {
       console.error("Trip calculation error:", error);
-      // setOpenModal(true);
+      setSubmitError(tripCalculationErrorMessage);
+      setOpenModal(true);
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +300,7 @@ export default function RoutePoints({
                 setValue={(data) => updateRoutePoint(item.id, data)}
               />
               </label>
-                {isRequired && !item?.point?.place_id && <span className="absolute bottom-0.5 text-red-600 font-semibold px-2">
+                {isRequired && !isValidRoutePoint(item) && <span className="absolute bottom-0.5 text-red-600 font-semibold px-2">
                   {book_Taxi.form.error}
                 </span>}
 
@@ -468,6 +501,11 @@ export default function RoutePoints({
             >
               {isLoading ? <CarLoading /> : book_Taxi.form.button}
             </Button>
+            {submitError && (
+              <p className="text-red-300 text-sm font-semibold text-center">
+                {submitError}
+              </p>
+            )}
           </div>
           <div className="w-5"></div>
         </div>
@@ -476,7 +514,7 @@ export default function RoutePoints({
       <GlobalModal isOpen={openModal} onClose={() => setOpenModal(false)}>
         <div className="flex items-center justify-center flex-col gap-5">
           <FaTimesCircle className="text-5xl text-red-700" />
-          <h1>{book_Taxi.form.error_message}</h1>
+          <h1>{submitError || book_Taxi.form.error_message}</h1>
           <Button
             onClick={() => setOpenModal(false)}
             className="p-5 px-10 text-lg"

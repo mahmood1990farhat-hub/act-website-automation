@@ -9,7 +9,7 @@ export type PlaceSuggestion = {
   matched_substrings: { length: number; offset: number; }[];
   place_id: string;
   reference: string;
-  coordinates: { lat: number; lng: number; };
+  coordinates?: { lat: number; lng: number; };
 };
 
 // London bounds for geographic restriction
@@ -28,11 +28,34 @@ const fetchPlaceDetails = async (placeId: string) => {
   try {
     const res = await fetch(`/api/place-details?place_id=${placeId}`);
     const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || "Failed to fetch place details");
+    }
+
     return data.result?.geometry?.location;
   } catch (err) {
     console.error("Failed to fetch place details", err);
     return null;
   }
+};
+
+const hasValidCoordinates = (coordinates?: { lat: number; lng: number }) => {
+  if (!coordinates) return false;
+
+  return (
+    Number.isFinite(coordinates.lat) &&
+    Number.isFinite(coordinates.lng) &&
+    !(coordinates.lat === 0 && coordinates.lng === 0)
+  );
+};
+
+const emptyPlaceSuggestion: PlaceSuggestion = {
+  description: "",
+  place_id: "",
+  matched_substrings: [],
+  reference: "",
+  coordinates: { lat: 0, lng: 0 },
 };
 
 const isInLondon = (coordinates: { lat: number; lng: number }) => {
@@ -304,7 +327,7 @@ export default function LocationSelector({
   const handleLocationSelect = async (location: any) => {
     // Immediately populate the field and hide options
     setIsSelectingLocation(true);
-    setValue({ ...location, coordinates: location.coordinates || { lat: 0, lng: 0 } });
+    setValue({ ...location, coordinates: undefined });
     setShowOptions(false);
 
     // Add to pending coordinates set
@@ -315,7 +338,7 @@ export default function LocationSelector({
     // Fetch coordinates in the background
     try {
       const coordinates = await fetchPlaceDetails(location.place_id);
-      if (coordinates) {
+      if (hasValidCoordinates(coordinates)) {
         // Verify the location is within the appropriate bounds
         let isValidLocation = false;
         let errorMessage = "";
@@ -355,6 +378,7 @@ export default function LocationSelector({
             ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
             : "Failed to get location details. Please try selecting again."
         );
+        setValue(emptyPlaceSuggestion);
       }
     } catch (err) {
       console.error("Error fetching place details:", err);
@@ -363,6 +387,7 @@ export default function LocationSelector({
           ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
           : "Failed to get location details. Please try selecting again."
       );
+        setValue(emptyPlaceSuggestion);
     } finally {
       // Remove from pending set
       const newPending = new Set(pendingCoordinates);
