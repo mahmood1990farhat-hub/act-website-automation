@@ -177,6 +177,63 @@
                   <p><strong>Drop-off:</strong> {{ destination }}</p>
                   <p><strong>Date:</strong> {{ date }}</p>
                   <p><strong>Time:</strong> {{ time }}</p>
+
+                  <hr
+                    style="
+                      border: none;
+                      border-top: 1px solid #e1e6ee;
+                      margin: 15px 0;
+                    "
+                  />
+
+                  <p style="font-weight: bold">Passenger & Travel Details</p>
+
+                  <p><strong>Passenger breakdown</strong></p>
+                  <p>Adults: {{ booking_details.passenger_counts.adults }}</p>
+                  <p>Children: {{ booking_details.passenger_counts.children }}</p>
+                  <p>Infants: {{ booking_details.passenger_counts.infants }}</p>
+                  <p>Total: {{ booking_details.passenger_counts.total }}</p>
+
+                  <p><strong>Flight details</strong></p>
+                  <p>Type: {{ booking_details.flight_details.type }}</p>
+                  <p>
+                    Flight Number:
+                    {{ booking_details.flight_details.flight_number }}
+                  </p>
+                  <p>Airline: {{ booking_details.flight_details.airline }}</p>
+                  <p>
+                    {{ booking_details.flight_details.time_label }}:
+                    {{ booking_details.flight_details.time }}
+                  </p>
+                  <p>
+                    Pick-up Sign Name:
+                    {{ booking_details.flight_details.pickup_sign_name }}
+                  </p>
+
+                  <p><strong>Child/infant travel</strong></p>
+                  <p>
+                    Infant Seat:
+                    {{ booking_details.child_infant_travel.infant_seat_option }}
+                  </p>
+                  <p>
+                    Child Seat:
+                    {{ booking_details.child_infant_travel.child_seat_option }}
+                  </p>
+
+                  <p><strong>Additional requirements</strong></p>
+                  <p>
+                    Meet &amp; Greet:
+                    {{ booking_details.additional_requirements.meet_and_greet }}
+                  </p>
+                  <p>
+                    Foldable Wheelchair:
+                    {{ booking_details.additional_requirements.foldable_wheelchair }}
+                  </p>
+                  <p>
+                    Notes to Driver:
+                    {{ booking_details.additional_requirements.notes_to_driver }}
+                  </p>
+                  <p><strong>Extra Services:</strong> {{ booking_details.extra_services }}</p>
                 </div>
               </td>
             </tr>
