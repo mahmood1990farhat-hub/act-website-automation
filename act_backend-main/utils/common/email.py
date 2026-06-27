@@ -399,6 +399,36 @@ def _format_trip_luggage_label(trip) -> str:
     return ", ".join(parts) if parts else "None"
 
 
+def _format_booking_details_text(booking_details) -> str:
+    booking_details = booking_details if isinstance(booking_details, dict) else {}
+    passenger_counts = booking_details.get("passenger_counts") or {}
+    flight_details = booking_details.get("flight_details") or {}
+    child_infant = booking_details.get("child_infant_travel") or {}
+    additional = booking_details.get("additional_requirements") or {}
+
+    return (
+        "Passenger breakdown\n"
+        f"Adults: {passenger_counts.get('adults', 0)}\n"
+        f"Children: {passenger_counts.get('children', 0)}\n"
+        f"Infants: {passenger_counts.get('infants', 0)}\n"
+        f"Total: {passenger_counts.get('total', 0)}\n\n"
+        "Flight details\n"
+        f"Type: {flight_details.get('type', 'Not applicable')}\n"
+        f"Flight number: {flight_details.get('flight_number', 'Not applicable')}\n"
+        f"Airline: {flight_details.get('airline', 'Not applicable')}\n"
+        f"{flight_details.get('time_label', 'Time')}: {flight_details.get('time', 'Not applicable')}\n"
+        f"Pick-up sign name: {flight_details.get('pickup_sign_name', 'Not applicable')}\n\n"
+        "Child/infant travel\n"
+        f"Infant seat: {child_infant.get('infant_seat_option', 'Not required')}\n"
+        f"Child seat: {child_infant.get('child_seat_option', 'Not required')}\n\n"
+        "Additional requirements\n"
+        f"Meet & Greet: {additional.get('meet_and_greet', 'No')}\n"
+        f"Foldable Wheelchair: {additional.get('foldable_wheelchair', 'No')}\n"
+        f"Notes to Driver: {additional.get('notes_to_driver', 'None')}\n"
+        f"Extra services: {booking_details.get('extra_services', 'None')}\n"
+    )
+
+
 def send_internal_notification(trip) -> None:
     """
     Send internal notification to admin when a new trip is booked
@@ -715,6 +745,8 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             vehicle_label = car_type.name_en or car_type.name_ar or "Private Transfer"
         else:
             vehicle_label = "Private Transfer"
+        booking_details = format_booking_details_for_email(trip)
+        booking_details_text = _format_booking_details_text(booking_details)
         context = {
             "first_name": first_name,
             "refund_message": refund_message,
@@ -728,6 +760,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             "destination": dropoff,
             "date": trip.trip_date.strftime("%d %B %Y"),
             "time": trip.trip_time.strftime("%I:%M %p").lstrip("0").lower(),
+            "booking_details": booking_details,
             "cancellation_image_url": _email_asset_url("trip_cancel/cancellation.png"),
             "charity_image_url": _email_asset_url("trip_cancel/charity.png"),
             "support_phone_primary": "+44 7464 940000",
@@ -756,6 +789,8 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             "Hello %(first_name)s,\n\n"
             "Your booking with Airport & City Transfer has been successfully cancelled.\n\n"
             "%(refund_message_text)s"
+            "Passenger & Travel Details\n"
+            "%(booking_details_text)s\n"
             "If you would like to arrange a new journey, visit:\n"
             "%(website_url)s\n\n"
             "Yours sincerely,\n"
@@ -763,6 +798,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
         ) % {
             "first_name": first_name,
             "refund_message_text": f"{refund_message}\n\n" if refund_message else "",
+            "booking_details_text": booking_details_text,
             "website_url": "https://airportandcitytransfer.com/en",
         }
         _send_mail_async(
@@ -785,6 +821,9 @@ def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") ->
         pickup, dropoff = _trip_locations_for_email(trip)
         passenger_user = trip.passenger.user if trip.passenger else None
         admin_email = getattr(settings, "ADMIN_EMAIL", "info@airportandcitytransfer.com")
+        booking_details_text = _format_booking_details_text(
+            format_booking_details_for_email(trip)
+        )
         subject = f"Passenger cancelled trip – #{trip.id}"
         message = (
             f"The passenger cancelled this trip:\n\n"
@@ -796,6 +835,8 @@ def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") ->
             f"Date: {trip.trip_date} {trip.trip_time}\n"
             f"Amount: £{trip.cost:.2f}\n"
             f"Status after cancel: {trip.status}\n"
+            f"\nPassenger & Travel Details\n"
+            f"{booking_details_text}"
         )
         if refund_message:
             message += f"Refund / payment note: {refund_message}\n"
@@ -848,6 +889,9 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
             or trip.dropoff_str
             or f"{trip.dropoff_lat},{trip.dropoff_lng}"
         )
+        booking_details_text = _format_booking_details_text(
+            format_booking_details_for_email(trip)
+        )
 
         subject = _("Driver Cancelled Your Trip – #{}").format(trip.id)
         message = _(
@@ -859,6 +903,8 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
             "To: %(destination)s\n"
             "Date: %(date)s at %(time)s\n"
             "Cost: £%(cost).2f\n\n"
+            "Passenger & Travel Details\n"
+            "%(booking_details_text)s\n"
             "Our team will connect you with another driver shortly. We apologize for any inconvenience.\n\n"
             "Thank you for your patience."
         ) % {
@@ -869,6 +915,7 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
             "date": trip.trip_date.strftime("%d %b %Y"),
             "time": trip.trip_time.strftime("%H:%M"),
             "cost": trip.cost,
+            "booking_details_text": booking_details_text,
         }
         
         logger.info(f"[EMAIL] Preparing driver cancellation email for trip #{trip.id} to {user.email}")
@@ -900,6 +947,9 @@ def send_driver_cancellation_to_admin(trip) -> None:
 
         passenger_user = trip.passenger.user if trip.passenger else None
         driver_user = trip.base_driver.user if trip.base_driver else None
+        booking_details_text = _format_booking_details_text(
+            format_booking_details_for_email(trip)
+        )
         
         admin_email = getattr(settings, 'ADMIN_EMAIL', 'info@airportandcitytransfer.com')
         
@@ -921,6 +971,7 @@ def send_driver_cancellation_to_admin(trip) -> None:
         if trip.cancelled_at:
             message += f"Cancelled At: {trip.cancelled_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
         
+        message += f"\nPassenger & Travel Details\n{booking_details_text}"
         message += "\nPlease reassign this trip to another driver from the admin panel.\n"
         
         logger.info(f"[EMAIL] Preparing driver cancellation notification email for trip #{trip.id} to {admin_email}")
