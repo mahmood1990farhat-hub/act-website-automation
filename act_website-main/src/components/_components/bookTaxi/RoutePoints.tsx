@@ -8,7 +8,7 @@ import { RiCheckboxBlankCircleFill } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
 import { book_Taxi, calculatTripCost } from ".";
 import { Locale } from "../../../../i18n.config";
-import { postData } from "@/lib/api/postData";
+import { extract_error } from "@/lib/api/errorApi";
 import GlobalModal from "../GlobalModal";
 import { FaTimesCircle } from "react-icons/fa";
 import { DateInput } from "../dateAndTime/date-input";
@@ -130,7 +130,41 @@ export default function RoutePoints({
     const hasAirportId = Boolean(point.id);
     const hasPlaceId = Boolean(point.place_id);
 
-    return hasAirportId || (hasPlaceId && hasValidCoordinates(point));
+    return (hasAirportId || hasPlaceId) && hasValidCoordinates(point);
+  };
+
+  const normalizeTripDate = (date: string) => {
+    const parts = date.split("-");
+    if (parts.length !== 3) return date;
+
+    const [year, month, day] = parts;
+    if (!year || !month || !day) return date;
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  };
+
+  const getBackendErrorMessage = (errorBody: any) => {
+    if (!errorBody) return tripCalculationErrorMessage;
+
+    const fieldErrors =
+      errorBody?.data?.errors ||
+      errorBody?.errors ||
+      (typeof errorBody === "object" ? errorBody : null);
+    const firstFieldError =
+      fieldErrors && !Array.isArray(fieldErrors)
+        ? Object.values(fieldErrors)[0]
+        : undefined;
+
+    return (
+      errorBody?.data?.detail ||
+      errorBody?.detail ||
+      errorBody?.details ||
+      errorBody?.message ||
+      errorBody?.error ||
+      (firstFieldError ? extract_error(firstFieldError) : "") ||
+      extract_error(errorBody) ||
+      tripCalculationErrorMessage
+    );
   };
 
   const validateForm = () => {
@@ -173,27 +207,25 @@ export default function RoutePoints({
     const stop_points = routePoints
       .filter((p) => p.type === "stop")
       .map((p) => ({
-        point_lat: p.point?.coordinates?.lat || 0,
-        point_lng: p.point?.coordinates?.lng || 0,
+        point_lat: p.point.coordinates.lat,
+        point_lng: p.point.coordinates.lng,
       }));
 
-    // Handle both airport and regular location formats
     const getLocationData = (point: any) => {
-      // If it's an airport (has id property), use airport_id
-      if (point.id && typeof point.id === 'string') {
-        return { airport_id: point.id };
+      if (!hasValidCoordinates(point)) {
+        throw new Error(locationValidationMessage);
       }
-      // Otherwise, use lat/lng coordinates
+
       return {
-        lat: point.coordinates?.lat || 0,
-        lng: point.coordinates?.lng || 0,
+        lat: point.coordinates.lat,
+        lng: point.coordinates.lng,
       };
     };
 
     const bodyData: any = {
       pickup_location: getLocationData(pickup.point),
       dropoff_location: getLocationData(dropoff.point),
-      trip_date: formDetails.date,
+      trip_date: normalizeTripDate(formDetails.date),
       trip_time: formDetails.time,
       passengers_count: inputValues.numberOfPassengers,
       large_suitcase: inputValues.largeSuitcase,
@@ -234,16 +266,28 @@ export default function RoutePoints({
 
       const bodyData = buildRequestBody(inputValues);
 
-      const response = await postData<calculatTripCost>({
-        endpoint: "/api/trips/calculate-trip-cost/",
-        body: bodyData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/trips/calculate-trip-cost/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
 
-      setTripData(response);
+      const responseBody = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(getBackendErrorMessage(responseBody));
+      }
+
+      setTripData(responseBody as calculatTripCost);
       nextStep();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Trip calculation error:", error);
-      setSubmitError(tripCalculationErrorMessage);
+      setSubmitError(error?.message || tripCalculationErrorMessage);
       setOpenModal(true);
     } finally {
       setIsLoading(false);
