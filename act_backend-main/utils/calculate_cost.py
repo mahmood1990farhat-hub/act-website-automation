@@ -129,10 +129,21 @@ PRICING = {
 
 MIN_FARE = 40.00
 
-def _apply_minimum_fare(subtotal):
-    if subtotal >= MIN_FARE:
+def _get_configured_minimum_fare():
+    try:
+        from apps.pricing.models import PricingSettings
+
+        settings = PricingSettings.get_settings()
+        return float(settings.minimum_fare)
+    except Exception:
+        return MIN_FARE
+
+
+def _apply_minimum_fare(subtotal, minimum_fare=None):
+    minimum_fare = MIN_FARE if minimum_fare is None else minimum_fare
+    if subtotal >= minimum_fare:
         return subtotal, 0
-    return MIN_FARE, MIN_FARE - subtotal
+    return minimum_fare, minimum_fare - subtotal
 
 
 def get_rate_per_mile(car_type, distance_miles, is_peak):
@@ -266,7 +277,10 @@ def _calculate_total_cost_legacy(
         dropoff_airport=dropoff_airport,
     )
 
-    total_cost, min_adjustment = _apply_minimum_fare(subtotal)
+    total_cost, min_adjustment = _apply_minimum_fare(
+        subtotal,
+        minimum_fare=_get_configured_minimum_fare(),
+    )
 
     return (round(total_cost, 2),
             round(regular_vat, 2),
@@ -305,28 +319,33 @@ def calculate_total_cost(
     Returns:
         tuple: (total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     try:
         from apps.pricing.models import PricingSettings
-        from apps.pricing.services.pricing_engine import PricingEngine
-        from apps.vehicle.models import VehicleType
-        
-        settings = PricingSettings.get_settings()
-        
-        if settings.use_dynamic_pricing:
-            try:
-                vehicle_type = VehicleType.objects.get(name_en=car_type_name_en)
-            except VehicleType.DoesNotExist:
-                return _calculate_total_cost_legacy(
-                    trip_time_obj,
-                    car_type_name_en,
-                    distance_miles,
-                    pickup_lat=pickup_lat,
-                    pickup_lng=pickup_lng,
-                    dropoff_lat=dropoff_lat,
-                    dropoff_lng=dropoff_lng,
-                    trip_date=trip_date,
-                )
-            
+    except Exception as e:
+        logger.warning(f"Pricing settings unavailable, falling back to legacy pricing: {str(e)}")
+        return _calculate_total_cost_legacy(
+            trip_time_obj,
+            car_type_name_en,
+            distance_miles,
+            pickup_lat=pickup_lat,
+            pickup_lng=pickup_lng,
+            dropoff_lat=dropoff_lat,
+            dropoff_lng=dropoff_lng,
+            trip_date=trip_date,
+        )
+
+    settings = PricingSettings.get_settings()
+
+    if settings.use_dynamic_pricing:
+        try:
+            from apps.pricing.services.pricing_engine import PricingEngine
+            from apps.vehicle.models import VehicleType
+
+            vehicle_type = VehicleType.objects.get(name_en=car_type_name_en)
+
             result = PricingEngine.calculate_trip_cost(
                 trip_time=trip_time_obj,
                 vehicle_type=vehicle_type,
@@ -338,31 +357,24 @@ def calculate_total_cost(
                 dropoff_lng=dropoff_lng,
                 manual_airport_id=manual_airport_id,
             )
-            
+
             return result.to_tuple()
-        else:
-            return _calculate_total_cost_legacy(
-                trip_time_obj,
+        except Exception as e:
+            logger.exception(
+                "Error in dynamic pricing for %s at %s miles",
                 car_type_name_en,
                 distance_miles,
-                pickup_lat=pickup_lat,
-                pickup_lng=pickup_lng,
-                dropoff_lat=dropoff_lat,
-                dropoff_lng=dropoff_lng,
-                trip_date=trip_date,
             )
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Error in dynamic pricing, falling back to legacy: {str(e)}")
-        return _calculate_total_cost_legacy(
-            trip_time_obj,
-            car_type_name_en,
-            distance_miles,
-            pickup_lat=pickup_lat,
-            pickup_lng=pickup_lng,
-            dropoff_lat=dropoff_lat,
-            dropoff_lng=dropoff_lng,
-            trip_date=trip_date,
-        )
+            raise
+
+    return _calculate_total_cost_legacy(
+        trip_time_obj,
+        car_type_name_en,
+        distance_miles,
+        pickup_lat=pickup_lat,
+        pickup_lng=pickup_lng,
+        dropoff_lat=dropoff_lat,
+        dropoff_lng=dropoff_lng,
+        trip_date=trip_date,
+    )
 
