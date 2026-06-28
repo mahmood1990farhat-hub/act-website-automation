@@ -59,9 +59,16 @@ class CalculateTripCostView(EMADBaseView):
 
         car_type_list = []
         failed_car_types = []
+        debug_vehicle_results = []
         distance_too_long = False
         
         for car_type_obj in car_types_qs:
+            vehicle_debug = {
+                "vehicle_type_id": car_type_obj.id,
+                "vehicle_name": car_type_obj.name_en,
+                "max_passengers_count": car_type_obj.max_passengers_count,
+                "icon_url": request.build_absolute_uri(car_type_obj.icon.url) if car_type_obj.icon else None,
+            }
             try:
                 total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
                     trip_time_obj,
@@ -89,9 +96,22 @@ class CalculateTripCostView(EMADBaseView):
                     'base_trip_cost': base_trip_cost,
                     'min_adjustment': min_adjustment,
                 })
+                vehicle_debug.update({
+                    "status": "ok",
+                    "total_cost": total_cost,
+                    "base_trip_cost": base_trip_cost,
+                    "regular_vat": regular_vat,
+                    "airport_vat": airport_vat,
+                    "min_adjustment": min_adjustment,
+                })
             except ValueError as e:
                 # Handle "No rate found" error - distance too long or unsupported car type
                 error_msg = str(e)
+                vehicle_debug.update({
+                    "status": "failed",
+                    "error_type": type(e).__name__,
+                    "error_message": error_msg,
+                })
                 if "No rate found" in error_msg:
                     # Distance exceeds maximum supported distance (90 miles)
                     distance_too_long = True
@@ -102,8 +122,23 @@ class CalculateTripCostView(EMADBaseView):
                     continue
             except ValidationError as ve:
                 # Handle ValidationError from calculate_total_cost (e.g., unsupported car type) - skip this car type
+                vehicle_debug.update({
+                    "status": "failed",
+                    "error_type": type(ve).__name__,
+                    "error_message": str(ve.detail if hasattr(ve, 'detail') else ve),
+                })
                 failed_car_types.append(car_type_obj.name_en)
                 continue
+            except Exception as e:
+                vehicle_debug.update({
+                    "status": "failed",
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                })
+                failed_car_types.append(car_type_obj.name_en)
+                raise
+            finally:
+                debug_vehicle_results.append(vehicle_debug)
         
         # If distance is too long for all car types, return error
         if distance_too_long and len(car_type_list) == 0:
@@ -113,7 +148,7 @@ class CalculateTripCostView(EMADBaseView):
                 locale
             )
             return create_validation_error_response(
-                {'details': message},
+                {'details': message, 'debug_vehicle_results': debug_vehicle_results},
                 locale,
                 get_bilingual_error_message(
                     'Error calculating trip cost',
@@ -137,7 +172,7 @@ class CalculateTripCostView(EMADBaseView):
                     locale
                 )
             return create_validation_error_response(
-                {'details': message},
+                {'details': message, 'debug_vehicle_results': debug_vehicle_results},
                 locale,
                 get_bilingual_error_message(
                     'Error calculating trip cost',
@@ -153,4 +188,5 @@ class CalculateTripCostView(EMADBaseView):
             "distance_miles": distance_miles,
             "expected_trip_duration_minutes": res['duration_minutes'],
             "distance_meters": res['distance_meters'],
+            "debug_vehicle_results": debug_vehicle_results,
         }, status=status.HTTP_200_OK)
