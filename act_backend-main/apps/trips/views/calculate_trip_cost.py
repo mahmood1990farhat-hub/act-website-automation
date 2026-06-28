@@ -25,6 +25,26 @@ class CalculateTripCostView(EMADBaseView):
     permission_classes = [AllowAny]
 
     def handle_post(self, request):
+        debug_vehicle_results = []
+
+        try:
+            return self._handle_post(request, debug_vehicle_results)
+        except Exception as e:
+            return self._unexpected_error_response(e, debug_vehicle_results)
+
+    def _unexpected_error_response(self, error, debug_vehicle_results):
+        return Response({
+            "success": False,
+            "message": "Unable to calculate trip cost.",
+            "data": {
+                "detail": str(error),
+                "error_type": type(error).__name__,
+                "debug_vehicle_results": debug_vehicle_results,
+            },
+            "pagination": None,
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def _handle_post(self, request, debug_vehicle_results):
         locale = get_locale(request=request)
         activate(locale)
 
@@ -59,7 +79,6 @@ class CalculateTripCostView(EMADBaseView):
 
         car_type_list = []
         failed_car_types = []
-        debug_vehicle_results = []
         distance_too_long = False
         
         for car_type_obj in car_types_qs:
