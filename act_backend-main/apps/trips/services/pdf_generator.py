@@ -42,15 +42,25 @@ def _readable_location(place_id, stored_location, lat, lng):
     return f"{lat}, {lng}"
 
 
+def _passenger_name(trip):
+    snapshot_name = (getattr(trip, "passenger_name", "") or "").strip()
+    if snapshot_name:
+        return snapshot_name
+
+    user = getattr(getattr(trip, "passenger", None), "user", None)
+    if user:
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        return full_name or user.username or "Passenger"
+
+    return "Passenger"
+
+
 def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     """
     Generate booking confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
-    passenger_name = "N/A"
-    if trip.passenger and trip.passenger.user:
-        full_name = f"{trip.passenger.user.first_name} {trip.passenger.user.last_name}".strip()
-        passenger_name = full_name or trip.passenger.user.username
+    passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
         settings.BASE_DIR,
@@ -138,10 +148,7 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate cancellation confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
-    passenger_name = "N/A"
-    if trip.passenger and trip.passenger.user:
-        full_name = f"{trip.passenger.user.first_name} {trip.passenger.user.last_name}".strip()
-        passenger_name = full_name or trip.passenger.user.username
+    passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
         settings.BASE_DIR,

@@ -26,7 +26,11 @@ class UserTripsListView(EMADBaseView):
         trip_status_param = request.query_params.get('trip_status')
 
         if account_type == 'passenger':
-            queryset = Trip.objects.filter(passenger__user=user).select_related(
+            base_filter = Q(passenger__user=user)
+            if user.email:
+                base_filter |= Q(passenger_email__iexact=user.email)
+
+            queryset = Trip.objects.filter(base_filter).select_related(
                 'base_driver__user',
                 'base_driver__normal_driver__vehicle',
                 'guest_driver_car',

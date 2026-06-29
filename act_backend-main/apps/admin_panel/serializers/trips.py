@@ -1,5 +1,13 @@
 from rest_framework import serializers
 from apps.trips.models import Trip
+import re
+
+
+def _format_snapshot_phone(country_code, phone):
+    dial_code_match = re.search(r"\+\d+", country_code or "")
+    dial_code = dial_code_match.group(0) if dial_code_match else (country_code or "").strip()
+    phone_number = (phone or "").strip()
+    return " ".join(part for part in [dial_code, phone_number] if part)
 
 class TripWithStopPointSerializer(serializers.ModelSerializer):
     passenger_info = serializers.SerializerMethodField()
@@ -15,7 +23,16 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
             user = obj.passenger.user
             return {
                 "full_name": f"{user.first_name} {user.last_name}",
-                "phone_number": user.phone_number
+                "phone_number": user.phone_number,
+                "email": user.email,
+            }
+        if obj.passenger_name or obj.passenger_email or obj.passenger_phone:
+            phone = _format_snapshot_phone(obj.passenger_country_code, obj.passenger_phone)
+            return {
+                "full_name": obj.passenger_name or "Guest Passenger",
+                "phone_number": phone or obj.passenger_phone or "",
+                "email": obj.passenger_email or "",
+                "is_guest_checkout": bool(obj.is_guest_checkout),
             }
         return None
 
