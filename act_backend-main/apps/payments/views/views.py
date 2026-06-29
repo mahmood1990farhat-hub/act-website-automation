@@ -76,6 +76,16 @@ def handle_payment_succeeded(event):
         )
 
         try:
+            logger.info(f"[WEBHOOK] Enriching addresses before PDF generation for trip {trip.id}")
+            enrich_addresses(trip)
+            logger.info(f"[WEBHOOK] Address enrichment complete before PDF generation for trip {trip.id}")
+        except Exception as address_error:
+            logger.warning(
+                f"[WEBHOOK] Failed to enrich addresses before PDF generation for trip {trip.id}: {str(address_error)}",
+                exc_info=True,
+            )
+
+        try:
             logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
             ensure_booking_confirmation_pdf(trip)
             logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
@@ -198,6 +208,16 @@ def extract_card_details(payment_intent):
         latest_charge = payment_intent.get('latest_charge')
         if isinstance(latest_charge, dict):
             card = ((latest_charge.get('payment_method_details') or {}).get('card') or {})
+        elif isinstance(latest_charge, str) and latest_charge:
+            try:
+                charge = stripe.Charge.retrieve(latest_charge)
+                card = ((charge.get('payment_method_details') or {}).get('card') or {})
+            except Exception as charge_error:
+                logger.warning(
+                    f"[WEBHOOK] Unable to retrieve Stripe charge card details "
+                    f"for charge={latest_charge}: {str(charge_error)}",
+                    exc_info=True,
+                )
 
     return {
         'last4': card.get('last4'),

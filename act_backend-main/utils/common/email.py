@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def _booking_reference(trip) -> str:
-    if getattr(trip, "stripe_payment_intent", None):
-        return f"ACT-{trip.stripe_payment_intent}"
-    return f"ACT-{trip.id}"
+    return f"ACT-{int(trip.id):06d}"
 
 
 # ---------- low-level helper ----------

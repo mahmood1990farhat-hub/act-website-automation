@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 
 from apps.trips.services.booking_details_formatter import format_booking_details_for_email
+from utils.common.google_map import place_to_string
 
 
 def _money(value):
@@ -21,15 +22,24 @@ def _money(value):
 
 
 def _booking_reference(trip):
-    if trip.stripe_payment_intent:
-        return f"ACT-{trip.stripe_payment_intent}"
-    return f"ACT-{trip.id}"
+    return f"ACT-{int(trip.id):06d}"
 
 
 def _payment_method_label(trip, fallback="Card Payment"):
     if trip.card_brand and trip.last4:
         return f"{fallback} ({trip.card_brand} ********{trip.last4})"
     return fallback
+
+
+def _readable_location(place_id, stored_location, lat, lng):
+    if stored_location:
+        return stored_location
+
+    place_label = place_to_string(place_id)
+    if place_label:
+        return place_label
+
+    return f"{lat}, {lng}"
 
 
 def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
@@ -57,6 +67,18 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     )
     booking_ref = _booking_reference(trip)
     payment_method_label = _payment_method_label(trip, payment_method)
+    pickup_location = _readable_location(
+        trip.pickup_place_id,
+        trip.pickup_str,
+        trip.pickup_lat,
+        trip.pickup_lng,
+    )
+    dropoff_location = _readable_location(
+        trip.dropoff_place_id,
+        trip.dropoff_str,
+        trip.dropoff_lat,
+        trip.dropoff_lng,
+    )
 
     context = {
         "booking_ref": booking_ref,
@@ -76,8 +98,8 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
         "passengers_count": str(trip.passengers_count or 1),
         "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
         "amount_paid": _money(trip.cost),
-        "pickup": trip.pickup_str or f"{trip.pickup_lat}, {trip.pickup_lng}",
-        "dropoff": trip.dropoff_str or f"{trip.dropoff_lat}, {trip.dropoff_lng}",
+        "pickup": pickup_location,
+        "dropoff": dropoff_location,
         "trip_date": trip.trip_date.strftime("%d %B %Y"),
         "trip_time": trip.trip_time.strftime("%I:%M%p").lower(),
         "trip_cost": _money(trip.base_trip_cost or trip.cost),
@@ -93,8 +115,8 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
             "passengers_count": str(trip.passengers_count or 1),
             "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
             "amount_paid": f"{float(trip.cost or 0):.2f}",
-            "pickup_location": trip.pickup_str or f"{trip.pickup_lat}, {trip.pickup_lng}",
-            "dropoff_location": trip.dropoff_str or f"{trip.dropoff_lat}, {trip.dropoff_lng}",
+            "pickup_location": pickup_location,
+            "dropoff_location": dropoff_location,
             "pickup_date": trip.trip_date.strftime("%d %B %Y"),
             "pickup_time": trip.trip_time.strftime("%I:%M%p").lower(),
             "trip_cost": f"{float(trip.base_trip_cost or trip.cost or 0):.2f}",
@@ -136,6 +158,18 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     )
     booking_ref = _booking_reference(trip)
     payment_method_label = _payment_method_label(trip, payment_method)
+    pickup_location = _readable_location(
+        trip.pickup_place_id,
+        trip.pickup_str,
+        trip.pickup_lat,
+        trip.pickup_lng,
+    )
+    dropoff_location = _readable_location(
+        trip.dropoff_place_id,
+        trip.dropoff_str,
+        trip.dropoff_lat,
+        trip.dropoff_lng,
+    )
 
     context = {
         "logo_uri": Path(logo_path).as_uri() if os.path.exists(logo_path) else "",
@@ -158,8 +192,8 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
             "passengers_count": str(trip.passengers_count or 1),
             "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
             "amount_paid": f"{float(trip.cost or 0):.2f}",
-            "pickup_location": trip.pickup_str or f"{trip.pickup_lat}, {trip.pickup_lng}",
-            "dropoff_location": trip.dropoff_str or f"{trip.dropoff_lat}, {trip.dropoff_lng}",
+            "pickup_location": pickup_location,
+            "dropoff_location": dropoff_location,
             "pickup_date": trip.trip_date.strftime("%d %B %Y"),
             "pickup_time": trip.trip_time.strftime("%I:%M%p").lower(),
             "trip_cost": f"{float(trip.base_trip_cost or trip.cost or 0):.2f}",
