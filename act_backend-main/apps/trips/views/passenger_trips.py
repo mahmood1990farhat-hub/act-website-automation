@@ -4,6 +4,7 @@ from utils.EMDBase import EMADBaseView
 from apps.accounts.permissions import IsPassenger, IsVerifiedAndProfileCompleted
 from django.utils.translation import gettext as _, activate
 from django.utils import timezone
+from django.db.models import Q
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
 from utils.common import get_locale, paginate_queryset
@@ -52,10 +53,13 @@ class PassengerTripsListView(EMADBaseView):
 
         # Get status filter from query params
         trip_status_param = request.query_params.get('status', '').strip()
+        base_filter = Q(passenger=passenger)
+        if user.email:
+            base_filter |= Q(passenger_email__iexact=user.email)
         
         # Build queryset
         queryset = Trip.objects.filter(
-            passenger=passenger
+            base_filter
         ).select_related(
             'base_driver__user',
             'base_driver__normal_driver__vehicle',
@@ -134,6 +138,10 @@ class PassengerTripDetailView(EMADBaseView):
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
         try:
+            base_filter = Q(passenger=passenger)
+            if user.email:
+                base_filter |= Q(passenger_email__iexact=user.email)
+
             trip = Trip.objects.select_related(
                 'base_driver__user',
                 'base_driver__normal_driver__vehicle',
@@ -141,8 +149,8 @@ class PassengerTripDetailView(EMADBaseView):
                 'airport',
                 'passenger__user'
             ).prefetch_related('stop_points').get(
+                base_filter,
                 id=trip_id,
-                passenger=passenger
             )
         except Trip.DoesNotExist:
             message = get_bilingual_error_message(
@@ -200,12 +208,16 @@ class PassengerCancelTripView(EMADBaseView):
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
         try:
+            base_filter = Q(passenger=passenger)
+            if user.email:
+                base_filter |= Q(passenger_email__iexact=user.email)
+
             trip = Trip.objects.select_related(
                 'passenger__user',
                 'base_driver__user'
             ).get(
+                base_filter,
                 id=trip_id,
-                passenger=passenger
             )
         except Trip.DoesNotExist:
             message = get_bilingual_error_message(
