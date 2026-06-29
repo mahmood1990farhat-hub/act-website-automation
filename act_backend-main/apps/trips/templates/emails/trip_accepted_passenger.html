@@ -60,8 +60,8 @@
       .text-main {
         font-family: Georgia, "Times New Roman", serif;
         color: #111111;
-        font-size: 22px;
-        line-height: 1.6;
+        font-size: 18px;
+        line-height: 1.45;
       }
 
       .text-bold {
@@ -72,7 +72,7 @@
         background-color: #204f8f;
         color: #ffffff;
         font-family: Georgia, "Times New Roman", serif;
-        font-size: 28px;
+        font-size: 22px;
         line-height: 1.2;
         font-weight: bold;
       }
@@ -85,7 +85,7 @@
         color: #ffffff !important;
         text-decoration: none;
         font-family: Georgia, "Times New Roman", serif;
-        font-size: 29px;
+        font-size: 22px;
         line-height: 1.2;
         font-weight: bold;
         padding: 12px 20px;
@@ -113,21 +113,21 @@
         }
 
         .desktop-pad {
-          padding-left: 18px !important;
-          padding-right: 18px !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
         }
 
         .text-main {
-          font-size: 18px !important;
-          line-height: 1.6 !important;
+          font-size: 15px !important;
+          line-height: 1.45 !important;
         }
 
         .blue-bar {
-          font-size: 22px !important;
+          font-size: 18px !important;
         }
 
         .download-btn {
-          font-size: 24px !important;
+          font-size: 18px !important;
           max-width: 100% !important;
         }
 
@@ -147,8 +147,8 @@
         }
 
         .mobile-px-18 {
-          padding-left: 18px !important;
-          padding-right: 18px !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
         }
 
         .mobile-pt-16 {
@@ -305,11 +305,14 @@
                       class="text-main text-bold mobile-px-18"
                       style="
                         padding: 12px 38px 0 38px;
-                        font-size: 24px;
-                        line-height: 1.5;
+                        font-size: 17px;
+                        line-height: 1.45;
                       "
                     >
                       Booking Number: {{ booking_ref }}<br />
+                      Passenger Name: {{ passenger_name }}<br />
+                      Passenger Email: {{ passenger_email }}<br />
+                      Passenger Phone: {{ passenger_phone }}<br />
                       Passengers: {{ passenger_count }}<br />
                       Vehicle: {{ vehicle_type }}<br />
                       Amount Paid: £{{ cost }}
@@ -320,8 +323,8 @@
                     <td
                       class="text-main text-bold mobile-px-18"
                       style="
-                        padding: 38px 38px 0 38px;
-                        font-size: 24px;
+                        padding: 26px 38px 0 38px;
+                        font-size: 18px;
                         line-height: 1.5;
                       "
                     >
@@ -333,8 +336,8 @@
                     <td
                       class="text-main text-bold mobile-px-18"
                       style="
-                        padding: 20px 38px 0 38px;
-                        font-size: 24px;
+                        padding: 12px 38px 0 38px;
+                        font-size: 17px;
                         line-height: 1.45;
                       "
                     >
@@ -349,8 +352,8 @@
                     <td
                       class="text-main text-bold mobile-px-18"
                       style="
-                        padding: 34px 38px 0 38px;
-                        font-size: 24px;
+                        padding: 24px 38px 0 38px;
+                        font-size: 18px;
                         line-height: 1.5;
                       "
                     >
@@ -362,9 +365,9 @@
                     <td
                       class="text-main mobile-px-18"
                       style="
-                        padding: 18px 38px 0 38px;
-                        font-size: 20px;
-                        line-height: 1.55;
+                        padding: 12px 38px 0 38px;
+                        font-size: 16px;
+                        line-height: 1.45;
                       "
                     >
                       Adults:
@@ -404,7 +407,7 @@
                   </tr>
 
                   <tr>
-                    <td align="center" style="padding: 26px 20px 0 20px">
+                    <td align="center" style="padding: 20px 20px 0 20px">
                       <a
                         href="{{ map_url }}"
                         target="_blank"

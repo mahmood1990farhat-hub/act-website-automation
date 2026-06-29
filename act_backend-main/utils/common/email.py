@@ -175,6 +175,20 @@ def send_passenger_confirmation(user, trip) -> bool:
             or getattr(trip, "passenger_name", "")
             or "Passenger"
         )
+        passenger_name = (
+            getattr(trip, "passenger_name", "")
+            or user_full_name
+            or first_name
+        )
+        passenger_email = getattr(trip, "passenger_email", "") or recipient_email
+        passenger_phone = " ".join(
+            part
+            for part in [
+                getattr(trip, "passenger_country_code", ""),
+                getattr(trip, "passenger_phone", ""),
+            ]
+            if part
+        )
         map_url = (
             "https://www.google.com/maps/dir/?api=1"
             f"&origin={quote(pickup)}"
@@ -194,6 +208,9 @@ def send_passenger_confirmation(user, trip) -> bool:
             "first_name": first_name,
             "trip_id": trip.id,
             "booking_ref": booking_ref,
+            "passenger_name": passenger_name,
+            "passenger_email": passenger_email,
+            "passenger_phone": passenger_phone or "N/A",
             "origin": pickup,
             "destination": dropoff,
             "date": trip.trip_date.strftime("%d %B %Y"),
