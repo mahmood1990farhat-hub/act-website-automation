@@ -12,6 +12,16 @@ from apps.earnings.services.commission_resolver import CommissionResolver
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 from decimal import Decimal
+import re
+
+
+def _format_snapshot_phone(country_code, phone):
+    dial_code_match = re.search(r"\+\d+", country_code or "")
+    dial_code = dial_code_match.group(0) if dial_code_match else (country_code or "").strip()
+    phone_number = (phone or "").strip()
+    return " ".join(part for part in [dial_code, phone_number] if part)
+
+
 class TripSerializer(serializers.ModelSerializer):
     stop_points = StopPointSerializer(many=True, required=False, write_only=True)
 
@@ -261,18 +271,27 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
 
     def get_passenger(self, obj):
         """Return passenger full information instead of just ID"""
-        if not obj.passenger:
-            return None
-        
-        user = getattr(obj.passenger, 'user', None)
-        if not user:
-            return None
-        
-        return {
+        user = getattr(obj.passenger, 'user', None) if obj.passenger else None
+        if user:
+            return {
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "phone_number": user.phone_number,
             }
+
+        if obj.passenger_name or obj.passenger_email or obj.passenger_phone:
+            name = (obj.passenger_name or "").strip()
+            first_name, _, last_name = name.partition(" ")
+            phone = _format_snapshot_phone(obj.passenger_country_code, obj.passenger_phone)
+            return {
+                "first_name": first_name or "Guest",
+                "last_name": last_name,
+                "phone_number": phone or obj.passenger_phone or "",
+                "email": obj.passenger_email or "",
+                "is_guest_checkout": bool(obj.is_guest_checkout),
+            }
+
+        return None
     
     def get_car_type(self, obj):
         """Return car_type full information instead of just ID"""
@@ -329,6 +348,19 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
             return {
                 "first_name": user.first_name,
                 "last_name": user.last_name
+            }
+        if obj.passenger_name or obj.passenger_email or obj.passenger_phone:
+            name = (obj.passenger_name or "").strip()
+            first_name, _, last_name = name.partition(" ")
+            return {
+                "first_name": first_name or "Guest",
+                "last_name": last_name,
+                "email": obj.passenger_email or "",
+                "phone_number": _format_snapshot_phone(
+                    obj.passenger_country_code,
+                    obj.passenger_phone,
+                ) or obj.passenger_phone or "",
+                "is_guest_checkout": bool(obj.is_guest_checkout),
             }
         return None
 

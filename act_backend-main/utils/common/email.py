@@ -1,5 +1,6 @@
 import threading
 import logging
+import re
 from typing import List, Optional
 from urllib.parse import quote
 
@@ -18,6 +19,17 @@ logger = logging.getLogger(__name__)
 
 def _booking_reference(trip) -> str:
     return f"ACT-{int(trip.id):06d}"
+
+
+def _dial_code_only(value: str) -> str:
+    match = re.search(r"\+\d+", value or "")
+    return match.group(0) if match else (value or "").strip()
+
+
+def _format_passenger_phone(country_code: str, phone: str) -> str:
+    dial_code = _dial_code_only(country_code)
+    phone_number = (phone or "").strip()
+    return " ".join(part for part in [dial_code, phone_number] if part)
 
 
 # ---------- low-level helper ----------
@@ -179,13 +191,9 @@ def send_passenger_confirmation(user, trip) -> bool:
             or first_name
         )
         passenger_email = getattr(trip, "passenger_email", "") or recipient_email
-        passenger_phone = " ".join(
-            part
-            for part in [
-                getattr(trip, "passenger_country_code", ""),
-                getattr(trip, "passenger_phone", ""),
-            ]
-            if part
+        passenger_phone = _format_passenger_phone(
+            getattr(trip, "passenger_country_code", ""),
+            getattr(trip, "passenger_phone", ""),
         )
         map_url = (
             "https://www.google.com/maps/dir/?api=1"
@@ -488,13 +496,9 @@ def send_internal_notification(trip) -> None:
             else "—"
         )
         customer_email = passenger_user.email if passenger_user else ""
-        snapshot_phone = " ".join(
-            part
-            for part in [
-                getattr(trip, "passenger_country_code", ""),
-                getattr(trip, "passenger_phone", ""),
-            ]
-            if part
+        snapshot_phone = _format_passenger_phone(
+            getattr(trip, "passenger_country_code", ""),
+            getattr(trip, "passenger_phone", ""),
         )
         customer_name = getattr(trip, "passenger_name", "") or customer_name
         customer_phone = snapshot_phone or customer_phone
