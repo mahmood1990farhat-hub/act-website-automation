@@ -16,6 +16,12 @@ from utils.common.google_map import place_to_string
 logger = logging.getLogger(__name__)
 
 
+def _booking_reference(trip) -> str:
+    if getattr(trip, "stripe_payment_intent", None):
+        return f"ACT-{trip.stripe_payment_intent}"
+    return f"ACT-{trip.id}"
+
+
 # ---------- low-level helper ----------
 def _send_mail_async(
     subject: str,
@@ -182,10 +188,12 @@ def send_passenger_confirmation(user, trip) -> bool:
             vehicle_label = "Private Transfer"
 
         booking_details = format_booking_details_for_email(trip)
+        booking_ref = _booking_reference(trip)
 
         context = {
             "first_name": first_name,
             "trip_id": trip.id,
+            "booking_ref": booking_ref,
             "origin": pickup,
             "destination": dropoff,
             "date": trip.trip_date.strftime("%d %B %Y"),
@@ -452,7 +460,7 @@ def send_internal_notification(trip) -> None:
         passenger_user = trip.passenger.user if trip.passenger else None
         admin_email = getattr(settings, "ADMIN_EMAIL", "info@airportandcitytransfer.com")
 
-        booking_ref = f"{trip.stripe_payment_intent}"
+        booking_ref = _booking_reference(trip)
         booking_date = django_timezone.localtime(trip.created_at).strftime("%d %B %Y")
         payment_status = "Paid" if trip.is_paid else "Unpaid"
         amount_paid = f"£{trip.cost:.2f}"
@@ -759,11 +767,13 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             vehicle_label = "Private Transfer"
         booking_details = format_booking_details_for_email(trip)
         booking_details_text = _format_booking_details_text(booking_details)
+        booking_ref = _booking_reference(trip)
         context = {
             "first_name": first_name,
             "refund_message": refund_message,
             "website_url": "https://airportandcitytransfer.com/en",
             "trip_id": trip.id,
+            "booking_ref": booking_ref,
             "passenger_name": first_name,
             "passenger_count": getattr(trip, "passengers_count", None) or "N/A",
             "vehicle_type": vehicle_label,

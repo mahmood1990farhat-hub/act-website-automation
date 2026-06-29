@@ -50,8 +50,7 @@
         {{ confirmation_title|default:"Your Booking Confirmation Booking" }}
       </h2>
       <div style="font-weight: 500; font-size: 11px">
-        {{ reference_label|default:"Reference Number" }}: {{ booking.reference
-        }}
+        {{ reference_label }}: {{ booking.reference }}
       </div>
     </div>
     <div
@@ -67,10 +66,7 @@
       <div>{{ intro_title|default:"Dear Customer" }}</div>
       <br style="line-height: 8px" />
       <div>
-        {{ intro_text|default:"Thank you for choosing Airport and City Transfer.
-        Your journey has been successfully confirmed. Please take a moment to
-        review your booking details and keep this confirmation for reference. We
-        look forward to delivering a seamless and premium travel experience." }}
+        {{ intro_text }}
       </div>
       <div style="margin-top: 24px">
         <h3 style="background-color: #fdf2ed; padding: 7px; margin: 0 0 6px 0">
@@ -190,7 +186,7 @@
 
       <div>
         <h3 style="background-color: #fdf2ed; padding: 7px; margin: 0 0 6px 0">
-          {{ payment_title|default:"Payment Summery" }}
+          {{ payment_title|default:"Payment Summary" }}
         </h3>
         <div
           style="

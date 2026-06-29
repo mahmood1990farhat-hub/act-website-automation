@@ -20,6 +20,18 @@ def _money(value):
         return "£0.00"
 
 
+def _booking_reference(trip):
+    if trip.stripe_payment_intent:
+        return f"ACT-{trip.stripe_payment_intent}"
+    return f"ACT-{trip.id}"
+
+
+def _payment_method_label(trip, fallback="Card Payment"):
+    if trip.card_brand and trip.last4:
+        return f"{fallback} ({trip.card_brand} ********{trip.last4})"
+    return fallback
+
+
 def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     """
     Generate booking confirmation PDF from HTML template.
@@ -43,8 +55,23 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
         "trip_accepted",
         "footer-logo.png",
     )
+    booking_ref = _booking_reference(trip)
+    payment_method_label = _payment_method_label(trip, payment_method)
+
     context = {
-        "booking_ref": f"ACT-{trip.stripe_payment_intent}",
+        "booking_ref": booking_ref,
+        "confirmation_title": "Your Booking Confirmation",
+        "reference_label": "Reference Number",
+        "intro_title": "Dear Customer",
+        "intro_text": (
+            "Thank you for choosing Airport and City Transfer. "
+            "Your journey has been successfully confirmed. Please take a moment to "
+            "review your booking details and keep this confirmation for reference. We "
+            "look forward to delivering a seamless and premium travel experience."
+        ),
+        "booking_details_title": "Your Booking Details",
+        "journey_title": "JOURNEY",
+        "payment_title": "Payment Summary",
         "passenger_name": passenger_name,
         "passengers_count": str(trip.passengers_count or 1),
         "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
@@ -56,12 +83,12 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
         "trip_cost": _money(trip.base_trip_cost or trip.cost),
         "vat_20": _money((trip.regular_vat or 0) + (trip.airport_vat or 0)),
         "total_cost": _money(trip.cost),
-        "payment_method": payment_method,
+        "payment_method": payment_method_label,
         "booking_details": format_booking_details_for_email(trip),
         "logo_uri": Path(logo_path).as_uri() if os.path.exists(logo_path) else "",
         "footer_logo_uri": Path(footer_logo_path).as_uri() if os.path.exists(footer_logo_path) else "",
         "booking": {
-            "reference": trip.stripe_payment_intent,
+            "reference": booking_ref,
             "passenger_name": passenger_name,
             "passengers_count": str(trip.passengers_count or 1),
             "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
@@ -73,7 +100,7 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
             "trip_cost": f"{float(trip.base_trip_cost or trip.cost or 0):.2f}",
             "vat_amount": f"{float((trip.regular_vat or 0) + (trip.airport_vat or 0)):.2f}",
             "total_amount": f"{float(trip.cost or 0):.2f}",
-            "payment_method": payment_method,
+            "payment_method": payment_method_label,
         },
     }
 
@@ -107,6 +134,9 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
         "trip_accepted",
         "footer-logo.png",
     )
+    booking_ref = _booking_reference(trip)
+    payment_method_label = _payment_method_label(trip, payment_method)
+
     context = {
         "logo_uri": Path(logo_path).as_uri() if os.path.exists(logo_path) else "",
         "footer_logo_uri": Path(footer_logo_path).as_uri() if os.path.exists(footer_logo_path) else "",
@@ -120,10 +150,10 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
         ),
         "booking_details_title": "Your Booking Details",
         "journey_title": "JOURNEY",
-        "payment_title": "Payment Summery",
+        "payment_title": "Payment Summary",
         "booking_details": format_booking_details_for_email(trip),
         "booking": {
-            "reference": trip.stripe_payment_intent,
+            "reference": booking_ref,
             "passenger_name": passenger_name,
             "passengers_count": str(trip.passengers_count or 1),
             "vehicle_name": trip.car_type.name_en if trip.car_type else "N/A",
@@ -135,7 +165,7 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
             "trip_cost": f"{float(trip.base_trip_cost or trip.cost or 0):.2f}",
             "vat_amount": f"{float((trip.regular_vat or 0) + (trip.airport_vat or 0)):.2f}",
             "total_amount": f"{float(trip.cost or 0):.2f}",
-            "payment_method": payment_method,
+            "payment_method": payment_method_label,
         },
     }
 
