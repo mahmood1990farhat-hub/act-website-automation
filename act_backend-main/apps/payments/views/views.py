@@ -36,6 +36,14 @@ def stripe_webhook_view(request):
         return HttpResponse(status=400)
 
     event_type = event.get('type')
+    payment_intent = (event.get('data') or {}).get('object') or {}
+    payment_intent_id = payment_intent.get('id')
+    pending_payment_id = (payment_intent.get('metadata') or {}).get('pending_payment_id')
+
+    logger.info(
+        f"[STRIPE WEBHOOK] Received event_type={event_type}, "
+        f"payment_intent_id={payment_intent_id}, pending_payment_id={pending_payment_id}"
+    )
 
     if event_type == 'payment_intent.succeeded':
         handle_payment_succeeded(event)
@@ -55,22 +63,34 @@ def handle_payment_succeeded(event):
     logger.info(f"[WEBHOOK] Processing success for PI={payment_intent_id}")
 
     try:
+        logger.info(
+            f"[WEBHOOK] Creating trip for PI={payment_intent_id}, pending_payment_id={pending_payment_id}"
+        )
         with transaction.atomic():
             trip = create_trip_from_payment(payment_intent, pending_payment_id)
 
+        logger.info(
+            f"[WEBHOOK] Trip create/lookup complete for PI={payment_intent_id}: "
+            f"trip_id={trip.id}, passenger_email={trip.passenger_email}, "
+            f"is_guest_checkout={trip.is_guest_checkout}"
+        )
+
         try:
+            logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
             ensure_booking_confirmation_pdf(trip)
+            logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
         except Exception as pdf_error:
             logger.warning(
-                f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}"
+                f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}",
+                exc_info=True,
             )
 
+        logger.info(f"[WEBHOOK] Starting post_trip_creation for trip {trip.id}")
         post_trip_creation(trip)
+        logger.info(f"[WEBHOOK] Finished post_trip_creation for trip {trip.id}")
 
     except Exception as e:
-        logger.error(f"[WEBHOOK] Failed for PI={payment_intent_id}: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
+        logger.exception(f"[WEBHOOK] Failed for PI={payment_intent_id}: {str(e)}")
 
 
 def handle_payment_failed(event):
@@ -187,11 +207,35 @@ def extract_card_details(payment_intent):
 
 def get_pending_payment(payment_intent_id, pending_payment_id):
     if pending_payment_id:
-        return PendingPayment.objects.filter(id=pending_payment_id).first()
+        pending_payment = PendingPayment.objects.filter(id=pending_payment_id).first()
+        if pending_payment:
+            logger.info(
+                f"[WEBHOOK] PendingPayment lookup by id succeeded: "
+                f"pending_payment_id={pending_payment_id}, payment_intent_id={payment_intent_id}"
+            )
+            return pending_payment
 
-    return PendingPayment.objects.filter(
+        logger.warning(
+            f"[WEBHOOK] PendingPayment lookup by id failed: "
+            f"pending_payment_id={pending_payment_id}, payment_intent_id={payment_intent_id}; "
+            "falling back to payment_intent_id lookup"
+        )
+
+    pending_payment = PendingPayment.objects.filter(
         payment_intent_id=payment_intent_id
     ).first()
+    if pending_payment:
+        logger.info(
+            f"[WEBHOOK] PendingPayment lookup by payment_intent_id succeeded: "
+            f"pending_payment_id={pending_payment.id}, payment_intent_id={payment_intent_id}"
+        )
+    else:
+        logger.warning(
+            f"[WEBHOOK] PendingPayment lookup by payment_intent_id failed: "
+            f"payment_intent_id={payment_intent_id}"
+        )
+
+    return pending_payment
 
 
 def normalize_trip_data(data):
@@ -241,10 +285,12 @@ def create_stop_points(trip, stop_points):
 
 def post_trip_creation(trip):
     try:
+        logger.info(f"[WEBHOOK] Enriching addresses for trip {trip.id}")
         enrich_addresses(trip)
+        logger.info(f"[WEBHOOK] Sending notifications for trip {trip.id}")
         send_notifications(trip)
     except Exception as e:
-        logger.error(f"[WEBHOOK] Post processing failed for trip {trip.id}: {str(e)}")
+        logger.exception(f"[WEBHOOK] Post processing failed for trip {trip.id}: {str(e)}")
 
 
 def enrich_addresses(trip):
@@ -265,7 +311,11 @@ def send_notifications(trip):
         passenger = trip.passenger
         passenger_user = passenger.user if passenger and passenger.user else None
 
-        send_passenger_confirmation(passenger_user, trip)
+        passenger_confirmation_sent = send_passenger_confirmation(passenger_user, trip)
+        logger.info(
+            f"[WEBHOOK] send_passenger_confirmation returned {passenger_confirmation_sent} "
+            f"for trip {trip.id}"
+        )
         if passenger_user:
             notify_user(
                 user=passenger_user.id,
@@ -278,7 +328,11 @@ def send_notifications(trip):
                 trip_id=trip.id
             )
 
-        send_internal_notification(trip)
+        internal_notification_sent = send_internal_notification(trip)
+        logger.info(
+            f"[WEBHOOK] send_internal_notification returned {internal_notification_sent} "
+            f"for trip {trip.id}"
+        )
 
         notify_all_drivers(
             title_en='New Trip Available',
@@ -291,5 +345,5 @@ def send_notifications(trip):
         )
 
     except Exception as e:
-        logger.error(f"[WEBHOOK] Notification failed: {str(e)}")
+        logger.exception(f"[WEBHOOK] Notification failed: {str(e)}")
 
