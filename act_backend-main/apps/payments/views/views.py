@@ -16,6 +16,7 @@ from utils.common import notify_user
 from utils.common.email import send_passenger_confirmation, send_internal_notification
 from utils.common.google_map import reverse_geocode
 from utils.common import get_route_with_distance
+from apps.trips.services.booking_confirmation import ensure_booking_confirmation_pdf
 import logging
 from datetime import datetime
 
@@ -56,6 +57,13 @@ def handle_payment_succeeded(event):
     try:
         with transaction.atomic():
             trip = create_trip_from_payment(payment_intent, pending_payment_id)
+
+        try:
+            ensure_booking_confirmation_pdf(trip)
+        except Exception as pdf_error:
+            logger.warning(
+                f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}"
+            )
 
         post_trip_creation(trip)
 
