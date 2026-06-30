@@ -94,17 +94,16 @@
       }
 
       .social-icon {
-        width: 32px;
-        max-width: 32px;
+        width: 28px;
+        max-width: 28px;
         height: auto;
-        display: inline-block;
+        display: block;
         opacity: 1;
-        vertical-align: middle;
       }
 
       .social-link {
         display: inline-block;
-        margin: 0 7px;
+        margin: 0 5px;
         padding: 0;
         text-decoration: none;
         vertical-align: middle;
@@ -159,12 +158,12 @@
         }
 
         .social-icon {
-          width: 30px !important;
-          max-width: 30px !important;
+          width: 24px !important;
+          max-width: 24px !important;
         }
 
         .social-link {
-          margin: 10px 6px !important;
+          margin: 8px 4px !important;
         }
 
         .store-badge {
@@ -646,7 +645,7 @@
                   </tr>
 
                   <tr>
-                    <td style="padding: 14px 10px 0 10px">
+                    <td style="padding: 12px 10px 0 10px">
                       <table
                         role="presentation"
                         width="100%"
@@ -682,7 +681,7 @@
                           <td
                             valign="top"
                             class="stack-column mobile-pt-16"
-                            style="padding-left: 10px"
+                            style="padding-left: 10px; padding-top: 2px"
                           >
                             <table
                               role="presentation"
@@ -690,13 +689,16 @@
                               border="0"
                               cellpadding="0"
                               cellspacing="0"
-                              style="background-color: #dddddd"
+                              style="
+                                background-color: #dddddd;
+                                border-left: 4px solid #204f8f;
+                              "
                             >
                               <tr>
                                 <td
                                   class="text-main"
                                   style="
-                                    padding: 14px 16px;
+                                    padding: 13px 16px;
                                     font-size: 16px;
                                     line-height: 1.4;
                                   "
@@ -726,54 +728,147 @@
                       >
                         <tr>
                           <td align="center" style="padding: 8px 6px">
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ facebook_icon_url }}"
-                                alt="Facebook"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ instagram_icon_url }}"
-                                alt="Instagram"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ x_icon_url }}"
-                                alt="X"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ youtube_icon_url }}"
-                                alt="YouTube"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ blogger_icon_url }}"
-                                alt="Blogger"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
-                            <a target="_blank" class="social-link">
-                              <img
-                                src="{{ tiktok_icon_url }}"
-                                alt="TikTok"
-                                width="39"
-                                class="social-icon"
-                              />
-                            </a>
+                            <table
+                              role="presentation"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              align="center"
+                            >
+                              <tr>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ facebook_icon_url }}"
+                                      alt="Facebook"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                                <td width="10" style="width: 10px">&nbsp;</td>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ instagram_icon_url }}"
+                                      alt="Instagram"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                                <td width="10" style="width: 10px">&nbsp;</td>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ x_icon_url }}"
+                                      alt="X"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                                <td width="10" style="width: 10px">&nbsp;</td>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ youtube_icon_url }}"
+                                      alt="YouTube"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                                <td width="10" style="width: 10px">&nbsp;</td>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ blogger_icon_url }}"
+                                      alt="Blogger"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                                <td width="10" style="width: 10px">&nbsp;</td>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  width="42"
+                                  height="42"
+                                  style="
+                                    width: 42px;
+                                    height: 42px;
+                                    background-color: #ffffff;
+                                    border-radius: 21px;
+                                  "
+                                >
+                                  <a target="_blank" class="social-link">
+                                    <img
+                                      src="{{ tiktok_icon_url }}"
+                                      alt="TikTok"
+                                      width="28"
+                                      class="social-icon"
+                                    />
+                                  </a>
+                                </td>
+                              </tr>
+                            </table>
                           </td>
                         </tr>
                       </table>
