@@ -93,20 +93,51 @@
         text-align: center;
       }
 
-      .social-icon {
-        width: 28px;
-        max-width: 28px;
-        height: auto;
-        display: block;
-        opacity: 1;
+      .social-strip {
+        display: inline-block;
+        background-color: #234f8f;
+        color: #ffffff !important;
+        border-radius: 4px;
+        padding: 9px 12px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 13px;
+        line-height: 1.6;
+        font-weight: bold;
       }
 
-      .social-link {
-        display: inline-block;
-        margin: 0 5px;
-        padding: 0;
+      .social-label {
+        color: #ffffff !important;
+        white-space: nowrap;
         text-decoration: none;
-        vertical-align: middle;
+      }
+
+      .social-divider {
+        color: #f2c94c !important;
+        padding: 0 7px;
+      }
+
+      .social-facebook {
+        color: #9ec5ff !important;
+      }
+
+      .social-instagram {
+        color: #ffb8da !important;
+      }
+
+      .social-x {
+        color: #ffffff !important;
+      }
+
+      .social-youtube {
+        color: #ffb3b3 !important;
+      }
+
+      .social-blogger {
+        color: #ffd28a !important;
+      }
+
+      .social-tiktok {
+        color: #9ff6ff !important;
       }
 
       @media only screen and (max-width: 600px) {
@@ -157,13 +188,10 @@
           padding-top: 16px !important;
         }
 
-        .social-icon {
-          width: 24px !important;
-          max-width: 24px !important;
-        }
-
-        .social-link {
-          margin: 8px 4px !important;
+        .social-strip {
+          font-size: 12px !important;
+          line-height: 1.8 !important;
+          padding: 8px 10px !important;
         }
 
         .store-badge {
@@ -736,136 +764,179 @@
                               align="center"
                             >
                               <tr>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ facebook_icon_url }}"
-                                      alt="Facebook"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
-                                </td>
-                                <td width="10" style="width: 10px">&nbsp;</td>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ instagram_icon_url }}"
-                                      alt="Instagram"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
-                                </td>
-                                <td width="10" style="width: 10px">&nbsp;</td>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ x_icon_url }}"
-                                      alt="X"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
-                                </td>
-                                <td width="10" style="width: 10px">&nbsp;</td>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ youtube_icon_url }}"
-                                      alt="YouTube"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
-                                </td>
-                                <td width="10" style="width: 10px">&nbsp;</td>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ blogger_icon_url }}"
-                                      alt="Blogger"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
-                                </td>
-                                <td width="10" style="width: 10px">&nbsp;</td>
-                                <td
-                                  align="center"
-                                  valign="middle"
-                                  width="42"
-                                  height="42"
-                                  style="
-                                    width: 42px;
-                                    height: 42px;
-                                    background-color: #ffffff;
-                                    border-radius: 21px;
-                                  "
-                                >
-                                  <a target="_blank" class="social-link">
-                                    <img
-                                      src="{{ tiktok_icon_url }}"
-                                      alt="TikTok"
-                                      width="28"
-                                      class="social-icon"
-                                    />
-                                  </a>
+                                <td align="center" style="padding: 0">
+                                  <span
+                                    class="social-strip"
+                                    style="
+                                      display: inline-block;
+                                      background-color: #234f8f;
+                                      color: #ffffff !important;
+                                      border-radius: 4px;
+                                      padding: 9px 12px;
+                                      font-family: Georgia, 'Times New Roman',
+                                        serif;
+                                      font-size: 13px;
+                                      line-height: 1.6;
+                                      font-weight: bold;
+                                    "
+                                  >
+                                    {% if facebook_url %}
+                                    <a
+                                      href="{{ facebook_url }}"
+                                      target="_blank"
+                                      class="social-label social-facebook"
+                                      style="
+                                        color: #9ec5ff !important;
+                                        text-decoration: none;
+                                      "
+                                      >Facebook</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-facebook"
+                                      style="
+                                        color: #9ec5ff !important;
+                                        text-decoration: none;
+                                      "
+                                      >Facebook</span
+                                    >
+                                    {% endif %}<span
+                                      class="social-divider"
+                                      style="
+                                        color: #f2c94c !important;
+                                        padding: 0 7px;
+                                      "
+                                      >|</span
+                                    >{% if instagram_url %}
+                                    <a
+                                      href="{{ instagram_url }}"
+                                      target="_blank"
+                                      class="social-label social-instagram"
+                                      style="
+                                        color: #ffb8da !important;
+                                        text-decoration: none;
+                                      "
+                                      >Instagram</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-instagram"
+                                      style="
+                                        color: #ffb8da !important;
+                                        text-decoration: none;
+                                      "
+                                      >Instagram</span
+                                    >
+                                    {% endif %}<span
+                                      class="social-divider"
+                                      style="
+                                        color: #f2c94c !important;
+                                        padding: 0 7px;
+                                      "
+                                      >|</span
+                                    >{% if x_url %}
+                                    <a
+                                      href="{{ x_url }}"
+                                      target="_blank"
+                                      class="social-label social-x"
+                                      style="
+                                        color: #ffffff !important;
+                                        text-decoration: none;
+                                      "
+                                      >X</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-x"
+                                      style="
+                                        color: #ffffff !important;
+                                        text-decoration: none;
+                                      "
+                                      >X</span
+                                    >
+                                    {% endif %}<span
+                                      class="social-divider"
+                                      style="
+                                        color: #f2c94c !important;
+                                        padding: 0 7px;
+                                      "
+                                      >|</span
+                                    >{% if youtube_url %}
+                                    <a
+                                      href="{{ youtube_url }}"
+                                      target="_blank"
+                                      class="social-label social-youtube"
+                                      style="
+                                        color: #ffb3b3 !important;
+                                        text-decoration: none;
+                                      "
+                                      >YouTube</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-youtube"
+                                      style="
+                                        color: #ffb3b3 !important;
+                                        text-decoration: none;
+                                      "
+                                      >YouTube</span
+                                    >
+                                    {% endif %}<span
+                                      class="social-divider"
+                                      style="
+                                        color: #f2c94c !important;
+                                        padding: 0 7px;
+                                      "
+                                      >|</span
+                                    >{% if blogger_url %}
+                                    <a
+                                      href="{{ blogger_url }}"
+                                      target="_blank"
+                                      class="social-label social-blogger"
+                                      style="
+                                        color: #ffd28a !important;
+                                        text-decoration: none;
+                                      "
+                                      >Blogger</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-blogger"
+                                      style="
+                                        color: #ffd28a !important;
+                                        text-decoration: none;
+                                      "
+                                      >Blogger</span
+                                    >
+                                    {% endif %}<span
+                                      class="social-divider"
+                                      style="
+                                        color: #f2c94c !important;
+                                        padding: 0 7px;
+                                      "
+                                      >|</span
+                                    >{% if tiktok_url %}
+                                    <a
+                                      href="{{ tiktok_url }}"
+                                      target="_blank"
+                                      class="social-label social-tiktok"
+                                      style="
+                                        color: #9ff6ff !important;
+                                        text-decoration: none;
+                                      "
+                                      >TikTok</a
+                                    >
+                                    {% else %}
+                                    <span
+                                      class="social-label social-tiktok"
+                                      style="
+                                        color: #9ff6ff !important;
+                                        text-decoration: none;
+                                      "
+                                      >TikTok</span
+                                    >
+                                    {% endif %}
+                                  </span>
                                 </td>
                               </tr>
                             </table>
