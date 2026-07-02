@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Plane } from "lucide-react";
 import { Locale } from "../../../../i18n.config";
 import { FlightDetailsForm } from ".";
+import { TimeInput } from "../dateAndTime/time-input";
 
 type Props = {
   locale: Locale;
@@ -12,6 +13,31 @@ type Props = {
   setFlightDetails: (details: FlightDetailsForm) => void;
   nextStep: () => void;
   prevStep: () => void;
+  pickupTime: string;
+};
+
+type TimeValue = {
+  hour: number;
+  minute: number;
+};
+
+const parseTimeValue = (time: string): TimeValue | undefined => {
+  const match = time.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return undefined;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return undefined;
+
+  return { hour, minute };
+};
+
+const toMinutes = (time: string) => {
+  const parsed = parseTimeValue(time);
+  if (!parsed) return undefined;
+
+  return parsed.hour * 60 + parsed.minute;
 };
 
 export default function FlightDetails({
@@ -20,6 +46,7 @@ export default function FlightDetails({
   setFlightDetails,
   nextStep,
   prevStep,
+  pickupTime,
 }: Props) {
   const isRTL = locale === "ar";
   const [isRequired, setIsRequired] = useState(false);
@@ -31,6 +58,28 @@ export default function FlightDetails({
   const updateField = (key: keyof FlightDetailsForm, value: string) => {
     setFlightDetails({ ...flightDetails, [key]: value });
   };
+
+  const pickupMinutes = toMinutes(pickupTime);
+  const activeFlightTime =
+    flightDetails.flightType === "arrival"
+      ? flightDetails.landingTime
+      : flightDetails.departureTime;
+  const flightMinutes = toMinutes(activeFlightTime);
+  const arrivalLooksLate =
+    flightDetails.flightType === "arrival" &&
+    pickupMinutes !== undefined &&
+    flightMinutes !== undefined &&
+    pickupMinutes - flightMinutes < 30;
+  const departureLooksEarly =
+    flightDetails.flightType === "departure" &&
+    pickupMinutes !== undefined &&
+    flightMinutes !== undefined &&
+    flightMinutes <= pickupMinutes;
+  const timingWarning = arrivalLooksLate
+    ? "For arrivals, pickup time normally needs to be after landing time with enough time for immigration, baggage collection, and meeting your driver."
+    : departureLooksEarly
+      ? "For departures, flight departure time is normally after your pickup time. Please check the flight and pickup times before continuing."
+      : "";
 
   const skipFlightDetails = () => {
     setFlightDetails({
@@ -110,6 +159,14 @@ export default function FlightDetails({
 
           {flightDetails.flightType && (
             <>
+          <div className="rounded-lg border border-[#ffd100]/30 bg-[#ffd100]/10 p-3">
+            <p className="text-[#ffd100] text-sm font-semibold">
+              Please enter the scheduled flight landing/departure time.
+            </p>
+            <p className="text-white/70 text-xs mt-1">
+              For arrivals, your pickup time should allow enough time for immigration, baggage collection, and meeting your driver.
+            </p>
+          </div>
           <div>
             <label htmlFor="flight-number">
               <p className="text-white">Flight Number</p>
@@ -137,11 +194,13 @@ export default function FlightDetails({
               <label htmlFor="landing-time">
                 <p className="text-white">Landing Time</p>
               </label>
-              <input
-                id="landing-time"
-                value={flightDetails.landingTime}
-                onChange={(event) => updateField("landingTime", event.target.value)}
-                className={inputClass}
+              <TimeInput
+                value={parseTimeValue(flightDetails.landingTime)}
+                language={locale}
+                required={isRequired}
+                placeholder="Select landing time"
+                setFormattedTime={(time) => updateField("landingTime", time)}
+                className="border-muted"
               />
             </div>
           )}
@@ -150,13 +209,20 @@ export default function FlightDetails({
               <label htmlFor="departure-time">
                 <p className="text-white">Departure Time</p>
               </label>
-              <input
-                id="departure-time"
-                value={flightDetails.departureTime}
-                onChange={(event) => updateField("departureTime", event.target.value)}
-                className={inputClass}
+              <TimeInput
+                value={parseTimeValue(flightDetails.departureTime)}
+                language={locale}
+                required={isRequired}
+                placeholder="Select departure time"
+                setFormattedTime={(time) => updateField("departureTime", time)}
+                className="border-muted"
               />
             </div>
+          )}
+          {timingWarning && (
+            <p className="rounded-lg border border-amber-300/40 bg-amber-300/10 p-3 text-sm text-amber-100">
+              {timingWarning}
+            </p>
           )}
           <div>
             <label htmlFor="pickup-sign-name">
