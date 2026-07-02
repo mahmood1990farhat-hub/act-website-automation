@@ -103,27 +103,29 @@ export function TimePicker({
   const TimePickerContent = (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="bg-gray-100 rounded-3xl p-6 text-black w-full max-w-sm mx-auto"
+      className="w-full max-w-sm mx-auto rounded-xl border border-white/20 bg-[#1f2020] p-5 text-white shadow-2xl"
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-sm text-gray-600 mb-3">{t.selectTime}</h2>
+      <div className="mb-5 rounded-lg border border-white/10 bg-white/5 p-4">
+        <h2 className="text-sm text-white/70 mb-2">{t.selectTime}</h2>
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-medium text-gray-900">
+          <div className="text-3xl font-bold tracking-wide text-[#ffd100]">
             {formatTime(tempTime)}
           </div>
-          <Clock className="w-5 h-5 text-gray-500" />
+          <Clock className="w-5 h-5 text-[#ffd100]" />
         </div>
       </div>
 
       {/* Pickers */}
-      <div className="flex items-start justify-center gap-4 mb-8">
+      <div className="flex items-start justify-center gap-4 mb-6">
         {/* Hours */}
         <div className="flex flex-col items-center">
-          <div className="text-xs text-gray-500 mb-1">{t.hour}</div>
-          <div className="flex flex-col items-center max-h-60 overflow-y-auto on-scrollbar">
-            <div className="grid grid-rows-6 gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-white/60 mb-2">
+            {t.hour}
+          </div>
+          <div className="flex flex-col items-center max-h-60 overflow-y-auto on-scrollbar rounded-lg border border-white/10 bg-black/20 p-2">
+            <div className="grid grid-cols-3 gap-2">
               {hours.map((h, idx) => (
                 <button
                   key={h}
@@ -131,11 +133,10 @@ export function TimePicker({
                     if (el) hourRefs.current[idx] = el;
                   }}
                   className={cn(
-                    "p-2.5 rounded-md text-center",
+                    "h-10 w-12 rounded-md text-center text-sm font-semibold transition-colors",
                     tempTime.hour === h
-                      ? "bg-primary"
-                      : "bg-white text-black",
-                    "hover:bg-gray-300"
+                      ? "bg-[#ffd100] text-[#2D2E2E] shadow"
+                      : "bg-white/10 text-white hover:bg-white/20"
                   )}
                   onClick={() => handleTimeChange("hour", h)}
                   type="button"
@@ -149,9 +150,11 @@ export function TimePicker({
 
         {/* Minutes */}
         <div className="flex flex-col items-center">
-          <div className="text-xs text-gray-500 mb-1">{t.minute}</div>
-          <div className="max-h-60 overflow-y-auto on-scrollbar">
-            <div className="grid grid-rows-6 gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-white/60 mb-2">
+            {t.minute}
+          </div>
+          <div className="max-h-60 overflow-y-auto on-scrollbar rounded-lg border border-white/10 bg-black/20 p-2">
+            <div className="grid grid-cols-3 gap-2">
               {minutes.map((m, idx) => (
                 <button
                   key={m}
@@ -159,11 +162,10 @@ export function TimePicker({
                     if (el) minuteRefs.current[idx] = el;
                   }}
                   className={cn(
-                    "p-2.5 rounded-md text-center",
+                    "h-10 w-12 rounded-md text-center text-sm font-semibold transition-colors",
                     tempTime.minute === m
-                      ? "bg-primary"
-                      : "bg-white text-black",
-                    "hover:bg-gray-300"
+                      ? "bg-[#ffd100] text-[#2D2E2E] shadow"
+                      : "bg-white/10 text-white hover:bg-white/20"
                   )}
                   onClick={() => handleTimeChange("minute", m)}
                   type="button"
@@ -181,7 +183,7 @@ export function TimePicker({
         <Button
           variant="ghost"
           onClick={onClose}
-          className="text-muted-foreground hover:text-gray-800"
+          className="text-white/70 hover:bg-white/10 hover:text-white"
           type="button"
         >
           {t.close}
@@ -191,14 +193,14 @@ export function TimePicker({
           <Button
             variant="ghost"
             onClick={handleCancel}
-            className="text-muted-foreground hover:text-gray-800"
+            className="text-white/70 hover:bg-white/10 hover:text-white"
             type="button"
           >
             {t.cancel}
           </Button>
           <Button
             onClick={handleOK}
-            className="bg-gray-800 text-white hover:bg-gray-900 px-6"
+            className="bg-[#ffd100] text-[#2D2E2E] hover:bg-[#ffd100]/90 px-6 font-bold"
             type="button"
           >
             {t.ok}

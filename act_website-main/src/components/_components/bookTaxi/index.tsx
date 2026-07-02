@@ -143,6 +143,7 @@ export type VehicleType = {
   base_trip_cost: number;
   regular_vat: number;
   total_cost: number;
+  expected_trip_duration_minutes?: number;
 };
 
 export type calculatTripCost = {
@@ -269,6 +270,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   locale={locale}
                   flightDetails={flightDetails}
                   setFlightDetails={setFlightDetails}
+                  pickupTime={formDetails.time}
                   nextStep={() => setStep(6)}
                   prevStep={() => setStep(formDetails.children > 0 || formDetails.infants > 0 ? 4 : 3)}
                 />
