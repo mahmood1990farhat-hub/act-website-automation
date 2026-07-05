@@ -195,6 +195,7 @@ export default function FlightDetails({
                 <p className="text-white">Landing Time</p>
               </label>
               <TimeInput
+                id="landing-time"
                 value={parseTimeValue(flightDetails.landingTime)}
                 language={locale}
                 required={isRequired}
@@ -210,6 +211,7 @@ export default function FlightDetails({
                 <p className="text-white">Departure Time</p>
               </label>
               <TimeInput
+                id="departure-time"
                 value={parseTimeValue(flightDetails.departureTime)}
                 language={locale}
                 required={isRequired}
