@@ -445,6 +445,7 @@ export default function RoutePoints({
                   <p>{book_Taxi.form.time}</p>
                 </label>
                 <TimeInput
+                  id="ride-time"
                   value={selectedTime}
                   onChange={(t) => setSelectedTime(t)}
                   language={locale}
