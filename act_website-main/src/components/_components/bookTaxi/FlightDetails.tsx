@@ -1,11 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Plane } from "lucide-react";
 import { Locale } from "../../../../i18n.config";
-import { FlightDetailsForm } from ".";
+import { FlightDetailsForm, RoutePoint } from ".";
 import { TimeInput } from "../dateAndTime/time-input";
+import {
+  getAirportJourneyDirection,
+  getArrivalGuidance,
+  getDepartureGuidance,
+} from "./flight-guidance";
 
 type Props = {
   locale: Locale;
@@ -14,6 +19,8 @@ type Props = {
   nextStep: () => void;
   prevStep: () => void;
   pickupTime: string;
+  routePoints: RoutePoint[];
+  changePickupTime: () => void;
 };
 
 type TimeValue = {
@@ -33,13 +40,6 @@ const parseTimeValue = (time: string): TimeValue | undefined => {
   return { hour, minute };
 };
 
-const toMinutes = (time: string) => {
-  const parsed = parseTimeValue(time);
-  if (!parsed) return undefined;
-
-  return parsed.hour * 60 + parsed.minute;
-};
-
 export default function FlightDetails({
   locale,
   flightDetails,
@@ -47,6 +47,8 @@ export default function FlightDetails({
   nextStep,
   prevStep,
   pickupTime,
+  routePoints,
+  changePickupTime,
 }: Props) {
   const isRTL = locale === "ar";
   const [isRequired, setIsRequired] = useState(false);
@@ -59,27 +61,26 @@ export default function FlightDetails({
     setFlightDetails({ ...flightDetails, [key]: value });
   };
 
-  const pickupMinutes = toMinutes(pickupTime);
-  const activeFlightTime =
+  const journeyDirection = getAirportJourneyDirection(routePoints);
+  const isDirectionDetected = journeyDirection !== "manual";
+  const timingWarning =
     flightDetails.flightType === "arrival"
-      ? flightDetails.landingTime
-      : flightDetails.departureTime;
-  const flightMinutes = toMinutes(activeFlightTime);
-  const arrivalLooksLate =
-    flightDetails.flightType === "arrival" &&
-    pickupMinutes !== undefined &&
-    flightMinutes !== undefined &&
-    pickupMinutes - flightMinutes < 30;
-  const departureLooksEarly =
-    flightDetails.flightType === "departure" &&
-    pickupMinutes !== undefined &&
-    flightMinutes !== undefined &&
-    flightMinutes <= pickupMinutes;
-  const timingWarning = arrivalLooksLate
-    ? "For arrivals, pickup time normally needs to be after landing time with enough time for immigration, baggage collection, and meeting your driver."
-    : departureLooksEarly
-      ? "For departures, flight departure time is normally after your pickup time. Please check the flight and pickup times before continuing."
-      : "";
+      ? getArrivalGuidance(pickupTime, flightDetails.landingTime)
+      : flightDetails.flightType === "departure"
+        ? getDepartureGuidance(pickupTime, flightDetails.departureTime)
+        : "";
+
+  useEffect(() => {
+    if (!isDirectionDetected || flightDetails.flightType === journeyDirection) return;
+
+    setFlightDetails({
+      ...flightDetails,
+      flightType: journeyDirection,
+      landingTime: journeyDirection === "arrival" ? flightDetails.landingTime : "",
+      departureTime:
+        journeyDirection === "departure" ? flightDetails.departureTime : "",
+    });
+  }, [flightDetails, isDirectionDetected, journeyDirection, setFlightDetails]);
 
   const skipFlightDetails = () => {
     setFlightDetails({
@@ -132,7 +133,10 @@ export default function FlightDetails({
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <p className="text-white">Flight Type</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div
+              className={`grid grid-cols-1 ${isDirectionDetected ? "" : "sm:grid-cols-2"} gap-2`}
+            >
+              {journeyDirection !== "departure" && (
               <label className={optionClass}>
                 <input
                   type="radio"
@@ -142,6 +146,8 @@ export default function FlightDetails({
                 />
                 <span>Arrival</span>
               </label>
+              )}
+              {journeyDirection !== "arrival" && (
               <label className={optionClass}>
                 <input
                   type="radio"
@@ -151,9 +157,14 @@ export default function FlightDetails({
                 />
                 <span>Departure</span>
               </label>
+              )}
             </div>
             <p className="text-xs text-white/60">
-              Flight type is optional. Select one if you would like to add flight timing details.
+              {journeyDirection === "arrival"
+                ? "Arrival is selected because your journey starts at an airport."
+                : journeyDirection === "departure"
+                  ? "Departure is selected because your journey ends at an airport."
+                  : "Flight type is optional. Select one if you would like to add flight timing details."}
             </p>
           </div>
 
@@ -164,7 +175,9 @@ export default function FlightDetails({
               Please enter the scheduled flight landing/departure time.
             </p>
             <p className="text-white/70 text-xs mt-1">
-              For arrivals, your pickup time should allow enough time for immigration, baggage collection, and meeting your driver.
+              {flightDetails.flightType === "arrival"
+                ? "For arrivals, your pickup time should allow enough time for immigration, baggage collection, and meeting your driver."
+                : "For departures, allow enough travel and airport check-in time before your scheduled flight."}
             </p>
           </div>
           <div>
@@ -222,9 +235,17 @@ export default function FlightDetails({
             </div>
           )}
           {timingWarning && (
-            <p className="rounded-lg border border-amber-300/40 bg-amber-300/10 p-3 text-sm text-amber-100">
-              {timingWarning}
-            </p>
+            <div className="rounded-lg border border-[#ffd100]/60 bg-black/30 p-4 text-sm text-white shadow-lg">
+              <p className="font-semibold leading-relaxed">{timingWarning}</p>
+              <Button
+                type="button"
+                variant="link"
+                onClick={changePickupTime}
+                className="mt-2 h-auto p-0 font-bold text-[#ffd100] hover:text-[#ffd100]/80"
+              >
+                Go back and change pickup time
+              </Button>
+            </div>
           )}
           <div>
             <label htmlFor="pickup-sign-name">

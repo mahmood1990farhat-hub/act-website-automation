@@ -271,6 +271,8 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   flightDetails={flightDetails}
                   setFlightDetails={setFlightDetails}
                   pickupTime={formDetails.time}
+                  routePoints={routePoints}
+                  changePickupTime={() => setStep(1)}
                   nextStep={() => setStep(6)}
                   prevStep={() => setStep(formDetails.children > 0 || formDetails.infants > 0 ? 4 : 3)}
                 />
