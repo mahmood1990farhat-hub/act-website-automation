@@ -33,4 +33,9 @@ jobs:
               /var/www/atg/front-end/airportandcitytransfer_repo/act_website-main/ \
               /var/www/atg/front-end/airportandcitytransfer/
 
-            su - act -c 'source ~/.nvm/nvm.sh && cd /var/www/atg/front-end/airportandcitytransfer && npm run build && pm2 restart act --update-env && pm2 save && pm2 status'
+            source ~/.nvm/nvm.sh
+            cd /var/www/atg/front-end/airportandcitytransfer
+            npm run build
+            pm2 restart act --update-env
+            pm2 save
+            pm2 status
