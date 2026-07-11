@@ -7,35 +7,29 @@ on:
 jobs:
   deploy-frontend:
     name: Deploy ACT frontend
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Deploy frontend on VPS
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          port: ${{ secrets.VPS_PORT }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script_stop: true
-          script: |
-            set -euo pipefail
+        shell: bash
+        run: |
+          set -euo pipefail
 
-            cd /var/www/atg/front-end/airportandcitytransfer_repo
-            git fetch origin
-            git checkout main
-            git pull --ff-only origin main
+          cd /var/www/atg/front-end/airportandcitytransfer_repo
+          git fetch origin
+          git checkout main
+          git pull --ff-only origin main
 
-            rsync -a --delete \
-              --exclude='.env' \
-              --exclude='.next' \
-              --exclude='node_modules' \
-              /var/www/atg/front-end/airportandcitytransfer_repo/act_website-main/ \
-              /var/www/atg/front-end/airportandcitytransfer/
+          rsync -a --delete \
+            --exclude='.env' \
+            --exclude='.next' \
+            --exclude='node_modules' \
+            /var/www/atg/front-end/airportandcitytransfer_repo/act_website-main/ \
+            /var/www/atg/front-end/airportandcitytransfer/
 
-            source ~/.nvm/nvm.sh
-            cd /var/www/atg/front-end/airportandcitytransfer
-            npm run build
-            pm2 restart act --update-env
-            pm2 save
-            pm2 status
+          source ~/.nvm/nvm.sh
+          cd /var/www/atg/front-end/airportandcitytransfer
+          npm run build
+          pm2 restart act --update-env
+          pm2 save
+          pm2 status
