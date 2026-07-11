@@ -7,6 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Script from "next/script";
 
+const GOOGLE_ADS_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-17641563982";
+
 const getLocaleFromHeaders = async (): Promise<Locale> => {
   const headersList = await headers();
   const rawPath = headersList.get("x-pathname") || headersList.get("x-url") || "";
@@ -45,18 +48,22 @@ export default async function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />
       </head>
       <body>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17641563982"
-          strategy="afterInteractive"
-        />
-        <Script id="google-ads-tag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17641563982');
-          `}
-        </Script>
+        {GOOGLE_ADS_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-ads-tag" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function(){window.dataLayer.push(arguments);}
+                window.gtag('js', new Date());
+                window.gtag('config', '${GOOGLE_ADS_ID}');
+              `}
+            </Script>
+          </>
+        )}
         <ReactQueryProvider>
           <ProviderMap>{children}</ProviderMap>
           <ToastContainer
