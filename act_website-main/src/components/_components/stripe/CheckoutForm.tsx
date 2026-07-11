@@ -37,6 +37,13 @@ const ELEMENT_OPTIONS = {
   },
 };
 
+const GOOGLE_ADS_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-17641563982";
+const GOOGLE_ADS_BOOKING_CONVERSION_LABEL =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL ||
+  "0LprCMbR8sQcEM7ok9xB";
+const BOOKING_CONVERSION_STORAGE_PREFIX = "act_booking_conversion_tracked";
+
 export default function CheckoutForm({
   nextStep,
   prevStep,
@@ -67,34 +74,44 @@ export default function CheckoutForm({
   const trackedPaymentIntentIds = useRef<Set<string>>(new Set());
 
   const fireBookingCompletedEvents = (transactionId: string) => {
+    if (!transactionId || !GOOGLE_ADS_ID || !GOOGLE_ADS_BOOKING_CONVERSION_LABEL) {
+      return;
+    }
+
     if (trackedPaymentIntentIds.current.has(transactionId)) return;
 
-    trackedPaymentIntentIds.current.add(transactionId);
+    const storageKey = `${BOOKING_CONVERSION_STORAGE_PREFIX}:${transactionId}`;
 
     if (typeof window === "undefined" || typeof window.gtag !== "function") {
       return;
     }
 
-    window.gtag("event", "conversion", {
-      send_to: "AW-17641563982/OJpcCMsREsQ_EM7Ok9xB",
-      value: bookingTotal,
-      currency,
-      transaction_id: transactionId,
-    });
+    try {
+      if (window.sessionStorage.getItem(storageKey)) return;
+    } catch {
+      // Ignore storage access issues and still track the successful payment once per component lifecycle.
+    }
 
-    window.gtag("event", "purchase", {
+    trackedPaymentIntentIds.current.add(transactionId);
+
+    const conversionPayload: Record<string, string | number> = {
+      send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_BOOKING_CONVERSION_LABEL}`,
+      currency: currency || "GBP",
       transaction_id: transactionId,
-      value: bookingTotal,
-      currency,
-      items: [
-        {
-          item_id: "airport-transfer",
-          item_name: "Airport Transfer Booking",
-          price: bookingTotal,
-          quantity: 1,
-        },
-      ],
-    });
+    };
+
+    const numericBookingTotal = Number(bookingTotal);
+    if (Number.isFinite(numericBookingTotal) && numericBookingTotal > 0) {
+      conversionPayload.value = numericBookingTotal;
+    }
+
+    window.gtag("event", "conversion", conversionPayload);
+
+    try {
+      window.sessionStorage.setItem(storageKey, "1");
+    } catch {
+      // Storage is best-effort duplicate protection; the in-memory guard still prevents double submits.
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
