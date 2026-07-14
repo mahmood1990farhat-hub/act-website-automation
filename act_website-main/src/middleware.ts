@@ -28,6 +28,31 @@ export function middleware(request: NextRequest) {
   const protectedRoutes = ["my-trips", "driver", "dashboard"];
 
   const pathname = request.nextUrl.pathname;
+  const hostname = request.nextUrl.hostname;
+  const requestHost = request.headers.get("host")?.split(":")[0];
+  const forwardedHost = request.headers
+    .get("x-forwarded-host")
+    ?.split(",")[0]
+    ?.trim()
+    ?.split(":")[0];
+
+  if (
+    hostname === "www.airportandcitytransfer.com" ||
+    requestHost === "www.airportandcitytransfer.com" ||
+    forwardedHost === "www.airportandcitytransfer.com"
+  ) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.protocol = "https:";
+    redirectUrl.hostname = "airportandcitytransfer.com";
+    redirectUrl.port = "";
+    return NextResponse.redirect(redirectUrl, 308);
+  }
+
+  if (pathname === "/") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/en";
+    return NextResponse.redirect(redirectUrl, 308);
+  }
 
   const token = request.cookies.get("userToken")?.value;
   const accountType = request.cookies.get("account_type")?.value;

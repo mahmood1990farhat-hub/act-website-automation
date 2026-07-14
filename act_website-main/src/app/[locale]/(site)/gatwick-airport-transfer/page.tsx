@@ -3,12 +3,23 @@ import { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getPublicPageSeo } from "@/lib/seo";
+import type { Locale } from "../../../../../i18n.config";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Gatwick Airport Transfer London | Airport & City Transfer",
   description:
     "Reliable private Gatwick airport transfers across London with fixed pricing, professional drivers, executive vehicles, flight monitoring and 24/7 booking.",
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return getPublicPageSeo(locale, "gatwick-airport-transfer", pageMetadata);
+}
 
 const benefits = [
   "Flight monitoring",

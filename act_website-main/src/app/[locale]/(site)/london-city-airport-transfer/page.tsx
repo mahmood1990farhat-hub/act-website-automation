@@ -3,12 +3,23 @@ import { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getPublicPageSeo } from "@/lib/seo";
+import type { Locale } from "../../../../../i18n.config";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "London City Airport Transfer | Airport & City Transfer",
   description:
     "Reliable private London City Airport transfers across London with fixed pricing, professional drivers, executive vehicles, flight monitoring and 24/7 booking.",
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return getPublicPageSeo(locale, "london-city-airport-transfer", pageMetadata);
+}
 
 const benefits = [
   "Flight monitoring",
