@@ -3,8 +3,16 @@ import getTrans from '@/lib/translation'
 import React from 'react'
 import { Locale } from '../../../../../i18n.config'
 import { cookies } from 'next/headers'
+import { getPublicPageSeo } from '@/lib/seo'
 
-export default async function ComplaintsPage({params}:{params:Promise<{locale:Locale}>}) {
+type PageProps = { params: Promise<{ locale: Locale }> }
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params
+  return getPublicPageSeo(locale, "complaints")
+}
+
+export default async function ComplaintsPage({params}: PageProps) {
   const locale= (await params).locale
 
   const transComplaints = await getTrans(locale, "complaints")

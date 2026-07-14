@@ -8,10 +8,16 @@ import ContactUs from "@/components/_components/about/ContactUs";
 import getTrans from "@/lib/translation";
 import { Locale } from "../../../../../i18n.config";
 import Link from "next/link";
+import { getPublicPageSeo } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ locale: Locale }>;
 };
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
+  return getPublicPageSeo(locale, "about-us");
+}
 
 export default async function AboutPage({ params }: PageProps) {
   const locale = (await params).locale;

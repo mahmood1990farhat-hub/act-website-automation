@@ -7,10 +7,16 @@ import Image from "next/image";
 import Link from "next/link";
 import getTrans from "@/lib/translation";
 import DownloadAppTabs from "@/components/_components/download-app/DownloadAppTabs";
+import { getPublicPageSeo } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ locale: Locale }>;
 };
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
+  return getPublicPageSeo(locale, "download-app");
+}
 
 export default async function DownloadAppPage({ params }: PageProps) {
   const locale = (await params).locale;
