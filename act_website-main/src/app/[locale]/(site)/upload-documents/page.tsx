@@ -4,6 +4,9 @@ import { Locale } from '../../../../../i18n.config'
 import getTrans from '@/lib/translation'
 import ModifyDocuments from '@/components/_components/driver/ModifyDocuments'
 import { redirect } from 'next/navigation'
+import { privatePageSeo } from '@/lib/seo'
+
+export const metadata = privatePageSeo
 
 export default async function UploadDocumentsPage({params}:{params:Promise<{locale:Locale}>}) {
   const locale=(await params).locale

@@ -2,6 +2,9 @@ import React from "react";
 import { Locale } from "../../../../../i18n.config";
 import Auth from "@/components/_components/auth/Auth";
 import getTrans from "@/lib/translation";
+import { privatePageSeo } from "@/lib/seo";
+
+export const metadata = privatePageSeo;
 
 type typePrpos = {
   params: Promise<{ locale: Locale }>;

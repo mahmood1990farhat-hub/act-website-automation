@@ -4,6 +4,9 @@ import React from "react";
 import { Locale } from "../../../../../i18n.config";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { privatePageSeo } from "@/lib/seo";
+
+export const metadata = privatePageSeo;
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const locale = (await params).locale;
