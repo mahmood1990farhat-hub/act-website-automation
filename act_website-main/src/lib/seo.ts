@@ -28,3 +28,10 @@ export const getPublicPageSeo = (
     },
   },
 });
+
+export const privatePageSeo: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};

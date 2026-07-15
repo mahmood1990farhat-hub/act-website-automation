@@ -6,6 +6,9 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Header from "@/components/_components/header/Header";
 import Footer from "@/components/_components/footer/Footer";
+import { privatePageSeo } from "@/lib/seo";
+
+export const metadata = privatePageSeo;
 
 export default async function LayoutDriver({
   children,

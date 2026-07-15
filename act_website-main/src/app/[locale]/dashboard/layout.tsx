@@ -5,6 +5,9 @@ import getTrans from "@/lib/translation";
 import DashboardAsidebar from "@/components/_components/dashboard/DashboardAsidebar";
 import DashboardNavbar from "@/components/_components/dashboard/DashboardNavbar";
 import DashboardLayoutClient from "@/components/_components/dashboard/DashboardLayoutClient";
+import { privatePageSeo } from "@/lib/seo";
+
+export const metadata = privatePageSeo;
 
 export default async function LayoutDashboard({
   children,
