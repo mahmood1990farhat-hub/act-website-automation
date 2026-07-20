@@ -42,7 +42,12 @@ const GOOGLE_ADS_ID =
 const GOOGLE_ADS_BOOKING_CONVERSION_LABEL =
   process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL ||
   "0LprCMbR8sQcEM7ok9xB";
+const GOOGLE_ADS_BOOKING_CONVERSION_SEND_TO =
+  "AW-17641563982/0LprCMbR8sQcEM7ok9xB";
+const EXPECTED_GOOGLE_ADS_BOOKING_CONVERSION_LABEL =
+  "0LprCMbR8sQcEM7ok9xB";
 const BOOKING_CONVERSION_STORAGE_PREFIX = "act_booking_conversion_tracked";
+const BOOKING_CONVERSION_EVENT_TIMEOUT = 2000;
 
 export default function CheckoutForm({
   nextStep,
@@ -73,45 +78,142 @@ export default function CheckoutForm({
   const [agreed, setAgreed] = useState(false);
   const trackedPaymentIntentIds = useRef<Set<string>>(new Set());
 
-  const fireBookingCompletedEvents = (transactionId: string) => {
-    if (!transactionId || !GOOGLE_ADS_ID || !GOOGLE_ADS_BOOKING_CONVERSION_LABEL) {
-      return;
-    }
-
-    if (trackedPaymentIntentIds.current.has(transactionId)) return;
-
-    const storageKey = `${BOOKING_CONVERSION_STORAGE_PREFIX}:${transactionId}`;
-
-    if (typeof window === "undefined" || typeof window.gtag !== "function") {
-      return;
-    }
-
-    try {
-      if (window.sessionStorage.getItem(storageKey)) return;
-    } catch {
-      // Ignore storage access issues and still track the successful payment once per component lifecycle.
-    }
-
-    trackedPaymentIntentIds.current.add(transactionId);
-
-    const conversionPayload: Record<string, string | number> = {
-      send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_BOOKING_CONVERSION_LABEL}`,
-      currency: currency || "GBP",
+  const fireBookingCompletedEvents = (transactionId: string): Promise<void> => {
+    console.info("[ACT Google Ads] conversion function entered", {
       transaction_id: transactionId,
-    };
+    });
 
-    const numericBookingTotal = Number(bookingTotal);
-    if (Number.isFinite(numericBookingTotal) && numericBookingTotal > 0) {
-      conversionPayload.value = numericBookingTotal;
-    }
+    return new Promise((resolve) => {
+      const finish = (reason: "callback" | "timeout" | "skipped") => {
+        console.info(`[ACT Google Ads] conversion ${reason}`, {
+          transaction_id: transactionId,
+        });
+        resolve();
+      };
 
-    window.gtag("event", "conversion", conversionPayload);
+      if (!transactionId || !GOOGLE_ADS_ID || !GOOGLE_ADS_BOOKING_CONVERSION_LABEL) {
+        console.info("[ACT Google Ads] conversion skipped: missing config", {
+          hasTransactionId: Boolean(transactionId),
+          hasGoogleAdsId: Boolean(GOOGLE_ADS_ID),
+          hasConversionLabel: Boolean(GOOGLE_ADS_BOOKING_CONVERSION_LABEL),
+        });
+        finish("skipped");
+        return;
+      }
 
-    try {
-      window.sessionStorage.setItem(storageKey, "1");
-    } catch {
-      // Storage is best-effort duplicate protection; the in-memory guard still prevents double submits.
-    }
+      if (trackedPaymentIntentIds.current.has(transactionId)) {
+        console.info("[ACT Google Ads] conversion skipped: in-memory duplicate", {
+          transaction_id: transactionId,
+        });
+        finish("skipped");
+        return;
+      }
+
+      const storageKey = `${BOOKING_CONVERSION_STORAGE_PREFIX}:${transactionId}`;
+
+      const gtag = typeof window !== "undefined" ? window.gtag : undefined;
+      const gtagAvailable = typeof gtag === "function";
+
+      console.info("[ACT Google Ads] window.gtag availability", {
+        available: gtagAvailable,
+        send_to: GOOGLE_ADS_BOOKING_CONVERSION_SEND_TO,
+      });
+
+      if (!gtagAvailable) {
+        console.info("[ACT Google Ads] conversion skipped: window.gtag unavailable", {
+          transaction_id: transactionId,
+        });
+        finish("skipped");
+        return;
+      }
+
+      console.info("[ACT Google Ads] conversion label comparison", {
+        runtimeLabel: GOOGLE_ADS_BOOKING_CONVERSION_LABEL,
+        expectedLabel: EXPECTED_GOOGLE_ADS_BOOKING_CONVERSION_LABEL,
+        matchesExpected:
+          GOOGLE_ADS_BOOKING_CONVERSION_LABEL ===
+          EXPECTED_GOOGLE_ADS_BOOKING_CONVERSION_LABEL,
+      });
+
+      let sessionStorageAlreadyTracked = false;
+      try {
+        sessionStorageAlreadyTracked = Boolean(
+          window.sessionStorage.getItem(storageKey),
+        );
+        console.info("[ACT Google Ads] sessionStorage duplicate check", {
+          storageKey,
+          alreadyTracked: sessionStorageAlreadyTracked,
+        });
+        if (sessionStorageAlreadyTracked) {
+          console.info("[ACT Google Ads] conversion skipped: session duplicate", {
+            transaction_id: transactionId,
+          });
+          finish("skipped");
+          return;
+        }
+      } catch (error) {
+        console.info("[ACT Google Ads] sessionStorage duplicate check failed", {
+          storageKey,
+          error,
+        });
+        // Ignore storage access issues and still track the successful payment once per component lifecycle.
+      }
+
+      trackedPaymentIntentIds.current.add(transactionId);
+
+      let hasCompleted = false;
+      const completeOnce = (reason: "callback" | "timeout") => {
+        if (hasCompleted) return;
+        hasCompleted = true;
+        window.clearTimeout(timeoutId);
+
+        try {
+          window.sessionStorage.setItem(storageKey, "1");
+        } catch {
+          // Storage is best-effort duplicate protection; the in-memory guard still prevents double submits.
+        }
+
+        console.info("[ACT Google Ads] callback/timeout completed", {
+          reason,
+          transaction_id: transactionId,
+        });
+        finish(reason);
+      };
+
+      const timeoutId = window.setTimeout(() => {
+        completeOnce("timeout");
+      }, BOOKING_CONVERSION_EVENT_TIMEOUT + 250);
+
+      const conversionPayload: Record<string, string | number | (() => void)> = {
+        send_to: GOOGLE_ADS_BOOKING_CONVERSION_SEND_TO,
+        value: Number.isFinite(Number(bookingTotal)) ? Number(bookingTotal) : 0,
+        currency: "GBP",
+        transaction_id: transactionId,
+        event_callback: () => completeOnce("callback"),
+        event_timeout: BOOKING_CONVERSION_EVENT_TIMEOUT,
+      };
+
+      console.info("[ACT Google Ads] sending conversion", {
+        send_to: GOOGLE_ADS_BOOKING_CONVERSION_SEND_TO,
+        transaction_id: transactionId,
+      });
+
+      try {
+        console.info("[ACT Google Ads] before gtag conversion call", {
+          send_to: conversionPayload.send_to,
+          transaction_id: transactionId,
+          value: conversionPayload.value,
+          currency: conversionPayload.currency,
+        });
+        gtag("event", "conversion", conversionPayload);
+        console.info("[ACT Google Ads] after gtag conversion call", {
+          transaction_id: transactionId,
+        });
+      } catch (error) {
+        console.error("[ACT Google Ads] conversion gtag call failed", error);
+        completeOnce("timeout");
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +235,7 @@ export default function CheckoutForm({
     if (result.error) {
       setErrorMsg(result.error.message || "Payment failed");
     } else if (result.paymentIntent.status === "succeeded") {
-      fireBookingCompletedEvents(result.paymentIntent.id);
+      await fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();
     }
 
