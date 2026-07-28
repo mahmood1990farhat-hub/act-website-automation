@@ -115,6 +115,10 @@ jobs:
           # The GitHub snapshot lacks historical migrations for these production apps.
           # Synchronize their current models only inside Django's isolated test database.
           MIGRATION_MODULES = {
+              "admin": None,
+              "auth": None,
+              "contenttypes": None,
+              "sessions": None,
               "accounts": None,
               "drivers": None,
               "passengers": None,
@@ -126,6 +130,8 @@ jobs:
               "pricing": None,
               "earnings": None,
               "admin_panel": None,
+              "silk": None,
+              "token_blacklist": None,
           }
           PY
           trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env" "$test_settings"' EXIT
