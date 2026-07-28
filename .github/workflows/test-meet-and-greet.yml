@@ -104,14 +104,34 @@ jobs:
         env:
           PYTHON_EXECUTABLE: ${{ steps.runtime.outputs.python_executable }}
           SERVICE_ENVIRONMENT_FILE: ${{ steps.runtime.outputs.environment_file }}
-          DJANGO_SETTINGS_MODULE: ${{ steps.runtime.outputs.settings_module }}
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE/act_backend-main"
           ln -s "$SERVICE_ENVIRONMENT_FILE" .env
-          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env"' EXIT
-          export DJANGO_SETTINGS_MODULE
+          test_settings="$GITHUB_WORKSPACE/act_backend-main/myProject/ci_test_settings.py"
+          cat > "$test_settings" <<'PY'
+          from .settings import *
+
+          # The GitHub snapshot lacks historical migrations for these production apps.
+          # Synchronize their current models only inside Django's isolated test database.
+          MIGRATION_MODULES = {
+              "accounts": None,
+              "drivers": None,
+              "passengers": None,
+              "trips": None,
+              "payments": None,
+              "office": None,
+              "vehicle": None,
+              "complaints": None,
+              "pricing": None,
+              "earnings": None,
+              "admin_panel": None,
+          }
+          PY
+          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env" "$test_settings"' EXIT
+          export DJANGO_SETTINGS_MODULE=myProject.ci_test_settings
           "$PYTHON_EXECUTABLE" manage.py test \
             apps.pricing.tests.test_extra_service_resolver \
             apps.trips.tests.test_meet_and_greet_pricing \
+            --noinput \
             --verbosity=2
