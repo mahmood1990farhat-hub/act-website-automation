@@ -1,7 +1,7 @@
 name: Test Meet and Greet Pricing
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -58,25 +58,25 @@ jobs:
           export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-myProject.settings}"
 
           isolation_output="$($python_executable - <<'PY'
-import django
-from django.conf import settings
-from django.db import connections
+          import django
+          from django.conf import settings
+          from django.db import connections
 
-django.setup()
-connection = connections["default"]
-production_name = str(connection.settings_dict.get("NAME") or "")
-test_name = str(connection.creation._get_test_db_name() or "")
+          django.setup()
+          connection = connections["default"]
+          production_name = str(connection.settings_dict.get("NAME") or "")
+          test_name = str(connection.creation._get_test_db_name() or "")
 
-if not production_name or not test_name:
-    raise SystemExit("Database names could not be resolved; refusing to run tests.")
-if production_name == test_name:
-    raise SystemExit("Test database resolves to the production database; refusing to run tests.")
+          if not production_name or not test_name:
+              raise SystemExit("Database names could not be resolved; refusing to run tests.")
+          if production_name == test_name:
+              raise SystemExit("Test database resolves to the production database; refusing to run tests.")
 
-print(f"DJANGO_SETTINGS_MODULE={settings.SETTINGS_MODULE}")
-print(f"TEST_DATABASE_NAME={test_name}")
-print("DATABASE_ISOLATION_CONFIRMED=true")
-PY
-)"
+          print(f"DJANGO_SETTINGS_MODULE={settings.SETTINGS_MODULE}")
+          print(f"TEST_DATABASE_NAME={test_name}")
+          print("DATABASE_ISOLATION_CONFIRMED=true")
+          PY
+          )"
 
           printf '%s\n' "$isolation_output"
           test_database_name="$(printf '%s\n' "$isolation_output" | sed -n 's/^TEST_DATABASE_NAME=//p')"
