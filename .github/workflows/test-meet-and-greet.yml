@@ -109,7 +109,7 @@ jobs:
 
           ln -s "$live/.env" "$stage/.env"
           cleanup_stage() {
-            rm -f "$stage/.env" "$stage/myProject/ci_test_settings.py" "$stage/myProject/ci_test_urls.py"
+            rm -f "$stage/.env" "$stage/myProject/ci_test_settings.py"
             find "$stage" -type d -name __pycache__ -prune -exec rm -rf {} + || true
           }
           trap cleanup_stage EXIT
@@ -123,10 +123,8 @@ jobs:
           "$python" manage.py check
           echo "DJANGO_SYSTEM_CHECK=pass"
 
-          printf 'urlpatterns = []\n' > "$stage/myProject/ci_test_urls.py"
           cat > "$stage/myProject/ci_test_settings.py" <<'PY'
           from .settings import *
-          ROOT_URLCONF = "myProject.ci_test_urls"
           MIGRATION_MODULES = {
               "admin": None, "auth": None, "contenttypes": None,
               "sessions": None, "accounts": None, "drivers": None,
@@ -137,6 +135,13 @@ jobs:
           }
           PY
           export DJANGO_SETTINGS_MODULE=myProject.ci_test_settings
+          echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
+          "$python" - <<'PY'
+          import django
+          from django.conf import settings
+          django.setup()
+          print(f"ROOT_URLCONF={settings.ROOT_URLCONF}")
+          PY
           test_database="$("$python" - <<'PY'
           import django
           from django.db import connections
