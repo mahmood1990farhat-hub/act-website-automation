@@ -22,6 +22,7 @@ jobs:
         shell: bash
         run: |
           set -u
+          set +e
           live=/var/www/atg/atg-backend/backend
           target="$GITHUB_WORKSPACE/act_backend-main"
           python="$live/env/bin/python"
@@ -392,6 +393,7 @@ jobs:
           echo "MIGRATIONS_RUN=false" | tee -a "$report/validation-status.txt"
 
       - name: Upload reconciliation report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backend-full-reconciliation-${{ github.run_id }}
