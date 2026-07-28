@@ -1,0 +1,117 @@
+name: Test Meet and Greet Pricing
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out feature branch in isolated workspace
+        uses: actions/checkout@v4
+        with:
+          ref: codex/meet-and-greet-pricing-v1
+          clean: true
+          fetch-depth: 1
+
+      - name: Identify ACT backend runtime and verify test database isolation
+        id: runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          service_properties="$(systemctl show act.service \
+            --property=ExecStart \
+            --property=WorkingDirectory \
+            --no-pager)"
+
+          exec_start="$(printf '%s\n' "$service_properties" | sed -n 's/^ExecStart=//p')"
+          service_working_directory="$(printf '%s\n' "$service_properties" | sed -n 's/^WorkingDirectory=//p')"
+          service_executable="$(printf '%s\n' "$exec_start" | sed -n 's/.*path=\([^ ;}]*\).*/\1/p')"
+
+          if [ -z "$service_executable" ] || [ ! -x "$service_executable" ]; then
+            echo "Unable to identify an executable from act.service ExecStart." >&2
+            exit 1
+          fi
+
+          virtualenv_bin="$(dirname "$service_executable")"
+          python_executable="$virtualenv_bin/python"
+          if [ ! -x "$python_executable" ]; then
+            echo "Python was not found beside the act.service executable." >&2
+            exit 1
+          fi
+
+          environment_file="$service_working_directory/.env"
+          if [ -z "$environment_file" ] || [ ! -r "$environment_file" ]; then
+            echo "The backend .env beside the act.service working directory is not readable." >&2
+            exit 1
+          fi
+
+          cd "$GITHUB_WORKSPACE/act_backend-main"
+          ln -s "$environment_file" .env
+          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env"' EXIT
+          export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-myProject.settings}"
+
+          isolation_output="$($python_executable - <<'PY'
+import django
+from django.conf import settings
+from django.db import connections
+
+django.setup()
+connection = connections["default"]
+production_name = str(connection.settings_dict.get("NAME") or "")
+test_name = str(connection.creation._get_test_db_name() or "")
+
+if not production_name or not test_name:
+    raise SystemExit("Database names could not be resolved; refusing to run tests.")
+if production_name == test_name:
+    raise SystemExit("Test database resolves to the production database; refusing to run tests.")
+
+print(f"DJANGO_SETTINGS_MODULE={settings.SETTINGS_MODULE}")
+print(f"TEST_DATABASE_NAME={test_name}")
+print("DATABASE_ISOLATION_CONFIRMED=true")
+PY
+)"
+
+          printf '%s\n' "$isolation_output"
+          test_database_name="$(printf '%s\n' "$isolation_output" | sed -n 's/^TEST_DATABASE_NAME=//p')"
+          settings_module="$(printf '%s\n' "$isolation_output" | sed -n 's/^DJANGO_SETTINGS_MODULE=//p')"
+
+          {
+            echo "python_executable=$python_executable"
+            echo "environment_file=$environment_file"
+            echo "settings_module=$settings_module"
+            echo "test_database_name=$test_database_name"
+            echo "service_working_directory=$service_working_directory"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Verified ACT backend test runtime"
+            echo "- Python: \`$python_executable\`"
+            echo "- Django settings: \`$settings_module\`"
+            echo "- Test database: \`$test_database_name\`"
+            echo "- Production service working directory (read only): \`$service_working_directory\`"
+            echo "- Tests run from isolated workspace: \`$GITHUB_WORKSPACE/act_backend-main\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run Meet and Greet backend tests
+        shell: bash
+        env:
+          PYTHON_EXECUTABLE: ${{ steps.runtime.outputs.python_executable }}
+          SERVICE_ENVIRONMENT_FILE: ${{ steps.runtime.outputs.environment_file }}
+          DJANGO_SETTINGS_MODULE: ${{ steps.runtime.outputs.settings_module }}
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/act_backend-main"
+          ln -s "$SERVICE_ENVIRONMENT_FILE" .env
+          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env"' EXIT
+          export DJANGO_SETTINGS_MODULE
+          "$PYTHON_EXECUTABLE" manage.py test \
+            apps.pricing.tests.test_extra_service_resolver \
+            apps.trips.tests.test_meet_and_greet_pricing \
+            --verbosity=2
