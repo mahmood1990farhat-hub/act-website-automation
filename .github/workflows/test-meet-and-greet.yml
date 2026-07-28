@@ -1,0 +1,133 @@
+name: Reconcile Live Backend Read Only
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Check out target GitHub merge
+        uses: actions/checkout@v4
+        with:
+          ref: 8eaab9416517840631ea0642fb76a09df37e5489
+          clean: true
+          fetch-depth: 2
+
+      - name: Back up and inventory live backend without modifying it
+        shell: bash
+        run: |
+          set -euo pipefail
+          live=/var/www/atg/atg-backend/backend
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          backup="/home/act/secure-backups/act-backend-reconcile-${stamp}-${GITHUB_RUN_ID}"
+          proposal="/home/act/reconcile-work/pr55-${GITHUB_RUN_ID}"
+          report="$GITHUB_WORKSPACE/reconcile-report"
+          mkdir -p "$backup" "$proposal" "$report/live-working" "$report/live-head" "$report/github-main"
+          chmod 700 "$backup" "$proposal"
+
+          git -C "$live" diff --binary > "$backup/tracked-working-tree.patch"
+          git -C "$live" diff --name-status > "$backup/tracked-name-status.txt"
+          git -C "$live" ls-files --others --exclude-standard -z > "$backup/untracked-all.list0"
+          git -C "$live" ls-files --others -i --exclude-standard -z > "$backup/ignored-all.list0"
+
+          python3 - "$live" "$backup" <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+
+          live = Path(sys.argv[1])
+          backup = Path(sys.argv[2])
+          paths = (backup / "untracked-all.list0").read_bytes().split(b"\0")
+          excluded_prefixes = ("env/", "static/", "media/", "logs/", ".git/")
+          excluded_names = {"celerybeat-schedule"}
+          included = []
+          rows = ["path\tsize\tmtime_utc"]
+          for raw in paths:
+              if not raw:
+                  continue
+              path = raw.decode("utf-8", "surrogateescape")
+              lower = path.lower()
+              if path.startswith(excluded_prefixes) or "/__pycache__/" in path or lower.endswith((".pyc", ".log", ".sqlite", ".sqlite3", ".db")) or path in excluded_names:
+                  continue
+              full = live / path
+              if not full.is_file():
+                  continue
+              stat = full.stat()
+              included.append(raw)
+              rows.append(f"{path}\t{stat.st_size}\t{int(stat.st_mtime)}")
+          (backup / "untracked-included.list0").write_bytes(b"\0".join(included) + (b"\0" if included else b""))
+          (backup / "untracked-inventory.tsv").write_text("\n".join(rows) + "\n", encoding="utf-8")
+          PY
+
+          if test -s "$backup/untracked-included.list0"; then
+            tar -C "$live" --null -T "$backup/untracked-included.list0" -czf "$backup/untracked-code-config.tar.gz"
+          else
+            tar -czf "$backup/untracked-code-config.tar.gz" --files-from /dev/null
+          fi
+          chmod 600 "$backup"/*
+          sha256sum "$backup/tracked-working-tree.patch" "$backup/untracked-code-config.tar.gz" > "$backup/SHA256SUMS"
+
+          cp -a "$GITHUB_WORKSPACE/act_backend-main/." "$proposal/"
+          chmod -R go-rwx "$proposal"
+
+          printf 'status\tpath\tclassification\tlive_sha256\tgithub_sha256\tgithub_parent_sha256\n' > "$report/classification.tsv"
+          while IFS=$'\t' read -r status path; do
+            test -n "$path" || continue
+            mkdir -p "$report/live-working/$(dirname "$path")" "$report/live-head/$(dirname "$path")" "$report/github-main/$(dirname "$path")"
+            live_hash=missing
+            target_hash=missing
+            parent_hash=missing
+            if test -f "$live/$path"; then
+              cp "$live/$path" "$report/live-working/$path"
+              live_hash="$(sha256sum "$live/$path" | cut -d' ' -f1)"
+            fi
+            if git -C "$live" cat-file -e "HEAD:$path" 2>/dev/null; then
+              git -C "$live" show "HEAD:$path" > "$report/live-head/$path"
+            fi
+            if git cat-file -e "8eaab9416517840631ea0642fb76a09df37e5489:act_backend-main/$path" 2>/dev/null; then
+              git show "8eaab9416517840631ea0642fb76a09df37e5489:act_backend-main/$path" > "$report/github-main/$path"
+              target_hash="$(sha256sum "$report/github-main/$path" | cut -d' ' -f1)"
+            fi
+            if git cat-file -e "8eaab9416517840631ea0642fb76a09df37e5489^:act_backend-main/$path" 2>/dev/null; then
+              parent_hash="$(git show "8eaab9416517840631ea0642fb76a09df37e5489^:act_backend-main/$path" | sha256sum | cut -d' ' -f1)"
+            fi
+            if test "$live_hash" = "$target_hash"; then
+              class=already_in_github
+            elif test "$live_hash" = "$parent_hash" && test "$target_hash" != "$parent_hash"; then
+              class=github_meet_greet_ahead
+            elif test "$target_hash" = "$parent_hash"; then
+              class=production_only_or_obsolete_review
+            else
+              class=both_changed_review
+            fi
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$status" "$path" "$class" "$live_hash" "$target_hash" "$parent_hash" >> "$report/classification.tsv"
+          done < <(git -C "$live" diff --name-status)
+
+          cp "$backup/tracked-name-status.txt" "$report/"
+          cp "$backup/untracked-inventory.tsv" "$report/"
+          tr '\0' '\n' < "$backup/ignored-all.list0" > "$report/ignored-files.txt"
+          git -C "$live" diff --stat > "$report/live-diff-stat.txt"
+          git diff --stat 8eaab9416517840631ea0642fb76a09df37e5489^ 8eaab9416517840631ea0642fb76a09df37e5489 -- act_backend-main/ > "$report/meet-greet-diff-stat.txt"
+
+          echo "LIVE_SHA=$(git -C "$live" rev-parse HEAD)"
+          echo "LIVE_ORIGIN_MAIN=$(git -C "$live" rev-parse --verify origin/main 2>/dev/null || echo unavailable)"
+          echo "LIVE_TREE_CLEAN=$(test -z "$(git -C "$live" status --porcelain)" && echo true || echo false)"
+          echo "BACKUP_PATH=$backup"
+          echo "PROPOSAL_PATH=$proposal"
+          echo "TRACKED_PATCH_SHA256=$(sha256sum "$backup/tracked-working-tree.patch" | cut -d' ' -f1)"
+          echo "UNTRACKED_ARCHIVE_SHA256=$(sha256sum "$backup/untracked-code-config.tar.gz" | cut -d' ' -f1)"
+          echo "CLASSIFICATION_SUMMARY"
+          cut -f3 "$report/classification.tsv" | sort | uniq -c
+
+      - name: Upload code-only reconciliation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-reconciliation-report-${{ github.run_id }}
+          path: reconcile-report/
+          if-no-files-found: error
+          retention-days: 7
