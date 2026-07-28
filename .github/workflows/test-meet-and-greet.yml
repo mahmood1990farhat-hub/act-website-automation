@@ -1,0 +1,48 @@
+name: Inspect Backend Deployment
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact merge commit in isolated workspace
+        uses: actions/checkout@v4
+        with:
+          ref: 8eaab9416517840631ea0642fb76a09df37e5489
+          clean: true
+          fetch-depth: 2
+
+      - name: Inspect live backend and deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          backend=/var/www/atg/atg-backend/backend
+          echo "LIVE_BACKEND_SHA=$(git -C "$backend" rev-parse HEAD)"
+          echo "LIVE_BACKEND_BRANCH=$(git -C "$backend" branch --show-current)"
+          echo "LIVE_BACKEND_REMOTE=$(git -C "$backend" remote get-url origin)"
+          if test -z "$(git -C "$backend" status --porcelain)"; then
+            echo "LIVE_BACKEND_CLEAN=true"
+          else
+            echo "LIVE_BACKEND_CLEAN=false"
+            git -C "$backend" status --short
+          fi
+          echo "ACT_SERVICE_ACTIVE=$(systemctl is-active act.service)"
+          systemctl show act.service \
+            --property=WorkingDirectory \
+            --property=ExecStart \
+            --no-pager
+          migration_files="$(git diff-tree --no-commit-id --name-only -r 8eaab9416517840631ea0642fb76a09df37e5489 -- 'act_backend-main/**/migrations/*')"
+          if test -n "$migration_files"; then
+            echo "MERGE_HAS_MIGRATIONS=true"
+            printf '%s\n' "$migration_files"
+          else
+            echo "MERGE_HAS_MIGRATIONS=false"
+          fi
+          echo "BACKEND_FILES_IN_MERGE"
+          git diff-tree --no-commit-id --name-only -r 8eaab9416517840631ea0642fb76a09df37e5489 -- act_backend-main/
