@@ -1,0 +1,77 @@
+name: Test Payment URL Import
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/fix-payment-url-import
+          clean: true
+
+      - name: Run isolated backend validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          live=/var/www/atg/atg-backend/backend
+          backend="$GITHUB_WORKSPACE/act_backend-main"
+          python="$live/env/bin/python"
+
+          test -x "$python"
+          cd "$backend"
+          ln -s "$live/.env" .env
+          test_settings="$backend/myProject/ci_test_settings.py"
+          cleanup() {
+            rm -f "$backend/.env" "$test_settings"
+            find "$backend" -type d -name __pycache__ -prune -exec rm -rf {} + || true
+          }
+          trap cleanup EXIT
+
+          "$python" -m py_compile \
+            apps/payments/urls.py \
+            apps/payments/views/views.py \
+            apps/payments/test_urls.py
+          echo "PYTHON_SYNTAX=pass"
+
+          "$python" manage.py check
+          echo "DJANGO_SYSTEM_CHECK=pass"
+
+          cat > "$test_settings" <<'PY'
+          from .settings import *
+          MIGRATION_MODULES = {
+              "admin": None, "auth": None, "contenttypes": None,
+              "sessions": None, "accounts": None, "drivers": None,
+              "passengers": None, "trips": None, "payments": None,
+              "office": None, "vehicle": None, "complaints": None,
+              "pricing": None, "earnings": None, "admin_panel": None,
+              "silk": None, "token_blacklist": None,
+          }
+          PY
+          export DJANGO_SETTINGS_MODULE=myProject.ci_test_settings
+
+          test_database="$("$python" - <<'PY'
+          import django
+          from django.db import connections
+          django.setup()
+          connection = connections["default"]
+          production = str(connection.settings_dict.get("NAME") or "")
+          test_name = str(connection.creation._get_test_db_name() or "")
+          if not production or not test_name or production == test_name:
+              raise SystemExit("Unsafe test database configuration")
+          print(test_name)
+          PY
+          )"
+          echo "ISOLATED_TEST_DATABASE=$test_database"
+
+          "$python" manage.py test \
+            apps.payments.test_urls \
+            apps.payments.tests \
+            apps.trips.tests.test_meet_and_greet_pricing \
+            --noinput --verbosity=2
