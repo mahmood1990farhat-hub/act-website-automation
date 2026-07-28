@@ -15,6 +15,11 @@ import { DateInput } from "../dateAndTime/date-input";
 import { TimeInput } from "../dateAndTime/time-input";
 import CarLoading from "../loading/CarLoading";
 import { ArrowUpDown } from "lucide-react";
+import {
+  buildTripQuoteRequest,
+  hasValidCoordinates,
+  locationValidationMessage,
+} from "./quote-request";
 
 type RoutePoint = {
   id: number;
@@ -75,8 +80,6 @@ export default function RoutePoints({
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const locationValidationMessage =
-    "Please select pickup and drop-off from the address suggestions and wait for them to load.";
   const tripCalculationErrorMessage =
     "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.";
 
@@ -111,17 +114,6 @@ export default function RoutePoints({
     setRoutePoints(newRoutePoints);
   };
 
-  const hasValidCoordinates = (point: any) => {
-    const lat = point?.coordinates?.lat;
-    const lng = point?.coordinates?.lng;
-
-    return (
-      Number.isFinite(lat) &&
-      Number.isFinite(lng) &&
-      !(lat === 0 && lng === 0)
-    );
-  };
-
   const isValidRoutePoint = (routePoint: RoutePoint) => {
     const point = routePoint.point;
 
@@ -131,16 +123,6 @@ export default function RoutePoints({
     const hasPlaceId = Boolean(point.place_id);
 
     return (hasAirportId || hasPlaceId) && hasValidCoordinates(point);
-  };
-
-  const normalizeTripDate = (date: string) => {
-    const parts = date.split("-");
-    if (parts.length !== 3) return date;
-
-    const [year, month, day] = parts;
-    if (!year || !month || !day) return date;
-
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
   const getBackendErrorMessage = (errorBody: any) => {
@@ -196,49 +178,6 @@ export default function RoutePoints({
     return { largeSuitcase, smallSuitcase, adults, children, infants, numberOfPassengers };
   };
 
-  const buildRequestBody = (inputValues: { largeSuitcase: number; smallSuitcase: number; numberOfPassengers: number }) => {
-    const pickup = routePoints.find((p) => p.type === "pickup");
-    const dropoff = routePoints.find((p) => p.type === "dropoff");
-
-    if (!pickup || !dropoff) {
-      throw new Error("Pickup or dropoff point not found");
-    }
-
-    const stop_points = routePoints
-      .filter((p) => p.type === "stop")
-      .map((p) => ({
-        point_lat: p.point.coordinates.lat,
-        point_lng: p.point.coordinates.lng,
-      }));
-
-    const getLocationData = (point: any) => {
-      if (!hasValidCoordinates(point)) {
-        throw new Error(locationValidationMessage);
-      }
-
-      return {
-        lat: point.coordinates.lat,
-        lng: point.coordinates.lng,
-      };
-    };
-
-    const bodyData: any = {
-      pickup_location: getLocationData(pickup.point),
-      dropoff_location: getLocationData(dropoff.point),
-      trip_date: normalizeTripDate(formDetails.date),
-      trip_time: formDetails.time,
-      passengers_count: inputValues.numberOfPassengers,
-      large_suitcase: inputValues.largeSuitcase,
-      small_suitcase: inputValues.smallSuitcase,
-    };
-
-    if (stop_points.length > 0) {
-      bodyData.stop_points = stop_points;
-    }
-
-    return bodyData;
-  };
-
   const onSubmit = async () => {
     setSubmitError("");
 
@@ -264,7 +203,10 @@ export default function RoutePoints({
         ...inputValues,
       });
 
-      const bodyData = buildRequestBody(inputValues);
+      const bodyData = buildTripQuoteRequest({
+        routePoints,
+        formDetails: { ...formDetails, ...inputValues },
+      });
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/trips/calculate-trip-cost/`,

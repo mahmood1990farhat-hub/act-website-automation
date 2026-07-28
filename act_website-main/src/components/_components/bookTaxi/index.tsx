@@ -16,6 +16,7 @@ import PassengerDetails from "./PassengerDetails";
 import ChildInfantTravelInfo from "./ChildInfantTravelInfo";
 import FlightDetails from "./FlightDetails";
 import AdditionalRequirements from "./AdditionalRequirements";
+import { buildTripQuoteRequest } from "./quote-request";
 
 
 export type book_Taxi = {
@@ -143,6 +144,10 @@ export type VehicleType = {
   base_trip_cost: number;
   regular_vat: number;
   total_cost: number;
+  meet_and_greet_available?: boolean;
+  meet_and_greet_fee?: number;
+  meet_and_greet_total?: number;
+  meet_and_greet_available_fee?: number;
   expected_trip_duration_minutes?: number;
 };
 
@@ -202,7 +207,44 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   const [SelectedCar, setSelectedCar] = useState<any | undefined>();
   const [rideOptions, setRideOptions] = useState<calculatTripCost | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('')
+  const [paymentTotal, setPaymentTotal] = useState<number | null>(null);
   const [step, setStep] = useState<number>(1);
+
+  const refreshMeetAndGreetQuote = async (selected: boolean) => {
+    if (!SelectedCar) {
+      throw new Error("Please choose a vehicle before selecting Meet & Greet.");
+    }
+
+    const requestBody = buildTripQuoteRequest({
+      routePoints,
+      formDetails,
+      meetAndGreet: selected,
+    });
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/trips/calculate-trip-cost/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      },
+    );
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.success) {
+      const detail = result?.data?.detail || result?.message;
+      throw new Error(detail || "We could not update the Meet & Greet price.");
+    }
+
+    const updatedCar = result.car_type?.find(
+      (vehicle: VehicleType) => vehicle.id === SelectedCar.id,
+    );
+    if (!updatedCar) {
+      throw new Error("The selected vehicle is no longer available.");
+    }
+
+    setRideOptions(result as calculatTripCost);
+    setSelectedCar(updatedCar);
+  };
   useEffect(() => {
     const handleRouteChange = () => {
       window.scrollTo(0, 0);
@@ -281,6 +323,9 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   locale={locale}
                   additionalRequirements={additionalRequirements}
                   setAdditionalRequirements={setAdditionalRequirements}
+                  meetAndGreetAvailable={SelectedCar?.meet_and_greet_available ?? false}
+                  meetAndGreetPrice={SelectedCar?.meet_and_greet_available_fee}
+                  onMeetAndGreetChange={refreshMeetAndGreetQuote}
                   nextStep={() => setStep(7)}
                   prevStep={() => setStep(5)}
                 />
@@ -324,11 +369,13 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     total_cost: SelectedCar
                       ? SelectedCar.total_cost
                       : undefined,
+                    meet_and_greet_fee: SelectedCar?.meet_and_greet_fee,
                       trip_duration_minutes: SelectedCar?.expected_trip_duration_minutes
                   }}
                   setStep={(e) => setStep(e)}
                   step={step}
                   setClientSecret={(Secret) => setClientSecret(Secret)}
+                  setPaymentTotal={setPaymentTotal}
                   editDatelis={() => setStep(1)}
                 />
               ) : step === 8 ? (
@@ -336,7 +383,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   <PaymentDsetails
                     policy_and_terms={policy_and_terms}
                     clientSecret={clientSecret}
-                    bookingTotal={SelectedCar?.total_cost ?? 0}
+                    bookingTotal={paymentTotal ?? SelectedCar?.total_cost ?? 0}
                     currency="GBP"
                     trans={home.Payments_details}
                     nextStep={() => setStep(9)}

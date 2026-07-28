@@ -60,12 +60,14 @@ type typeProps = {
 		airport_vat?: number;
 		regular_vat?: number;
 		total_cost?: number;
+		meet_and_greet_fee?: number;
 		trip_duration_minutes?: number;
 	};
 	setStep: (n: number) => void;
 	step: number;
 	editDatelis: () => void;
 	setClientSecret: (clientSecret: string) => void;
+	setPaymentTotal: (total: number) => void;
 };
 
 export default function ModernConfirmFlightDetails({
@@ -75,6 +77,7 @@ export default function ModernConfirmFlightDetails({
 	step,
 	editDatelis,
 	setClientSecret,
+	setPaymentTotal,
 	rideOptions,
 	locale,
 }: typeProps) {
@@ -99,6 +102,7 @@ export default function ModernConfirmFlightDetails({
 	const vat = data.regular_vat || 0;
 	const airport_vat = data.airport_vat || 0;
 	const totalCost = data.total_cost;
+	const meetAndGreetFee = data.meet_and_greet_fee || 0;
 
 	// Arabic text alternatives
 	const texts = {
@@ -124,6 +128,7 @@ export default function ModernConfirmFlightDetails({
 		baseCost: isRTL ? "تكلفة الرحلة" : "Trip Cost",
 		airportVAT: isRTL ? "رسوم المطار" : "Airport Charges",
 		regularVAT: isRTL ? "الضريبة 20%" : "Vat 20%",
+		meetAndGreet: isRTL ? "خدمة الاستقبال" : "Meet & Greet",
 		totalCost: isRTL ? "التكلفة الإجمالية" : "Total Cost",
 		routeMap: isRTL ? "خريطة المسار" : "Route Map",
 	};
@@ -225,9 +230,10 @@ export default function ModernConfirmFlightDetails({
 				},
 			});
 			setIsLoading(false);
-			setStep(8);
 			// The API returns client_secret in the response
 			setClientSecret(res.client_secret);
+			setPaymentTotal(res.price_breakdown?.total_cost ?? data.total_cost ?? 0);
+			setStep(8);
 		} catch (error) {
 			console.error(error);
 			setIsLoading(false);
@@ -664,6 +670,15 @@ export default function ModernConfirmFlightDetails({
 										<span className="text-white/80">{texts.regularVAT}</span>
 										<span className="text-white font-semibold">
 											£{vat.toFixed(2)}
+										</span>
+									</div>
+								)}
+
+								{meetAndGreetFee > 0 && (
+									<div className={`flex justify-between items-center`}>
+										<span className="text-white/80">{texts.meetAndGreet}</span>
+										<span className="text-white font-semibold">
+											£{meetAndGreetFee.toFixed(2)}
 										</span>
 									</div>
 								)}

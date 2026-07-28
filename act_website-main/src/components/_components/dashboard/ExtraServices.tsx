@@ -517,7 +517,9 @@ export default function ExtraServices({ trans, token, locale }: ExtraServicesPro
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Fee Amount</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Fee Amount — final customer price, including VAT
+                </label>
                 <input
                   type="text"
                   {...register("fee_amount", {

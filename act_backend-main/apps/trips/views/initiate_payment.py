@@ -8,10 +8,15 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import validate_email
 from django.utils.translation import gettext as _, activate
 from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_time
 from datetime import timedelta
 from utils.common import get_locale, remove_empty_values, get_route_with_distance
 from utils.utils_trip import prepare_trip_data
 from utils.calculate_cost import calculate_total_cost
+from apps.pricing.services.extra_service_resolver import (
+    apply_meet_and_greet_pricing,
+    persist_authoritative_meet_and_greet,
+)
 from apps.payments.models import PendingPayment
 from apps.vehicle.models import VehicleType
 import stripe
@@ -20,6 +25,58 @@ import logging
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def calculate_authoritative_payment_price(data, car_type, distance_miles, booking_details):
+    trip_time = data.get('trip_time')
+    if isinstance(trip_time, str):
+        trip_time = parse_time(trip_time)
+
+    trip_date = data.get('trip_date')
+    if isinstance(trip_date, str):
+        trip_date = parse_date(trip_date)
+
+    total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
+        trip_time,
+        car_type.name_en,
+        distance_miles,
+        pickup_lat=data.get('pickup_lat'),
+        pickup_lng=data.get('pickup_lng'),
+        dropoff_lat=data.get('dropoff_lat'),
+        dropoff_lng=data.get('dropoff_lng'),
+        manual_airport_id=data.get('airport'),
+        trip_date=trip_date,
+    )
+    extra_pricing = apply_meet_and_greet_pricing(
+        total_cost=total_cost,
+        booking_details=booking_details,
+        vehicle_type=car_type,
+        pickup_lat=data.get('pickup_lat'),
+        pickup_lng=data.get('pickup_lng'),
+        dropoff_lat=data.get('dropoff_lat'),
+        dropoff_lng=data.get('dropoff_lng'),
+        manual_airport_id=data.get('airport'),
+    )
+    authoritative_details = persist_authoritative_meet_and_greet(
+        booking_details,
+        extra_pricing,
+    )
+    price_breakdown = {
+        'total_cost': float(extra_pricing['total_cost']),
+        'base_trip_cost': float(base_trip_cost),
+        'regular_vat': float(regular_vat),
+        'airport_vat': float(airport_vat),
+        'min_adjustment': float(min_adjustment),
+        'meet_and_greet_fee': float(extra_pricing['meet_and_greet_fee']),
+        'meet_and_greet_total': float(extra_pricing['meet_and_greet_total']),
+    }
+    return (
+        extra_pricing['total_cost'],
+        price_breakdown,
+        authoritative_details,
+        trip_time,
+        trip_date,
+    )
 
 
 class InitiatePaymentView(EMADBaseView):
@@ -51,35 +108,17 @@ class InitiatePaymentView(EMADBaseView):
         )
         distance_miles = res['distance_miles']
 
-        trip_time_obj = data.get('trip_time')
-        if isinstance(trip_time_obj, str):
-            from django.utils.dateparse import parse_time
-            trip_time_obj = parse_time(trip_time_obj)
-
-        trip_date = data.get('trip_date')
-        if isinstance(trip_date, str):
-            from django.utils.dateparse import parse_date
-            trip_date = parse_date(trip_date)
-
-        total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
-            trip_time_obj,
-            car_type.name_en,
-            distance_miles,
-            pickup_lat=data.get('pickup_lat'),
-            pickup_lng=data.get('pickup_lng'),
-            dropoff_lat=data.get('dropoff_lat'),
-            dropoff_lng=data.get('dropoff_lng'),
-            manual_airport_id=data.get('airport'),
-            trip_date=trip_date,
+        booking_details = request.data.get('booking_details') or {}
+        total_cost, price_breakdown, booking_details, trip_time_obj, trip_date = (
+            calculate_authoritative_payment_price(
+                data,
+                car_type,
+                distance_miles,
+                booking_details,
+            )
         )
 
-        price_breakdown = {
-            'total_cost': float(total_cost),
-            'base_trip_cost': float(base_trip_cost),
-            'regular_vat': float(regular_vat),
-            'airport_vat': float(airport_vat),
-            'min_adjustment': float(min_adjustment),
-        }
+        meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
@@ -105,10 +144,6 @@ class InitiatePaymentView(EMADBaseView):
             trip_data_for_storage['airport'] = trip_data_for_storage['airport'].id
 
         trip_data_for_storage['car_type'] = car_type.id
-        booking_details = request.data.get('booking_details') or {}
-        if not isinstance(booking_details, dict):
-            booking_details = {}
-
         pending_payment = PendingPayment.objects.create(
             payment_intent_id=None,
             price_breakdown=price_breakdown,
@@ -142,6 +177,7 @@ class InitiatePaymentView(EMADBaseView):
             "trip_date": stripe_metadata_value(trip_date),
             "trip_time": stripe_metadata_value(trip_time_obj),
             "passengers_count": stripe_metadata_value(data.get("passengers_count")),
+            "meet_and_greet_total": stripe_metadata_value(meet_and_greet_total),
             "currency": "GBP",
         }
         payment_intent = stripe.PaymentIntent.create(
@@ -176,6 +212,7 @@ class InitiatePaymentView(EMADBaseView):
             "client_secret": payment_intent.client_secret,
             "payment_intent_id": payment_intent.id,
             "pending_payment_id": pending_payment.id,
+            "price_breakdown": price_breakdown,
         }, status=status.HTTP_200_OK)
 
 
@@ -259,35 +296,16 @@ class InitiateGuestPaymentView(EMADBaseView):
         )
         distance_miles = res['distance_miles']
 
-        trip_time_obj = data.get('trip_time')
-        if isinstance(trip_time_obj, str):
-            from django.utils.dateparse import parse_time
-            trip_time_obj = parse_time(trip_time_obj)
-
-        trip_date = data.get('trip_date')
-        if isinstance(trip_date, str):
-            from django.utils.dateparse import parse_date
-            trip_date = parse_date(trip_date)
-
-        total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
-            trip_time_obj,
-            car_type.name_en,
-            distance_miles,
-            pickup_lat=data.get('pickup_lat'),
-            pickup_lng=data.get('pickup_lng'),
-            dropoff_lat=data.get('dropoff_lat'),
-            dropoff_lng=data.get('dropoff_lng'),
-            manual_airport_id=data.get('airport'),
-            trip_date=trip_date,
+        booking_details = request.data.get('booking_details') or {}
+        total_cost, price_breakdown, booking_details, trip_time_obj, trip_date = (
+            calculate_authoritative_payment_price(
+                data,
+                car_type,
+                distance_miles,
+                booking_details,
+            )
         )
-
-        price_breakdown = {
-            'total_cost': float(total_cost),
-            'base_trip_cost': float(base_trip_cost),
-            'regular_vat': float(regular_vat),
-            'airport_vat': float(airport_vat),
-            'min_adjustment': float(min_adjustment),
-        }
+        meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
@@ -313,10 +331,6 @@ class InitiateGuestPaymentView(EMADBaseView):
             trip_data_for_storage['airport'] = trip_data_for_storage['airport'].id
 
         trip_data_for_storage['car_type'] = car_type.id
-        booking_details = request.data.get('booking_details') or {}
-        if not isinstance(booking_details, dict):
-            booking_details = {}
-
         pending_payment = PendingPayment.objects.create(
             payment_intent_id=None,
             price_breakdown=price_breakdown,
@@ -342,6 +356,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             "trip_date": self._stripe_metadata_value(trip_date),
             "trip_time": self._stripe_metadata_value(trip_time_obj),
             "passengers_count": self._stripe_metadata_value(data.get("passengers_count")),
+            "meet_and_greet_total": self._stripe_metadata_value(meet_and_greet_total),
             "currency": "GBP",
         }
         payment_intent = stripe.PaymentIntent.create(
@@ -377,6 +392,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             "client_secret": payment_intent.client_secret,
             "payment_intent_id": payment_intent.id,
             "pending_payment_id": pending_payment.id,
+            "price_breakdown": price_breakdown,
         }, status=status.HTTP_200_OK)
 
 
