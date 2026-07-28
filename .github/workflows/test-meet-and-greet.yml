@@ -109,8 +109,12 @@ jobs:
           cd "$GITHUB_WORKSPACE/act_backend-main"
           ln -s "$SERVICE_ENVIRONMENT_FILE" .env
           test_settings="$GITHUB_WORKSPACE/act_backend-main/myProject/ci_test_settings.py"
+          test_urls="$GITHUB_WORKSPACE/act_backend-main/myProject/ci_test_urls.py"
+          printf 'urlpatterns = []\n' > "$test_urls"
           cat > "$test_settings" <<'PY'
           from .settings import *
+
+          ROOT_URLCONF = "myProject.ci_test_urls"
 
           # The GitHub snapshot lacks historical migrations for these production apps.
           # Synchronize their current models only inside Django's isolated test database.
@@ -134,7 +138,7 @@ jobs:
               "token_blacklist": None,
           }
           PY
-          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env" "$test_settings"' EXIT
+          trap 'rm -f "$GITHUB_WORKSPACE/act_backend-main/.env" "$test_settings" "$test_urls"' EXIT
           export DJANGO_SETTINGS_MODULE=myProject.ci_test_settings
           "$PYTHON_EXECUTABLE" manage.py test \
             apps.pricing.tests.test_extra_service_resolver \
