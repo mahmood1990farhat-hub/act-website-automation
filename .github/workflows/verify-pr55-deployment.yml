@@ -1,0 +1,29 @@
+name: Verify PR 55 Deployment
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Verify live services and backend source
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ACT_SERVICE_STATUS=$(systemctl is-active act.service)"
+          pm2_status="$(pm2 jlist | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((p.get("pm2_env",{}).get("status", "unknown") for p in data if p.get("name") == "act"), "missing"))')"
+          echo "PM2_ACT_STATUS=$pm2_status"
+          backend=/var/www/atg/atg-backend/backend
+          echo "BACKEND_GIT_SHA=$(git -C "$backend" rev-parse HEAD)"
+          if test -f "$backend/apps/pricing/services/extra_service_resolver.py" && \
+             grep -q 'apply_meet_and_greet_pricing' "$backend/apps/trips/views/initiate_payment.py"; then
+            echo "MEET_GREET_BACKEND_DEPLOYED=true"
+          else
+            echo "MEET_GREET_BACKEND_DEPLOYED=false"
+          fi
+          echo "WEBSITE_HTTP_STATUS=$(curl -sS -o /dev/null -w '%{http_code}' https://airportandcitytransfer.com/en)"
