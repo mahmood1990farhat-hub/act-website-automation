@@ -142,6 +142,9 @@ jobs:
           export DJANGO_SETTINGS_MODULE=myProject.ci_test_settings
           "$PYTHON_EXECUTABLE" manage.py test \
             apps.pricing.tests.test_extra_service_resolver \
+            apps.pricing.tests.test_pricing_engine \
+            apps.pricing.tests.test_airport_resolver \
+            apps.pricing.tests.test_integration \
             apps.trips.tests.test_meet_and_greet_pricing \
             --noinput \
             --verbosity=2
