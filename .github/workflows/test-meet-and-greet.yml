@@ -14,7 +14,7 @@ jobs:
       - name: Check out reviewed merge
         uses: actions/checkout@v4
         with:
-          ref: 8eaab9416517840631ea0642fb76a09df37e5489
+          ref: 7b867f4f719486aad7b93e6a7928706b1f29fd74
           clean: true
           fetch-depth: 2
 
@@ -26,12 +26,14 @@ jobs:
           live=/var/www/atg/atg-backend/backend
           source="$GITHUB_WORKSPACE/act_backend-main"
           python="$live/env/bin/python"
-          target_sha=8eaab9416517840631ea0642fb76a09df37e5489
+          target_sha=7b867f4f719486aad7b93e6a7928706b1f29fd74
           stamp="$(date -u +%Y%m%dT%H%M%SZ)"
           rollback="/home/act/secure-backups/meet-greet-deploy-${stamp}-${GITHUB_RUN_ID}"
           stage="/home/act/reconcile-work/meet-greet-deploy-${GITHUB_RUN_ID}"
 
           files=(
+            apps/payments/test_urls.py
+            apps/payments/urls.py
             apps/pricing/admin.py
             apps/pricing/services/extra_service_resolver.py
             apps/pricing/tests/test_extra_service_resolver.py
@@ -149,6 +151,8 @@ jobs:
           )"
           echo "ISOLATED_TEST_DATABASE=$test_database"
           "$python" manage.py test \
+            apps.payments.test_urls \
+            apps.payments.tests \
             apps.pricing.tests.test_extra_service_resolver \
             apps.pricing.tests.test_pricing_engine \
             apps.pricing.tests.test_airport_resolver \
@@ -225,6 +229,57 @@ jobs:
             *) echo "BACKEND_HEALTH_HTTP=$health_code"; false ;;
           esac
           echo "BACKEND_HEALTH_HTTP=$health_code"
+
+          cat > /tmp/act-quote-off.json <<'JSON'
+          {
+            "pickup_location": {"lat": 51.5074, "lng": -0.1278},
+            "dropoff_location": {"lat": 51.4700, "lng": -0.4543},
+            "trip_date": "2026-08-15",
+            "trip_time": "10:00",
+            "passengers_count": 1,
+            "large_suitcase": 0,
+            "small_suitcase": 0,
+            "booking_details": {"additional_requirements": {"meet_and_greet": false}}
+          }
+          JSON
+          sed 's/"meet_and_greet": false/"meet_and_greet": true/' \
+            /tmp/act-quote-off.json > /tmp/act-quote-on.json
+          quote_url=https://airportandcitytransfer.com/api/trips/calculate-trip-cost/
+          off_code="$(curl -sS -o /tmp/act-quote-off-response.json -w '%{http_code}' \
+            --max-time 45 -H 'Content-Type: application/json' \
+            --data-binary @/tmp/act-quote-off.json "$quote_url")"
+          on_code="$(curl -sS -o /tmp/act-quote-on-response.json -w '%{http_code}' \
+            --max-time 45 -H 'Content-Type: application/json' \
+            --data-binary @/tmp/act-quote-on.json "$quote_url")"
+          test "$off_code" = 200
+          test "$on_code" = 200
+          "$python" - <<'PY'
+          import json
+          from decimal import Decimal
+
+          with open('/tmp/act-quote-off-response.json', encoding='utf-8') as handle:
+              off = json.load(handle)
+          with open('/tmp/act-quote-on-response.json', encoding='utf-8') as handle:
+              on = json.load(handle)
+          if not off.get('success') or not on.get('success'):
+              raise SystemExit('Quote endpoint did not return success')
+          off_by_id = {item['id']: item for item in off.get('car_type', [])}
+          verified = []
+          for selected in on.get('car_type', []):
+              fee = Decimal(str(selected.get('meet_and_greet_total', 0)))
+              baseline = off_by_id.get(selected['id'])
+              if fee <= 0 or not baseline:
+                  continue
+              if Decimal(str(baseline.get('meet_and_greet_total', 0))) != 0:
+                  raise SystemExit('Unselected quote contains a Meet & Greet charge')
+              delta = Decimal(str(selected['total_cost'])) - Decimal(str(baseline['total_cost']))
+              if abs(delta - fee) > Decimal('0.02'):
+                  raise SystemExit('Meet & Greet quote delta does not equal configured fee')
+              verified.append((selected['id'], selected['name_en'], str(fee)))
+          if not verified:
+              raise SystemExit('No configured Meet & Greet fee was returned by the live quote')
+          print('MEET_GREET_QUOTE_VERIFIED=' + json.dumps(verified))
+          PY
 
           test -f "$live/apps/pricing/services/extra_service_resolver.py"
           grep -q 'apply_meet_and_greet_pricing' "$live/apps/trips/views/calculate_trip_cost.py"
