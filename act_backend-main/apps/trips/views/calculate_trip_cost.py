@@ -9,6 +9,7 @@ from ..serializers import TripSerializer
 from utils.common import get_locale , remove_empty_values , is_past_datetime , get_route_with_distance , validate_int_value
 from utils.calculate_cost import calculate_total_cost
 from utils.utils_trip import prepare_trip_data
+from apps.pricing.services.extra_service_resolver import apply_meet_and_greet_pricing
 from utils.common.error_handlers import (
     create_validation_error_response,
     create_exception_error_response,
@@ -74,6 +75,7 @@ class CalculateTripCostView(EMADBaseView):
         trip_time_obj = validated_data.get('trip_time')
         trip_date = validated_data.get('trip_date')
         passengers_count = validated_data.get('passengers_count')
+        booking_details = request.data.get('booking_details') or {}
 
         car_types_qs = VehicleType.objects.filter(max_passengers_count__gte=passengers_count)
 
@@ -100,6 +102,17 @@ class CalculateTripCostView(EMADBaseView):
                     manual_airport_id=data.get('airport'),
                     trip_date=trip_date,
                 )
+                extra_pricing = apply_meet_and_greet_pricing(
+                    total_cost=total_cost,
+                    booking_details=booking_details,
+                    vehicle_type=car_type_obj,
+                    pickup_lat=data.get('pickup_lat'),
+                    pickup_lng=data.get('pickup_lng'),
+                    dropoff_lat=data.get('dropoff_lat'),
+                    dropoff_lng=data.get('dropoff_lng'),
+                    manual_airport_id=data.get('airport'),
+                )
+                total_cost = extra_pricing['total_cost']
                 # regular_vat = round(regular_vat + min_adjustment, 2)
                 car_type_list.append({
                     "id": car_type_obj.id,
@@ -114,6 +127,10 @@ class CalculateTripCostView(EMADBaseView):
                     'airport_vat': airport_vat,
                     'base_trip_cost': base_trip_cost,
                     'min_adjustment': min_adjustment,
+                    'meet_and_greet_available': extra_pricing['available'],
+                    'meet_and_greet_fee': float(extra_pricing['meet_and_greet_fee']),
+                    'meet_and_greet_total': float(extra_pricing['meet_and_greet_total']),
+                    'meet_and_greet_available_fee': float(extra_pricing['meet_and_greet_available_fee']),
                 })
                 vehicle_debug.update({
                     "status": "ok",
@@ -122,6 +139,7 @@ class CalculateTripCostView(EMADBaseView):
                     "regular_vat": regular_vat,
                     "airport_vat": airport_vat,
                     "min_adjustment": min_adjustment,
+                    "meet_and_greet_fee": float(extra_pricing['meet_and_greet_fee']),
                 })
             except ValueError as e:
                 # Handle "No rate found" error - distance too long or unsupported car type

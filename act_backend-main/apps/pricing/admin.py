@@ -169,7 +169,8 @@ class ExtraServiceFeeAdmin(admin.ModelAdmin):
             'description': 'Leave airport or vehicle type empty to apply this rule broadly.'
         }),
         ('Pricing', {
-            'fields': ('fee_amount', 'pricing_mode')
+            'fields': ('fee_amount', 'pricing_mode'),
+            'description': 'Fee Amount is the final customer price, including VAT.'
         }),
     )
 
