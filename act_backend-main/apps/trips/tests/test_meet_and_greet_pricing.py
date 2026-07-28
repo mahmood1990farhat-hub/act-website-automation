@@ -105,6 +105,7 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
         }
         quote_request = SimpleNamespace(
             data=self.request_data,
+            query_params={},
             build_absolute_uri=lambda path: f'https://example.com{path}',
         )
         with patch(
