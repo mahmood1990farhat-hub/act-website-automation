@@ -1,0 +1,82 @@
+name: Recover Remaining Historical Migrations
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Recover allowlisted migration directories read-only
+        id: recover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          live=/var/www/atg/atg-backend/backend
+          output="$RUNNER_TEMP/remaining-migration-recovery-${GITHUB_RUN_ID}"
+          files="$output/files"
+          metadata="$output/file-metadata.tsv"
+          missing_dirs="$output/missing-directories.txt"
+          count_file="$output/recovered-count.txt"
+
+          rm -rf -- "$output"
+          mkdir -p "$files"
+          chmod 700 "$output"
+          printf 'relative_path\tabsolute_source_path\tsize_bytes\tmodified_utc\tsha256\n' > "$metadata"
+          : > "$missing_dirs"
+          count=0
+
+          allowlist=(
+            'apps/admin_panel/migrations'
+            'apps/complaints/migrations'
+            'apps/earnings/migrations'
+          )
+
+          for relative_dir in "${allowlist[@]}"; do
+            source_dir="$live/$relative_dir"
+            if [[ ! -d "$source_dir" ]]; then
+              printf '%s\n' "$relative_dir" >> "$missing_dirs"
+              continue
+            fi
+
+            while IFS= read -r -d '' source; do
+              filename="$(basename "$source")"
+              relative="$relative_dir/$filename"
+              destination="$files/$relative"
+              mkdir -p "$(dirname "$destination")"
+              cp --preserve=timestamps -- "$source" "$destination"
+
+              size="$(stat -c '%s' -- "$source")"
+              modified="$(date -u -d "@$(stat -c '%Y' -- "$source")" '+%Y-%m-%dT%H:%M:%SZ')"
+              hash="$(sha256sum "$source" | awk '{print $1}')"
+              copied_hash="$(sha256sum "$destination" | awk '{print $1}')"
+              test "$hash" = "$copied_hash"
+              printf '%s\t%s\t%s\t%s\t%s\n' \
+                "$relative" "$source" "$size" "$modified" "$hash" >> "$metadata"
+              count=$((count + 1))
+            done < <(find "$source_dir" -maxdepth 1 -type f -name '[0-9]*.py' -print0 | sort -z)
+          done
+
+          printf '%s\n' "$count" > "$count_file"
+          echo "artifact_path=$output" >> "$GITHUB_OUTPUT"
+          echo "recovered_count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Upload recovered migration artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovered-remaining-migrations-${{ github.run_id }}
+          path: ${{ steps.recover.outputs.artifact_path }}/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Confirm migrations were recovered
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ '${{ steps.recover.outputs.recovered_count }}' -gt 0 ]]
