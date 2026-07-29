@@ -304,14 +304,8 @@ class ExtraServiceFee(models.Model):
     class Meta:
         ordering = ['-priority', 'order', 'service_key', 'airport', 'vehicle_type', 'direction']
         indexes = [
-            models.Index(
-                fields=['service_key', 'is_active'],
-                name='pricing_ext_service_75ce8e_idx',
-            ),
-            models.Index(
-                fields=['airport', 'vehicle_type'],
-                name='pricing_ext_airport_5094b5_idx',
-            ),
+            models.Index(fields=['service_key', 'is_active']),
+            models.Index(fields=['airport', 'vehicle_type']),
         ]
         verbose_name = "Extra Service Fee"
         verbose_name_plural = "Extra Service Fees"

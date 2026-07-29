@@ -91,12 +91,6 @@ class Trip(models.Model):
     small_suitcase = models.PositiveIntegerField(default=0)
     
     stripe_payment_intent = models.CharField(max_length=255, unique=True, null=True, blank=True)
-    stripe_invoice_id = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text='Stripe Invoice id (in_...) when the trip was paid via an invoice',
-    )
     last4 = models.CharField(max_length=4, null=True, blank=True)
     card_brand = models.CharField(max_length=20, null=True, blank=True)
     is_paid = models.BooleanField(default= False)
