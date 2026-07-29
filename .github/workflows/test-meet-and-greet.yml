@@ -1,4 +1,4 @@
-name: Retrieve sanitized migration validation failure
+name: Validate restored backend migration history
 
 on:
   workflow_dispatch: {}
@@ -7,28 +7,179 @@ permissions:
   contents: read
 
 jobs:
-  report:
+  validate:
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 90
     steps:
-      - name: Sanitize existing test failure log
+      - name: Check out temporary validation branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/recover-live-migration-files
+          clean: true
+
+      - name: Run isolated backend validation
         shell: bash
         run: |
           set -euo pipefail
-          source_log=/home/act/reconcile-work/restored-migrations-30491672218/private-logs/tests.log
-          report="$RUNNER_TEMP/restored-migration-test-failure-${GITHUB_RUN_ID}"
-          test -f "$source_log"
-          mkdir -p "$report"
-          sed -E \
-            -e '/Invalid line:/d' \
-            -e '/PASSWORD|SECRET|TOKEN|API_KEY|DATABASE_URL|PRIVATE_KEY/Id' \
-            -e 's#(/[^ ]*\.env[^ ]*)#[REDACTED_ENV_PATH]#g' \
-            "$source_log" > "$report/tests.txt"
 
-      - name: Upload sanitized failure report
+          live=/var/www/atg/atg-backend/backend
+          python="$live/env/bin/python"
+          work="/home/act/reconcile-work/restored-migrations-${GITHUB_RUN_ID}"
+          proposal="$work/backend"
+          private_logs="$work/private-logs"
+          report="$GITHUB_WORKSPACE/restored-migration-report"
+          migration_db="act_migration_validation_${GITHUB_RUN_ID}"
+          test_db="${migration_db}_tests"
+
+          rm -rf -- "$work" "$report"
+          mkdir -p "$proposal" "$private_logs" "$report"
+          chmod 700 "$work" "$private_logs"
+          cp -a "$GITHUB_WORKSPACE/act_backend-main/." "$proposal/"
+
+          declare -A expected=(
+            ['apps/accounts/migrations/0001_initial.py']='af85ff9a8d71dc70c2ca5f4ddf6435310b46ff53ecb99453cdd33b249c4a3688'
+            ['apps/admin_panel/migrations/0001_initial.py']='01b55c62e720588baaab1551b64b0b585caa16377d3276bad10c47e1c9827333'
+            ['apps/complaints/migrations/0001_initial.py']='42aeab79735e17147a24aca703bdd258662e1d7f55c80484b5672486ed7a93e1'
+            ['apps/drivers/migrations/0001_initial.py']='dd877a474873d9600169f1c57e84cd06bcd043e69520e9672e7bb9309248d469'
+            ['apps/earnings/migrations/0001_initial.py']='4278f46aaa1b6c22e562853248ecd9811e642121e313b30378e9f6ca8684d8f7'
+            ['apps/office/migrations/0001_initial.py']='5ed886ea476637bc8d7613d1509740ba7eec108a36f61fe1ebb5eb6aacd09301'
+            ['apps/passengers/migrations/0001_initial.py']='86b0cfb2a68e14767564635929b353c658bbb96ec3f848ba0f3d7b866e046cba'
+            ['apps/payments/migrations/0001_initial.py']='01d118e0a161d8868917868ef65c46803ebf9bf3beab1aeb224dc589bdc4c8e8'
+            ['apps/trips/migrations/0001_initial.py']='90f0dc7c58bbcf88f8fbececcbdddfff0873e0a66acab4e8d6aa7bdad0ccc6fd'
+            ['apps/trips/migrations/0002_alter_trip_status.py']='7641e0eda881e000c5b907b28d4d7eb0e7afd7f2ccfe266aa70474044359ef06'
+            ['apps/trips/migrations/0003_trip_booking_confirmation_pdf_and_more.py']='ca494b6ad9691dcddbaec9bef2461361fb244e679ea2be99e2efc2fd6ae5bc59'
+            ['apps/vehicle/migrations/0001_initial.py']='8e5d98f19fc30557d11142538271bf7a445e33331b889a567c814f997486722e'
+          )
+
+          printf 'path\tsha256\tverified\n' > "$report/hashes.tsv"
+          for relative in "${!expected[@]}"; do
+            actual="$(sha256sum "$proposal/$relative" | awk '{print $1}')"
+            test "$actual" = "${expected[$relative]}"
+            printf '%s\t%s\ttrue\n' "$relative" "$actual" >> "$report/hashes.tsv"
+          done
+
+          ln -s "$live/.env" "$proposal/.env"
+          settings_file="$proposal/myProject/ci_restored_migration_settings.py"
+          cat > "$settings_file" <<'PY'
+          import os
+          from .settings import *
+          DATABASES['default']['NAME'] = os.environ['CI_MIGRATION_DB_NAME']
+          DATABASES['default'].setdefault('TEST', {})['NAME'] = os.environ['CI_TEST_DB_NAME']
+          PY
+
+          sanitize() {
+            sed -E \
+              -e '/Invalid line:/d' \
+              -e '/PASSWORD|SECRET|TOKEN|API_KEY|DATABASE_URL|PRIVATE_KEY/Id' \
+              -e 's#(/[^ ]*\.env[^ ]*)#[REDACTED_ENV_PATH]#g' \
+              "$1" > "$2"
+          }
+
+          cleanup() {
+            set +e
+            cd "$proposal" 2>/dev/null || true
+            DJANGO_SETTINGS_MODULE=myProject.settings "$python" - \
+              "$migration_db" "$test_db" > "$private_logs/cleanup.log" 2>&1 <<'PY'
+          import django
+          import re
+          import sys
+          django.setup()
+          from django.db import connection
+
+          names = list(sys.argv[1:])
+          if any(not re.fullmatch(r'act_migration_validation_[0-9]+(?:_tests)?', name) for name in names):
+              raise SystemExit('Unsafe isolated database name')
+          with connection._nodb_cursor() as cursor:
+              for name in names:
+                  cursor.execute(
+                      'SELECT pg_terminate_backend(pid) FROM pg_stat_activity '
+                      'WHERE datname = %s AND pid <> pg_backend_pid()',
+                      [name],
+                  )
+                  cursor.execute(f'DROP DATABASE IF EXISTS {connection.ops.quote_name(name)}')
+              cursor.execute('SELECT datname FROM pg_database WHERE datname = ANY(%s)', [names])
+              remaining = [row[0] for row in cursor.fetchall()]
+          if remaining:
+              raise SystemExit('Isolated databases remain after cleanup')
+          print('ISOLATED_DATABASES_REMOVED=true')
+          PY
+            cleanup_status=$?
+            sanitize "$private_logs/cleanup.log" "$report/cleanup.txt"
+            printf 'CLEANUP_EXIT=%s\n' "$cleanup_status" >> "$report/cleanup.txt"
+            rm -f "$proposal/.env" "$settings_file"
+            find "$proposal" -type d -name __pycache__ -prune -exec rm -rf {} + || true
+            return "$cleanup_status"
+          }
+          trap cleanup EXIT
+
+          cd "$proposal"
+          export CI_MIGRATION_DB_NAME="$migration_db"
+          export CI_TEST_DB_NAME="$test_db"
+
+          "$python" -m compileall -q apps utils myProject
+
+          DJANGO_SETTINGS_MODULE=myProject.settings "$python" - > "$private_logs/graph.log" 2>&1 <<'PY'
+          import django
+          django.setup()
+          from django.db.migrations.loader import MigrationLoader
+          loader = MigrationLoader(None, ignore_no_migrations=False)
+          loader.graph.ensure_not_cyclic()
+          nodes = sorted(loader.graph.nodes)
+          leaves = sorted(loader.graph.leaf_nodes())
+          print(f'MIGRATION_NODE_COUNT={len(nodes)}')
+          print('MIGRATION_LEAVES=' + ','.join(f'{app}.{name}' for app, name in leaves))
+          PY
+          sanitize "$private_logs/graph.log" "$report/migration-graph.txt"
+
+          DJANGO_SETTINGS_MODULE=myProject.settings "$python" - "$migration_db" > "$private_logs/create-db.log" 2>&1 <<'PY'
+          import django
+          import re
+          import sys
+          django.setup()
+          from django.db import connection
+          requested = sys.argv[1]
+          production = str(connection.settings_dict.get('NAME') or '')
+          if not re.fullmatch(r'act_migration_validation_[0-9]+', requested) or requested == production:
+              raise SystemExit('Unsafe isolated migration database name')
+          connection.settings_dict.setdefault('TEST', {})['NAME'] = requested
+          created = connection.creation._create_test_db(verbosity=1, autoclobber=True, keepdb=False)
+          print(f'ISOLATED_MIGRATION_DATABASE={created}')
+          print(f'PRODUCTION_DATABASE_UNCHANGED={created != production}')
+          PY
+          sanitize "$private_logs/create-db.log" "$report/create-database.txt"
+
+          "$python" manage.py check --settings myProject.ci_restored_migration_settings \
+            > "$private_logs/check.log" 2>&1
+          sanitize "$private_logs/check.log" "$report/django-check.txt"
+
+          "$python" manage.py showmigrations --plan --settings myProject.ci_restored_migration_settings \
+            > "$private_logs/show-plan.log" 2>&1
+          sanitize "$private_logs/show-plan.log" "$report/showmigrations-plan.txt"
+
+          "$python" manage.py makemigrations --check --dry-run --settings myProject.ci_restored_migration_settings \
+            > "$private_logs/makemigrations.log" 2>&1
+          sanitize "$private_logs/makemigrations.log" "$report/makemigrations-check.txt"
+
+          "$python" manage.py migrate --noinput --settings myProject.ci_restored_migration_settings \
+            > "$private_logs/migrate.log" 2>&1
+          sanitize "$private_logs/migrate.log" "$report/migrate-fresh-database.txt"
+
+          "$python" manage.py showmigrations --plan --settings myProject.ci_restored_migration_settings \
+            > "$private_logs/show-after.log" 2>&1
+          sanitize "$private_logs/show-after.log" "$report/showmigrations-after.txt"
+
+          "$python" manage.py test --settings myProject.ci_restored_migration_settings \
+            --noinput --verbosity=2 > "$private_logs/tests.log" 2>&1
+          sanitize "$private_logs/tests.log" "$report/tests.txt"
+
+          printf 'LIVE_SOURCE_MODIFIED=false\nPRODUCTION_MIGRATIONS_RUN=false\nSERVICES_RESTARTED=false\n' \
+            > "$report/safety.txt"
+
+      - name: Upload validation report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: restored-migration-test-failure-${{ github.run_id }}
-          path: ${{ runner.temp }}/restored-migration-test-failure-${{ github.run_id }}/
-          if-no-files-found: error
+          name: restored-migration-validation-${{ github.run_id }}
+          path: restored-migration-report/
+          if-no-files-found: warn
           retention-days: 7
