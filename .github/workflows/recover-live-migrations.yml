@@ -1,0 +1,133 @@
+name: Recover Live Migration Files
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Recover allowlisted migration files
+        id: recover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          live=/var/www/atg/atg-backend/backend
+          output="$RUNNER_TEMP/live-migration-recovery-$GITHUB_RUN_ID"
+          files_output="$output/files"
+          metadata="$output/file-metadata.tsv"
+          missing="$output/missing-files.txt"
+
+          mkdir -p -- "$files_output"
+          printf 'relative_path\tabsolute_source_path\tsize_bytes\tmodified_utc\tsha256\n' > "$metadata"
+          : > "$missing"
+
+          files=(
+            'apps/payments/migrations/0001_initial.py'
+            'apps/trips/migrations/0001_initial.py'
+            'apps/trips/migrations/0002_alter_trip_status.py'
+            'apps/trips/migrations/0003_trip_booking_confirmation_pdf_and_more.py'
+          )
+
+          live_real=$(realpath -- "$live")
+          for relative_path in "${files[@]}"; do
+            source_path="$live/$relative_path"
+            if [[ ! -f "$source_path" ]]; then
+              printf '%s\n' "$relative_path" >> "$missing"
+              printf 'MISSING\t%s\n' "$relative_path"
+              continue
+            fi
+
+            source_real=$(realpath -- "$source_path")
+            case "$source_real" in
+              "$live_real"/*) ;;
+              *)
+                printf 'Rejected path outside live backend: %s\n' "$relative_path" >&2
+                exit 1
+                ;;
+            esac
+
+            size_bytes=$(stat -c '%s' -- "$source_real")
+            modified_epoch=$(stat -c '%Y' -- "$source_real")
+            modified_utc=$(date -u -d "@$modified_epoch" '+%Y-%m-%dT%H:%M:%SZ')
+            sha256=$(sha256sum -- "$source_real" | cut -d ' ' -f 1)
+
+            mkdir -p -- "$files_output/$(dirname -- "$relative_path")"
+            cp --preserve=timestamps -- "$source_real" "$files_output/$relative_path"
+            printf '%s\t%s\t%s\t%s\t%s\n' \
+              "$relative_path" "$source_real" "$size_bytes" "$modified_utc" "$sha256" \
+              >> "$metadata"
+            printf 'FOUND\t%s\tsize=%s\tmodified=%s\tsha256=%s\n' \
+              "$relative_path" "$size_bytes" "$modified_utc" "$sha256"
+          done
+
+          if [[ -s "$missing" ]]; then
+            echo 'complete=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'complete=true' >> "$GITHUB_OUTPUT"
+          fi
+          echo "output=$output" >> "$GITHUB_OUTPUT"
+
+      - name: Read allowlisted Django migration metadata
+        id: migration_metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          output="${{ steps.recover.outputs.output }}"
+          records="$output/production-migration-records.tsv"
+          error_file="$output/migration-metadata-error.txt"
+          printf 'app\tname\tapplied_utc\n' > "$records"
+          : > "$error_file"
+
+          sql=$(cat <<'SQL'
+          SET default_transaction_read_only = on;
+          SELECT app, name, to_char(applied AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')
+          FROM django_migrations
+          WHERE (app = 'payments' AND name = '0001_initial')
+             OR (app = 'trips' AND name IN (
+                  '0001_initial',
+                  '0002_alter_trip_status',
+                  '0003_trip_booking_confirmation_pdf_and_more'
+                ))
+          ORDER BY app, name;
+          SQL
+          )
+
+          if ! sudo -n -u postgres psql -X -d act1 -v ON_ERROR_STOP=1 -A -F $'\t' -t -c "$sql" \
+              >> "$records" 2> "$error_file"; then
+            echo 'Unable to query allowlisted migration metadata without credentials.' >&2
+            echo 'complete=false' >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          if [[ $(tail -n +2 "$records" | sed '/^[[:space:]]*$/d' | wc -l) -ne 4 ]]; then
+            echo 'Expected four allowlisted migration records.' >&2
+            echo 'complete=false' >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          rm -f -- "$error_file"
+          echo 'complete=true' >> "$GITHUB_OUTPUT"
+
+      - name: Upload recovered migration artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovered-live-migrations-${{ github.run_id }}
+          path: ${{ steps.recover.outputs.output }}/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Confirm complete recovery
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ '${{ steps.recover.outputs.complete }}' == 'true' ]]
+          [[ '${{ steps.migration_metadata.outputs.complete }}' == 'true' ]]
