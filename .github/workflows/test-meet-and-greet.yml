@@ -1,0 +1,225 @@
+name: Validate Complete Restored Migration History
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: self-hosted
+    timeout-minutes: 60
+    steps:
+      - name: Check out validation harness
+        uses: actions/checkout@v4
+        with:
+          ref: codex/recover-live-migration-files
+          clean: true
+
+      - name: Validate complete migration history in isolation
+        id: validation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          live=/var/www/atg/atg-backend/backend
+          python="$live/env/bin/python"
+          work="/home/act/reconcile-work/complete-migration-${GITHUB_RUN_ID}"
+          proposal="$work/backend"
+          raw="$work/private-logs"
+          report="$GITHUB_WORKSPACE/complete-migration-report"
+          migration_db="act_migration_validation_${GITHUB_RUN_ID}"
+          test_db="${migration_db}_tests"
+
+          mkdir -p "$proposal" "$raw" "$report"
+          chmod 700 "$work" "$raw"
+          cp -a "$GITHUB_WORKSPACE/act_backend-main/." "$proposal/"
+
+          declare -A expected=(
+            ['apps/accounts/migrations/0001_initial.py']='af85ff9a8d71dc70c2ca5f4ddf6435310b46ff53ecb99453cdd33b249c4a3688'
+            ['apps/admin_panel/migrations/0001_initial.py']='01b55c62e720588baaab1551b64b0b585caa16377d3276bad10c47e1c9827333'
+            ['apps/complaints/migrations/0001_initial.py']='42aeab79735e17147a24aca703bdd258662e1d7f55c80484b5672486ed7a93e1'
+            ['apps/drivers/migrations/0001_initial.py']='dd877a474873d9600169f1c57e84cd06bcd043e69520e9672e7bb9309248d469'
+            ['apps/earnings/migrations/0001_initial.py']='4278f46aaa1b6c22e562853248ecd9811e642121e313b30378e9f6ca8684d8f7'
+            ['apps/office/migrations/0001_initial.py']='5ed886ea476637bc8d7613d1509740ba7eec108a36f61fe1ebb5eb6aacd09301'
+            ['apps/passengers/migrations/0001_initial.py']='86b0cfb2a68e14767564635929b353c658bbb96ec3f848ba0f3d7b866e046cba'
+            ['apps/payments/migrations/0001_initial.py']='01d118e0a161d8868917868ef65c46803ebf9bf3beab1aeb224dc589bdc4c8e8'
+            ['apps/trips/migrations/0001_initial.py']='90f0dc7c58bbcf88f8fbececcbdddfff0873e0a66acab4e8d6aa7bdad0ccc6fd'
+            ['apps/trips/migrations/0002_alter_trip_status.py']='7641e0eda881e000c5b907b28d4d7eb0e7afd7f2ccfe266aa70474044359ef06'
+            ['apps/trips/migrations/0003_trip_booking_confirmation_pdf_and_more.py']='ca494b6ad9691dcddbaec9bef2461361fb244e679ea2be99e2efc2fd6ae5bc59'
+            ['apps/vehicle/migrations/0001_initial.py']='8e5d98f19fc30557d11142538271bf7a445e33331b889a567c814f997486722e'
+          )
+
+          printf 'path\tsha256\n' > "$report/hashes.tsv"
+          for relative in "${!expected[@]}"; do
+            source="$live/$relative"
+            destination="$proposal/$relative"
+            test -f "$source"
+            source_hash="$(sha256sum "$source" | awk '{print $1}')"
+            test "$source_hash" = "${expected[$relative]}"
+            cp -- "$source" "$destination"
+            destination_hash="$(sha256sum "$destination" | awk '{print $1}')"
+            test "$destination_hash" = "${expected[$relative]}"
+            printf '%s\t%s\n' "$relative" "$destination_hash" >> "$report/hashes.tsv"
+          done
+
+          ln -s "$live/.env" "$proposal/.env"
+          settings_file="$proposal/myProject/ci_complete_migration_settings.py"
+          cat > "$settings_file" <<'PY'
+          import os
+          from .settings import *
+          DATABASES['default']['NAME'] = os.environ['CI_MIGRATION_DB_NAME']
+          DATABASES['default'].setdefault('TEST', {})['NAME'] = os.environ['CI_TEST_DB_NAME']
+          PY
+
+          sanitize() {
+            sed -E \
+              -e '/Invalid line:/d' \
+              -e '/PASSWORD|SECRET|TOKEN|API_KEY|DATABASE_URL|PRIVATE_KEY/Id' \
+              -e 's#(/[^ ]*\.env[^ ]*)#[REDACTED_ENV_PATH]#g' \
+              "$1" > "$2"
+          }
+
+          cleanup() {
+            set +e
+            cd "$proposal" 2>/dev/null || true
+            DJANGO_SETTINGS_MODULE=myProject.settings \
+              "$python" - "$migration_db" "$test_db" > "$raw/cleanup.log" 2>&1 <<'PY'
+          import django
+          import sys
+          django.setup()
+          from django.db import connection
+
+          remaining = []
+          for name in sys.argv[1:]:
+              try:
+                  connection.creation._destroy_test_db(name, verbosity=0, keepdb=False)
+              except Exception:
+                  pass
+          with connection._nodb_cursor() as cursor:
+              cursor.execute(
+                  'SELECT datname FROM pg_database WHERE datname = ANY(%s)',
+                  [list(sys.argv[1:])],
+              )
+              remaining = [row[0] for row in cursor.fetchall()]
+          if remaining:
+              raise SystemExit('Isolated databases were not removed')
+          print('ISOLATED_DATABASES_REMOVED=true')
+          PY
+            cleanup_status=$?
+            sanitize "$raw/cleanup.log" "$report/cleanup.txt"
+            echo "CLEANUP_EXIT=$cleanup_status" >> "$report/cleanup.txt"
+            rm -f "$proposal/.env" "$settings_file"
+            find "$proposal" -type d -name __pycache__ -prune -exec rm -rf {} + || true
+            return "$cleanup_status"
+          }
+          trap cleanup EXIT
+
+          cd "$proposal"
+          export CI_MIGRATION_DB_NAME="$migration_db"
+          export CI_TEST_DB_NAME="$test_db"
+
+          "$python" -m py_compile \
+            apps/accounts/migrations/0001_initial.py \
+            apps/admin_panel/migrations/0001_initial.py \
+            apps/complaints/migrations/0001_initial.py \
+            apps/drivers/migrations/0001_initial.py \
+            apps/earnings/migrations/0001_initial.py \
+            apps/office/migrations/0001_initial.py \
+            apps/passengers/migrations/0001_initial.py \
+            apps/payments/migrations/0001_initial.py \
+            apps/payments/migrations/0002_booking_details_persistence.py \
+            apps/pricing/migrations/0001_initial.py \
+            apps/pricing/migrations/0002_extra_service_fee.py \
+            apps/pricing/migrations/0003_extra_service_fee_priority.py \
+            apps/trips/migrations/0001_initial.py \
+            apps/trips/migrations/0002_alter_trip_status.py \
+            apps/trips/migrations/0003_trip_booking_confirmation_pdf_and_more.py \
+            apps/trips/migrations/0004_booking_details_persistence.py \
+            apps/vehicle/migrations/0001_initial.py
+
+          DJANGO_SETTINGS_MODULE=myProject.settings \
+            "$python" - > "$raw/graph.log" 2>&1 <<'PY'
+          import django
+          django.setup()
+          from django.db.migrations.loader import MigrationLoader
+
+          loader = MigrationLoader(None, ignore_no_migrations=False)
+          loader.graph.ensure_not_cyclic()
+          nodes = sorted(loader.graph.nodes)
+          leaves = sorted(loader.graph.leaf_nodes())
+          print(f'MIGRATION_NODE_COUNT={len(nodes)}')
+          print('MIGRATION_LEAVES=' + ','.join(f'{app}.{name}' for app, name in leaves))
+          PY
+          sanitize "$raw/graph.log" "$report/migration-graph.txt"
+
+          DJANGO_SETTINGS_MODULE=myProject.settings \
+            "$python" - "$migration_db" > "$raw/create-db.log" 2>&1 <<'PY'
+          import django
+          import sys
+          django.setup()
+          from django.db import connection
+
+          requested = sys.argv[1]
+          production = str(connection.settings_dict.get('NAME') or '')
+          if (
+              not requested.startswith('act_migration_validation_')
+              or requested == production
+          ):
+              raise SystemExit('Unsafe isolated migration database name')
+          connection.settings_dict.setdefault('TEST', {})['NAME'] = requested
+          created = connection.creation._create_test_db(
+              verbosity=1,
+              autoclobber=True,
+              keepdb=False,
+          )
+          print(f'ISOLATED_MIGRATION_DATABASE={created}')
+          print(f'PRODUCTION_DATABASE_UNCHANGED={created != production}')
+          PY
+          sanitize "$raw/create-db.log" "$report/create-database.txt"
+
+          "$python" manage.py check \
+            --settings myProject.ci_complete_migration_settings \
+            > "$raw/django-check.log" 2>&1
+          sanitize "$raw/django-check.log" "$report/django-check.txt"
+
+          "$python" manage.py showmigrations --plan \
+            --settings myProject.ci_complete_migration_settings \
+            > "$raw/show-before.log" 2>&1
+          sanitize "$raw/show-before.log" "$report/showmigrations-before.txt"
+
+          "$python" manage.py makemigrations --check --dry-run \
+            --settings myProject.ci_complete_migration_settings \
+            > "$raw/makemigrations.log" 2>&1
+          sanitize "$raw/makemigrations.log" "$report/makemigrations-check.txt"
+
+          "$python" manage.py migrate --noinput \
+            --settings myProject.ci_complete_migration_settings \
+            > "$raw/migrate.log" 2>&1
+          sanitize "$raw/migrate.log" "$report/migrate-fresh-database.txt"
+
+          "$python" manage.py showmigrations \
+            --settings myProject.ci_complete_migration_settings \
+            > "$raw/show-after.log" 2>&1
+          sanitize "$raw/show-after.log" "$report/showmigrations-after.txt"
+
+          "$python" manage.py test \
+            --settings myProject.ci_complete_migration_settings \
+            --noinput \
+            --verbosity=2 \
+            > "$raw/tests.log" 2>&1
+          sanitize "$raw/tests.log" "$report/tests.txt"
+
+          echo 'LIVE_SOURCE_MODIFIED=false' > "$report/safety.txt"
+          echo 'PRODUCTION_MIGRATIONS_RUN=false' >> "$report/safety.txt"
+          echo 'SERVICES_RESTARTED=false' >> "$report/safety.txt"
+
+      - name: Upload complete validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: complete-migration-validation-${{ github.run_id }}
+          path: complete-migration-report/
+          if-no-files-found: warn
+          retention-days: 7
