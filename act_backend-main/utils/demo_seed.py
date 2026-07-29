@@ -683,7 +683,7 @@ def run_seed(
         stdout.write(
             style.SUCCESS(
                 password_message
-                "Emails: demo.passenger@example.com, demo.passenger2@example.com, "
+                + "Emails: demo.passenger@example.com, demo.passenger2@example.com, "
                 "demo.office@example.com, demo.driver@example.com, demo.driver2@example.com"
             )
         )
