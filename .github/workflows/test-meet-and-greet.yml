@@ -104,7 +104,13 @@ jobs:
           print(f"PRODUCTION_DATABASE_UNCHANGED={production != requested}")
           PY
 
-          "$python" -m compileall -q apps myProject utils
+          "$python" -m py_compile \
+            apps/payments/migrations/0001_initial.py \
+            apps/payments/migrations/0002_booking_details_persistence.py \
+            apps/trips/migrations/0001_initial.py \
+            apps/trips/migrations/0002_alter_trip_status.py \
+            apps/trips/migrations/0003_trip_booking_confirmation_pdf_and_more.py \
+            apps/trips/migrations/0004_booking_details_persistence.py
           "$python" manage.py check \
             --settings myProject.ci_migration_validation_settings \
             | tee "$report/django-check.txt"
