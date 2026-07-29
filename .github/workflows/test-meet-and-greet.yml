@@ -54,7 +54,7 @@ jobs:
           from django.db import connection
 
           config = connection.settings_dict
-          if 'postgresql' not in config.get('ENGINE', ''):
+          if connection.vendor != 'postgresql':
               raise SystemExit('Production database is not PostgreSQL')
 
           pg_dump = shutil.which('pg_dump')
