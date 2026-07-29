@@ -33,7 +33,7 @@ jobs:
           }
 
           cd "$live"
-          "$python" - \
+          DJANGO_SETTINGS_MODULE=myProject.settings "$python" - \
             act_migration_validation_30484096725 \
             act_migration_validation_30484096725_tests \
             > "$raw/cleanup.log" 2>&1 <<'PY'
