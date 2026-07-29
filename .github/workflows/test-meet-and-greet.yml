@@ -1,0 +1,80 @@
+name: Recover Live Foundation Migrations
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Copy allowlisted migration files read-only
+        id: recover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          live=/var/www/atg/atg-backend/backend
+          output="$RUNNER_TEMP/foundation-migration-recovery-${GITHUB_RUN_ID}"
+          files="$output/files"
+          metadata="$output/file-metadata.tsv"
+          missing="$output/missing-files.txt"
+
+          rm -rf -- "$output"
+          mkdir -p "$files"
+          chmod 700 "$output"
+          printf 'relative_path\tabsolute_source_path\tsize_bytes\tmodified_utc\tsha256\n' > "$metadata"
+          : > "$missing"
+
+          allowlist=(
+            'apps/accounts/migrations/0001_initial.py'
+            'apps/office/migrations/0001_initial.py'
+            'apps/passengers/migrations/0001_initial.py'
+            'apps/vehicle/migrations/0001_initial.py'
+            'apps/drivers/migrations/0001_initial.py'
+          )
+
+          for relative in "${allowlist[@]}"; do
+            source="$live/$relative"
+            destination="$files/$relative"
+            if [[ ! -f "$source" ]]; then
+              printf '%s\n' "$relative" >> "$missing"
+              continue
+            fi
+
+            mkdir -p "$(dirname "$destination")"
+            cp --preserve=timestamps -- "$source" "$destination"
+
+            size="$(stat -c '%s' -- "$source")"
+            modified="$(date -u -d "@$(stat -c '%Y' -- "$source")" '+%Y-%m-%dT%H:%M:%SZ')"
+            hash="$(sha256sum "$source" | awk '{print $1}')"
+            copied_hash="$(sha256sum "$destination" | awk '{print $1}')"
+            test "$hash" = "$copied_hash"
+            printf '%s\t%s\t%s\t%s\t%s\n' \
+              "$relative" "$source" "$size" "$modified" "$hash" >> "$metadata"
+          done
+
+          echo "artifact_path=$output" >> "$GITHUB_OUTPUT"
+          if [[ -s "$missing" ]]; then
+            echo 'complete=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'complete=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload recovered migration artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovered-foundation-migrations-${{ github.run_id }}
+          path: ${{ steps.recover.outputs.artifact_path }}/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Confirm complete recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ '${{ steps.recover.outputs.complete }}' == 'true' ]]
