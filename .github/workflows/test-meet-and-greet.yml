@@ -1,0 +1,101 @@
+name: Preflight controlled backend deployment
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@v4
+        with:
+          ref: d30e13773e5dd2f1b816b09008b832aae1670235
+          clean: true
+
+      - name: Verify production deployment preconditions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          live=/var/www/atg/atg-backend/backend
+          python="$live/env/bin/python"
+          report="$GITHUB_WORKSPACE/backend-deployment-preflight"
+          backup=/home/act/reconcile-work/backups/pricing-pre-migration-20260729T223916Z-30496879585.dump
+          expected_backup_hash=4857f5633628af815d706144e927c1a0b0dc9987817fe26a4fe10ae4d888e95e
+          expected_source=d30e13773e5dd2f1b816b09008b832aae1670235
+
+          rm -rf -- "$report"
+          mkdir -p "$report"
+
+          actual_source="$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+          test "$actual_source" = "$expected_source"
+          printf 'REVIEWED_SOURCE=%s\nSOURCE_VERIFIED=true\n' "$actual_source" > "$report/reviewed-source.txt"
+
+          test -d "$live/.git"
+          git -C "$live" rev-parse HEAD > "$report/live-head.txt"
+          git -C "$live" branch --show-current > "$report/live-branch.txt"
+          git -C "$live" remote -v > "$report/live-remotes.txt"
+          git -C "$live" status --porcelain=v1 --untracked-files=all > "$report/live-status.txt"
+          if test -s "$report/live-status.txt"; then
+            printf 'LIVE_WORKTREE_CLEAN=false\n' > "$report/precondition-result.txt"
+            exit 20
+          fi
+          printf 'LIVE_WORKTREE_CLEAN=true\n' > "$report/precondition-result.txt"
+
+          test -f "$backup"
+          actual_backup_hash="$(sha256sum "$backup" | awk '{print $1}')"
+          test "$actual_backup_hash" = "$expected_backup_hash"
+          pg_restore --list "$backup" > /dev/null
+          printf 'BACKUP_PATH=%s\nBACKUP_SHA256=%s\nPG_RESTORE_LIST_VERIFIED=true\n' \
+            "$backup" "$actual_backup_hash" > "$report/backup.txt"
+
+          cd "$live"
+          DJANGO_SETTINGS_MODULE=myProject.settings "$python" - > "$report/database.txt" <<'PY'
+          import django
+          django.setup()
+          from django.db import connection, transaction
+
+          with transaction.atomic():
+              with connection.cursor() as cursor:
+                  cursor.execute('SET TRANSACTION READ ONLY')
+                  cursor.execute('SELECT current_schema()')
+                  schema = cursor.fetchone()[0]
+                  cursor.execute(
+                      "SELECT name FROM django_migrations WHERE app = %s ORDER BY name",
+                      ['pricing'],
+                  )
+                  migrations = [row[0] for row in cursor.fetchall()]
+                  expected = [
+                      '0001_initial',
+                      '0002_extra_service_fee',
+                      '0003_extra_service_fee_priority',
+                  ]
+                  if migrations != expected:
+                      raise SystemExit(f'Unexpected Pricing migrations: {migrations}')
+                  cursor.execute('SELECT to_regclass(%s)', [f'{schema}.pricing_extraservicefee'])
+                  if cursor.fetchone()[0] is None:
+                      raise SystemExit('pricing_extraservicefee is missing')
+                  print('PRICING_MIGRATIONS=' + ','.join(migrations))
+                  print('EXTRA_SERVICE_TABLE_EXISTS=true')
+                  print('DATABASE_PRECONDITIONS_VERIFIED=true')
+          PY
+
+          systemctl show act.service \
+            --property=Id,LoadState,ActiveState,SubState,User,FragmentPath,WorkingDirectory,ExecStart \
+            > "$report/act-service.txt"
+          systemctl is-active act.service > "$report/act-service-active.txt"
+          printf 'LIVE_FILES_MODIFIED=false\nDATABASE_WRITES=false\nSERVICES_RESTARTED=false\n' > "$report/safety.txt"
+
+      - name: Upload preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-deployment-preflight-${{ github.run_id }}
+          path: backend-deployment-preflight/
+          if-no-files-found: error
+          retention-days: 7
