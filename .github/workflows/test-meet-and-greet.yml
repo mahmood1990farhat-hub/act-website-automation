@@ -1,0 +1,148 @@
+name: Deploy reviewed backend source
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - name: Checkout reviewed commit
+        uses: actions/checkout@v4
+        with:
+          ref: d30e13773e5dd2f1b816b09008b832aae1670235
+          fetch-depth: 1
+
+      - name: Back up, deploy, validate, and restart
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          TARGET_SHA=d30e13773e5dd2f1b816b09008b832aae1670235
+          LIVE=/var/www/atg/atg-backend/backend
+          SOURCE="$GITHUB_WORKSPACE/act_backend-main"
+          PYTHON="$LIVE/env/bin/python"
+          WORK=/home/act/reconcile-work/deploy-${GITHUB_RUN_ID}
+          BACKUP_DIR=/home/act/reconcile-work/backups
+          BACKUP="$BACKUP_DIR/backend-tracked-source-before-${TARGET_SHA:0:12}-${GITHUB_RUN_ID}.tar.gz"
+          TARGET_LIST="$WORK/target-files.txt"
+          LIVE_LIST="$WORK/live-tracked-files.txt"
+          STALE_LIST="$WORK/stale-files.txt"
+          STARTED_AT="$(date --utc +%Y-%m-%dT%H:%M:%SZ)"
+          REPLACEMENT_STARTED=0
+          RESTART_ATTEMPTED=0
+
+          mkdir -p "$WORK" "$BACKUP_DIR"
+          chmod 700 "$WORK" "$BACKUP_DIR"
+
+          keep_source_path() {
+            case "$1" in
+              .env|.env.*|env|env/*|media|media/*|static|static/*|logs|logs/*|backups|backups/*|celerybeat-schedule|*.log|*.pyc|*/__pycache__/*) return 1 ;;
+              *) return 0 ;;
+            esac
+          }
+
+          rollback() {
+            code=$?
+            trap - ERR
+            if [ "$REPLACEMENT_STARTED" -eq 1 ]; then
+              echo "Deployment failed; restoring tracked source from $BACKUP"
+              while IFS= read -r path; do
+                [ -n "$path" ] && rm -f -- "$LIVE/$path"
+              done < "$TARGET_LIST"
+              tar -xzf "$BACKUP" -C "$LIVE"
+              if [ "$RESTART_ATTEMPTED" -eq 1 ]; then
+                systemctl restart act.service || true
+              fi
+              echo "Rollback source restoration completed"
+            fi
+            exit "$code"
+          }
+          trap rollback ERR
+
+          test "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)" = "$TARGET_SHA"
+          test -d "$LIVE/.git"
+          test -x "$PYTHON"
+          for path in .env env media static; do test -e "$LIVE/$path"; done
+
+          git -C "$GITHUB_WORKSPACE" ls-tree -r --name-only "$TARGET_SHA" -- act_backend-main/ |
+            sed 's#^act_backend-main/##' |
+            while IFS= read -r path; do keep_source_path "$path" && printf '%s\n' "$path"; done |
+            LC_ALL=C sort -u > "$TARGET_LIST"
+          git -C "$LIVE" ls-files |
+            while IFS= read -r path; do keep_source_path "$path" && printf '%s\n' "$path"; done |
+            LC_ALL=C sort -u > "$LIVE_LIST"
+          test -s "$TARGET_LIST"
+          comm -23 "$LIVE_LIST" "$TARGET_LIST" > "$STALE_LIST"
+
+          while IFS= read -r path; do
+            case "$path" in /*|*..*) echo "Unsafe manifest path"; exit 1 ;; esac
+          done < "$TARGET_LIST"
+
+          tar -czf "$BACKUP" -C "$LIVE" --files-from="$LIVE_LIST"
+          chmod 600 "$BACKUP"
+          tar -tzf "$BACKUP" >/dev/null
+          BACKUP_SHA256="$(sha256sum "$BACKUP" | awk '{print $1}')"
+          echo "Backup: $BACKUP"
+          echo "Backup SHA-256: $BACKUP_SHA256"
+
+          test -w "$LIVE"
+          while IFS= read -r path; do
+            [ -e "$LIVE/$path" ] && test -w "$LIVE/$path"
+            test -w "$(dirname "$LIVE/$path")"
+          done < "$TARGET_LIST"
+
+          REPLACEMENT_STARTED=1
+          rsync -a --files-from="$TARGET_LIST" "$SOURCE/" "$LIVE/"
+          while IFS= read -r path; do
+            [ -n "$path" ] && rm -f -- "$LIVE/$path"
+          done < "$STALE_LIST"
+
+          while IFS= read -r path; do
+            test -f "$LIVE/$path"
+            test "$(sha256sum "$SOURCE/$path" | awk '{print $1}')" = "$(sha256sum "$LIVE/$path" | awk '{print $1}')"
+          done < "$TARGET_LIST"
+
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX="$WORK/pycache"
+          cd "$LIVE"
+          "$PYTHON" -m compileall -q apps utils myProject
+          "$PYTHON" manage.py check
+          "$PYTHON" manage.py showmigrations pricing | tee "$WORK/pricing-before.txt"
+          grep -Eq '^ \[X\] 0001_initial$' "$WORK/pricing-before.txt"
+          grep -Eq '^ \[X\] 0002_extra_service_fee$' "$WORK/pricing-before.txt"
+          grep -Eq '^ \[X\] 0003_extra_service_fee_priority$' "$WORK/pricing-before.txt"
+          "$PYTHON" manage.py makemigrations --check --dry-run
+          "$PYTHON" manage.py shell -c "from django.urls import resolve; [resolve(p) for p in ['/api/payments/webhook/stripe/','/api/trips/calculate-trip-cost/','/api/trips/initiate-payment/','/api/trips/initiate-guest-payment/']]; print('URL configuration loaded')"
+
+          RESTART_ATTEMPTED=1
+          systemctl restart act.service
+          systemctl is-active --quiet act.service
+          sleep 5
+          systemctl is-active --quiet act.service
+
+          "$PYTHON" manage.py check
+          "$PYTHON" manage.py showmigrations pricing | tee "$WORK/pricing-after.txt"
+          diff -u "$WORK/pricing-before.txt" "$WORK/pricing-after.txt"
+
+          socket_code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --unix-socket /run/act.sock http://localhost/api/auth/login/)"
+          public_code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' https://airportandcitytransfer.com/api/auth/login/)"
+          case "$socket_code" in 2??|3??|4??) ;; *) echo "Socket health failed: $socket_code"; exit 1 ;; esac
+          case "$public_code" in 2??|3??|4??) ;; *) echo "Public health failed: $public_code"; exit 1 ;; esac
+
+          journalctl -u act.service --since "$STARTED_AT" --no-pager > "$WORK/act-service.log"
+          if grep -Eiq 'Traceback|CRITICAL|ModuleNotFoundError|ImportError|Application startup failed' "$WORK/act-service.log"; then
+            echo "New severe service log errors detected"
+            grep -Ei 'Traceback|CRITICAL|ModuleNotFoundError|ImportError|Application startup failed' "$WORK/act-service.log"
+            exit 1
+          fi
+
+          echo "TARGET_SHA=$TARGET_SHA"
+          echo "SOCKET_HEALTH_HTTP=$socket_code"
+          echo "PUBLIC_HEALTH_HTTP=$public_code"
+          echo "SERVICE_STATUS=$(systemctl is-active act.service)"
+          echo "RESTARTED_AT_UTC=$(date --utc +%Y-%m-%dT%H:%M:%SZ)"
+          echo "BACKUP=$BACKUP"
+          echo "BACKUP_SHA256=$BACKUP_SHA256"
+          trap - ERR
