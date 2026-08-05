@@ -1,0 +1,42 @@
+name: Deploy ACT backend
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact 40-character Git commit SHA
+        required: true
+      apply_migrations:
+        description: Apply reviewed migrations (disabled until backup hook is configured)
+        type: boolean
+        default: false
+
+concurrency:
+  group: act-backend-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: production
+    steps:
+      - name: Validate SHA
+        shell: bash
+        run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
+
+      - name: Deploy exact commit
+        shell: bash
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          args=("${{ inputs.commit_sha }}" --github-token-stdin)
+          if [[ "${{ inputs.apply_migrations }}" == true ]]; then args+=(--migrate); fi
+          printf '%s\n' "$GH_TOKEN" | sudo /usr/local/sbin/act-backend-deploy "${args[@]}" | tee "$RUNNER_TEMP/act-backend-deploy.log"
+
+      - name: Deployment summary
+        if: always()
+        shell: bash
+        run: tail -n 80 "$RUNNER_TEMP/act-backend-deploy.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
