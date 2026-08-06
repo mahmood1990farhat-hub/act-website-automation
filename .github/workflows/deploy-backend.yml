@@ -1,6 +1,9 @@
 name: Deploy ACT backend
 
 on:
+  push:
+    branches:
+      - codex/celery-beat-service-fix
   workflow_dispatch:
     inputs:
       commit_sha:
