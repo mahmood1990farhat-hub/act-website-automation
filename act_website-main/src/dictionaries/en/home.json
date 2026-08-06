@@ -81,7 +81,14 @@
       "Edit": "Edit",
       "details": "details",
       "Total_Cost": "Total Cost",
-      "button": "Confirm"
+      "button": "Confirm",
+      "cost_breakdown": "Cost Breakdown",
+      "transfer_fare": "Transfer Fare",
+      "vat_20": "VAT (20%)",
+      "airport_access_fee": "Airport Access Fee",
+      "meet_and_greet": "Meet & Greet",
+      "included": "Included",
+      "total_price": "Total Price"
     },
     "Payments_details": {
       "title": "Payments Details",

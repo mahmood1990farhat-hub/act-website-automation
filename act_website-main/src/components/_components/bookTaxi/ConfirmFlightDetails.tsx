@@ -57,7 +57,9 @@ type typeProps = {
 		additionalRequirements: AdditionalRequirementsForm;
 		cartype?: number;
 		cost: number | undefined;
+		transfer_fare?: number;
 		airport_vat?: number;
+		airport_access_fee?: number;
 		regular_vat?: number;
 		total_cost?: number;
 		trip_duration_minutes?: number;
@@ -97,9 +99,9 @@ export default function ModernConfirmFlightDetails({
 	const dropoff =
 		data.routePoints.find((r) => r.type === "dropoff")?.point?.description ||
 		"-";
-	const cost = data.cost || 0;
+	const transferFare = data.transfer_fare ?? data.cost ?? 0;
 	const vat = data.regular_vat || 0;
-	const airport_vat = data.airport_vat || 0;
+	const airportAccessFee = data.airport_access_fee ?? data.airport_vat ?? 0;
 	const totalCost = data.total_cost;
 
 	// Arabic text alternatives
@@ -108,7 +110,7 @@ export default function ModernConfirmFlightDetails({
 		tripDetails: isRTL ? "تفاصيل الرحلة" : "Trip Details",
 		passengerInfo: isRTL ? "معلومات الركاب" : "Passenger Information",
 		vehicleDetails: isRTL ? "تفاصيل المركبة" : "Vehicle Details",
-		costBreakdown: isRTL ? "تفاصيل التكلفة" : "Cost Breakdown",
+		costBreakdown: trans.Confir_flight_details.cost_breakdown,
 		back: isRTL ? "العودة" : "Back",
 		edit: isRTL ? "تعديل" : "Edit",
 		confirm: isRTL ? "التأكيد و المتابعة" : "Confirm & Continue",
@@ -123,10 +125,12 @@ export default function ModernConfirmFlightDetails({
 		smallLuggage: isRTL ? "حقائب صغيرة" : "Small Luggage",
 		largeLuggage: isRTL ? "حقائب كبيرة" : "Large Luggage",
 		vehicleType: isRTL ? "نوع المركبة" : "Vehicle Type",
-		baseCost: isRTL ? "تكلفة الرحلة" : "Trip Cost",
-		airportVAT: isRTL ? "رسوم المطار" : "Airport Charges",
-		regularVAT: isRTL ? "الضريبة 20%" : "Vat 20%",
-		totalCost: isRTL ? "التكلفة الإجمالية" : "Total Cost",
+		baseCost: trans.Confir_flight_details.transfer_fare,
+		airportVAT: trans.Confir_flight_details.airport_access_fee,
+		regularVAT: trans.Confir_flight_details.vat_20,
+		meetAndGreet: trans.Confir_flight_details.meet_and_greet,
+		included: trans.Confir_flight_details.included,
+		totalCost: trans.Confir_flight_details.total_price,
 		routeMap: isRTL ? "خريطة المسار" : "Route Map",
 	};
 
@@ -648,7 +652,7 @@ export default function ModernConfirmFlightDetails({
 								<div className={`flex justify-between items-center`}>
 									<span className="text-white/80">{texts.baseCost}</span>
 									<span className="text-white font-semibold">
-										£{Number(cost + (airport_vat ?? 0)).toFixed(2)}
+										£{Number(transferFare).toFixed(2)}
 									</span>
 								</div>
 
@@ -662,6 +666,20 @@ export default function ModernConfirmFlightDetails({
 										</span>
 									</div>
 								)}
+
+								{airportAccessFee > 0 && (
+									<div className={`flex justify-between items-center`}>
+										<span className="text-white/80">{texts.airportVAT}</span>
+										<span className="text-white font-semibold">
+											£{airportAccessFee.toFixed(2)}
+										</span>
+									</div>
+								)}
+
+								<div className={`flex justify-between items-center`}>
+									<span className="text-white/80">{texts.meetAndGreet}</span>
+									<span className="text-[#ffd100] font-semibold">{texts.included}</span>
+								</div>
 
 							</div>
 

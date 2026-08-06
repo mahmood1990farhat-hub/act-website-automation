@@ -57,6 +57,13 @@ export type Confir_flight_details = {
   details: string;
   Total_Cost: string;
   button: string;
+  cost_breakdown: string;
+  transfer_fare: string;
+  vat_20: string;
+  airport_access_fee: string;
+  meet_and_greet: string;
+  included: string;
+  total_price: string;
 };
 export type Payments_details = {
   title: string;
@@ -147,7 +154,9 @@ export type VehicleType = {
   icon_url: string;
   max_passengers_count: number;
   airport_vat: number;
+  airport_access_fee: number;
   base_trip_cost: number;
+  transfer_fare: number;
   regular_vat: number;
   total_cost: number;
   meet_and_greet_available?: boolean;
@@ -327,9 +336,11 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                       carImage: SelectedCar ? SelectedCar.icon_url : "",
                     cartype: SelectedCar?.id,
                     cost: SelectedCar ? SelectedCar.base_trip_cost : undefined,
+                    transfer_fare: SelectedCar?.transfer_fare,
                     airport_vat: SelectedCar
                       ? SelectedCar.airport_vat
                       : undefined,
+                    airport_access_fee: SelectedCar?.airport_access_fee,
                     regular_vat: SelectedCar
                       ? SelectedCar.regular_vat
                       : undefined,

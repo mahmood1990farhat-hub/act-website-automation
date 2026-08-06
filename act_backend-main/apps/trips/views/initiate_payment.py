@@ -64,8 +64,10 @@ def calculate_authoritative_payment_price(data, car_type, distance_miles, bookin
     price_breakdown = {
         'total_cost': float(extra_pricing['total_cost']),
         'base_trip_cost': float(base_trip_cost),
+        'transfer_fare': float(base_trip_cost + min_adjustment),
         'regular_vat': float(regular_vat),
         'airport_vat': float(airport_vat),
+        'airport_access_fee': float(airport_vat),
         'min_adjustment': float(min_adjustment),
         'meet_and_greet_fee': float(extra_pricing['meet_and_greet_fee']),
         'meet_and_greet_total': float(extra_pricing['meet_and_greet_total']),
