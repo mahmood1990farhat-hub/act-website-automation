@@ -3,6 +3,11 @@ name: Deploy Frontend
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: act-frontend-production
+  cancel-in-progress: false
 
 jobs:
   deploy-frontend:
