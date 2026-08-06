@@ -60,7 +60,6 @@ type typeProps = {
 		airport_vat?: number;
 		regular_vat?: number;
 		total_cost?: number;
-		meet_and_greet_fee?: number;
 		trip_duration_minutes?: number;
 	};
 	setStep: (n: number) => void;
@@ -102,7 +101,6 @@ export default function ModernConfirmFlightDetails({
 	const vat = data.regular_vat || 0;
 	const airport_vat = data.airport_vat || 0;
 	const totalCost = data.total_cost;
-	const meetAndGreetFee = data.meet_and_greet_fee || 0;
 
 	// Arabic text alternatives
 	const texts = {
@@ -128,7 +126,6 @@ export default function ModernConfirmFlightDetails({
 		baseCost: isRTL ? "تكلفة الرحلة" : "Trip Cost",
 		airportVAT: isRTL ? "رسوم المطار" : "Airport Charges",
 		regularVAT: isRTL ? "الضريبة 20%" : "Vat 20%",
-		meetAndGreet: isRTL ? "خدمة الاستقبال" : "Meet & Greet",
 		totalCost: isRTL ? "التكلفة الإجمالية" : "Total Cost",
 		routeMap: isRTL ? "خريطة المسار" : "Route Map",
 	};
@@ -207,8 +204,8 @@ export default function ModernConfirmFlightDetails({
 					child_seat_option: data.childInfantTravel.childSeatOption,
 				},
 				additional_requirements: {
-					meet_and_greet: data.additionalRequirements.meetAndGreet,
-					foldable_wheelchair: data.additionalRequirements.foldableWheelchair,
+					meet_and_greet: false,
+					foldable_wheelchair: false,
 					notes_to_driver: data.additionalRequirements.notesToDriver,
 				},
 				extra_services: [],
@@ -567,27 +564,19 @@ export default function ModernConfirmFlightDetails({
 						</CardContent>
 					</Card>
 
-					{/* Additional Requirements */}
+					{/* Additional Information */}
 					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
 								<CheckCircle className="w-5 h-5 text-[#ffd100]" />
-								Additional Requirements
+								{trans.Additional_Information.title}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Meet & Greet Service</p>
-									<p className="text-white text-sm">{data.additionalRequirements.meetAndGreet ? "Yes" : "No"}</p>
-								</div>
-								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Foldable Wheelchair</p>
-									<p className="text-white text-sm">{data.additionalRequirements.foldableWheelchair ? "Yes" : "No"}</p>
-								</div>
-							</div>
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Notes to Driver</p>
+								<p className="text-white/60 text-xs sm:text-sm">
+									{trans.Additional_Information.driverTitle}
+								</p>
 								<p className="text-white text-sm whitespace-pre-wrap">
 									{data.additionalRequirements.notesToDriver || "-"}
 								</p>
@@ -674,14 +663,6 @@ export default function ModernConfirmFlightDetails({
 									</div>
 								)}
 
-								{meetAndGreetFee > 0 && (
-									<div className={`flex justify-between items-center`}>
-										<span className="text-white/80">{texts.meetAndGreet}</span>
-										<span className="text-white font-semibold">
-											£{meetAndGreetFee.toFixed(2)}
-										</span>
-									</div>
-								)}
 							</div>
 
 							<Separator className="bg-white/20" />

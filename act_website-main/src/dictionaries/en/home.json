@@ -63,6 +63,13 @@
       "title": "Choose a car",
       "button": "Next"
     },
+    "Additional_Information": {
+      "title": "Additional Information",
+      "driverTitle": "Additional Information for Your Driver",
+      "description": "Please let us know about any important information that may help your journey, such as your flight details, terminal changes, luggage requirements, child seats, mobility assistance, accessibility needs, or any other special requests.",
+      "back": "Back",
+      "continue": "Continue"
+    },
     "Confir_flight_details": {
       "title": "Confirm Booking Details",
       "Distance": "Distance",
