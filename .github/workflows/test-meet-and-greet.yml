@@ -1,0 +1,81 @@
+name: Diagnose ACT Celery Beat
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: self-hosted
+    steps:
+      - name: Read-only Celery Beat diagnosis
+        shell: bash
+        run: |
+          set -u
+          unit=act-celery-beat.service
+          root=/var/www/atg/atg-backend
+          current="$root/current"
+          schedule="$root/shared/celery/celerybeat-schedule"
+          redact() {
+            sed -E \
+              -e 's#(redis|rediss|postgres|postgresql|amqp|amqps)://[^[:space:]]+#\1://[REDACTED]#gI' \
+              -e 's#(password|passwd|secret|token|api[_-]?key|credential)([=:][^[:space:]]+)#\1=[REDACTED]#gI' \
+              -e 's#https?://[^/@[:space:]]+:[^/@[:space:]]+@#https://[REDACTED]@#gI'
+          }
+
+          echo '=== current release ==='
+          readlink -f "$current" || true
+          git -C "$current" rev-parse HEAD 2>/dev/null || true
+
+          echo '=== unit status ==='
+          sudo /usr/bin/systemctl status "$unit" --no-pager -l 2>&1 | redact || true
+          systemctl show "$unit" \
+            -p Id -p LoadState -p ActiveState -p SubState -p UnitFileState \
+            -p User -p Group -p WorkingDirectory -p ExecStart -p EnvironmentFiles \
+            -p Restart -p RestartUSec -p MainPID -p Result -p ExecMainStatus || true
+
+          echo '=== effective unit ==='
+          systemctl cat "$unit" 2>&1 | redact || true
+
+          echo '=== recent journal ==='
+          journalctl -u "$unit" --since '-2 hours' --no-pager -n 120 -o short-iso 2>&1 | redact || true
+
+          echo '=== runtime paths and permissions ==='
+          for path in "$current" "$current/.venv/bin/celery" "$root/shared/celery" "$schedule"; do
+            if [[ -e "$path" || -L "$path" ]]; then
+              stat -c '%A %U:%G %s %n' "$path"
+              namei -l "$path" || true
+            else
+              echo "MISSING $path"
+            fi
+          done
+          id www-data || true
+
+          echo '=== executable and settings checks as runner (read-only) ==='
+          "$current/.venv/bin/celery" --version || true
+          (
+            cd "$current"
+            "$current/.venv/bin/python" manage.py check --deploy 2>&1 | redact | tail -n 80
+          ) || true
+
+          echo '=== broker connectivity via configured Celery app (read-only) ==='
+          if (
+            cd "$current"
+            "$current/.venv/bin/python" - >/dev/null 2>&1 <<'PY'
+from myProject.celery import app
+connection = app.connection_for_read()
+connection.ensure_connection(max_retries=1, timeout=5)
+connection.release()
+PY
+          ); then
+            echo 'BROKER_REACHABLE=yes'
+          else
+            echo 'BROKER_REACHABLE=no'
+          fi
+
+          echo '=== process inventory ==='
+          pgrep -a -f 'celery.*beat|celerybeat' || true
+          systemctl is-active act.service || true
+          echo 'READ_ONLY_DIAGNOSIS_COMPLETE=yes'
