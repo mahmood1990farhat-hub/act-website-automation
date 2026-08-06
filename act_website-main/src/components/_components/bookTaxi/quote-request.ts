@@ -29,11 +29,9 @@ const normalizeTripDate = (date: string) => {
 export function buildTripQuoteRequest({
   routePoints,
   formDetails,
-  meetAndGreet = false,
 }: {
   routePoints: QuoteRoutePoint[];
   formDetails: QuoteFormDetails;
-  meetAndGreet?: boolean;
 }) {
   const pickup = routePoints.find((point) => point.type === "pickup")?.point;
   const dropoff = routePoints.find((point) => point.type === "dropoff")?.point;
@@ -50,7 +48,7 @@ export function buildTripQuoteRequest({
     large_suitcase: formDetails.largeSuitcase,
     small_suitcase: formDetails.smallSuitcase,
     booking_details: {
-      additional_requirements: { meet_and_greet: meetAndGreet },
+      additional_requirements: { meet_and_greet: false },
     },
   };
   const stopPoints = routePoints

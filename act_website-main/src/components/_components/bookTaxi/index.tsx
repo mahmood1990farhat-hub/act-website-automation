@@ -16,7 +16,6 @@ import PassengerDetails from "./PassengerDetails";
 import ChildInfantTravelInfo from "./ChildInfantTravelInfo";
 import FlightDetails from "./FlightDetails";
 import AdditionalRequirements from "./AdditionalRequirements";
-import { buildTripQuoteRequest } from "./quote-request";
 
 
 export type book_Taxi = {
@@ -108,9 +107,15 @@ export type FlightDetailsForm = {
 };
 
 export type AdditionalRequirementsForm = {
-  meetAndGreet: boolean;
-  foldableWheelchair: boolean;
   notesToDriver: string;
+};
+
+export type AdditionalInformation = {
+  title: string;
+  driverTitle: string;
+  description: string;
+  back: string;
+  continue: string;
 };
 
 export type booking_Confirmation = {
@@ -131,6 +136,7 @@ export type home = {
   Confir_flight_details: Confir_flight_details;
   Payments_details: Payments_details;
   Booking_Confirmation: booking_Confirmation;
+  Additional_Information: AdditionalInformation;
 };
 export type VehicleType = {
   id: number;
@@ -200,8 +206,6 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
     pickupSignName: "",
   });
   const [additionalRequirements, setAdditionalRequirements] = useState<AdditionalRequirementsForm>({
-    meetAndGreet: false,
-    foldableWheelchair: false,
     notesToDriver: "",
   });
   const [SelectedCar, setSelectedCar] = useState<any | undefined>();
@@ -210,41 +214,6 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   const [paymentTotal, setPaymentTotal] = useState<number | null>(null);
   const [step, setStep] = useState<number>(1);
 
-  const refreshMeetAndGreetQuote = async (selected: boolean) => {
-    if (!SelectedCar) {
-      throw new Error("Please choose a vehicle before selecting Meet & Greet.");
-    }
-
-    const requestBody = buildTripQuoteRequest({
-      routePoints,
-      formDetails,
-      meetAndGreet: selected,
-    });
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/trips/calculate-trip-cost/`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      },
-    );
-    const result = await response.json().catch(() => null);
-    if (!response.ok || !result?.success) {
-      const detail = result?.data?.detail || result?.message;
-      throw new Error(detail || "We could not update the Meet & Greet price.");
-    }
-
-    const updatedCar = result.car_type?.find(
-      (vehicle: VehicleType) => vehicle.id === SelectedCar.id,
-    );
-    if (!updatedCar) {
-      throw new Error("The selected vehicle is no longer available.");
-    }
-
-    setRideOptions(result as calculatTripCost);
-    setSelectedCar(updatedCar);
-  };
   useEffect(() => {
     const handleRouteChange = () => {
       window.scrollTo(0, 0);
@@ -321,11 +290,9 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
               ) : step === 6 ? (
                 <AdditionalRequirements
                   locale={locale}
+                  translations={home.Additional_Information}
                   additionalRequirements={additionalRequirements}
                   setAdditionalRequirements={setAdditionalRequirements}
-                  meetAndGreetAvailable={SelectedCar?.meet_and_greet_available ?? false}
-                  meetAndGreetPrice={SelectedCar?.meet_and_greet_available_fee}
-                  onMeetAndGreetChange={refreshMeetAndGreetQuote}
                   nextStep={() => setStep(7)}
                   prevStep={() => setStep(5)}
                 />
@@ -369,7 +336,6 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     total_cost: SelectedCar
                       ? SelectedCar.total_cost
                       : undefined,
-                    meet_and_greet_fee: SelectedCar?.meet_and_greet_fee,
                       trip_duration_minutes: SelectedCar?.expected_trip_duration_minutes
                   }}
                   setStep={(e) => setStep(e)}
