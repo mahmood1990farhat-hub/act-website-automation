@@ -1,7 +1,15 @@
-name: Diagnose ACT Celery Beat
+name: Deploy ACT backend
 
 on:
   workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact 40-character Git commit SHA
+        required: true
+      apply_migrations:
+        description: Must remain false during diagnosis
+        type: boolean
+        default: false
 
 permissions:
   contents: read
