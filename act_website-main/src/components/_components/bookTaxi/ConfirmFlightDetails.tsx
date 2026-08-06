@@ -58,6 +58,7 @@ type typeProps = {
 		cartype?: number;
 		cost: number | undefined;
 		transfer_fare?: number;
+		min_adjustment?: number;
 		airport_vat?: number;
 		airport_access_fee?: number;
 		regular_vat?: number;
@@ -99,7 +100,8 @@ export default function ModernConfirmFlightDetails({
 	const dropoff =
 		data.routePoints.find((r) => r.type === "dropoff")?.point?.description ||
 		"-";
-	const transferFare = data.transfer_fare ?? data.cost ?? 0;
+	const transferFare =
+		data.transfer_fare ?? (data.cost ?? 0) + (data.min_adjustment ?? 0);
 	const vat = data.regular_vat || 0;
 	const airportAccessFee = data.airport_access_fee ?? data.airport_vat ?? 0;
 	const totalCost = data.total_cost;

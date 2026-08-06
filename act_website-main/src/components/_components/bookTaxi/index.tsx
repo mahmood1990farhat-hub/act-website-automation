@@ -157,6 +157,7 @@ export type VehicleType = {
   airport_access_fee: number;
   base_trip_cost: number;
   transfer_fare: number;
+  min_adjustment: number;
   regular_vat: number;
   total_cost: number;
   meet_and_greet_available?: boolean;
@@ -337,6 +338,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     cartype: SelectedCar?.id,
                     cost: SelectedCar ? SelectedCar.base_trip_cost : undefined,
                     transfer_fare: SelectedCar?.transfer_fare,
+                    min_adjustment: SelectedCar?.min_adjustment,
                     airport_vat: SelectedCar
                       ? SelectedCar.airport_vat
                       : undefined,
