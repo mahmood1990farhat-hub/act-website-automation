@@ -1,114 +1,42 @@
-name: Validate PR 63 cost breakdown
+name: Deploy ACT backend
 
 on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Exact PR commit SHA
+        description: Exact 40-character Git commit SHA
         required: true
       apply_migrations:
-        description: Must remain false
+        description: Apply reviewed migrations (disabled until backup hook is configured)
         type: boolean
         default: false
+
+concurrency:
+  group: act-backend-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  deploy:
     runs-on: self-hosted
-    timeout-minutes: 90
+    environment: production
     steps:
-      - name: Validate requested commit
+      - name: Validate SHA
         shell: bash
+        run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
+
+      - name: Deploy exact commit
+        shell: bash
+        env:
+          GH_TOKEN: "${{ github.token }}"
         run: |
-          set -euo pipefail
-          [[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]
-          [[ '${{ inputs.apply_migrations }}' == false ]]
+          args=("${{ inputs.commit_sha }}" --github-token-stdin)
+          if [[ "${{ inputs.apply_migrations }}" == true ]]; then args+=(--migrate); fi
+          printf '%s\n' "$GH_TOKEN" | sudo /usr/local/sbin/act-backend-deploy "${args[@]}" | tee "$RUNNER_TEMP/act-backend-deploy.log"
 
-      - name: Check out exact PR commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.commit_sha }}
-          fetch-depth: 0
-          clean: true
-
-      - name: Validate backend with isolated database
+      - name: Deployment summary
+        if: always()
         shell: bash
-        run: |
-          set -euo pipefail
-          live=/var/www/atg/atg-backend/backend
-          python="$live/env/bin/python"
-          backend="$GITHUB_WORKSPACE/act_backend-main"
-          test_db="test_act_pr63_${GITHUB_RUN_ID}"
-          settings_file="$backend/myProject/ci_pr63_settings.py"
-
-          test -x "$python"
-          test -f "$live/.env"
-          ln -s "$live/.env" "$backend/.env"
-          cat > "$settings_file" <<'PY'
-          import os
-          from .settings import *
-          test_name = os.environ['CI_TEST_DB_NAME']
-          production_name = str(DATABASES['default'].get('NAME') or '')
-          if test_name == production_name or not test_name.startswith('test_act_pr63_'):
-              raise RuntimeError('Unsafe isolated test database name')
-          DATABASES['default'].setdefault('TEST', {})['NAME'] = test_name
-          PY
-
-          cleanup() {
-            set +e
-            cd "$backend"
-            DJANGO_SETTINGS_MODULE=myProject.settings "$python" - "$test_db" <<'PY'
-          import django
-          import re
-          import sys
-          django.setup()
-          from django.db import connection
-          name = sys.argv[1]
-          production = str(connection.settings_dict.get('NAME') or '')
-          if not re.fullmatch(r'test_act_pr63_[0-9]+', name) or name == production:
-              raise SystemExit('Unsafe cleanup database name')
-          with connection._nodb_cursor() as cursor:
-              cursor.execute(
-                  'SELECT pg_terminate_backend(pid) FROM pg_stat_activity '
-                  'WHERE datname = %s AND pid <> pg_backend_pid()', [name]
-              )
-              cursor.execute(f'DROP DATABASE IF EXISTS {connection.ops.quote_name(name)}')
-              cursor.execute('SELECT 1 FROM pg_database WHERE datname = %s', [name])
-              if cursor.fetchone():
-                  raise SystemExit('Isolated test database still exists')
-          print(f'ISOLATED_DATABASE_REMOVED={name}')
-          PY
-            rm -f "$backend/.env" "$settings_file"
-          }
-          trap cleanup EXIT
-
-          cd "$backend"
-          export CI_TEST_DB_NAME="$test_db"
-          echo "PYTHON_EXECUTABLE=$python"
-          echo "ISOLATED_TEST_DATABASE=$test_db"
-          "$python" -m compileall -q apps utils myProject
-          "$python" manage.py check --settings myProject.ci_pr63_settings
-          "$python" manage.py test \
-            apps.payments.test_urls \
-            apps.payments.tests \
-            apps.pricing.tests.test_extra_service_resolver \
-            apps.pricing.tests.test_pricing_engine \
-            apps.pricing.tests.test_airport_resolver \
-            apps.pricing.tests.test_integration \
-            apps.trips.tests.test_meet_and_greet_pricing \
-            --settings myProject.ci_pr63_settings \
-            --noinput --verbosity=2
-
-      - name: Validate frontend production build
-        shell: bash
-        working-directory: act_website-main
-        run: |
-          set -euo pipefail
-          npm ci
-          npm run build -- --webpack
-
-      - name: Validate diff whitespace
-        shell: bash
-        run: git diff --check origin/main...HEAD
+        run: tail -n 80 "$RUNNER_TEMP/act-backend-deploy.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
