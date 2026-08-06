@@ -139,8 +139,45 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
             )
 
         quoted_total = quote.data['car_type'][0]['total_cost']
+        quoted_breakdown = quote.data['car_type'][0]
         self.assertEqual(quoted_total, payment_total)
         self.assertEqual(float(quoted_total), breakdown['total_cost'])
+        self.assertEqual(quoted_breakdown['transfer_fare'], Decimal('42.00'))
+        self.assertEqual(quoted_breakdown['airport_access_fee'], Decimal('0.00'))
+
+    def test_authoritative_breakdown_separates_airport_fee_and_minimum_fare(self):
+        booking_details = {
+            'additional_requirements': {'meet_and_greet': False},
+            'extra_services': [],
+        }
+        with patch(
+            'apps.trips.views.initiate_payment.calculate_total_cost',
+            return_value=(
+                Decimal('65.00'), Decimal('10.00'), Decimal('10.00'),
+                Decimal('40.00'), Decimal('5.00'),
+            ),
+        ), patch(
+            'apps.pricing.services.extra_service_resolver.'
+            'AirportResolver.detect_airport',
+            return_value={'pickup_airport': None, 'dropoff_airport': None},
+        ):
+            total, breakdown, _, _, _ = calculate_authoritative_payment_price(
+                self.prepared_data,
+                self.vehicle,
+                10,
+                booking_details,
+            )
+
+        self.assertEqual(total, Decimal('65.00'))
+        self.assertEqual(breakdown['transfer_fare'], 45.0)
+        self.assertEqual(breakdown['regular_vat'], 10.0)
+        self.assertEqual(breakdown['airport_access_fee'], 10.0)
+        self.assertEqual(
+            breakdown['transfer_fare']
+            + breakdown['regular_vat']
+            + breakdown['airport_access_fee'],
+            breakdown['total_cost'],
+        )
 
     def run_payment(self, guest):
         request = SimpleNamespace(data=self.request_data.copy())

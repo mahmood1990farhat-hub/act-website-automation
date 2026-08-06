@@ -113,6 +113,7 @@ class CalculateTripCostView(EMADBaseView):
                     manual_airport_id=data.get('airport'),
                 )
                 total_cost = extra_pricing['total_cost']
+                transfer_fare = round(base_trip_cost + min_adjustment, 2)
                 # regular_vat = round(regular_vat + min_adjustment, 2)
                 car_type_list.append({
                     "id": car_type_obj.id,
@@ -126,7 +127,9 @@ class CalculateTripCostView(EMADBaseView):
                     'regular_vat': regular_vat,
                     'airport_vat': airport_vat,
                     'base_trip_cost': base_trip_cost,
+                    'transfer_fare': transfer_fare,
                     'min_adjustment': min_adjustment,
+                    'airport_access_fee': airport_vat,
                     'meet_and_greet_available': extra_pricing['available'],
                     'meet_and_greet_fee': float(extra_pricing['meet_and_greet_fee']),
                     'meet_and_greet_total': float(extra_pricing['meet_and_greet_total']),

@@ -79,7 +79,14 @@
       "Edit": "تعديل",
       "details": "تفاصيل",
       "Total_Cost": "التكلفة الإجمالية",
-      "button": "تأكيد"
+      "button": "تأكيد",
+      "cost_breakdown": "تفاصيل التكلفة",
+      "transfer_fare": "أجرة النقل",
+      "vat_20": "ضريبة القيمة المضافة (20%)",
+      "airport_access_fee": "رسوم دخول المطار",
+      "meet_and_greet": "الاستقبال والمرافقة",
+      "included": "مشمول",
+      "total_price": "السعر الإجمالي"
     },
     "Payments_details": {
       "title": "تفاصيل الدفع",
