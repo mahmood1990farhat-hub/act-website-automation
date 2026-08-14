@@ -62,6 +62,11 @@ jobs:
           cache: pip
           cache-dependency-path: act_backend-main/requirements.txt
 
+      - name: Install GIS runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gdal-bin libgdal-dev
+
       - name: Install backend dependencies
         working-directory: act_backend-main
         run: pip install -r requirements.txt
