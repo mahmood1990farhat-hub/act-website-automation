@@ -71,6 +71,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          exec > >(tee "$RUNNER_TEMP/clearpay-django-validation.log") 2>&1
           test_db="test_act_clearpay_${GITHUB_RUN_ID}"
           settings_file="myProject/ci_clearpay_settings.py"
 
@@ -106,3 +107,12 @@ jobs:
             exit 1
           fi
           echo "ISOLATED_DATABASE_REMOVED=$test_db"
+
+      - name: Upload validation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clearpay-django-validation-${{ github.run_id }}
+          path: ${{ runner.temp }}/clearpay-django-validation.log
+          if-no-files-found: warn
+          retention-days: 1
