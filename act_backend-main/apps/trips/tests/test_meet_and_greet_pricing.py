@@ -1,9 +1,11 @@
 from datetime import date, time
+from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.payments.models import PendingPayment
 from apps.pricing.models import ExtraServiceFee
@@ -86,6 +88,11 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
         self.assertEqual(pending.price_breakdown['meet_and_greet_fee'], 20.0)
         self.assertEqual(pending.booking_details['extra_services'][0]['total_amount'], 20.0)
         self.assertEqual(stripe_create.call_args.kwargs['amount'], 7000)
+        self.assertEqual(
+            stripe_create.call_args.kwargs['automatic_payment_methods'],
+            {'enabled': True},
+        )
+        self.assertGreater(pending.expires_at, timezone.now() + timedelta(hours=3, minutes=59))
 
     def test_guest_payment_recalculates_same_authoritative_fee(self):
         response, stripe_create = self.run_payment(guest=True)
@@ -94,6 +101,11 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
         self.assertEqual(response.data['price_breakdown']['total_cost'], 70.0)
         self.assertEqual(pending.price_breakdown['meet_and_greet_total'], 20.0)
         self.assertEqual(stripe_create.call_args.kwargs['amount'], 7000)
+        self.assertEqual(
+            stripe_create.call_args.kwargs['automatic_payment_methods'],
+            {'enabled': True},
+        )
+        self.assertGreater(pending.expires_at, timezone.now() + timedelta(hours=3, minutes=59))
 
     def test_quote_and_payment_totals_match(self):
         serializer = Mock()

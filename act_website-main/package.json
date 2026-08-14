@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
     "start": "next start -p 3001",
     "lint": "next lint"
   },

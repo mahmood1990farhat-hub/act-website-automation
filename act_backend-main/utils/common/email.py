@@ -515,7 +515,12 @@ def send_internal_notification(trip) -> None:
             vehicle_label = "Private transfer"
 
         if trip.stripe_payment_intent:
-            payment_method = "Stripe (Card)"
+            if (getattr(trip, "card_brand", "") or "").lower() == "clearpay":
+                payment_method = "Clearpay"
+            elif trip.card_brand and trip.last4:
+                payment_method = f"Card Payment ({trip.card_brand} ********{trip.last4})"
+            else:
+                payment_method = "Stripe (Card)"
             transaction_id = trip.stripe_payment_intent
         else:
             payment_method = "—"

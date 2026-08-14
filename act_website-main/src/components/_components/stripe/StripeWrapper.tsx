@@ -7,10 +7,12 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 export default function StripeWrapper({ clientSecret, children }: { clientSecret: string; children: ReactNode }) {
   const appearance = {
-    theme: "flat",
+    theme: "flat" as const,
   };
   const options = {
     clientSecret,
+    appearance,
+    locale: "auto" as const,
   };
   if (!clientSecret) return null;
 

@@ -4,7 +4,7 @@ from apps.payments.models import PendingPayment
 
 
 class Command(BaseCommand):
-    help = 'Cleanup expired PendingPayment records (older than 15 minutes)'
+    help = 'Cleanup expired PendingPayment records after their redirect-safe retention window'
 
     def handle(self, *args, **options):
         expired = PendingPayment.objects.filter(expires_at__lt=timezone.now())

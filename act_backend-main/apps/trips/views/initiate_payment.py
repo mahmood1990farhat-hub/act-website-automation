@@ -25,6 +25,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+PENDING_PAYMENT_LIFETIME = timedelta(hours=4)
 
 
 def calculate_authoritative_payment_price(data, car_type, distance_miles, booking_details):
@@ -157,7 +158,7 @@ class InitiatePaymentView(EMADBaseView):
             passenger_phone=request.data.get('passenger_phone') or '',
             booking_details=booking_details,
             currency='GBP',
-            expires_at=timezone.now() + timedelta(minutes=15)
+            expires_at=timezone.now() + PENDING_PAYMENT_LIFETIME
         )
 
         idempotency_key = f"payment_{pending_payment.id}"
@@ -185,6 +186,7 @@ class InitiatePaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True},
             metadata=payment_metadata,
             idempotency_key=idempotency_key
         )
@@ -344,7 +346,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             passenger_phone=guest_contact['passenger_phone'],
             booking_details=booking_details,
             currency='GBP',
-            expires_at=timezone.now() + timedelta(minutes=15)
+            expires_at=timezone.now() + PENDING_PAYMENT_LIFETIME
         )
 
         idempotency_key = f"guest_payment_{pending_payment.id}"
@@ -364,6 +366,7 @@ class InitiateGuestPaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True},
             metadata=payment_metadata,
             receipt_email=guest_contact['passenger_email'],
             idempotency_key=idempotency_key

@@ -197,31 +197,42 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
 def extract_card_details(payment_intent):
     charges = ((payment_intent.get('charges') or {}).get('data') or [])
-    card = {}
+    payment_method_details = {}
 
     if charges:
         first_charge = charges[0] or {}
-        card = ((first_charge.get('payment_method_details') or {}).get('card') or {})
+        payment_method_details = first_charge.get('payment_method_details') or {}
 
     # Fallback in case webhook payload structure differs and latest_charge is expanded.
-    if not card:
+    if not payment_method_details:
         latest_charge = payment_intent.get('latest_charge')
         if isinstance(latest_charge, dict):
-            card = ((latest_charge.get('payment_method_details') or {}).get('card') or {})
+            payment_method_details = latest_charge.get('payment_method_details') or {}
         elif isinstance(latest_charge, str) and latest_charge:
             try:
                 charge = stripe.Charge.retrieve(latest_charge)
-                card = ((charge.get('payment_method_details') or {}).get('card') or {})
+                payment_method_details = charge.get('payment_method_details') or {}
             except Exception as charge_error:
                 logger.warning(
-                    f"[WEBHOOK] Unable to retrieve Stripe charge card details "
+                    f"[WEBHOOK] Unable to retrieve Stripe charge payment details "
                     f"for charge={latest_charge}: {str(charge_error)}",
                     exc_info=True,
                 )
 
+    payment_method_type = payment_method_details.get('type')
+
+    if payment_method_type == 'afterpay_clearpay':
+        return {
+            'last4': None,
+            'card_brand': 'Clearpay',
+            'payment_method_type': payment_method_type,
+        }
+
+    card = payment_method_details.get('card') or {}
     return {
         'last4': card.get('last4'),
         'card_brand': card.get('brand'),
+        'payment_method_type': payment_method_type or 'card',
     }
 
 
