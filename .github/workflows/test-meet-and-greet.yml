@@ -2,6 +2,9 @@ name: Validate Clearpay checkout
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/clearpay-checkout-v1
 
 permissions:
   contents: read
