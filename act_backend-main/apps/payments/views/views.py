@@ -24,13 +24,25 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
+def stripe_to_plain(value):
+    """Convert StripeObject/list structures recursively to normal Python types."""
+    if hasattr(value, "_data"):
+        value = value._data
+    if isinstance(value, dict):
+        return {k: stripe_to_plain(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [stripe_to_plain(v) for v in value]
+    return value
+
+
+
 @csrf_exempt
 def stripe_webhook_view(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        event = stripe_to_plain(stripe.Webhook.construct_event(payload, sig_header, endpoint_secret))
     except (ValueError, stripe.error.SignatureVerificationError) as e:
         logger.error(f"[STRIPE WEBHOOK] Invalid webhook: {str(e)}")
         return HttpResponse(status=400)
