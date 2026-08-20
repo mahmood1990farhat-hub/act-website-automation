@@ -208,6 +208,7 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
 
 def extract_card_details(payment_intent):
+    payment_intent = stripe_to_plain(payment_intent)
     charges = ((payment_intent.get('charges') or {}).get('data') or [])
     card = {}
 
@@ -222,7 +223,7 @@ def extract_card_details(payment_intent):
             card = ((latest_charge.get('payment_method_details') or {}).get('card') or {})
         elif isinstance(latest_charge, str) and latest_charge:
             try:
-                charge = stripe.Charge.retrieve(latest_charge)
+                charge = stripe_to_plain(stripe.Charge.retrieve(latest_charge))
                 card = ((charge.get('payment_method_details') or {}).get('card') or {})
             except Exception as charge_error:
                 logger.warning(
