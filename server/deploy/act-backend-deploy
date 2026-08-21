@@ -1,0 +1,295 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 027
+
+source /etc/act-deploy/backend.conf
+
+[[ ${EUID:-999} -eq 0 ]] || { echo "root required" >&2; exit 1; }
+exec 9>/run/lock/act-backend-deploy.lock
+flock -n 9 || { echo "another deployment is active" >&2; exit 1; }
+
+log_event() {
+  local event=$1
+  shift
+  printf '%s event=%s %s\n' "$(date -u +%FT%TZ)" "$event" "$*"
+}
+
+get_unit_state() {
+  local unit=$1
+  local state rc
+  if state=$(systemctl is-active "$unit" 2>&1); then
+    rc=0
+  else
+    rc=$?
+  fi
+  UNIT_STATE=$state
+  UNIT_STATE_RC=$rc
+}
+
+emit_failure_diagnostics() {
+  local reason=$1
+  log_event diagnostics_start "reason=$reason"
+  systemctl status --no-pager --full act.service || true
+  journalctl -u act.service --since "$DEPLOY_STARTED_AT" --no-pager -n 100 || true
+  if [[ -r ${NGINX_ERROR_LOG:-/var/log/nginx/error.log} ]]; then
+    tail -n 100 "${NGINX_ERROR_LOG:-/var/log/nginx/error.log}" || true
+  fi
+  journalctl -u nginx --since "$DEPLOY_STARTED_AT" --no-pager -n 100 || true
+  log_event diagnostics_end "reason=$reason"
+}
+
+SHA=${1:-}
+shift || true
+[[ $SHA =~ ^[0-9a-f]{40}$ ]] || { echo "exact lowercase 40-character SHA required" >&2; exit 1; }
+
+MIGRATE=0
+TOKEN_STDIN=0
+while (($#)); do
+  case $1 in
+    --migrate) MIGRATE=1 ;;
+    --github-token-stdin) TOKEN_STDIN=1 ;;
+    *) echo "unsupported argument: $1" >&2; exit 1 ;;
+  esac
+  shift
+done
+
+((TOKEN_STDIN)) || { echo "short-lived GitHub token must be supplied on stdin" >&2; exit 1; }
+IFS= read -r -s GH_TOKEN
+[[ -n $GH_TOKEN ]] || { echo "empty GitHub token" >&2; exit 1; }
+
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+DEPLOY_STARTED_AT=$(date -u +%FT%TZ)
+ID="$STAMP-${SHA:0:12}"
+RELEASE="$ACT_ROOT/releases/$ID/backend"
+LOG="/var/log/act-deploy/$ID.log"
+PREVIOUS=$(readlink -f "$ACT_ROOT/current")
+exec > >(tee -a "$LOG") 2>&1
+log_event deployment_start "git_sha=$SHA release=$ID previous=$PREVIOUS"
+
+IFS=, read -ra APPROVED_UNITS <<<"$APP_UNITS"
+REQUIRED_ACTIVE_UNITS=${REQUIRED_ACTIVE_UNITS:-act.service}
+IFS=, read -ra REQUIRED_UNITS <<<"$REQUIRED_ACTIVE_UNITS"
+declare -A PRE_STATE PRE_STATE_RC REQUIRED_UNIT
+PRE_ACTIVE_UNITS=()
+
+for unit in "${REQUIRED_UNITS[@]}"; do
+  REQUIRED_UNIT["$unit"]=1
+done
+
+for unit in "${APPROVED_UNITS[@]}"; do
+  get_unit_state "$unit"
+  PRE_STATE["$unit"]=$UNIT_STATE
+  PRE_STATE_RC["$unit"]=$UNIT_STATE_RC
+  log_event unit_precheck \
+    "unit=$unit expected_pre=observed actual_pre=$UNIT_STATE exit_code=$UNIT_STATE_RC required=${REQUIRED_UNIT[$unit]:-0}"
+
+  if [[ $UNIT_STATE == active && $UNIT_STATE_RC -eq 0 ]]; then
+    PRE_ACTIVE_UNITS+=("$unit")
+  elif [[ ${REQUIRED_UNIT[$unit]:-0} == 1 ]]; then
+    log_event deployment_abort \
+      "reason=required_unit_not_active unit=$unit actual_pre=$UNIT_STATE exit_code=$UNIT_STATE_RC"
+    exit 1
+  else
+    log_event unit_preexisting_unhealthy \
+      "unit=$unit actual_pre=$UNIT_STATE exit_code=$UNIT_STATE_RC action=will_not_restart"
+  fi
+done
+
+mkdir -p "$RELEASE"
+
+API="https://api.github.com/repos/$GITHUB_REPOSITORY"
+VERIFIED_SHA=$(curl --fail --silent --show-error \
+  -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+  "$API/commits/$SHA" | jq -r '.sha')
+[[ $VERIFIED_SHA == "$SHA" ]] || { echo "GitHub commit verification failed" >&2; exit 1; }
+
+ARCHIVE="$ACT_ROOT/releases/$ID/source.tar.gz"
+curl --fail --silent --show-error --location \
+  -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+  "$API/tarball/$SHA" -o "$ARCHIVE"
+unset GH_TOKEN
+tar -tzf "$ARCHIVE" >/dev/null
+tar -xzf "$ARCHIVE" -C "$ACT_ROOT/releases/$ID"
+TOP=$(tar -tzf "$ARCHIVE" | awk -F/ 'NR==1{top=$1} END{print top}')
+[[ -d "$ACT_ROOT/releases/$ID/$TOP/$APP_SUBDIR" ]] || { echo "backend subtree missing from GitHub archive" >&2; exit 1; }
+rm -rf "$RELEASE"
+mv "$ACT_ROOT/releases/$ID/$TOP/$APP_SUBDIR" "$RELEASE"
+rm -rf "$ACT_ROOT/releases/$ID/$TOP" "$ARCHIVE"
+
+rm -rf "$RELEASE/.env" "$RELEASE/env" "$RELEASE/media" "$RELEASE/static" "$RELEASE/logs" "$RELEASE/backups"
+ln -s "$ACT_ROOT/shared/.env" "$RELEASE/.env"
+ln -s "$ACT_ROOT/shared/media" "$RELEASE/media"
+ln -s "$ACT_ROOT/shared/static" "$RELEASE/static"
+ln -s "$ACT_ROOT/shared/logs" "$RELEASE/logs"
+
+python3 -m venv "$RELEASE/.venv"
+"$RELEASE/.venv/bin/pip" install --disable-pip-version-check -r "$RELEASE/requirements.txt"
+
+export PYTHONDONTWRITEBYTECODE=1 PYTHONPYCACHEPREFIX="$ACT_ROOT/shared/logs/pycache-$ID"
+cd "$RELEASE"
+.venv/bin/python -m compileall -q apps utils myProject
+.venv/bin/python manage.py check
+.venv/bin/python manage.py makemigrations --check --dry-run
+.venv/bin/python manage.py migrate --plan | tee "$ACT_ROOT/shared/logs/migration-plan-$ID.txt"
+MIGRATION_STATE=$(.venv/bin/python manage.py showmigrations --plan | sha256sum | awk '{print $1}')
+
+if ((MIGRATE)); then
+  [[ ${ACT_MIGRATION_AUTHORIZED:-} == YES ]] || { echo "migration authorization missing" >&2; exit 1; }
+  echo "Automatic migration execution is intentionally disabled until a reviewed backup hook is configured." >&2
+  exit 1
+fi
+
+REQ_HASH=$(sha256sum requirements.txt | awk '{print $1}')
+cat >release.json <<EOF
+{"git_sha":"$SHA","build_time":"$(date -u +%FT%TZ)","python_version":"$(.venv/bin/python -V 2>&1)","requirements_sha256":"$REQ_HASH","migration_state_sha256":"$MIGRATION_STATE","workflow_run":"${GITHUB_RUN_ID:-manual}"}
+EOF
+chown -R root:root "$ACT_ROOT/releases/$ID"
+chmod -R go-w "$ACT_ROOT/releases/$ID"
+
+SWITCHED=0
+ROLLBACK_REASON=unspecified_post_switch_failure
+
+rollback() {
+  local rc=$1 line=$2 command=$3
+  trap - ERR
+  log_event rollback_trigger \
+    "reason=$ROLLBACK_REASON exit_code=$rc line=$line command=$(printf '%q' "$command") previous=$PREVIOUS"
+  if ((SWITCHED)); then
+    ln -sfn "$PREVIOUS" "$ACT_ROOT/.current.rollback"
+    mv -Tf "$ACT_ROOT/.current.rollback" "$ACT_ROOT/current"
+  fi
+  for unit in "${PRE_ACTIVE_UNITS[@]}"; do
+    log_event rollback_restart "unit=$unit command=systemctl_restart"
+    systemctl restart "$unit" || true
+  done
+  exit "$rc"
+}
+trap 'rollback "$?" "$LINENO" "$BASH_COMMAND"' ERR
+
+ROLLBACK_REASON=atomic_symlink_switch_failed
+ln -sfn "$RELEASE" "$ACT_ROOT/.current.next"
+mv -Tf "$ACT_ROOT/.current.next" "$ACT_ROOT/current"
+SWITCHED=1
+
+for unit in "${PRE_ACTIVE_UNITS[@]}"; do
+  ROLLBACK_REASON="restart_failed:$unit"
+  log_event unit_restart "unit=$unit command=systemctl_restart"
+  systemctl restart "$unit"
+done
+
+for unit in "${APPROVED_UNITS[@]}"; do
+  get_unit_state "$unit"
+  expected="preserve_pre_state:${PRE_STATE[$unit]}"
+  [[ ${PRE_STATE[$unit]} == active ]] && expected=active
+  log_event unit_postcheck \
+    "unit=$unit expected=$expected actual=$UNIT_STATE exit_code=$UNIT_STATE_RC required=${REQUIRED_UNIT[$unit]:-0}"
+
+  if [[ ${PRE_STATE[$unit]} == active && $UNIT_STATE != active ]]; then
+    ROLLBACK_REASON="previously_active_unit_unhealthy:$unit:actual=$UNIT_STATE:exit=$UNIT_STATE_RC"
+    false
+  fi
+  if [[ ${REQUIRED_UNIT[$unit]:-0} == 1 && $UNIT_STATE != active ]]; then
+    ROLLBACK_REASON="required_unit_unhealthy:$unit:actual=$UNIT_STATE:exit=$UNIT_STATE_RC"
+    false
+  fi
+  if [[ ${PRE_STATE[$unit]} != active && $UNIT_STATE != active ]]; then
+    log_event unit_preexisting_unhealthy \
+      "unit=$unit pre=${PRE_STATE[$unit]} actual=$UNIT_STATE exit_code=$UNIT_STATE_RC deployment_failure=false"
+  fi
+done
+
+ROLLBACK_REASON=public_health_readiness_failed
+READINESS_STARTED_EPOCH=$(date +%s)
+READINESS_MAX_ATTEMPTS=20
+READINESS_DELAY_SECONDS=3
+SOCKET_PATH=${ACT_SOCKET_PATH:-/run/act.sock}
+SOCKET_HEALTH_PATH=${ACT_SOCKET_HEALTH_PATH:-/}
+READINESS_OK=0
+log_event readiness_start \
+  "url=$HEALTH_URL socket=$SOCKET_PATH attempts=$READINESS_MAX_ATTEMPTS delay_seconds=$READINESS_DELAY_SECONDS"
+
+for ((attempt = 1; attempt <= READINESS_MAX_ATTEMPTS; attempt++)); do
+  sleep "$READINESS_DELAY_SECONDS"
+  attempt_timestamp=$(date -u +%FT%TZ)
+  elapsed_seconds=$(( $(date +%s) - READINESS_STARTED_EPOCH ))
+
+  get_unit_state act.service
+  if [[ $UNIT_STATE != active || $UNIT_STATE_RC -ne 0 ]]; then
+    ROLLBACK_REASON="readiness_act_service_unhealthy:actual=$UNIT_STATE:exit=$UNIT_STATE_RC"
+    log_event readiness_attempt \
+      "attempt=$attempt timestamp=$attempt_timestamp http_status=not_checked curl_exit=not_run elapsed_seconds=$elapsed_seconds service_state=$UNIT_STATE service_exit=$UNIT_STATE_RC socket_status=not_checked"
+    emit_failure_diagnostics "$ROLLBACK_REASON"
+    false
+  fi
+
+  if [[ ! -S $SOCKET_PATH ]]; then
+    ROLLBACK_REASON="readiness_socket_missing:path=$SOCKET_PATH:attempt=$attempt"
+    log_event readiness_attempt \
+      "attempt=$attempt timestamp=$attempt_timestamp http_status=not_checked curl_exit=not_run elapsed_seconds=$elapsed_seconds service_state=$UNIT_STATE service_exit=$UNIT_STATE_RC socket_status=missing"
+    if ((attempt == READINESS_MAX_ATTEMPTS)); then
+      emit_failure_diagnostics "$ROLLBACK_REASON"
+      false
+    fi
+    continue
+  fi
+
+  if SOCKET_HTTP_CODE=$(curl --unix-socket "$SOCKET_PATH" --silent --show-error \
+    --output /dev/null --write-out '%{http_code}' "http://localhost$SOCKET_HEALTH_PATH"); then
+    SOCKET_CURL_RC=0
+  else
+    SOCKET_CURL_RC=$?
+  fi
+  if [[ $SOCKET_CURL_RC -ne 0 || $SOCKET_HTTP_CODE == 000 ]]; then
+    ROLLBACK_REASON="readiness_socket_not_accepting:curl_exit=$SOCKET_CURL_RC:http_status=$SOCKET_HTTP_CODE:attempt=$attempt"
+    log_event readiness_attempt \
+      "attempt=$attempt timestamp=$attempt_timestamp http_status=not_checked curl_exit=not_run elapsed_seconds=$elapsed_seconds service_state=$UNIT_STATE service_exit=$UNIT_STATE_RC socket_status=not_accepting socket_http_status=$SOCKET_HTTP_CODE socket_curl_exit=$SOCKET_CURL_RC"
+    if [[ $SOCKET_CURL_RC =~ ^[234]$ ]] || ((attempt == READINESS_MAX_ATTEMPTS)); then
+      emit_failure_diagnostics "$ROLLBACK_REASON"
+      false
+    fi
+    continue
+  fi
+
+  if HEALTH_HTTP_CODE=$(curl --silent --show-error --output /dev/null \
+    --write-out '%{http_code}' "$HEALTH_URL"); then
+    HEALTH_CURL_RC=0
+  else
+    HEALTH_CURL_RC=$?
+  fi
+  log_event readiness_attempt \
+    "attempt=$attempt timestamp=$attempt_timestamp http_status=$HEALTH_HTTP_CODE curl_exit=$HEALTH_CURL_RC elapsed_seconds=$elapsed_seconds service_state=$UNIT_STATE service_exit=$UNIT_STATE_RC socket_status=accepting socket_http_status=$SOCKET_HTTP_CODE socket_curl_exit=$SOCKET_CURL_RC"
+
+  if [[ $HEALTH_CURL_RC -eq 0 && $HEALTH_HTTP_CODE =~ ^[234][0-9]{2}$ ]]; then
+    READINESS_OK=1
+    log_event readiness_success \
+      "attempt=$attempt timestamp=$attempt_timestamp http_status=$HEALTH_HTTP_CODE curl_exit=$HEALTH_CURL_RC elapsed_seconds=$elapsed_seconds"
+    break
+  fi
+
+  ROLLBACK_REASON="public_health_not_ready:curl_exit=$HEALTH_CURL_RC:http_status=$HEALTH_HTTP_CODE:attempt=$attempt"
+  if [[ $HEALTH_CURL_RC =~ ^[234]$ ]]; then
+    ROLLBACK_REASON="public_health_unrecoverable_curl_error:curl_exit=$HEALTH_CURL_RC:http_status=$HEALTH_HTTP_CODE:attempt=$attempt"
+    emit_failure_diagnostics "$ROLLBACK_REASON"
+    false
+  fi
+  if ((attempt == READINESS_MAX_ATTEMPTS)); then
+    emit_failure_diagnostics "$ROLLBACK_REASON"
+    false
+  fi
+done
+
+if ((READINESS_OK == 0)); then
+  ROLLBACK_REASON="public_health_readiness_exhausted"
+  emit_failure_diagnostics "$ROLLBACK_REASON"
+  false
+fi
+ROLLBACK_REASON=post_switch_django_check_failed
+"$RELEASE/.venv/bin/python" manage.py check
+
+trap - ERR
+log_event deployment_success "release=$ID git_sha=$SHA"
+
+mapfile -t OLD_RELEASES < <(find "$ACT_ROOT/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -nr | tail -n +$((RELEASES_TO_KEEP + 1)) | cut -d' ' -f2-)
+for old in "${OLD_RELEASES[@]}"; do
+  [[ $(readlink -f "$ACT_ROOT/current") != "$old/backend" ]] && rm -rf -- "$old"
+done
