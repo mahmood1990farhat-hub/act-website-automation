@@ -17,6 +17,7 @@ from ..models import DriverOnboardingRequest
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 import logging
+from utils.integrations.n8n import send_event
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -161,6 +162,11 @@ class DriverOnboardingStep1View(EMADBaseView):
         from utils.common.email import send_driver_onboarding_submitted, send_admin_onboarding_notification
         send_driver_onboarding_submitted(onboarding_request)
         send_admin_onboarding_notification(onboarding_request)
+        send_event('driver.onboarding.submitted', {
+            'onboarding_request_id': onboarding_request.id,
+            'user_id': onboarding_request.user_id,
+            'status': onboarding_request.status,
+        })
         
         return Response({
             'message': _('Your onboarding request has been submitted successfully. We will review your application and get back to you soon.'),
@@ -475,6 +481,12 @@ class AdminOnboardingRequestActionView(EMADBaseView):
         try:
             if action == 'approve':
                 onboarding_request.approve_step1(request.user, notes)
+                send_event('driver.onboarding.step1_approved', {
+                    'onboarding_request_id': onboarding_request.id,
+                    'user_id': onboarding_request.user_id,
+                    'status': onboarding_request.status,
+                    'reviewed_by': request.user.id,
+                })
                 
                 # Send step 1 approval email (won't fail if email sending fails)
                 from utils.common.email import send_driver_step1_approval
