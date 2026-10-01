@@ -1,0 +1,59 @@
+name: ACT Maps before and after screenshots
+"on":
+  push:
+    branches: [codex/seo-metadata-airport-links-20261001]
+    paths: ['preview/maps-preview.cjs', '.github/workflows/maps-preview.yml']
+permissions:
+  contents: read
+jobs:
+  screenshots:
+    if: github.ref == 'refs/heads/codex/seo-metadata-airport-links-20261001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [before, after]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: c4e07c63439495943359025ed605f7ed16c1178a
+          path: production-source
+          persist-credentials: false
+      - name: Build exact comparison variant
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          set -euo pipefail
+          if [ "$VARIANT" = before ]; then
+            build_source=production-source/act_website-main
+          else
+            build_source=candidate/act_website-main
+          fi
+          mkdir -p "$build_source/tests"
+          if [ "$VARIANT" = before ]; then
+            cp candidate/act_website-main/tests/frontend.Dockerfile "$build_source/tests/"
+            cp candidate/act_website-main/tests/frontend.Dockerfile.dockerignore "$build_source/tests/"
+          fi
+          cp candidate/preview/maps-preview.cjs "$build_source/tests/maps-preview.cjs"
+          docker build -f "$build_source/tests/frontend.Dockerfile" -t maps-preview "$build_source"
+      - name: Capture with network disabled
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          set -euo pipefail
+          docker create --name maps-capture --network none --cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 -e PREVIEW_SOURCE="$VARIANT" maps-preview node tests/maps-preview.cjs
+          docker start -a maps-capture
+          test "$(docker inspect -f '{{.State.ExitCode}}' maps-capture)" = 0
+          docker cp maps-capture:/tmp/maps-preview ./screenshots
+          docker rm maps-capture
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maps-${{ matrix.variant }}
+          path: screenshots/
+          retention-days: 30
+          if-no-files-found: error
