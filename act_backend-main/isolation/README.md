@@ -26,19 +26,20 @@ or authorize a production deployment. Payment SDKs and credentials are absent.
 
 ## GitHub-hosted runner preparation
 
-`.github/workflows/isolated-safety-tests.yml` is a manual-only candidate using
+`.github/workflows/isolated-safety-tests.yml` is an isolated-branch test workflow using
 `ubuntu-24.04`, contents-read permission, a 10-minute job limit, no production
 environment/secrets, exact dispatched SHA checkout and no persisted credentials.
 It runs the local regressions/config checks, builds the isolated image and runs
 the container. Dependency/image downloads happen before the network-disabled
 test runtime. It does not test the complete ACT application.
 
-BLOCKED: this new workflow exists only on the test branch. GitHub's standard
-manual trigger requires the workflow on the default branch. Do not merge to
-main to enable it, because main pushes trigger frontend production deployment.
-No run has been dispatched. A branch-only push trigger would avoid main but is
-a change from the approved manual-only design and requires owner approval.
-The available connector also has no workflow-dispatch operation.
+Owner approved branch-only push execution on 2026-10-01. Relevant changes pushed
+only to `codex/isolated-backend-tests-20261001` trigger the hosted test job.
+There is no main/PR/scheduled trigger; a second job-level branch gate also applies.
+GitHub's standard manual trigger still requires default-branch registration.
+Do not merge to main to enable it: main pushes trigger frontend production.
+Runtime results must be checked in Actions; committing this file alone is not
+proof of a successful run. No credentials or live data are supplied to tests.
 
 Five host-side static workflow safety tests can be run from act_backend-main:
 

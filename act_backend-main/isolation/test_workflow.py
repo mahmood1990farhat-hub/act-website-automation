@@ -12,8 +12,15 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.workflow = yaml.safe_load(self.text)
         self.job = self.workflow['jobs']['isolated-tests']
 
-    def test_manual_only(self):
-        self.assertEqual(list(self.workflow['on']), ['workflow_dispatch'])
+    def test_isolated_branch_push_and_explicit_manual_only(self):
+        self.assertEqual(set(self.workflow['on']), {'push', 'workflow_dispatch'})
+        self.assertEqual(self.workflow['on']['push']['branches'], ['codex/isolated-backend-tests-20261001'])
+        self.assertEqual(self.workflow['on']['push']['paths'], [
+            '.github/workflows/isolated-safety-tests.yml', 'act_backend-main/isolation/**',
+            'act_backend-main/tests/test_onboarding_logging.py',
+            'act_backend-main/tests/test_shared_exception_safety.py',
+            'act_backend-main/utils/common/error_handlers.py',
+            'act_backend-main/apps/drivers/views/onboarding_views.py'])
         consent = self.workflow['on']['workflow_dispatch']['inputs']['confirm_synthetic_only']
         self.assertEqual(consent['type'], 'boolean')
         self.assertTrue(consent['required'])
@@ -30,6 +37,7 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("github.event_name == 'workflow_dispatch'", gate)
         self.assertIn("github.ref == 'refs/heads/codex/isolated-backend-tests-20261001'", gate)
         self.assertIn('inputs.confirm_synthetic_only == true', gate)
+        self.assertIn("github.event_name == 'push'", gate)
 
     def test_no_production_credentials_or_environment(self):
         self.assertNotIn('environment', self.job)
