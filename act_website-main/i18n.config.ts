@@ -1,7 +1,7 @@
 import { Languages } from "./src/constants/enums";
 export type Locale = Languages.ARABIC | Languages.ENGLISH;
 export type languageType = Locale;
-export type SupportedLocale = Locale | "zh-CN" | "tr" | "es" | "fr" | "de";
+export type SupportedLocale = `${Locale}` | "zh-CN" | "tr" | "es" | "fr" | "de";
 export const localeRegistry: Record<SupportedLocale, { label: string; direction: "ltr" | "rtl"; enabled: boolean }> = {
   en: { label: "English", direction: "ltr", enabled: true },
   ar: { label: "العربية", direction: "rtl", enabled: true },

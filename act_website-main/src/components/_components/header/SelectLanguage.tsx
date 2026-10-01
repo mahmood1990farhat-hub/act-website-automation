@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { TbWorld } from "react-icons/tb";
-import { enabledLocales, localeRegistry, localizedPath, type Locale } from "../../../../i18n.config";
+import { enabledLocales, localeRegistry, localizedPath, type Locale, type SupportedLocale } from "../../../../i18n.config";
 
 export default function SelectLanguage({ locale, language }: {
   locale: string; language: { English: string; Arabic: string };
@@ -11,7 +11,7 @@ export default function SelectLanguage({ locale, language }: {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const label = (code: Locale) => code === "en" ? language.English : code === "ar" ? language.Arabic : localeRegistry[code].label;
+  const label = (code: SupportedLocale) => code === "en" ? language.English : code === "ar" ? language.Arabic : localeRegistry[code].label;
   useEffect(() => {
     const close = (event: MouseEvent) => { if (!ref.current?.contains(event.target as Node)) setOpen(false); };
     document.addEventListener("mousedown", close);
