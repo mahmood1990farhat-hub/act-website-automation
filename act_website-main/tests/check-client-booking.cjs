@@ -16,8 +16,23 @@ async function main() {
   const context = await browser.newContext({serviceWorkers: 'block'});
   const errors = [];
   let details = 0;
+  let simulatedStripeLoads = 0;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
+    // Simulate SDK initialization only. Any payment-method use fails explicitly.
+    // This response is generated locally; Stripe is never contacted.
+    if (url.origin === 'https://js.stripe.com' && /^\/v3\/?$/.test(url.pathname)) {
+      simulatedStripeLoads++;
+      return route.fulfill({contentType: 'application/javascript', body: `
+        window.Stripe = function () {
+          return new Proxy({}, { get: function (_, name) {
+            if (name === '_registerWrapper' || name === 'registerAppInfo') return function () {};
+            if (name === 'then') return undefined;
+            throw new Error('Payment operation is outside this simulated test: ' + String(name));
+          }});
+        };
+      `});
+    }
     if (url.origin !== origin) return route.abort();
     if (url.pathname === '/api/places') return route.fulfill({json: {status:'OK', predictions:[{description:'Synthetic Test Street, London, UK', place_id:'synthetic-only', reference:'synthetic-only', matched_substrings:[]}]}});
     if (url.pathname === '/api/place-details') {
@@ -49,6 +64,8 @@ async function main() {
     console.log('PASS client content/contact/location selection',locale);
   }
   assert.equal(details,2,'Two simulated location-detail responses');
+  assert.ok(simulatedStripeLoads > 0,'Locally simulated Stripe loader exercised');
+  console.log('SIMULATED Stripe loader responses:', simulatedStripeLoads);
   assert.deepEqual(errors,[],'No uncaught browser errors');
   console.log('PASS bounded client acceptance; no quote, booking or payment submitted');
 }
