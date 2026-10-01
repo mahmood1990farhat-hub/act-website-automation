@@ -14,20 +14,26 @@ async function main(){
   const context=await browser.newContext({viewport,serviceWorkers:'block',deviceScaleFactor:1});
   await context.route('**/*',r=>{const u=new URL(r.request().url());return u.origin!==origin||u.pathname.startsWith('/api/')||r.request().method()!=='GET'?r.abort():r.continue();});
   const page=await context.newPage();
+  for(const [airport,name] of [['gatwick','غاتويك'],['stansted','ستانستد'],['luton','لوتون']]){
   for(const locale of ['en','ar']){
-   await page.goto(origin+'/'+locale+'/heathrow-airport-transfer',{waitUntil:'networkidle'});
-   await page.getByRole('heading',{level:1,name:locale==='ar'?'خدمة التوصيل من وإلى مطار هيثرو في لندن':'Heathrow Airport Transfer London',exact:true}).waitFor();
+   await page.goto(origin+'/'+locale+'/'+airport+'-airport-transfer',{waitUntil:'networkidle'});
+   await page.getByRole('heading',{level:1,name:locale==='ar'?`خدمة التوصيل بين مطار ${name} ولندن`:airport[0].toUpperCase()+airport.slice(1)+' Airport Transfer London',exact:true}).waitFor();
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'No horizontal page overflow');
    if(locale==='ar'){
     const main=page.locator('main[lang="ar"]');
     assert.equal(await main.getAttribute('dir'),'rtl');
-    assert.equal(await page.title(),'توصيل من وإلى مطار هيثرو في لندن | ACT');
+    assert.equal(await page.title(),`توصيل مطار ${name} من وإلى لندن | ACT`);
     assert.equal(await main.locator('h3').count(),5);
     assert.equal(await main.locator('a[href="tel:+442081530303"]').count(),1);
+    assert.equal(await main.locator('a[href="/ar#book-now"]').count(),2);
+    assert.equal(await main.locator('a[href="/ar/about-us#contact-us"]').count(),1);
    }
-   await page.screenshot({path:`/tmp/approved-preview/${locale}-${size}.png`});
-   await page.screenshot({path:`/tmp/approved-preview/${locale}-${size}-full.png`,fullPage:true});
-   console.log('PASS screenshot/layout',locale,size);
+   if(locale==='ar') {
+    await page.screenshot({path:`/tmp/approved-preview/${airport}-${size}.png`});
+    await page.screenshot({path:`/tmp/approved-preview/${airport}-${size}-full.png`,fullPage:true});
+   }
+   console.log('PASS screenshot/layout',airport,locale,size);
+  }
   }
   await context.close();
  }
