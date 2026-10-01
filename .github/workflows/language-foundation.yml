@@ -1,0 +1,24 @@
+name: ACT hidden language foundation
+"on":
+  push:
+    branches: [codex/language-foundation-20261001]
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build isolated frontend
+        run: docker build -f act_website-main/tests/frontend.Dockerfile -t act-language act_website-main
+      - name: Registry dictionary and routing checks
+        run: docker run --rm --network none act-language node tests/check-language-foundation.cjs
+      - name: Existing public route checks
+        run: docker run --rm --network none act-language node tests/check-rendered-seo.cjs
+      - name: Language menu desktop and mobile
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-language node tests/check-language-browser.cjs
+      - name: Existing booking entry
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-language node tests/check-client-booking.cjs

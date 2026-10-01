@@ -11,7 +11,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { Locale } from "../../../../i18n.config";
+import { Locale, localizedVehicleValue } from "../../../../i18n.config";
 import { calculatTripCost, Choose_car, VehicleType } from ".";
 import { Button } from "@/components/ui/button";
 
@@ -174,7 +174,7 @@ export default function ModernChooseCar({
                       <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 relative rounded-xl overflow-hidden bg-white p-1 sm:p-2">
                         <Image
                           src={car.icon_url}
-                          alt={car[`name_${locale}`]}
+                          alt={localizedVehicleValue(car, "name", locale)}
                           fill
                           className="object-contain drop-shadow-lg"
                           sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
@@ -210,7 +210,7 @@ export default function ModernChooseCar({
                                 : "text-white"
                             } group-hover:text-[#ffd100] transition-colors`}
                           >
-                            {car[`name_${locale}`]}
+                            {localizedVehicleValue(car, "name", locale)}
                           </h3>
 
                           <div
@@ -245,7 +245,7 @@ export default function ModernChooseCar({
                       </div>
 
                       <p className="text-white/80 text-xs sm:text-sm lg:text-base leading-relaxed mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-none">
-                        {car[`desc_${locale}`]}
+                        {localizedVehicleValue(car, "desc", locale)}
                       </p>
 
                       {/* Features */}
@@ -331,3 +331,4 @@ export default function ModernChooseCar({
     </div>
   );
 }
+

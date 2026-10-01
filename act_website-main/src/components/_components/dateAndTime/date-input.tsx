@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "./date-picker";
 import { format } from "date-fns";
 
-type Language = "ar" | "en";
+import { dictionaryLocale, type SupportedLocale } from "../../../../i18n.config";
+type Language = SupportedLocale;
 
 const placeholders = {
   ar: "اختر التاريخ",
@@ -46,7 +47,7 @@ export function DateInput({
 }: DateInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[language];
+  const defaultPlaceholder = placeholder || placeholders[dictionaryLocale(language)];
   const locale = language === "ar" ? ar : enUS;
   const isRTL = language === "ar";
 
@@ -104,8 +105,9 @@ export function DateInput({
         onSelect={handleDateSelect}
         selectedDate={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={language}
+        language={dictionaryLocale(language)}
       />
     </>
   );
 }
+

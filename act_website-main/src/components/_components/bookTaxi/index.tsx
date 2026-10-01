@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { PlaceSuggestion } from "./LocationSelector";
 import RoutePoints from "./RoutePoints";
 import ChooseCar from "./ChooseCar";
-import { Locale } from "../../../../i18n.config";
+import { Locale, directionFor, localizedVehicleValue } from "../../../../i18n.config";
 import ConfirmFlightDetails from "./ConfirmFlightDetails";
 import PaymentDsetails from "./PaymentDsetails";
 import BookingConfirmation from "./BookingConfirmation";
@@ -242,11 +242,11 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
         <div>
           <div
             className="flex items-center max-md:flex-col gap-5 py-5 w-full lg:px-24 px-5"
-            dir={locale === "en" ? "ltr" : "rtl"}
+            dir={directionFor(locale)}
           >
             <section
               className="flex-1 w-full"
-              dir={locale === "en" ? "ltr" : "rtl"}
+              dir={directionFor(locale)}
             >
               {step === 1 ? (
                 <RoutePoints
@@ -330,9 +330,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     flightDetails,
                     additionalRequirements,
                     carName: SelectedCar
-                      ? (SelectedCar[
-                        `name_${locale}` as keyof VehicleType
-                      ] as string)
+                      ? localizedVehicleValue(SelectedCar, "name", locale)
                       : "",
                       carImage: SelectedCar ? SelectedCar.icon_url : "",
                     cartype: SelectedCar?.id,
@@ -384,3 +382,4 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
     </div>
   );
 }
+

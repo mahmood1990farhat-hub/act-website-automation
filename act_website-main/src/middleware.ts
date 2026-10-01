@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { i18n, languageType } from "../i18n.config";
+import { i18n, languageType, localeFromPath, isSupportedLocale, isEnabledLocale } from "../i18n.config";
 import { match as matchLocale } from "@formatjs/intl-localematcher";
 import Negotiator from "negotiator";
 
@@ -24,10 +24,15 @@ function getLocale(request: NextRequest): string | undefined {
 export function middleware(request: NextRequest) {
   const requestHeader = new Headers(request.headers);
   requestHeader.set("x-url", request.url);
-  const locale = getLocale(request);
+  requestHeader.set("x-pathname", request.nextUrl.pathname);
+  const locale = localeFromPath(request.nextUrl.pathname) || getLocale(request);
   const protectedRoutes = ["my-trips", "driver", "dashboard"];
 
   const pathname = request.nextUrl.pathname;
+  const localeSegment = pathname.split("/")[1];
+  if (isSupportedLocale(localeSegment) && !isEnabledLocale(localeSegment)) {
+    return new NextResponse("Not found", { status: 404, headers: { "X-Robots-Tag": "noindex" } });
+  }
   const hostname = request.nextUrl.hostname;
   const requestHost = request.headers.get("host")?.split(":")[0];
   const forwardedHost = request.headers
@@ -64,13 +69,11 @@ export function middleware(request: NextRequest) {
   const isMyTrips = splitPathname.includes("my-trips");
   const isAdminLogin = splitPathname.includes("admin") && splitPathname.includes("login");
   const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
-  const pathnameIsMissingLocale = i18n.locales.every(
-    (locale) => !pathname.startsWith(`/${locale}`)
-  );
+  const pathnameIsMissingLocale = !localeFromPath(pathname);
 
   // Always allow access to admin login page (for logout/re-login)
   if (isAdminLogin) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeader } });
   }
 
   // Redirect to auth if accessing protected routes without token
@@ -90,7 +93,7 @@ export function middleware(request: NextRequest) {
     // If it's a dashboard route and not blocked, allow it
     if (isDashboard && !isHomePage && !isMyTrips) {
       // Allow dashboard access
-      return NextResponse.next();
+      return NextResponse.next({ request: { headers: requestHeader } });
     }
     // Redirect to dashboard if trying to access non-dashboard routes
     if (!isDashboard || isHomePage || isMyTrips) {
@@ -124,7 +127,7 @@ export function middleware(request: NextRequest) {
     // Allow upload-documents for drivers (it's in site section now, so isDriver won't be true)
     if (isUploadDocuments && accountType === "normal_driver") {
       console.log("✅ Middleware: Allowing access to upload-documents");
-      const response = NextResponse.next();
+      const response = NextResponse.next({ request: { headers: requestHeader } });
       response.headers.set("x-url", request.url);
       response.headers.set("x-pathname", pathname);
       return response;
@@ -138,7 +141,7 @@ export function middleware(request: NextRequest) {
       }
       // Allow driver access
       if (isDriver) {
-        return NextResponse.next();
+        return NextResponse.next({ request: { headers: requestHeader } });
       }
     } else {
       // Unverified drivers - can ONLY access site routes (like passengers)
@@ -148,7 +151,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}`, request.url));
       }
       // Allow site access (home, my-trips, etc.)
-      return NextResponse.next();
+      return NextResponse.next({ request: { headers: requestHeader } });
     }
   }
 
@@ -163,7 +166,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
     // Allow site access (home, my-trips, etc.)
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeader } });
   }
 
   // if (token && isAuth) {
@@ -175,7 +178,7 @@ export function middleware(request: NextRequest) {
   // }
 
     if (pathname.endsWith('.html')) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeader } });
   }
   
   if (pathnameIsMissingLocale) {
@@ -183,7 +186,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Create response with headers
-  const response = NextResponse.next();
+  const response = NextResponse.next({ request: { headers: requestHeader } });
   response.headers.set("x-url", request.url);
   response.headers.set("x-pathname", pathname);
   return response;
