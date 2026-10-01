@@ -28,6 +28,7 @@ def main():
     root = Path(__file__).resolve().parents[1]
     suite = unittest.TestSuite()
     suite.addTests(unittest.TestLoader().discover(str(root / 'tests'), pattern='test_onboarding_logging.py'))
+    suite.addTests(unittest.TestLoader().discover(str(root / 'tests'), pattern='test_shared_exception_safety.py'))
     suite.addTests(unittest.TestLoader().discover(str(root / 'isolation'), pattern='test_smoke.py'))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1

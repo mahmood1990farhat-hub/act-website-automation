@@ -206,99 +206,20 @@ def format_field_name(field_name):
 
 
 def format_exception_error(exception, locale='en'):
-    """
-    Format exception errors with proper locale-based messages
-    Logs the actual error for debugging while returning user-friendly messages
+    """Return a fixed public message without inspecting untrusted exceptions.
+
+    Exception values, class names, reprs and tracebacks can contain credentials,
+    payment metadata or personal data. Do not serialize them to responses/logs.
+    Expected validation errors have their own explicit response path.
     """
     import logging
-    import traceback
-    
-    logger = logging.getLogger(__name__)
-    error_str = str(exception)
-    error_type = type(exception).__name__
-    
-    # Log the actual error for debugging
-    logger.error(f"Exception type: {error_type}, Message: {error_str}")
-    logger.error(traceback.format_exc())
-    
-    # Handle ValidationError with bilingual messages
-    if 'ErrorDetail' in error_str and 'string=' in error_str:
-        # Extract the error details
-        import re
-        
-        # Find all ErrorDetail strings
-        error_details = re.findall(r"ErrorDetail\(string='([^']+)', code='[^']+'\)", error_str)
-        
-        if error_details:
-            # Check if we have bilingual messages (English and Arabic)
-            if len(error_details) == 2:
-                english_msg = error_details[0]
-                arabic_msg = error_details[1]
-                return get_bilingual_error_message(english_msg, arabic_msg, locale)
-            else:
-                # Single message
-                return error_details[0]
-    
-    # Handle specific error types with more descriptive messages
-    error_lower = error_str.lower()
-    
-    # Stripe errors
-    if 'stripe' in error_lower or error_type == 'StripeError':
-        if locale == 'ar':
-            return f'خطأ في معالجة الدفع: {error_str[:100]}'
-        else:
-            return f'Payment processing error: {error_str[:100]}'
-    
-    # Database errors
-    if 'database' in error_lower or 'integrity' in error_lower or 'doesnotexist' in error_lower:
-        if locale == 'ar':
-            return 'خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.'
-        else:
-            return 'Database error. Please try again or contact support.'
-    
-    # Network/API errors
-    if 'connection' in error_lower or 'timeout' in error_lower or 'network' in error_lower:
-        if locale == 'ar':
-            return 'خطأ في الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.'
-        else:
-            return 'Connection error. Please check your internet connection and try again.'
-    
-    # Value/Type errors
-    if error_type in ['ValueError', 'TypeError', 'AttributeError']:
-        if locale == 'ar':
-            return f'خطأ في البيانات: {error_str[:100]}'
-        else:
-            return f'Data error: {error_str[:100]}'
-    
-    # Handle other types of errors
-    if locale == 'ar':
-        if 'phone number is not valid' in error_lower:
-            return 'رقم الهاتف غير صحيح. يرجى التحقق من الرقم والمحاولة مرة أخرى.'
-        elif 'invalid phone number format' in error_lower:
-            return 'تنسيق رقم الهاتف غير صحيح. يرجى استخدام التنسيق الدولي (مثل: +447700900123).'
-        elif 'user with this email already exists' in error_lower:
-            return 'عنوان البريد الإلكتروني مستخدم بالفعل. يرجى استخدام عنوان آخر.'
-        elif 'user with this username already exists' in error_lower:
-            return 'اسم المستخدم مستخدم بالفعل. يرجى استخدام اسم آخر.'
-        elif 'no rate found' in error_lower or 'distance exceeds' in error_lower:
-            return 'المسافة طويلة جداً أو نوع السيارة غير مدعوم. يرجى المحاولة بخيارات أخرى.'
-        else:
-            # Return the actual error message (truncated) for better debugging
-            return f'حدث خطأ: {error_str[:150]}'
-    else:
-        if 'phone number is not valid' in error_lower:
-            return 'Phone number is not valid. Please check the number and try again.'
-        elif 'invalid phone number format' in error_lower:
-            return 'Invalid phone number format. Please use international format (e.g., +447700900123).'
-        elif 'user with this email already exists' in error_lower:
-            return 'Email address already exists. Please use a different email.'
-        elif 'user with this username already exists' in error_lower:
-            return 'Username already exists. Please use a different username.'
-        elif 'no rate found' in error_lower or 'distance exceeds' in error_lower:
-            return 'Distance too long or car type not supported. Please try other options.'
-        else:
-            # Return the actual error message (truncated) for better debugging
-            return f'Error: {error_str[:150]}'
+
+    logging.getLogger(__name__).error("Unexpected application error.")
+    return get_bilingual_error_message(
+        'An unexpected error occurred. Please try again.',
+        'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+        locale
+    )
 
 
 def create_error_response(message, errors=None, locale='en', status_code=status.HTTP_400_BAD_REQUEST, detail=None):

@@ -8,6 +8,10 @@
 !isolation/Dockerfile.dockerignore
 !tests/
 !tests/test_onboarding_logging.py
+!tests/test_shared_exception_safety.py
+!utils/
+!utils/common/
+!utils/common/error_handlers.py
 !apps/
 !apps/drivers/
 !apps/drivers/views/

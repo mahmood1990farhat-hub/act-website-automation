@@ -5,7 +5,7 @@ Keep this work on `codex/isolated-backend-tests-20261001`. Do not merge to main:
 every main push triggers production frontend deployment, even backend-only edits.
 
 This is a test harness, not a staging website or a complete backend replica.
-It executes the 11 existing onboarding handler/AST regression tests, plus four
+It executes 11 onboarding handler/AST and 11 shared exception-safety tests, plus four
 real Django smoke tests for memory-only email, disposable synthetic SQLite data,
 the Python network tripwire and absence of production module imports.
 ACT serializers, models, migrations, HTTP routes, PostGIS, Celery and external
@@ -41,6 +41,7 @@ Host-only checks, from `act_backend-main`:
 
 ```sh
 python -m unittest discover -s tests -p test_onboarding_logging.py -v
+python -m unittest discover -s tests -p test_shared_exception_safety.py -v
 python -m unittest discover -s isolation -p test_config.py -v
 ```
 
@@ -48,7 +49,7 @@ The second command requires PyYAML. Do not use `manage.py` for this harness.
 
 ## Verification status
 
-The 11 handler regression tests and six configuration/guard checks passed in the
+The 22 source/handler regression tests and six configuration/guard checks passed in the
 authoring workspace. Python syntax and YAML parsing passed. Docker and Django
 are unavailable there, so image build, container startup and the four Django
 smoke tests remain UNEXECUTED. No production deployment or live-data test was
@@ -57,4 +58,6 @@ performed for this change.
 Next gate: run this container on an authorized disposable runner, then extend
 to actual ACT signup with isolated PostGIS and explicit fake integrations before
 considering deployment. The existing logging fix covers the step-1 handler's
-save exception path; shared error handlers and other paths still need review.
+save exception path. The branch also prepares a fixed-message shared unexpected
+exception formatter; see `../tests/SHARED_EXCEPTION_SAFETY.md` for scope limits.
+Other callers, logging paths and real application integration still need review.
