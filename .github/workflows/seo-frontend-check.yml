@@ -1,0 +1,26 @@
+name: ACT SEO frontend build and rendered checks
+"on":
+  push:
+    branches: [codex/seo-metadata-airport-links-20261001]
+    paths: ['act_website-main/**', '.github/workflows/seo-frontend-check.yml']
+permissions:
+  contents: read
+concurrency:
+  group: act-seo-frontend-test
+  cancel-in-progress: false
+jobs:
+  frontend:
+    if: github.ref == 'refs/heads/codex/seo-metadata-airport-links-20261001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Source contracts
+        run: python3 -m unittest discover -s act_website-main/tests -p test_seo_locale_patch.py -v
+      - name: Build frontend with no build-step network
+        run: docker build -f act_website-main/tests/frontend.Dockerfile -t act-seo-test act_website-main
+      - name: Verify locally rendered routes without external networking
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 act-seo-test
