@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { i18n, Locale } from "../../i18n.config";
 import ReactQueryProvider from "@/providers/Provider";
-import ProviderMap from "@/providers/ProviderMap";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
@@ -65,7 +64,7 @@ export default async function RootLayout({
           </>
         )}
         <ReactQueryProvider>
-          <ProviderMap>{children}</ProviderMap>
+          {children}
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -85,4 +84,5 @@ export default async function RootLayout({
     </html>
   );
 }
+
 
