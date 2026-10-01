@@ -17,22 +17,20 @@ async function main() {
   const errors = [];
   let details = 0;
   let simulatedStripeLoads = 0;
+  // Supply the SDK global before app hydration, regardless of SDK script URL.
+  await context.addInitScript(() => {
+    window.__simulatedStripeInitializations = 0;
+    window.Stripe = function () {
+      window.__simulatedStripeInitializations++;
+      return new Proxy({}, { get: function (_, name) {
+        if (name === '_registerWrapper' || name === 'registerAppInfo') return function () {};
+        if (name === 'then') return undefined;
+        throw new Error('Payment operation is outside this simulated test: ' + String(name));
+      }});
+    };
+  });
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
-    // Simulate SDK initialization only. Any payment-method use fails explicitly.
-    // This response is generated locally; Stripe is never contacted.
-    if (url.origin === 'https://js.stripe.com' && /^\/v3\/?$/.test(url.pathname)) {
-      simulatedStripeLoads++;
-      return route.fulfill({contentType: 'application/javascript', body: `
-        window.Stripe = function () {
-          return new Proxy({}, { get: function (_, name) {
-            if (name === '_registerWrapper' || name === 'registerAppInfo') return function () {};
-            if (name === 'then') return undefined;
-            throw new Error('Payment operation is outside this simulated test: ' + String(name));
-          }});
-        };
-      `});
-    }
     if (url.origin !== origin) return route.abort();
     if (url.pathname === '/api/places') return route.fulfill({json: {status:'OK', predictions:[{description:'Synthetic Test Street, London, UK', place_id:'synthetic-only', reference:'synthetic-only', matched_substrings:[]}]}});
     if (url.pathname === '/api/place-details') {
@@ -61,6 +59,7 @@ async function main() {
     await selected.click();
     await response;
     assert.equal(await input.inputValue(),'Synthetic Test Street, London, UK');
+    simulatedStripeLoads += await page.evaluate(() => window.__simulatedStripeInitializations);
     console.log('PASS client content/contact/location selection',locale);
   }
   assert.equal(details,2,'Two simulated location-detail responses');
