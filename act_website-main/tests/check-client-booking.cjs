@@ -16,21 +16,12 @@ async function main() {
   const context = await browser.newContext({serviceWorkers: 'block'});
   const errors = [];
   let details = 0;
-  let simulatedStripeLoads = 0;
-  // Supply the SDK global before app hydration, regardless of SDK script URL.
-  await context.addInitScript(() => {
-    window.__simulatedStripeInitializations = 0;
-    window.Stripe = function () {
-      window.__simulatedStripeInitializations++;
-      return new Proxy({}, { get: function (_, name) {
-        if (name === '_registerWrapper' || name === 'registerAppInfo') return function () {};
-        if (name === 'then') return undefined;
-        throw new Error('Payment operation is outside this simulated test: ' + String(name));
-      }});
-    };
-  });
+  let mapsRequests = 0;
+  let writeRequests = 0;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
+    if (url.hostname === 'maps.googleapis.com') mapsRequests++;
+    if (route.request().method() !== 'GET') writeRequests++;
     if (url.origin !== origin) return route.abort();
     if (url.pathname === '/api/places') return route.fulfill({json: {status:'OK', predictions:[{description:'Synthetic Test Street, London, UK', place_id:'synthetic-only', reference:'synthetic-only', matched_substrings:[]}]}});
     if (url.pathname === '/api/place-details') {
@@ -49,8 +40,13 @@ async function main() {
     const contact = page.locator(`a[href="/${locale}/about-us#contact-us"]`).first();
     await contact.click();
     await page.locator('#contact-us').waitFor({state:'visible'});
-    await page.goto(`${origin}/${locale}`, {waitUntil:'networkidle'});
-    const input = page.locator('input[placeholder="'+(locale === 'en'?'Search for a location in London...':'ابحث عن موقع في لندن...')+'"]').first();
+    await page.goto(`${origin}/${locale}/heathrow-airport-transfer`, {waitUntil:'networkidle'});
+    await page.locator(`a[href="/${locale}#book-now"]`).first().click();
+    await page.locator('#book-now').waitFor({state:'visible'});
+    for (const placeholder of (locale === 'en'
+      ? ['Search for a location in London...', 'Search for a location in the UK...']
+      : ['ابحث عن موقع في لندن...', 'ابحث عن موقع في المملكة المتحدة...'])) {
+    const input = page.getByPlaceholder(placeholder, {exact:true});
     await input.waitFor({state:'visible'});
     await input.fill('Synthetic London');
     const selected = page.getByText('Synthetic Test Street, London, UK',{exact:true}).first();
@@ -59,13 +55,18 @@ async function main() {
     await selected.click();
     await response;
     assert.equal(await input.inputValue(),'Synthetic Test Street, London, UK');
-    simulatedStripeLoads += await page.evaluate(() => window.__simulatedStripeInitializations);
-    console.log('PASS client content/contact/location selection',locale);
+    }
+    assert.equal(await page.evaluate(() => typeof window.google), 'undefined', 'No Maps browser global needed');
+    console.log('PASS content/contact/booking link/pickup/dropoff with Maps unavailable',locale);
   }
-  assert.equal(details,2,'Two simulated location-detail responses');
-  assert.ok(simulatedStripeLoads > 0,'Locally simulated Stripe loader exercised');
-  console.log('SIMULATED Stripe loader responses:', simulatedStripeLoads);
-  assert.deepEqual(errors,[],'No uncaught browser errors');
-  console.log('PASS bounded client acceptance; no quote, booking or payment submitted');
+  assert.equal(details,4,'Four simulated location-detail responses');
+  assert.equal(mapsRequests,0,'Public pages do not request the Maps browser SDK');
+  assert.equal(writeRequests,0,'No quote, booking or payment writes attempted');
+  // This is a Maps-independent booking-entry check, NOT payment acceptance.
+  // Keep the known offline Stripe error visible; all other page errors fail.
+  const offlineStripeErrors = errors.filter(e => e === 'Failed to load Stripe.js');
+  console.log('KNOWN OFFLINE STRIPE ERRORS (payment unverified):', offlineStripeErrors.length);
+  assert.deepEqual(errors.filter(e => e !== 'Failed to load Stripe.js'),[], 'No unexpected browser errors');
+  console.log('PASS focused booking-entry scope only; real Maps/Places/quote/payment remain unverified');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{if(browser)await browser.close();server.kill('SIGTERM');});
