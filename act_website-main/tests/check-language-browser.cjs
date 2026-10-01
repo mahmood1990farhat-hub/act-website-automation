@@ -26,6 +26,8 @@ async function main(){
    const target=locale==='en'?'ar':'en';
    await page.locator('button[lang="'+target+'"]:visible').click();
    await page.waitForURL('**/'+target+'/about-us?source=language-check#contact-us');
+   assert.equal(await page.locator('html').getAttribute('lang'),target);
+   assert.equal(await page.locator('html').getAttribute('dir'),target==='ar'?'rtl':'ltr');
    console.log('PASS switch preserves path/query/hash',width,locale);
   }
   await context.close();

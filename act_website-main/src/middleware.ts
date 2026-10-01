@@ -8,7 +8,8 @@ function getLocale(request: NextRequest): string | undefined {
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
 
   const locales: languageType[] = i18n.locales;
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages();
+  const languages = new Negotiator({ headers: negotiatorHeaders }).languages().filter(language => language !== "*");
+  if (!languages.length) return i18n.defaultLocale;
   let locale = "";
 
   try {

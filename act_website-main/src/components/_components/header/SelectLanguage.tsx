@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { TbWorld } from "react-icons/tb";
 import { enabledLocales, localeRegistry, localizedPath, type Locale, type SupportedLocale } from "../../../../i18n.config";
 
@@ -10,7 +10,6 @@ export default function SelectLanguage({ locale, language }: {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const router = useRouter();
   const label = (code: SupportedLocale) => code === "en" ? language.English : code === "ar" ? language.Arabic : localeRegistry[code].label;
   useEffect(() => {
     const close = (event: MouseEvent) => { if (!ref.current?.contains(event.target as Node)) setOpen(false); };
@@ -28,7 +27,7 @@ export default function SelectLanguage({ locale, language }: {
       {enabledLocales.map(code => <li key={code}><button type="button" lang={code}
         aria-current={code === locale ? "true" : undefined}
         className="w-full rounded p-2 text-start hover:bg-white/10"
-        onClick={() => { setOpen(false); if (code !== locale) router.push(localizedPath(pathname, code) + window.location.search + window.location.hash); }}>
+        onClick={() => { setOpen(false); if (code !== locale) window.location.assign(localizedPath(pathname, code) + window.location.search + window.location.hash); }}>
         {label(code)}
       </button></li>)}
     </ul>}
