@@ -66,7 +66,14 @@ const faqs = [
   },
 ];
 
-export default function GatwickAirportTransferPage() {
+export default async function GatwickAirportTransferPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  const bookingHref = `/${locale}#book-now`;
+  const contactHref = `/${locale}/about-us#contact-us`;
     const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -78,7 +85,7 @@ export default function GatwickAirportTransferPage() {
       url: "https://airportandcitytransfer.com",
     },
     areaServed: ["London", "Gatwick Airport"],
-    url: "https://airportandcitytransfer.com/en/gatwick-airport-transfer",
+    url: `https://airportandcitytransfer.com/${locale}/gatwick-airport-transfer`,
     description:
       "Private Gatwick airport transfer service across London with fixed pricing, professional drivers, executive vehicles, flight monitoring and 24/7 booking.",
   };
@@ -108,11 +115,11 @@ export default function GatwickAirportTransferPage() {
 
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild className="bg-yellow-500 text-black hover:bg-yellow-400">
-              <Link href="/en#book-now">Book Now</Link>
+              <Link href={bookingHref}>Book Now</Link>
             </Button>
 
             <Button asChild variant="outline" className="border-yellow-500 text-yellow-500">
-              <Link href="/en/contact-us">Contact Us</Link>
+              <Link href={contactHref}>Contact Us</Link>
             </Button>
           </div>
         </div>
@@ -224,7 +231,7 @@ export default function GatwickAirportTransferPage() {
           </p>
 
           <Button asChild className="mt-8 bg-yellow-500 text-black hover:bg-yellow-400">
-            <Link href="/en#book-now">Book Now</Link>
+            <Link href={bookingHref}>Book Now</Link>
           </Button>
         </div>
       </section>
