@@ -1,4 +1,5 @@
 "use client";
+import ProviderMap from "@/providers/ProviderMap";
 import React, { useEffect, useRef, useState } from "react";
 import {
 	GoogleMap,
@@ -222,6 +223,13 @@ const MapView = ({ routePolyline }: Props) => {
 	);
 };
 
-export default MapView;
+export default function GuardedMapView(props: Props) {
+  return (
+    <ProviderMap>
+      <MapView {...props} />
+    </ProviderMap>
+  );
+}
 
 // darkMapStyle هو الثيم الداكن الذي ناقشناه سابقاً
+

@@ -1,3 +1,4 @@
+import ProviderMap from "@/providers/ProviderMap";
 import Asidebar from "@/components/_components/driver/Asidebar";
 import React from "react";
 import { Locale } from "../../../../i18n.config";
@@ -64,6 +65,7 @@ export default async function LayoutDriver({
 
   // For verified drivers, show full layout with sidebar
   return (
+    <ProviderMap>
     <div className="flex">
       <Asidebar trans={aside} adminVerification={adminVerification} sidebar={sidebar} />
 
@@ -72,5 +74,7 @@ export default async function LayoutDriver({
         {children}
       </main>
     </div>
+    </ProviderMap>
   );
 }
+

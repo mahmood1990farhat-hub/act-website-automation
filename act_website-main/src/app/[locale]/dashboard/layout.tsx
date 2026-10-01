@@ -1,3 +1,4 @@
+import ProviderMap from "@/providers/ProviderMap";
 import Asidebar from "@/components/_components/driver/Asidebar";
 import React from "react";
 import { Locale } from "../../../../i18n.config";
@@ -22,6 +23,7 @@ export default async function LayoutDashboard({
   const { navbar } = await getTrans(localeTyped, "home");
 
   return (
+    <ProviderMap>
     <DashboardLayoutClient
       locale={localeTyped}
       aside={aside}
@@ -30,5 +32,7 @@ export default async function LayoutDashboard({
     >
       {children}
     </DashboardLayoutClient>
+    </ProviderMap>
   );
 }
+
