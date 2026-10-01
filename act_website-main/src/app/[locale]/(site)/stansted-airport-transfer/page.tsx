@@ -1,3 +1,4 @@
+import ArabicStanstedPage, { arabicMetadata } from "./ArabicStanstedPage";
 import Link from "next/link";
 import { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  if (locale === "ar") return getPublicPageSeo(locale, "stansted-airport-transfer", arabicMetadata);
   return getPublicPageSeo(locale, "stansted-airport-transfer", pageMetadata);
 }
 
@@ -72,6 +74,7 @@ export default async function StanstedAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
+  if (locale === "ar") return <ArabicStanstedPage />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;
     const serviceSchema = {
