@@ -8,5 +8,6 @@ RUN --network=none npm run build
 RUN mkdir -p /app/.next/cache/images && chown -R node:node /app/.next/cache
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 RUN npm install --prefix /opt/browser-test --ignore-scripts --no-audit --no-fund playwright@1.56.1 && /opt/browser-test/node_modules/.bin/playwright install --with-deps chromium && chmod -R a+rX /opt/playwright-browsers
+RUN apt-get update && apt-get install -y --no-install-recommends fonts-noto-core && rm -rf /var/lib/apt/lists/*
 USER node
 CMD ["node", "tests/check-rendered-seo.cjs"]

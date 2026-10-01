@@ -74,7 +74,7 @@ export default function ArabicHeathrowPage() {
     description: content.description,
   };
   return (
-    <main lang="ar" dir="rtl" className="bg-black text-white">
+    <main lang="ar" dir="rtl" className="bg-black text-white" style={{ fontFamily: "Tahoma, Arial, sans-serif" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <section className="px-6 py-20 md:px-12 lg:px-20">
         <div className="mx-auto max-w-6xl">
