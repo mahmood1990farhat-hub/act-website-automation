@@ -36,7 +36,7 @@ async function main() {
   page.on('pageerror', error => errors.push(error.message));
   for (const locale of ['en','ar']) {
     await page.goto(`${origin}/${locale}/heathrow-airport-transfer`, {waitUntil:'networkidle'});
-    assert.ok(await page.getByRole('heading',{name:'Heathrow Airport Transfer London',exact:true}).isVisible());
+    assert.ok(await page.getByRole('heading',{name:locale === 'ar' ? 'خدمة التوصيل من وإلى مطار هيثرو في لندن' : 'Heathrow Airport Transfer London',exact:true}).isVisible());
     const contact = page.locator(`a[href="/${locale}/about-us#contact-us"]`).first();
     await contact.click();
     await page.locator('#contact-us').waitFor({state:'visible'});

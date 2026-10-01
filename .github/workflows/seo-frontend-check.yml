@@ -21,8 +21,23 @@ jobs:
       - name: Source contracts
         run: python3 -m unittest discover -s act_website-main/tests -p test_seo_locale_patch.py -v
       - name: Build frontend with no build-step network
-        run: docker build -f act_website-main/tests/frontend.Dockerfile -t act-seo-test act_website-main
+        run: |
+          cp preview/approved-release.cjs act_website-main/tests/approved-release.cjs
+          docker build -f act_website-main/tests/frontend.Dockerfile -t act-seo-test act_website-main
       - name: Verify locally rendered routes without external networking
         run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 act-seo-test
       - name: Bounded client booking check with simulated services
         run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 act-seo-test node tests/check-client-booking.cjs
+      - name: Capture approved Arabic and Maps result
+        run: |
+          docker create --name approved-capture --network none --cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 act-seo-test node tests/approved-release.cjs
+          docker start -a approved-capture
+          test "$(docker inspect -f '{{.State.ExitCode}}' approved-capture)" = 0
+          docker cp approved-capture:/tmp/approved-preview ./screenshots
+          docker rm approved-capture
+      - uses: actions/upload-artifact@v4
+        with:
+          name: approved-arabic-maps-preview
+          path: screenshots/
+          retention-days: 30
+          if-no-files-found: error
