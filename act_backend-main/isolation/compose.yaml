@@ -1,0 +1,16 @@
+name: act-isolated-contract-tests
+services:
+  tests:
+    build:
+      context: ..
+      dockerfile: isolation/Dockerfile
+    network_mode: none
+    read_only: true
+    user: "65534:65534"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1.0
+    restart: "no"

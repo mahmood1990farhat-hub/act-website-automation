@@ -1,0 +1,14 @@
+**
+!isolation/
+!isolation/__init__.py
+!isolation/settings.py
+!isolation/run.py
+!isolation/test_smoke.py
+!isolation/Dockerfile
+!isolation/Dockerfile.dockerignore
+!tests/
+!tests/test_onboarding_logging.py
+!apps/
+!apps/drivers/
+!apps/drivers/views/
+!apps/drivers/views/onboarding_views.py
