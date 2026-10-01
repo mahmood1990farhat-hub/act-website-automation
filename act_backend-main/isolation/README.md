@@ -24,6 +24,30 @@ or authorize a production deployment. Payment SDKs and credentials are absent.
   and Django range are not a reproducible dependency lock; review/pin before CI use.
 - No GitHub workflow, worker, public server, scheduler or paid infrastructure created.
 
+## GitHub-hosted runner preparation
+
+`.github/workflows/isolated-safety-tests.yml` is a manual-only candidate using
+`ubuntu-24.04`, contents-read permission, a 10-minute job limit, no production
+environment/secrets, exact dispatched SHA checkout and no persisted credentials.
+It runs the local regressions/config checks, builds the isolated image and runs
+the container. Dependency/image downloads happen before the network-disabled
+test runtime. It does not test the complete ACT application.
+
+BLOCKED: this new workflow exists only on the test branch. GitHub's standard
+manual trigger requires the workflow on the default branch. Do not merge to
+main to enable it, because main pushes trigger frontend production deployment.
+No run has been dispatched. A branch-only push trigger would avoid main but is
+a change from the approved manual-only design and requires owner approval.
+The available connector also has no workflow-dispatch operation.
+
+Five host-side static workflow safety tests can be run from act_backend-main:
+
+```sh
+python -m unittest discover -s isolation -p test_workflow.py -v
+```
+
+Reference: https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow
+
 ## Run on a disposable Docker-capable development machine
 
 From the repository root (not a production server):
