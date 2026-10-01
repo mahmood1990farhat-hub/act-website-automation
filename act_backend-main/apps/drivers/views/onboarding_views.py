@@ -31,24 +31,13 @@ class DriverOnboardingStep1View(EMADBaseView):
     def handle_post(self, request):
         activate(get_locale(request=request))
         
-        # Debug: Check the data
+        # Never log signup payloads, serializer contents or credential values.
         data = request.data
-        print("=" * 80)
-        print("DEBUG: Raw request data:")
-        print(f"  - confirm_password present: {'confirm_password' in data}")
-        print(f"  - confirm_password value: {data.get('confirm_password')}")
-        print(f"  - All keys: {list(data.keys())}")
         
         serializer = DriverOnboardingQuestionnaireSerializer(data=data)
-        print(f"DEBUG: Serializer fields: {list(serializer.fields.keys())}")
-        print(f"DEBUG: confirm_password field: {serializer.fields.get('confirm_password')}")
-        print(f"DEBUG: confirm_password required: {serializer.fields.get('confirm_password').required if 'confirm_password' in serializer.fields else 'N/A'}")
         
         is_valid = serializer.is_valid()
-        print(f"DEBUG: Serializer is_valid: {is_valid}")
         if not is_valid:
-            print(f"DEBUG: Serializer errors: {serializer.errors}")
-            print("=" * 80)
             
             # Get locale from request
             locale = get_locale(request=request)
@@ -62,16 +51,11 @@ class DriverOnboardingStep1View(EMADBaseView):
             )
             return create_validation_error_response(serializer.errors, locale, custom_message)
         
-        print(f"DEBUG: Validated data keys: {list(serializer.validated_data.keys())}")
         
         try:
             onboarding_request = serializer.save()
-            print(f"DEBUG: Successfully saved onboarding request: {onboarding_request.id}")
-            print("=" * 80)
         except ValidationError as e:
             # Validation errors should return 400, not 500
-            print(f"DEBUG: Validation error during save: {type(e).__name__}: {str(e)}")
-            print("=" * 80)
             
             # Get locale from request
             locale = get_locale(request=request)
@@ -95,10 +79,6 @@ class DriverOnboardingStep1View(EMADBaseView):
                 errors = {'detail': [str(e.detail)]}
             return create_validation_error_response(errors, locale, custom_message)
         except Exception as e:
-            print(f"DEBUG: Error during save: {type(e).__name__}: {str(e)}")
-            print("=" * 80)
-            import traceback
-            traceback.print_exc()
             
             # Get locale from request
             locale = get_locale(request=request)
@@ -148,14 +128,18 @@ class DriverOnboardingStep1View(EMADBaseView):
                     from utils.common.error_handlers import create_error_response
                     return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
             
-            # Use standardized exception error response for other errors
-            from utils.common.error_handlers import create_exception_error_response
+            # Do not pass raw signup exceptions to the generic logging helper.
+            from utils.common.error_handlers import create_error_response
+            logger.error("Driver onboarding step 1 save failed.")
             custom_message = get_bilingual_error_message(
                 'Error creating onboarding request',
                 'خطأ في إنشاء طلب التسجيل',
                 locale
             )
-            return create_exception_error_response(e, locale, custom_message)
+            return create_error_response(
+                custom_message, locale=locale,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
         # Send confirmation emails
         from utils.common.email import send_driver_onboarding_submitted, send_admin_onboarding_notification
@@ -553,4 +537,3 @@ class AdminOnboardingRequestActionView(EMADBaseView):
             
             from utils.common.error_handlers import create_exception_error_response
             return create_exception_error_response(e, locale, custom_message)
-    
