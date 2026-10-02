@@ -44,7 +44,7 @@ async function main(){
    if(locale==='fr'&&name==='heathrow')await page.screenshot({path:`${out}/fr-heathrow-${device}-full.png`,fullPage:true});
   }
   await page.goto(origin+'/fr/heathrow-airport-transfer',{waitUntil:'networkidle'});
-  await page.locator('a[href="/fr/about-us#contact-us"]').first().click();await page.locator('#contact-us').waitFor({state:'visible'});
+  await page.locator('article a[href="/fr/about-us#contact-us"]').click();await page.locator('#contact-us').waitFor({state:'visible'});
   await page.goto(origin+'/fr#book-now',{waitUntil:'networkidle'});
   for(const placeholder of ['Rechercher un lieu à Londres…','Rechercher un lieu au Royaume-Uni…']){
    const field=page.getByPlaceholder(placeholder,{exact:true});await field.fill('Synthetic London');
