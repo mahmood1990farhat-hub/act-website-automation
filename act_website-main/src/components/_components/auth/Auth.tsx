@@ -123,7 +123,7 @@ export default function Auth({ locale, trans, isCaptain, isAdmin, setStep, isBoo
           {tap === 8 ? (
             // Driver Onboarding Step 1
             <div className="flex-1 w-full flex justify-center bg-gray-900/80 backdrop-blur-sm px-6 md:px-12 lg:px-20 py-10 rounded-3xl max-w-[1000px] mx-auto border border-gray-700">
-              <div className="w-full" dir={locale === "en" ? "ltr" : "rtl"}>
+              <div className="w-full" dir={locale === "ar" ? "rtl" : "ltr"}>
                 <DriverOnboardingStep1
                   setTapAction={setTap}
                   locale={locale}
@@ -155,7 +155,7 @@ export default function Auth({ locale, trans, isCaptain, isAdmin, setStep, isBoo
           dir="ltr"
         >
           <div className="flex-1 w-full flex justify-center bg-gray-900/80 backdrop-blur-sm px-6 md:px-12 lg:px-28 py-18 rounded-3xl max-w-[800px] mx-auto border border-gray-700">
-            <div className="w-full" dir={locale === "en" ? "ltr" : "rtl"}>
+            <div className="w-full" dir={locale === "ar" ? "rtl" : "ltr"}>
               {authSteps[tap - 1]?.component}
             </div>
           </div>
@@ -176,3 +176,4 @@ export default function Auth({ locale, trans, isCaptain, isAdmin, setStep, isBoo
     </div>
   );
 }
+

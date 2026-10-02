@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -100,7 +101,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
 
           {/* How It Works Steps */}
           <div className="mb-38 px-6 md:px-12 xl:px-20">
-            {!isRTL && <h3 className="text-3xl text-black font-bold text-center mb-12">How It Works</h3>}
+            {!isRTL && <h3 className="text-3xl text-black font-bold text-center mb-12">{customerText(locale, "How It Works")}</h3>}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {steps.map((step, index) => (
                 <div key={index} className="relative">
@@ -153,14 +154,10 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                 </div>
                 <div className="flex items-end justify-end gap-10">
                   <Link href={`/${locale}/auth/`}>
-                    <Button className="text-lg p-6 cursor-pointer">
-                      Passenger
-                    </Button>
+                    <Button className="text-lg p-6 cursor-pointer">{customerText(locale, "Passenger")}</Button>
                   </Link>{" "}
-                  <Link href={`/${locale}/auth?captain=1`}>
-                    <Button className="text-lg p-6 cursor-pointer">
-                      PCO Driver
-                    </Button>
+                  <Link href={`/${locale === "fr" ? "en" : locale}/auth?captain=1`}>
+                    <Button className="text-lg p-6 cursor-pointer">{customerText(locale, "PCO Driver")}</Button>
                   </Link>{" "}
                 </div>
               </div>
@@ -195,13 +192,13 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                 <p className="mt-4 max-w-lg text-base md:text-lg text-foreground-200">
                   {booking_data.joinUs.subtitle}
                 </p>
-                <div className="flex items-center gap-6 mt-6">
+                <div className="flex flex-wrap justify-center items-center gap-6 mt-6">
                   <Link href={`/${locale}/auth/`}>
                     <Button size="lg" className="text-lg px-8 py-6 cursor-pointer border-none">
                       {booking_data.joinUs.passenger}
                     </Button>
                   </Link>
-                  <Link href={`/${locale}/auth?captain=1`}>
+                  <Link href={`/${locale === "fr" ? "en" : locale}/auth?captain=1`}>
                     <Button size="lg" variant="outline" className="text-black text-lg px-8 py-6 cursor-pointer border-none hover:text-white">
                       {booking_data.joinUs.driver}
                     </Button>
@@ -312,92 +309,58 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
-              Popular Airport Transfers
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              Reliable airport taxi and chauffeur services across London with professional drivers, fixed pricing, and 24/7 availability.
-            </p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">{customerText(locale, "Popular Airport Transfers")}</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">{customerText(locale, "Reliable airport taxi and chauffeur services across London with professional drivers, fixed pricing, and 24/7 availability.")}</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-2xl font-bold text-black">
-                  Heathrow Airport Transfer
-                </h3>
-                <p className="text-gray-600">
-                  Executive and standard Heathrow airport transfers with meet and greet service, flight monitoring, and professional drivers.
-                </p>
+                <h3 className="text-2xl font-bold text-black">{customerText(locale, "Heathrow Airport Transfer")}</h3>
+                <p className="text-gray-600">{customerText(locale, "Executive and standard Heathrow airport transfers with meet and greet service, flight monitoring, and professional drivers.")}</p>
                 <Link href={`/${locale}/heathrow-airport-transfer`}>
-                  <Button className="cursor-pointer">
-                    View Heathrow Transfers
-                  </Button>
+                  <Button className="cursor-pointer">{customerText(locale, "View Heathrow Transfers")}</Button>
                 </Link>
               </CardContent>
             </Card>
 
             <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-2xl font-bold text-black">
-                  Gatwick Airport Transfer
-                </h3>
-                <p className="text-gray-600">
-                  Comfortable Gatwick airport taxi services for business and leisure travel with fixed fares and reliable pickups.
-                </p>
+                <h3 className="text-2xl font-bold text-black">{customerText(locale, "Gatwick Airport Transfer")}</h3>
+                <p className="text-gray-600">{customerText(locale, "Comfortable Gatwick airport taxi services for business and leisure travel with fixed fares and reliable pickups.")}</p>
                 <Link href={`/${locale}/gatwick-airport-transfer`}>
-                  <Button className="cursor-pointer">
-                    View Gatwick Transfers
-                  </Button>
+                  <Button className="cursor-pointer">{customerText(locale, "View Gatwick Transfers")}</Button>
                 </Link>
               </CardContent>
             </Card>
 
             <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-2xl font-bold text-black">
-                  Stansted Airport Transfer
-                </h3>
-                <p className="text-gray-600">
-                  Professional Stansted airport transfer services with punctual drivers and easy online booking across London.
-                </p>
+                <h3 className="text-2xl font-bold text-black">{customerText(locale, "Stansted Airport Transfer")}</h3>
+                <p className="text-gray-600">{customerText(locale, "Professional Stansted airport transfer services with punctual drivers and easy online booking across London.")}</p>
                 <Link href={`/${locale}/stansted-airport-transfer`}>
-                  <Button className="cursor-pointer">
-                    View Stansted Transfers
-                  </Button>
+                  <Button className="cursor-pointer">{customerText(locale, "View Stansted Transfers")}</Button>
                 </Link>
               </CardContent>
             </Card>
 
             <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-2xl font-bold text-black">
-                  Luton Airport Transfer
-                </h3>
-                <p className="text-gray-600">
-                  Affordable and executive Luton airport taxi services available 24 hours a day with experienced chauffeurs.
-                </p>
+                <h3 className="text-2xl font-bold text-black">{customerText(locale, "Luton Airport Transfer")}</h3>
+                <p className="text-gray-600">{customerText(locale, "Affordable and executive Luton airport taxi services available 24 hours a day with experienced chauffeurs.")}</p>
                 <Link href={`/${locale}/luton-airport-transfer`}>
-                  <Button className="cursor-pointer">
-                    View Luton Transfers
-                  </Button>
+                  <Button className="cursor-pointer">{customerText(locale, "View Luton Transfers")}</Button>
                 </Link>
               </CardContent>
             </Card>
 
             <Card className="shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-2xl font-bold text-black">
-                  London City Airport Transfer
-                </h3>
-                <p className="text-gray-600">
-                  Fast and reliable London City Airport transfers for corporate and private passengers across Greater London.
-                </p>
+                <h3 className="text-2xl font-bold text-black">{customerText(locale, "London City Airport Transfer")}</h3>
+                <p className="text-gray-600">{customerText(locale, "Fast and reliable London City Airport transfers for corporate and private passengers across Greater London.")}</p>
                 <Link href={`/${locale}/london-city-airport-transfer`}>
-                  <Button className="cursor-pointer">
-                    View London City Transfers
-                  </Button>
+                  <Button className="cursor-pointer">{customerText(locale, "View London City Transfers")}</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -436,3 +399,4 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
     </>
   );
 }
+

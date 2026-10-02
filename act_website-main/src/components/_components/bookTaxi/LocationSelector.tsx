@@ -1,4 +1,5 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { useEffect, useState, useRef } from "react";
 import { Locale } from "../../../../i18n.config";
 import { PiMapPinLineFill } from "react-icons/pi";
@@ -274,10 +275,10 @@ export default function LocationSelector({
             const errorMessage = isLondonOnly
               ? (isRTL
                 ? "لم يتم العثور على أي مواقع في لندن. يُرجى البحث عن مواقع داخل لندن فقط."
-                : "No locations found in London. Please search for locations within London only.")
+                : customerText(locale, "No locations found in London. Please search for locations within London only."))
               : (isRTL
                 ? "لم يتم العثور على أي مواقع في المملكة المتحدة. يُرجى البحث عن مواقع داخل المملكة المتحدة فقط."
-                : "No locations found in the UK. Please search for locations within the UK only.");
+                : customerText(locale, "No locations found in the UK. Please search for locations within the UK only."));
             setError(errorMessage);
             setOptions([]);
           } else {
@@ -287,10 +288,10 @@ export default function LocationSelector({
           const errorMessage = isLondonOnly
             ? (isRTL
               ? "لم يتم العثور على أي مواقع في لندن. يُرجى استخدام مصطلح بحث آخر."
-              : "No locations found in London. Please try a different search term.")
+              : customerText(locale, "No locations found in London. Please try a different search term."))
             : (isRTL
               ? "لم يتم العثور على أي مواقع في المملكة المتحدة. يُرجى استخدام مصطلح بحث آخر."
-              : "No locations found in the UK. Please try a different search term.");
+              : customerText(locale, "No locations found in the UK. Please try a different search term."));
           setError(errorMessage);
           setOptions([]);
         } else {
@@ -302,7 +303,7 @@ export default function LocationSelector({
           setError(
             isRTL
               ? "تعذر البحث عن المواقع. يُرجى المحاولة مرة أخرى."
-              : "Unable to search for locations. Please try again."
+              : customerText(locale, "Unable to search for locations. Please try again.")
           );
           console.error("Fetching suggestions failed:", err);
         }
@@ -350,12 +351,12 @@ export default function LocationSelector({
             isPickupExceptionLocation(location.description);
           errorMessage = isRTL
             ? "الموقع المختار خارج لندن. يُرجى اختيار موقع داخل لندن فقط."
-            : "Selected location is outside London. Please choose a location within London only.";
+            : customerText(locale, "Selected location is outside London. Please choose a location within London only.");
         } else {
           isValidLocation = isInUK(coordinates);
           errorMessage = isRTL
             ? "الموقع المختار خارج المملكة المتحدة. يُرجى اختيار موقع داخل المملكة المتحدة فقط."
-            : "Selected location is outside the UK. Please choose a location within the UK only.";
+            : customerText(locale, "Selected location is outside the UK. Please choose a location within the UK only.");
         }
 
         if (!isValidLocation) {
@@ -376,7 +377,7 @@ export default function LocationSelector({
         toast.error(
           isRTL
             ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
-            : "Failed to get location details. Please try selecting again."
+            : customerText(locale, "Failed to get location details. Please try selecting again.")
         );
         setValue(emptyPlaceSuggestion);
       }
@@ -385,7 +386,7 @@ export default function LocationSelector({
       toast.error(
         isRTL
           ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
-          : "Failed to get location details. Please try selecting again."
+          : customerText(locale, "Failed to get location details. Please try selecting again.")
       );
         setValue(emptyPlaceSuggestion);
     } finally {
@@ -416,12 +417,12 @@ export default function LocationSelector({
 
   // Dynamic placeholder and restriction notice text
   const placeholderText = isLondonOnly
-    ? (isRTL ? 'ابحث عن موقع في لندن...' : 'Search for a location in London...')
-    : (isRTL ? 'ابحث عن موقع في المملكة المتحدة...' : 'Search for a location in the UK...');
+    ? (isRTL ? 'ابحث عن موقع في لندن...' : customerText(locale, "Search for a location in London..."))
+    : (isRTL ? 'ابحث عن موقع في المملكة المتحدة...' : customerText(locale, "Search for a location in the UK..."));
 
   const restrictionNotice = isLondonOnly
-    ? (isRTL ? 'البحث مقتصر على مواقع لندن فقط' : 'Search limited to London locations only')
-    : (isRTL ? 'البحث مقتصر على مواقع المملكة المتحدة فقط' : 'Search limited to UK locations only');
+    ? (isRTL ? 'البحث مقتصر على مواقع لندن فقط' : customerText(locale, "Search limited to London locations only"))
+    : (isRTL ? 'البحث مقتصر على مواقع المملكة المتحدة فقط' : customerText(locale, "Search limited to UK locations only"));
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // Check if the focus is moving to the dropdown
@@ -506,3 +507,4 @@ export default function LocationSelector({
     </div>
   );
 }
+

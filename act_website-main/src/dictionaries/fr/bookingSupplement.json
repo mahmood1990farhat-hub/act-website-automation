@@ -1,0 +1,44 @@
+{
+  "common": { "back": "Retour", "continue": "Continuer", "chooseLanguage": "Choisir une langue", "selectDate": "Choisir une date", "selectTime": "Choisir une heure" },
+  "passenger": {
+    "title": "Coordonnées du passager", "fullName": "Nom complet", "email": "Adresse e-mail", "countryCode": "Indicatif du pays", "mobileNumber": "Numéro de téléphone portable",
+    "required": "Le nom du passager, l’adresse e-mail, l’indicatif du pays et le numéro de téléphone portable sont obligatoires.",
+    "countryLabels": { "+44 United Kingdom": "+44 Royaume-Uni", "+1 United States": "+1 États-Unis", "+971 United Arab Emirates": "+971 Émirats arabes unis", "+966 Saudi Arabia": "+966 Arabie saoudite", "+974 Qatar": "+974 Qatar", "+965 Kuwait": "+965 Koweït", "+973 Bahrain": "+973 Bahreïn", "+968 Oman": "+968 Oman" }
+  },
+  "flight": {
+    "title": "Informations sur le vol", "type": "Type de vol", "arrival": "Arrivée", "departure": "Départ",
+    "arrivalDetected": "L’option Arrivée est sélectionnée car votre trajet commence à un aéroport.",
+    "departureDetected": "L’option Départ est sélectionnée car votre trajet se termine à un aéroport.",
+    "typeOptional": "Le type de vol est facultatif. Sélectionnez-en un si vous souhaitez préciser les horaires de votre vol.",
+    "scheduledTime": "Veuillez indiquer l’heure prévue d’atterrissage ou de départ du vol.",
+    "arrivalAdvice": "À l’arrivée, prévoyez suffisamment de temps avant la prise en charge pour le contrôle des passeports, la récupération des bagages et la rencontre avec votre chauffeur.",
+    "departureAdvice": "Au départ, prévoyez suffisamment de temps pour le trajet et l’enregistrement à l’aéroport avant l’heure prévue de votre vol.",
+    "number": "Numéro de vol", "airline": "Compagnie aérienne", "landingTime": "Heure d’atterrissage", "departureTime": "Heure de départ du vol",
+    "selectLandingTime": "Choisir l’heure d’atterrissage", "selectDepartureTime": "Choisir l’heure de départ du vol", "changePickupTime": "Revenir et modifier l’heure de prise en charge",
+    "signName": "Nom à afficher sur la pancarte d’accueil", "departureRequired": "L’heure de départ est obligatoire pour les vols au départ.",
+    "landingRequired": "L’heure d’atterrissage est obligatoire pour les vols à l’arrivée.", "skip": "Passer — Sans objet pour ce trajet",
+    "departureGuidance": "Pour les départs à l’aéroport, nous recommandons une prise en charge environ 2 à 3 heures avant le départ du vol. L’heure choisie peut être trop proche du départ ou trop tôt. Heure de prise en charge suggérée : entre {windowStart} et {windowEnd}.",
+    "arrivalGuidance": "Pour les arrivées à l’aéroport, nous recommandons une prise en charge au moins 1 heure après l’atterrissage, afin de prévoir le contrôle des passeports, la récupération des bagages et la rencontre avec votre chauffeur. Heure de prise en charge suggérée : {suggestedPickup} ou plus tard."
+  },
+  "childSeats": {
+    "title": "Vous voyagez avec des enfants ou des bébés ?",
+    "description": "Les recommandations britanniques prévoient généralement l’utilisation d’un dispositif de retenue adapté à l’âge, à la taille et au poids de l’enfant. Veuillez préciser comment les sièges enfants ou bébés seront fournis pour cette réservation.",
+    "infantTitle": "Siège bébé", "childTitle": "Siège enfant",
+    "infantOptions": [ "Je fournirai mes propres sièges bébés", "Je souhaite qu’ACT fournisse les sièges bébés", "Je comprends qu’ACT pourrait ne pas disposer de sièges bébés et je souhaite continuer" ],
+    "childOptions": [ "Je fournirai mes propres sièges enfants", "Je souhaite qu’ACT fournisse les sièges enfants", "Je comprends qu’ACT pourrait ne pas disposer de sièges enfants et je souhaite continuer" ],
+    "guidanceTitle": "Lire les recommandations britanniques",
+    "guidance": [ "Bébés et jeunes enfants (0–3 ans) : devraient voyager dans un siège bébé ou enfant adapté.", "Enfants (4–11 ans) : devraient normalement utiliser un siège adapté jusqu’à l’âge de 12 ans ou jusqu’à une taille de 135 cm, selon le premier seuil atteint.", "Enfants de 12 ans ou plus, ou mesurant plus de 135 cm : doivent utiliser une ceinture de sécurité pour adulte." ],
+    "required": "Veuillez sélectionner l’option de siège enfant ou bébé requise avant de continuer."
+  },
+  "payment": { "cvc": "Cryptogramme visuel (CVC)", "failed": "Le paiement a échoué", "and": "et", "back": "Retour" },
+  "confirmation": {
+    "nextSteps": "PROCHAINES ÉTAPES", "emailSent": "Les détails de confirmation ont été envoyés à votre adresse e-mail", "help": "Besoin d’aide ? Contactez notre équipe 24 h/24 et 7 j/7"
+  },
+  "languageNotices": {
+    "booking": "Les suggestions d’adresses, certaines descriptions de véhicules et les confirmations par e-mail ou PDF restent en anglais. Les tarifs et les paiements sont en livres sterling (GBP).",
+    "support": "Le choix du français sur le site ne garantit pas une assistance téléphonique en français.",
+    "driver": "L’espace chauffeur est disponible en anglais ou en arabe. Continuer en anglais.",
+    "admin": "L’espace de gestion est disponible en anglais ou en arabe. Continuer en anglais.",
+    "app": "La traduction française concerne le site web. La langue des applications et des instructions PDF peut être différente."
+  }
+}

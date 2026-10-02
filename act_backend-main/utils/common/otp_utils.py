@@ -13,7 +13,7 @@ def generate_otp_code():
     return str(random.randint(100000, 999999))
 
 
-def send_otp_email(user, code, purpose='password_reset'):
+def send_otp_email(user, code, purpose='password_reset', locale='en'):
     """
     Send OTP code via email using existing email infrastructure.
     
@@ -24,7 +24,7 @@ def send_otp_email(user, code, purpose='password_reset'):
     """
     try:
         from utils.common.email import send_password_reset_otp
-        send_password_reset_otp(user, code)
+        send_password_reset_otp(user, code, locale=locale)
         logger.info(f"OTP email sent to {user.email} for purpose: {purpose}")
         return True
     except Exception as e:
@@ -109,4 +109,3 @@ def verify_otp_code(email, code, purpose='password_reset'):
     except Exception as e:
         logger.error(f"Error verifying OTP: {str(e)}")
         return False, None, "An error occurred while verifying OTP code"
-

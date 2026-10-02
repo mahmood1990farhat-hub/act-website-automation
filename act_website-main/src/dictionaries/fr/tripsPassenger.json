@@ -1,0 +1,73 @@
+{
+  "title": "Mes trajets",
+  "section_1": {
+    "title": "Tous les trajets",
+    "tpes": [
+      { "title": "Tous", "value": "" },
+      { "title": "En attente", "value": "pending" },
+      { "title": "Acceptés", "value": "accepted" },
+      { "title": "En cours", "value": "active" },
+      { "title": "À venir", "value": "driver_on_the_way" },
+      { "title": "Terminés", "value": "completed" },
+      { "title": "Annulés", "value": "cancelled" }
+    ]
+  },
+  "section_2": {
+    "title": "Récents",
+    "desc": "Pour toute question ou réclamation, vous pouvez contacter les chauffeurs des trajets effectués au cours des dernières 24 heures."
+  },
+  "tripsCount": "Nombre de trajets :",
+  "noTrips": {
+    "title": "Aucun trajet trouvé",
+    "tryDifferentFilter": "Essayez de sélectionner un autre filtre",
+    "willAppearHere": "Vos trajets apparaîtront ici"
+  },
+  "noRecentTrips": {
+    "title": "Aucun trajet récent",
+    "desc": "Les trajets des dernières 24 heures apparaîtront ici"
+  },
+  "deleteTrip": {
+    "title": "Supprimer le trajet ?",
+    "desc": "Voulez-vous vraiment annuler ce trajet ? Cette action est irréversible.",
+    "btuCancel": "Annuler",
+    "btuConfirm": "Supprimer le trajet"
+  },
+  "tripCard": {
+    "name_of_driver": "Nom du chauffeur",
+    "phone_of_driver": "Téléphone du chauffeur",
+    "model_car": "Modèle du véhicule",
+    "color_car": "Couleur du véhicule",
+    "number_car": "Immatriculation du véhicule",
+    "tripId": "Référence du trajet :",
+    "distance": "Distance",
+    "duration": "Durée",
+    "destination": "Destination",
+    "carInfo": "Informations sur le véhicule",
+    "brand": "Marque",
+    "additional_notes": "Informations complémentaires",
+    "model": "Modèle",
+    "color": "Couleur",
+    "registrationNumber": "Numéro d’immatriculation",
+    "year": "Année",
+    "pickup": "Prise en charge",
+    "dropoff": "Arrivée",
+    "gbp": "GBP",
+    "seeDetails": "Voir les détails",
+    "details": "Détails",
+    "cancel": "Annuler",
+    "tripDetails": "Détails du trajet",
+    "status": "Statut :",
+    "date": "Date",
+    "cost": "Prix",
+    "contactDriver": "Contacter le chauffeur",
+    "close": "Fermer",
+    "statusLabels": {
+      "pending": "En attente",
+      "accepted": "Accepté",
+      "active": "En cours",
+      "driver_on_the_way": "Chauffeur en route",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    }
+  }
+}

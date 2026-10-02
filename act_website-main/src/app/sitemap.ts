@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 const baseUrl = "https://airportandcitytransfer.com";
 
-const locales = ["en", "ar"];
+import { publishedLocalesFor } from "../../i18n.config";
 
 const routes = [
   { path: "", priority: 1.0 },
@@ -20,8 +20,8 @@ const routes = [
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
-  return locales.flatMap((locale) =>
-    routes.map((route) => ({
+  return routes.flatMap((route) =>
+    publishedLocalesFor(route.path).map((locale) => ({
       url: route.path
         ? `${baseUrl}/${locale}/${route.path}`
         : `${baseUrl}/${locale}`,
@@ -31,3 +31,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 }
+

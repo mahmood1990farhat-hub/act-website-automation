@@ -1,4 +1,5 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -291,3 +292,4 @@ export default function FlightDetails({
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 const arabic: Record<string, string> = {
   "Back": "رجوع",
   "Continue": "متابعة",
@@ -65,4 +66,4 @@ const arabic: Record<string, string> = {
 
 // Display text only: never translate stored booking values or customer input.
 export const bookingText = (locale: string, text: string): string =>
-  locale === "ar" ? arabic[text] ?? text : text;
+  locale === "ar" ? arabic[text] ?? text : customerText(locale, text);

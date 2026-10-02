@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Locale } from "../../../../i18n.config";
+import { Locale, dictionaryLocale } from "../../../../i18n.config";
 import { IoIosAirplane } from "react-icons/io";
 import { useQuery } from "@tanstack/react-query";
 import { fetchData } from "@/lib/api/fetchData";
@@ -61,7 +61,7 @@ export default function SelectAirport({ setValue, value, locale }: typeProps) {
 
   if (data) {
     const filtered = data.filter((airport) =>
-      airport[`name_${locale}`].toLowerCase().includes(inputValue.toLowerCase())
+      airport[`name_${dictionaryLocale(locale)}`].toLowerCase().includes(inputValue.toLowerCase())
     );
     setFilteredAirports(filtered);
   }
@@ -90,10 +90,10 @@ export default function SelectAirport({ setValue, value, locale }: typeProps) {
   };
 
   const handleSelect = (airport: (typeof filteredAirports)[0]) => {
-    setInputValue(airport[`name_${locale}`]);
+    setInputValue(airport[`name_${dictionaryLocale(locale)}`]);
     setValue({
       id: airport.id,
-      description: airport[`name_${locale}`],
+      description: airport[`name_${dictionaryLocale(locale)}`],
     });
     setShowOptions(false);
   };
@@ -121,7 +121,7 @@ export default function SelectAirport({ setValue, value, locale }: typeProps) {
               className="flex items-center gap-2 px-4 py-3  border-b border-muted-foreground cursor-pointer rounded  duration-200 hover:bg-primary/20"
             >
               <IoIosAirplane className="text-primary text-2xl" />
-              {airport[`name_${locale}`]}
+              {airport[`name_${dictionaryLocale(locale)}`]}
             </li>
           ))}
         </ul>
@@ -135,3 +135,4 @@ There are no airports
     </div>
   );
 }
+

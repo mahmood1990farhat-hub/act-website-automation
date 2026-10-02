@@ -1,4 +1,5 @@
 "use client";
+import frCountries from "react-phone-number-input/locale/fr.json";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -39,6 +40,7 @@ export default function SignUpT({
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [phone, setPhone] = useState<string>("");
@@ -59,6 +61,7 @@ export default function SignUpT({
   }, [phone, setValue]);
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
+    setRequestError("");
     if (!isValidPhoneNumber(phone)) {
       setPhoneError(trans.phoneInvalid || "Phone Number is Invalid")
     } else {
@@ -83,6 +86,7 @@ export default function SignUpT({
 
         const res = await postData<any>({
           endpoint: endpointURL,
+          noToast: locale === "fr",
           body: body,
           queryParams: {
             locale: locale,
@@ -98,6 +102,7 @@ export default function SignUpT({
         setTap(1);
       } catch (err) {
         console.error(err);
+        if (locale === "fr") setRequestError("La création du compte n’a pas pu être confirmée. Vérifiez vos informations ou contactez ACT.");
       }
       finally{
         setLoading(false);
@@ -112,6 +117,7 @@ export default function SignUpT({
         {trans.createAccount}
       </h1>
       <p className="text-muted text-center mt-1  mb-10">{trans.desc_main}</p>
+      {requestError && <p role="alert" className="text-red-300 mb-3">{requestError}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 text-sm">
         <div className="flex items-center w-full gap-5  ">
           <div className="w-full">
@@ -154,6 +160,7 @@ export default function SignUpT({
           >
             <PhoneInputWithCountrySelect
               defaultCountry="GB"
+              labels={locale === "fr" ? frCountries : undefined}
               value={phone}
               onChange={(val) => setPhone(val || "")}
               international
@@ -216,3 +223,4 @@ export default function SignUpT({
     </>
   );
 }
+

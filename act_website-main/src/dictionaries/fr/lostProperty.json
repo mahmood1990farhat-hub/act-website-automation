@@ -1,0 +1,56 @@
+{
+  "title": "Objets perdus",
+  "subtitle": "Signalez un objet perdu et suivez vos déclarations",
+  "tabs": { "my_reports": "Mes déclarations", "submit_report": "Faire une déclaration" },
+  "stats": { "total": "Total des déclarations", "reported": "Signalés", "under_investigation": "En cours de recherche", "found": "Retrouvés", "returned": "Restitués", "not_found": "Non retrouvés", "closed": "Clôturées" },
+  "report_list": {
+    "title": "Déclarations d’objets perdus",
+    "empty": "Aucune déclaration d’objet perdu trouvée",
+    "filter": { "all": "Toutes", "status_label": "Filtrer par statut", "item_type_label": "Filtrer par type d’objet" },
+    "item_types": {
+      "all": "Tous les objets", "luggage": "Bagage / Valise", "bag": "Sac / Sac à main",
+      "wallet": "Portefeuille / Porte-monnaie", "phone": "Téléphone portable", "keys": "Clés",
+      "documents": "Documents / Pièce d’identité", "clothing": "Vêtements", "other": "Autres objets"
+    }
+  },
+  "report_card": {
+    "report_id": "Référence de la déclaration", "item_type": "Type d’objet", "description": "Description",
+    "color": "Couleur", "brand": "Marque", "lost_location": "Lieu de perte", "contact_preference": "Mode de contact souhaité",
+    "status": "Statut", "trip_date": "Date du trajet", "created_at": "Signalé le", "updated_at": "Dernière mise à jour",
+    "admin_notes": "Notes de l’équipe", "found_at": "Retrouvé le", "returned_at": "Restitué le",
+    "view_trip": "Voir les détails du trajet", "show_details": "Afficher les détails", "report_details": "Détails de la déclaration d’objet perdu",
+    "close": "Fermer", "update_status": "Modifier le statut", "item_details": "Détails de l’objet", "reporter_info": "Informations sur le déclarant",
+    "trip_info": "Informations sur le trajet", "trip_id": "Référence du trajet", "trip_time": "Heure du trajet", "distance": "Distance",
+    "duration": "Durée estimée", "passenger_info": "Informations sur le passager", "driver_info": "Informations sur le chauffeur",
+    "name": "Nom", "phone_number": "Numéro de téléphone", "email": "Adresse e-mail", "full_name": "Nom complet", "photo": "Photo",
+    "report_info": "Informations sur la déclaration", "downloadPdf": "Télécharger le PDF", "updateReportTitle": "Modifier la déclaration d’objet perdu"
+  },
+  "submit_form": {
+    "title": "Signaler un objet perdu",
+    "subtitle": "Veuillez fournir des précisions sur l’objet perdu",
+    "fields": {
+      "trip": "Sélectionner un trajet", "trip_placeholder": "Choisissez le trajet au cours duquel vous avez perdu l’objet",
+      "item_type": "Type d’objet", "item_description": "Description de l’objet", "item_description_placeholder": "Décrivez l’objet en détail",
+      "item_color": "Couleur de l’objet", "item_color_placeholder": "Ex. : noir, bleu, rouge", "item_brand": "Marque (facultatif)",
+      "item_brand_placeholder": "Ex. : Samsonite, Apple, Nike", "lost_location": "Où l’avez-vous perdu ?",
+      "lost_location_placeholder": "Ex. : dans le véhicule, au point de prise en charge", "contact_preference": "Mode de contact souhaité",
+      "contact_options": { "phone": "Appel téléphonique", "email": "E-mail", "sms": "SMS" },
+      "photo": "Photo (facultatif)", "photo_description": "Joignez une photo de l’objet perdu si vous en avez une", "selected_photo": "Sélectionnée"
+    },
+    "button": "Envoyer la déclaration", "button_loading": "Envoi en cours…",
+    "success_message": "Déclaration d’objet perdu envoyée !", "error_message": "Impossible d’envoyer la déclaration. Veuillez réessayer.",
+    "validation": {
+      "trip_required": "Veuillez sélectionner un trajet", "item_type_required": "Veuillez sélectionner un type d’objet",
+      "item_type_invalid": "Veuillez choisir un type d’objet valide dans la liste", "description_required": "Veuillez saisir une description",
+      "description_min": "La description doit contenir au moins 10 caractères", "color_required": "Veuillez préciser la couleur de l’objet",
+      "lost_location_required": "Veuillez préciser où vous avez perdu l’objet", "contact_preference_required": "Veuillez sélectionner un mode de contact",
+      "contact_preference_invalid": "Veuillez choisir un mode de contact valide"
+    }
+  },
+  "statuses": { "reported": "Signalé", "under_investigation": "En cours de recherche", "found": "Retrouvé", "returned": "Restitué", "not_found": "Non retrouvé", "closed": "Clôturé" },
+  "contact_preferences": { "phone": "Appel téléphonique", "email": "E-mail", "sms": "SMS" },
+  "lost_locations": { "in_vehicle": "Dans le véhicule", "at_pickup": "Au point de prise en charge", "at_dropoff": "Au point d’arrivée", "unsure": "Je ne sais pas" },
+  "download": "Télécharger", "choose_file": "Choisir un fichier", "no_file_chosen": "Aucun fichier sélectionné",
+  "click_to_view": "Cliquer pour afficher", "image_downloaded": "Image téléchargée", "image_download_failed": "Impossible de télécharger l’image",
+  "file_read_failed": "Impossible de lire le fichier image", "select_item_type": "Sélectionner un type d’objet", "select_contact_method": "Sélectionner un mode de contact"
+}

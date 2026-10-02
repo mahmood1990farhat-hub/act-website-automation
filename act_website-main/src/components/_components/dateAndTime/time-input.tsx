@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ActTimePicker } from "./act-time-picker";
 
-type Language = "ar" | "en";
+import { dictionaryLocale, type SupportedLocale } from "../../../../i18n.config";
+type Language = SupportedLocale;
 
 interface TimeValue {
   hour: number;
@@ -17,6 +18,7 @@ interface TimeValue {
 const placeholders = {
   ar: "اختر الوقت",
   en: "Select time",
+  fr: "Choisir une heure",
 };
 
 interface TimeInputProps {
@@ -44,7 +46,7 @@ export function TimeInput({
 }: TimeInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[language];
+  const defaultPlaceholder = placeholder || placeholders[language === "fr" ? "fr" : dictionaryLocale(language)];
   const isRTL = language === "ar";
 
   const handleTimeSelect = (time: TimeValue) => {
@@ -97,8 +99,10 @@ export function TimeInput({
         onSelect={handleTimeSelect}
         selectedTime={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={language}
+        language={language === "fr" ? "fr" : dictionaryLocale(language)}
       />
     </>
   );
 }
+
+

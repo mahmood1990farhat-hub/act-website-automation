@@ -37,6 +37,7 @@ export default function Login({
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [adminVerified, setAdminVerified] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [loading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState<"passenger" | "driver">(
     isCaptain ? "driver" : "passenger"
@@ -69,6 +70,7 @@ export default function Login({
 
   const onSubmit: SubmitHandler<LoginData> = async (data) => {
     setIsLoading(true);
+    setRequestError("");
     try {
       // Use different endpoints based on selected login type
       const endpoint = loginType === "driver" 
@@ -90,6 +92,7 @@ export default function Login({
 
       const res = await postData<any>({
         endpoint: endpoint,
+        noToast: locale === "fr",
         body: body,
         queryParams: {
           locale,
@@ -280,6 +283,7 @@ export default function Login({
       }
     } catch (error) {
       console.error("Login Error:", error);
+      if (locale === "fr") setRequestError("Connexion impossible. Vérifiez vos identifiants ou réessayez plus tard.");
       setIsLoading(false);
     }
   };
@@ -397,7 +401,7 @@ export default function Login({
           </button>
           <button
             type="button"
-            onClick={() => setLoginType("driver")}
+            onClick={() => locale === "fr" ? router.push("/en/auth?captain=1") : setLoginType("driver")}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
               loginType === "driver"
                 ? "bg-primary text-foreground shadow-lg"
@@ -409,6 +413,7 @@ export default function Login({
         </div>
       )}
 
+      {requestError && <p role="alert" className="text-red-300 mb-3">{requestError}</p>}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-4 text-sm  w-full"
@@ -492,7 +497,7 @@ export default function Login({
             <p className="text-sm text-white/80">
               {loginType === "driver"
                 ? "Signing you in to your driver account..."
-                : "Signing you in to your account..."}
+                : locale === "fr" ? "Connexion à votre compte…" : "Signing you in to your account..."}
             </p>
           </div>
         </div>
@@ -500,3 +505,4 @@ export default function Login({
     </div>
   );
 }
+

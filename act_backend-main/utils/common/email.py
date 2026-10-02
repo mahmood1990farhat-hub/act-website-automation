@@ -1,5 +1,6 @@
+from apps.accounts.customer_messages import account_message
 from apps.trips.services.customer_language import booking_language, use_booking_language
-from apps.trips.services.customer_documents import render_arabic_document
+from apps.trips.services.localized_documents import render_customer_document
 import threading
 import logging
 import re
@@ -144,35 +145,25 @@ def _send_mail_async(
 
 # ========== PASSENGER EMAILS ==========
 
-def send_passenger_registration_confirmation(user) -> None:
-    """
-    Send welcome email to newly registered passenger
-    """
+def send_passenger_registration_confirmation(user, locale="en") -> None:
+    """Welcome message in the registration request's language."""
+    if not user or not user.email:
+        return
     try:
-        subject = _("Welcome to Airport & City Transfer!")
-        message = _(
-            "Hello %(first_name)s,\n\n"
-            "Thank you for registering with Airport & City Transfer!\n\n"
-            "Your account has been successfully created. You can now book trips and enjoy our services.\n\n"
-            "If you have any questions, please don't hesitate to contact us.\n\n"
-            "Best regards,\n"
-            "The ATG Team"
-        ) % {
-            "first_name": user.first_name or user.get_full_name() or "Valued Customer",
-        }
+        subject, message = account_message("welcome", user, locale)
         _send_mail_async(subject, message, [user.email], fail_silently=True)
-    except Exception as e:
-        logger.error(f"Failed to send passenger registration email to {user.email}: {str(e)}")
+    except Exception:
+        logger.exception("Failed to prepare passenger registration email")
 
 
 
-def _send_arabic_customer_email(user, trip, kind, refund_message="", driver=None):
+def _send_localized_customer_email(user, trip, kind, refund_message="", driver=None):
     recipient = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
     if not recipient:
         return False
     file_field = getattr(trip, "cancellation_confirmation_pdf" if kind == "cancellation" else "booking_confirmation_pdf", None)
     download_url = _absolute_app_url(file_field.url) if file_field else ""
-    subject, html, text = render_arabic_document(
+    subject, html, text = render_customer_document(
         trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
         logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
     )
@@ -187,8 +178,8 @@ def send_passenger_confirmation(user, trip) -> bool:
     user_id = getattr(user, "id", "guest")
     logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "booking")
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "booking")
         recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
         if not recipient_email:
             logger.warning(
@@ -743,8 +734,8 @@ def send_trip_accepted_to_passenger(
             "support_website": "https://airportandcitytransfer.com/en",
             "footer_logo_image_url": _email_asset_url("trip_accepted/footer-logo.png"),
         }
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "driver", driver={
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "driver", driver={
                 "name": driver_name, "phone": driver_phone,
                 "vehicle": (getattr(vehicle_type, "name_ar", None) or vehicle_label) if not (is_guest_driver and guest_driver_info) else vehicle_label,
                 "registration": registration_number, "color": vehicle_color, "pco_url": driver_pco_url,
@@ -800,8 +791,8 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
     """
     logger.info(f"[EMAIL] send_passenger_trip_cancellation_to_passenger trip #{trip.id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "cancellation", refund_message=refund_message)
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "cancellation", refund_message=refund_message)
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send passenger cancel email: user {user.id} has no email")
             return
@@ -946,8 +937,8 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
     """
     logger.info(f"[EMAIL] send_driver_cancellation_to_passenger called for trip #{trip.id}, user {user.id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "driver_cancelled")
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "driver_cancelled")
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send driver cancellation email: user {user.id} has no email address")
             return
@@ -1154,8 +1145,8 @@ def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_d
                 "driver_phone": driver_phone,
             }
         
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "reassigned", driver={
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "reassigned", driver={
                 "name": driver_name, "phone": driver_phone,
                 "company": driver_company if is_guest_driver and guest_driver_info else "",
             })
@@ -1166,68 +1157,9 @@ def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_d
         logger.error(f"[EMAIL] Failed to send trip reassignment email for trip #{trip.id} to {user.email}: {str(e)}")
 
 
-def send_password_reset_otp(user, otp_code) -> None:
-    """
-    Send password reset OTP code via email to user.
-    Supports bilingual (English/Arabic) email content.
-    
-    Args:
-        user: CustomUser instance
-        otp_code: 6-digit OTP code
-    """
+def send_password_reset_otp(user, otp_code, locale="en") -> None:
+    """Password reset message in the requesting customer's selected language."""
     if not user or not user.email:
-        logger.warning(f"[EMAIL] Cannot send password reset OTP: user {user.id if user else 'None'} has no email address")
         return
-    
-    try:
-        # English email content
-        subject_en = "Password Reset OTP Code"
-        message_en = f"""
-Hello {user.first_name or 'User'},
-
-You have requested to reset your password. Please use the following OTP code to complete the process:
-
-OTP Code: {otp_code}
-
-This code will expire in 15 minutes.
-
-If you did not request this password reset, please ignore this email.
-
-Best regards,
-Airport & City Transfer Team
-"""
-        
-        # Arabic email content
-        subject_ar = "رمز إعادة تعيين كلمة المرور"
-        message_ar = f"""
-مرحباً {user.first_name or 'المستخدم'},
-
-لقد طلبت إعادة تعيين كلمة المرور. يرجى استخدام رمز OTP التالي لإكمال العملية:
-
-رمز OTP: {otp_code}
-
-سينتهي صلاحية هذا الرمز خلال 15 دقيقة.
-
-إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد الإلكتروني.
-
-مع أطيب التحيات،
-فريق نقل المطار والمدينة
-"""
-        
-        # Send email (use English by default, but both are prepared)
-        # In a real implementation, you might want to detect user's preferred language
-        _send_mail_async(
-            subject=subject_en,
-            message=message_en,
-            recipient_list=[user.email],
-            html_message=None,
-            fail_silently=True
-        )
-        
-        logger.info(f"[EMAIL] Password reset OTP sent to {user.email}")
-        
-    except Exception as e:
-        logger.error(f"[EMAIL] Failed to send password reset OTP to {user.email}: {str(e)}")
-        import traceback
-        logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")       
-        logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
+    subject, message = account_message("reset", user, locale, code=otp_code)
+    _send_mail_async(subject, message, [user.email], html_message=None, fail_silently=True)

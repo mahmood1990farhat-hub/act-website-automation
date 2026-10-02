@@ -1,3 +1,4 @@
+import french from "@/dictionaries/fr/bookingSupplement.json";
 export type AirportJourneyDirection = "arrival" | "departure" | "manual";
 
 type RoutePointLike = {
@@ -99,6 +100,7 @@ export const getDepartureGuidance = (pickupTime: string, flightTime: string, loc
 
   if (locale === "ar") return `لرحلات المغادرة، نوصي بوقت استلام يسبق موعد إقلاع الطائرة بساعتين إلى ثلاث ساعات. قد يكون الوقت المحدد قريبًا جدًا أو مبكرًا جدًا. وقت الاستلام المقترح: بين ${windowStart} و${windowEnd}.`;
 
+  if (locale === "fr") return french.flight.departureGuidance.replace("{windowStart}", windowStart).replace("{windowEnd}", windowEnd);
   return `For airport departures, we recommend choosing a pickup time around 2–3 hours before your flight departure. Your selected pickup time may be too close or too early. Suggested pickup time: between ${windowStart} and ${windowEnd}.`;
 };
 
@@ -116,5 +118,7 @@ export const getArrivalGuidance = (pickupTime: string, landingTime: string, loca
 
   if (locale === "ar") return `لرحلات الوصول، نوصي بوقت استلام بعد هبوط الطائرة بساعة على الأقل لإتاحة وقت لإجراءات الجوازات واستلام الأمتعة ولقاء السائق. وقت الاستلام المقترح: ${suggestedPickup} أو بعد ذلك.`;
 
+  if (locale === "fr") return french.flight.arrivalGuidance.replace("{suggestedPickup}", suggestedPickup);
   return `For airport arrivals, we recommend choosing a pickup time at least 1 hour after landing to allow time for immigration, baggage collection, and meeting your driver. Suggested pickup time: ${suggestedPickup} or later.`;
 };
+

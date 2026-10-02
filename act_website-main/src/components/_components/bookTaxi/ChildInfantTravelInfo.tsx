@@ -1,4 +1,5 @@
 "use client";
+import french from "@/dictionaries/fr/bookingSupplement.json";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -152,3 +153,4 @@ export default function ChildInfantTravelInfo({
     </div>
   );
 }
+

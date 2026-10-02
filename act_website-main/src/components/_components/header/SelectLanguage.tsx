@@ -1,93 +1,36 @@
 "use client";
-
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-
-import { useEffect, useRef, useState } from "react";
-
+import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { TbWorld } from "react-icons/tb";
+import { enabledLocales, localeRegistry, localizedPath, type Locale, type SupportedLocale } from "../../../../i18n.config";
 
-const languagew = [
-  { name: "English", loacle: "en" },
-  { name: "Arabic", loacle: "ar" },
-];
-
-function SelectLanguage({
-  locale,
-  language,
-}: {
-  locale: string;
-  language: {
-    English: string;
-    Arabic: string;
-  };
+export default function SelectLanguage({ locale, language }: {
+  locale: string; language: { English: string; Arabic: string };
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [newPathname, setNewPathname] = useState("en");
+  const label = (code: SupportedLocale) => code === "en" ? language.English : code === "ar" ? language.Arabic : localeRegistry[code].label;
   useEffect(() => {
-    setNewPathname(
-      pathname.replace(`/${locale}`, `/${locale !== "ar" ? "ar" : "en"}`)
-    );
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const close = (event: MouseEvent) => { if (!ref.current?.contains(event.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
-  return (
-    <div
-      ref={dropdownRef}
-      className=" relative cursor-pointer text-[16px]  border-muted rounded w-full text-gray-200"
-      onClick={() => setIsOpen(!isOpen)}
-    >
-      <div
-        className={`flex items-center  max-sm:justify-between gap-1.5 p-2  lg:px-3  sm:w-fit rounded-lg duration-300  `}
-      >
-        <TbWorld className="text-xl text-gray-200" />
-        <h1 className="text-base font-medium text-gray-200">
-          {locale == "en" ? language.English : language.Arabic}
-        </h1>
-      </div>
-      {isOpen && (
-        <ul
-          className={` absolute  mt-1 p-2 w-full z-10 text-[16px] font-medium  rounded space-y-2 bg-black text-center  `}
-        >
-          <li
-            onClick={() => setIsOpen(false)}
-            className="hover:bg-gray-50/10 rounded p-1"
-          >
-            {locale === "ar" ? (
-              <Link href={newPathname}>{language.English}</Link>
-            ) : (
-              language.English
-            )}
-          </li>
-          <li
-            onClick={() => setIsOpen(false)}
-            className="hover:bg-gray-50/10 rounded p-1"
-          >
-            {locale !== "ar" ? (
-              <Link href={newPathname}>{language.Arabic}</Link>
-            ) : (
-              language.Arabic
-            )}
-          </li>
-        </ul>
-      )}
-    </div>
-  );
+  useEffect(() => setOpen(false), [pathname]);
+  return <div ref={ref} className="relative" onKeyDown={e => { if (e.key === "Escape") setOpen(false); }}>
+    <button type="button" aria-label={locale === "ar" ? "اختر اللغة" : locale === "fr" ? "Choisir une langue" : "Choose language"}
+      aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(!open)}
+      className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary rounded-lg border border-primary/30">
+      <TbWorld /><span>{localeRegistry[locale as Locale]?.label || "English"}</span>
+    </button>
+    {open && <ul className="absolute end-0 z-50 mt-2 min-w-36 p-2 rounded border border-primary/30 bg-black text-primary">
+      {enabledLocales.map(code => <li key={code}><button type="button" lang={code}
+        aria-current={code === locale ? "true" : undefined}
+        className="w-full rounded p-2 text-start hover:bg-white/10"
+        onClick={() => { setOpen(false); if (code !== locale) window.location.assign(localizedPath(pathname, code) + window.location.search + window.location.hash); }}>
+        {label(code)}
+      </button></li>)}
+    </ul>}
+  </div>;
 }
 
-export default SelectLanguage;

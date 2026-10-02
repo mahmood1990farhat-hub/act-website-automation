@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const translations = {
+  fr: { selectTime: "Choisir une heure", cancel: "Annuler", ok: "Valider", hour: "Heure", minute: "Minute", period: "AM/PM" },
   ar: {
     selectTime: "اختر الوقت",
     cancel: "إلغاء",
@@ -25,7 +26,7 @@ const translations = {
   },
 };
 
-type Language = "ar" | "en";
+type Language = "ar" | "en" | "fr";
 type Period = "AM" | "PM";
 
 interface TimeValue {
@@ -294,3 +295,4 @@ export function ActTimePicker({
     </div>
   );
 }
+

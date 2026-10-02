@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  return getPublicPageSeo(locale, "", locale === "ar" ? {
+  return getPublicPageSeo(locale, "", locale === "fr" ? { title: "Transferts aéroport à Londres | Airport & City Transfer", description: "Réservez votre transfert privé entre les aéroports et Londres avec Airport & City Transfer. Découvrez nos services et obtenez un tarif." } : locale === "ar" ? {
     title: "خدمات النقل من وإلى مطارات لندن | Airport & City Transfer",
     description:
       "احجز خدمات النقل الخاص من وإلى المطارات وداخل لندن مع Airport & City Transfer. تعرّف على خدماتنا واحصل على عرض سعر لرحلتك.",
@@ -38,3 +38,4 @@ export default async function Home({
     </div>
   );
 }
+

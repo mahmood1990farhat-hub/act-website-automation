@@ -1,24 +1,42 @@
 import "server-only";
-import { Locale } from "../../i18n.config";
-import { Languages } from "@/constants/enums";
+import { dictionaryLocale, type SupportedLocale } from "../../i18n.config";
+import { mergeDictionary } from "./translation-fallback";
 
-// const dictionaries = {
-//   ar: () => import("@/dictionaries/ar.json").then((module) => module.default),
-//   en: () => import("@/dictionaries/en.json").then((module) => module.default),
-// };
-
-// const getTrans = async (locale: Locale) => {
-//   return locale === Languages.ARABIC ? dictionaries.ar() : dictionaries.en();
-// };
-
- const getTrans = async (locale: Locale, section: string) => {
-  const translations = await import(`@/dictionaries/${locale}/${section}.json`).then((module) => module.default)
-  return translations
+const loaders = {
+  en: {
+    home: () => import("@/dictionaries/en/home.json").then(m => m.default),
+    auth: () => import("@/dictionaries/en/auth.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/en/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/en/lostProperty.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/en/tripsPassenger.json").then(m => m.default),
+    driver: () => import("@/dictionaries/en/driver.json").then(m => m.default),
+    dashboard: () => import("@/dictionaries/en/dashboard.json").then(m => m.default),
+  },
+  ar: {
+    home: () => import("@/dictionaries/ar/home.json").then(m => m.default),
+    auth: () => import("@/dictionaries/ar/auth.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/ar/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/ar/lostProperty.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/ar/tripsPassenger.json").then(m => m.default),
+    driver: () => import("@/dictionaries/ar/driver.json").then(m => m.default),
+    dashboard: () => import("@/dictionaries/ar/dashboard.json").then(m => m.default),
+  },
 };
+const frenchLoaders = {
+  home: () => import("@/dictionaries/fr/home.json").then(m => m.default),
+  auth: () => import("@/dictionaries/fr/auth.json").then(m => m.default),
+  complaints: () => import("@/dictionaries/fr/complaints.json").then(m => m.default),
+  lostProperty: () => import("@/dictionaries/fr/lostProperty.json").then(m => m.default),
+  tripsPassenger: () => import("@/dictionaries/fr/tripsPassenger.json").then(m => m.default),
+};
+export default async function getTrans(locale: SupportedLocale, section: string): Promise<any> {
+  if (!Object.prototype.hasOwnProperty.call(loaders.en, section)) throw new Error(`Unknown translation section: ${section}`);
+  const key = section as keyof typeof loaders.en;
+  const english = await loaders.en[key]();
+  if (locale === "fr" && Object.prototype.hasOwnProperty.call(frenchLoaders, section)) {
+    return mergeDictionary(english, await frenchLoaders[section as keyof typeof frenchLoaders]());
+  }
+  const language = dictionaryLocale(locale);
+  return language === "en" ? english : mergeDictionary(english, await loaders[language][key]());
+}
 
-export default getTrans;
-
-// export const getTrans = async (locale: Locale, section: string) => {
-//   const translations = await import(`@/dictionaries/${locale}/${section}.json`);
-//   return translations.default;
-// };

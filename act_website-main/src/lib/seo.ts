@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { Locale } from "../../i18n.config";
+import { publishedLocalesFor, type Locale } from "../../i18n.config";
 import { Languages } from "@/constants/enums";
 
 const SITE_URL = "https://airportandcitytransfer.com";
@@ -17,13 +17,12 @@ export const getPublicPageSeo = (
   metadata: Metadata = {}
 ): Metadata => ({
   ...metadata,
+  ...(locale === "fr" ? { robots: { index: false, follow: false } } : {}),
   alternates: {
     ...metadata.alternates,
     canonical: buildLocalizedUrl(locale, path),
     languages: {
-      ...metadata.alternates?.languages,
-      en: buildLocalizedUrl(Languages.ENGLISH, path),
-      ar: buildLocalizedUrl(Languages.ARABIC, path),
+      ...Object.fromEntries(publishedLocalesFor(path).map(code => [code, buildLocalizedUrl(code, path)])),
       "x-default": buildLocalizedUrl(Languages.ENGLISH, path),
     },
   },
@@ -35,3 +34,4 @@ export const privatePageSeo: Metadata = {
     follow: false,
   },
 };
+

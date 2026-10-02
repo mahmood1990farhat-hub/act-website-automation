@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { i18n, Locale } from "../../i18n.config";
+import { i18n, Locale, directionFor } from "../../i18n.config";
 import ReactQueryProvider from "@/providers/Provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -40,7 +40,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      dir={locale === "en" ? "ltr" : "rtl"}
+      dir={directionFor(locale)}
       className="font-sans"
     >
       <head>

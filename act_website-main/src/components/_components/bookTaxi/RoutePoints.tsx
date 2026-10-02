@@ -1,4 +1,5 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
 import LocationSelector, { PlaceSuggestion } from "./LocationSelector";
@@ -83,7 +84,7 @@ export default function RoutePoints({
   const [submitError, setSubmitError] = useState("");
 
   const tripCalculationErrorMessage =
-    "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.";
+    customerText(locale, "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.");
 
   const addStopPoint = () => {
     const dropoff = routePoints.find((p) => p.type === "dropoff");
@@ -185,7 +186,7 @@ export default function RoutePoints({
 
     if (!validateForm()) {
       setIsRequired(true);
-      setSubmitError(locationValidationMessage);
+      setSubmitError(locale === "fr" ? "Sélectionnez des lieux valides, une date et une heure avant de continuer." : locationValidationMessage);
       return;
     }
 
@@ -515,3 +516,4 @@ export default function RoutePoints({
     </div>
   );
 }
+

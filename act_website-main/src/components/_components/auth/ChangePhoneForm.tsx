@@ -1,4 +1,5 @@
 "use client";
+import frCountries from "react-phone-number-input/locale/fr.json";
 import { Button } from "@/components/ui/button";
 import React, { useState, useRef, useEffect } from "react";
 import { Locale } from "../../../../i18n.config";
@@ -277,6 +278,7 @@ export default function ChangePhoneForm({
           >
             <PhoneInputWithCountrySelect
               defaultCountry="GB"
+              labels={locale === "fr" ? frCountries : undefined}
               value={phone}
               onChange={(val) => {
                 setPhone(val || "");
@@ -304,4 +306,5 @@ export default function ChangePhoneForm({
     </div>
   );
 }
+
 

@@ -54,9 +54,15 @@ export default async function RootLayout({
       <main
         className="relative overflow-clip bg-cover bg-center text-white min-h-[700px]">
         <Header navbar={navbar} locale={locale} token={token} />
+        {locale === "fr" && <aside className="border-y border-yellow-500/30 bg-black px-5 py-3 text-sm text-yellow-300" data-testid="french-preview-notice">
+          Aperçu privé — version française en cours de révision, non publiée.
+          <p className="mt-1 text-white/75">Les suggestions d’adresses, certaines descriptions de véhicules et les confirmations par e-mail ou PDF restent en anglais. Certains messages des prestataires externes peuvent aussi être en anglais. Paiements en GBP. L’assistance téléphonique en français n’est pas garantie.</p>
+          <a className="underline" href="/en/auth?captain=1">Espace chauffeur : continuer en anglais</a>
+        </aside>}
         {children}
       </main>
       <Footer footer={footer} privacyPolicy={policy_and_terms.policy} terms={policy_and_terms.terms} faqs={faqs} locale={locale} />
     </>
   );
 }
+
