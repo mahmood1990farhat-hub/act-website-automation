@@ -19,20 +19,22 @@ jobs:
     runs-on: self-hosted
     environment: production
     steps:
-      - name: Read service health and filtered startup failures
+      - name: Check directory access and permitted recovery path
         shell: bash
         run: |
           set -uo pipefail
-          for unit in act.service act-celery-beat.service; do
-            systemctl show "$unit" -p ActiveState -p SubState -p Result -p ExecMainStatus -p User -p WorkingDirectory -p ExecStart
-          done
-          sudo -n journalctl -u act-celery-beat.service --since '2026-10-02 15:53:00 UTC' -n 120 --no-pager -o cat 2>/dev/null | python3 -c '
-          import sys,re
-          lines=sys.stdin.read().splitlines()
-          for line in lines:
-              if any(s in line.lower() for s in ("error","exception","permission denied","no such file","failed at step","cannot","traceback","celery","schedule","code=")):
-                  line=re.sub(r"[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+","[REDACTED_URI]",line)
-                  line=re.sub(r"(?i)(password|secret|token|api[_-]?key)\s*[=:]\s*\S+",r"\1=[REDACTED]",line)
-                  print(line[:500])
-          '
+          namei -l /var/www/atg/atg-backend/current/.venv/bin/python || true
+          stat -c '%A %U:%G %n' /var/www/atg/atg-backend/releases /var/www/atg/atg-backend/releases/20261002T155353Z-a111eb476795 /var/www/atg/atg-backend/releases/20260806T221753Z-5e12ad9c393b || true
+          sudo -n -l || true
           fc-match 'DejaVu Sans' -f '%{family}\n' || true
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/usr/local/sbin/act-backend-deploy')
+          try:
+              lines=p.read_text().splitlines()
+              for i,line in enumerate(lines,1):
+                  if any(x in line for x in ('umask','chmod','chown','mktemp','mkdir','install -d')):
+                      print(f'deploy-script:{i}: {line}')
+          except PermissionError:
+              print('Deployment script not readable by runner')
+          PY
