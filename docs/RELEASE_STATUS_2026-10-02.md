@@ -14,10 +14,16 @@ Initial backend run 37030061847 rolled back because newly created release and vi
 The owner recovered the scheduler and, at approximately 16:47 UTC, successfully patched /usr/local/sbin/act-backend-deploy. Backup: /usr/local/sbin/act-backend-deploy.bak-1790959659.
 After existing ownership/write restrictions and before the release switch, the helper now assigns www-data group to the release root/backend directory and virtual environment, then checks Celery/WeasyPrint imports as www-data. No broad chmod or health-check bypass. The source helper on this diagnostic branch records the same correction.
 
-## Remaining acceptance check
-DejaVu Sans was confirmed installed in earlier run 37031124431. A synthetic Arabic booking and cancellation PDF render on the deployed environment remains pending.
-The automation account cannot traverse the protected release. Do not widen its permissions. Administrator execution of server/deploy/verify-customer-documents.py at immutable commit b1c0edec6c97b0df1210841f5205e8a90d3afd25 verifies the deployed SHA, runs the five existing offline tests and the deployed Arabic PDF functions with isolated Django template settings. It reads no production secrets, queries no database, sends no messages and makes no payments. It writes only synthetic PDFs and a manifest to a new /tmp/act-language-check-a111eb476795-* directory readable by the existing runner for subsequent visual inspection. No production permissions are modified.
-Once the owner provides the output directory, retrieve only those synthetic outputs through the diagnostic workflow, render and visually inspect both PDFs, then update this checkpoint. Do not claim server PDF acceptance before this completes.
+## Acceptance completed
+The owner executed the immutable acceptance helper and reported all five offline language tests passing and both Arabic PDF renders successful. Synthetic output directory: /tmp/act-language-check-a111eb476795-794ce1bc.
+Retrieval run 37039077593, job 110944450415, succeeded on 2 October 2026 after validating the manifest, deployed SHA, file lengths and SHA-256 digests. It also confirmed both application and scheduler still active, approximately twenty minutes after deployment.
+- Booking PDF: 71,929 bytes; SHA-256 5ff4df8b199db668a9c268c2c99dc8d819b232f7ac3a9226954355f34ba6176e.
+- Cancellation PDF: 72,448 bytes; SHA-256 934cb5cc2021c0fcdbc1446ed4da91e3731a9f391d7a24c4c0870a5056bea120.
+- Both PDFs contain one page, embedded DejaVu Sans regular/bold fonts and one logo image.
+- Both were rendered with Poppler and visually inspected: Arabic glyph shaping and right-to-left layout readable; logo top-left; rows, totals, contact information and footer within page bounds; no clipping or overlap observed.
+- The five offline tests exercised deployed booking-owned email language paths with sends substituted, legacy language fallback, template escaping, refund-status copy and English vehicle registration. They do not constitute actual email delivery or full payment/webhook integration tests.
+
+The approved English/Arabic frontend and backend release is deployed and its bounded acceptance checks are complete. No further owner terminal action is required for this release.
 
 ## Scope and limitations
 No real bookings, payments, refunds or outgoing emails were created. Stripe receipts and full database/webhook/payment integration remain outside verified scope. Existing stored customer PDFs were not regenerated. Deployment logs still show a missing Firebase credential-file warning; Django checks pass, but Firebase-dependent features were not verified.
