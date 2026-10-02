@@ -830,6 +830,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             "Hello %(first_name)s,\n\n"
             "Your booking with Airport & City Transfer has been successfully cancelled.\n\n"
             "%(refund_message_text)s"
+            'Refund eligibility follows the terms agreed when you booked. We initiate any confirmed refund to the original payment method within 5 working days of confirming the refund amount. Your bank or payment provider may take longer to credit the funds.\n\nFor cancellation or amendment requests, email info@airportandcitytransfer.com with your booking reference. For urgent changes, also telephone +44 208 153 0303. Keep a copy of your request; notice is measured from when ACT receives it, not when staff reply.\n\n'
             "Passenger & Travel Details\n"
             "%(booking_details_text)s\n"
             "If you would like to arrange a new journey, visit:\n"
