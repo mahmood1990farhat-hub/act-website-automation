@@ -36,7 +36,7 @@ REFUNDS = {
 }
 
 
-def arabic_document_context(trip, kind, refund_message="", driver=None, download_url=""):
+def arabic_document_context(trip, kind, refund_message="", driver=None, download_url="", logo_uri=""):
     details = format_booking_details_for_email(trip)
     raw = getattr(trip, "booking_details", {}) or {}
     raw = raw if isinstance(raw, dict) else {}
@@ -92,6 +92,7 @@ def arabic_document_context(trip, kind, refund_message="", driver=None, download
             rows.append((label, value(driver[key])))
     return {
         "title": TITLES[kind], "intro": INTROS[kind], "rows": rows, "contact": CONTACT,
+        "logo_uri": logo_uri,
         "website_url": "https://airportandcitytransfer.com/ar",
         "refund_message": REFUNDS.get(refund_message, "للاستفسار عن حالة الاسترداد، يرجى التواصل معنا مع ذكر مرجع الحجز." if refund_message else ""),
         "download_url": download_url, "driver_pco_url": driver.get("pco_url", ""),

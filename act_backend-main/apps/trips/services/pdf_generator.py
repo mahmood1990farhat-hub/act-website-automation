@@ -63,7 +63,10 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     Returns a BytesIO buffer.
     """
     if booking_language(trip) == "ar":
-        _, html, _ = render_arabic_document(trip, "booking")
+        _, html, _ = render_arabic_document(
+            trip, "booking",
+            logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
+        )
         buffer = BytesIO()
         HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
         buffer.seek(0)
@@ -159,7 +162,10 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     Returns a BytesIO buffer.
     """
     if booking_language(trip) == "ar":
-        _, html, _ = render_arabic_document(trip, "cancellation")
+        _, html, _ = render_arabic_document(
+            trip, "cancellation",
+            logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
+        )
         buffer = BytesIO()
         HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
         buffer.seek(0)
@@ -232,6 +238,5 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
     buffer.seek(0)
     return buffer
-
 
 
