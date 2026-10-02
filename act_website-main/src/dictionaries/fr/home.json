@@ -1,74 +1,158 @@
 {
   "navbar": {
     "navLinks": [
-      { "name": "Accueil", "url": "/fr", "protected": false },
-      { "name": "À propos", "url": "/fr/about-us", "protected": false },
-      { "name": "Nous contacter", "url": "/fr/about-us#contact-us", "protected": false },
-      { "name": "Mes trajets", "url": "/fr/my-trips", "protected": true },
-      { "name": "Télécharger l’application", "url": "/fr/download-app", "protected": false },
-      { "name": "Objets perdus", "url": "/fr/lost-property", "protected": true },
-      { "name": "Réclamations", "url": "/fr/complaints", "protected": true }
+      {
+        "name": "Accueil",
+        "url": "/fr",
+        "protected": false
+      },
+      {
+        "name": "À propos",
+        "url": "/fr/about-us",
+        "protected": false
+      },
+      {
+        "name": "Nous contacter",
+        "url": "/fr/about-us#contact-us",
+        "protected": false
+      },
+      {
+        "name": "Mes trajets",
+        "url": "/fr/my-trips",
+        "protected": true
+      },
+      {
+        "name": "Télécharger l’application",
+        "url": "/fr/download-app",
+        "protected": false
+      },
+      {
+        "name": "Objets perdus",
+        "url": "/fr/lost-property",
+        "protected": true
+      },
+      {
+        "name": "Réclamations",
+        "url": "/fr/complaints",
+        "protected": true
+      }
     ],
-    "languages": { "English": "Anglais", "Arabic": "Arabe" },
+    "languages": {
+      "English": "Anglais",
+      "Arabic": "Arabe"
+    },
     "menuToggle": "Ouvrir ou fermer le menu",
     "auth": {
-      "login": "Se connecter", "logout": "Se déconnecter", "profile": "Profil",
-      "deleteAccount": "Supprimer le compte", "changePassword": "Modifier le mot de passe",
-      "logoutConfirmTitle": "Confirmer la déconnexion", "logoutConfirmMessage": "Voulez-vous vraiment vous déconnecter ?",
-      "profileDescription": "Gérer votre compte", "logoutDescription": "Vous déconnecter de votre compte",
-      "logoutSuccess": "Déconnexion réussie", "logoutError": "Erreur lors de la déconnexion", "loggingOut": "Déconnexion en cours…",
+      "login": "Se connecter",
+      "logout": "Se déconnecter",
+      "profile": "Profil",
+      "deleteAccount": "Supprimer le compte",
+      "changePassword": "Modifier le mot de passe",
+      "logoutConfirmTitle": "Confirmer la déconnexion",
+      "logoutConfirmMessage": "Voulez-vous vraiment vous déconnecter ?",
+      "profileDescription": "Gérer votre compte",
+      "logoutDescription": "Vous déconnecter de votre compte",
+      "logoutSuccess": "Déconnexion réussie",
+      "logoutError": "Erreur lors de la déconnexion",
+      "loggingOut": "Déconnexion en cours…",
       "deleteAccountConfirmTitle": "Supprimer le compte",
       "deleteAccountConfirmMessage": "Cette action est irréversible. Saisissez votre mot de passe pour supprimer définitivement votre compte.",
-      "passwordLabel": "Mot de passe", "passwordRequired": "Le mot de passe est obligatoire", "confirm": "Confirmer", "cancel": "Annuler"
+      "passwordLabel": "Mot de passe",
+      "passwordRequired": "Le mot de passe est obligatoire",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
     }
   },
   "home": {
     "Book_Taxi": {
       "title": "Vos transferts aéroport et en ville, en toute simplicité",
       "subtitle": "Réservez votre trajet en quelques instants et voyagez confortablement, en toute confiance, de la prise en charge à l’arrivée.",
-      "fromAirport": "Depuis l’aéroport", "toAirport": "Vers l’aéroport",
+      "fromAirport": "Depuis l’aéroport",
+      "toAirport": "Vers l’aéroport",
       "form": {
-        "PickUp_location": "Lieu de prise en charge", "stop_ponit": "Arrêt intermédiaire", "DropOff_location": "Destination",
-        "error": "Le lieu n’est pas valide", "date": "Date", "time": "Heure", "is_required": "Ce champ est obligatoire.",
-        "button": "Obtenir un tarif", "smallSuitcase": "Petite valise", "largeSuitcase": "Grande valise",
-        "NumberOfPassenger": "Nombre de passagers", "error_message": "Désolé, nous n’avons pas pu calculer l’itinéraire.", "error_button": "Fermer"
+        "PickUp_location": "Lieu de prise en charge",
+        "stop_ponit": "Arrêt intermédiaire",
+        "DropOff_location": "Destination",
+        "error": "Le lieu n’est pas valide",
+        "date": "Date",
+        "time": "Heure",
+        "is_required": "Ce champ est obligatoire.",
+        "button": "Obtenir un tarif",
+        "smallSuitcase": "Petite valise",
+        "largeSuitcase": "Grande valise",
+        "NumberOfPassenger": "Nombre de passagers",
+        "error_message": "Désolé, nous n’avons pas pu calculer l’itinéraire.",
+        "error_button": "Fermer"
       }
     },
-    "Choose_car": { "title": "Choisir un véhicule", "button": "Suivant" },
+    "Choose_car": {
+      "title": "Choisir un véhicule",
+      "button": "Suivant"
+    },
     "Additional_Information": {
-      "title": "Informations complémentaires", "driverTitle": "Informations complémentaires pour votre chauffeur",
+      "title": "Informations complémentaires",
+      "driverTitle": "Informations complémentaires pour votre chauffeur",
       "description": "Indiquez toute information utile pour votre trajet : détails du vol, changement de terminal, bagages, sièges enfants, aide à la mobilité, besoins d’accessibilité ou autre demande particulière.",
-      "back": "Retour", "continue": "Continuer"
+      "back": "Retour",
+      "continue": "Continuer"
     },
     "Confir_flight_details": {
-      "title": "Confirmer les détails de la réservation", "Distance": "Distance", "Trip": "Trajet", "Car_type": "Type de véhicule",
-      "Cost": "Prix", "airport_vat": "Frais d’aéroport", "VAT": "TVA", "Edit": "Modifier", "details": "Détails",
-      "Total_Cost": "Montant total", "button": "Confirmer", "cost_breakdown": "Détail du prix", "transfer_fare": "Tarif du transfert",
-      "vat_20": "TVA (20 %)", "airport_access_fee": "Frais d’accès à l’aéroport", "meet_and_greet": "Accueil avec pancarte",
-      "included": "Inclus", "total_price": "Prix total"
+      "title": "Confirmer les détails de la réservation",
+      "Distance": "Distance",
+      "Trip": "Trajet",
+      "Car_type": "Type de véhicule",
+      "Cost": "Prix",
+      "airport_vat": "Frais d’aéroport",
+      "VAT": "Majoration",
+      "Edit": "Modifier",
+      "details": "Détails",
+      "Total_Cost": "Montant total",
+      "button": "Confirmer",
+      "cost_breakdown": "Détail du prix",
+      "transfer_fare": "Tarif du transfert",
+      "vat_20": "Majoration commerciale (20 %)",
+      "airport_access_fee": "Frais d’accès à l’aéroport",
+      "meet_and_greet": "Accueil avec pancarte",
+      "included": "Inclus",
+      "total_price": "Prix total"
     },
     "Payments_details": {
-      "title": "Informations de paiement", "subtitle": "Veuillez saisir vos informations de paiement",
+      "title": "Informations de paiement",
+      "subtitle": "Veuillez saisir vos informations de paiement",
       "form": {
-        "Card_Number": "Numéro de carte", "Expired_date": "Date d’expiration",
-        "check": { "Agree": "J’accepte", "privacy_policy": " la politique de confidentialité", "terms_of_use": " les conditions d’utilisation" },
+        "Card_Number": "Numéro de carte",
+        "Expired_date": "Date d’expiration",
+        "check": {
+          "Agree": "J’accepte",
+          "privacy_policy": " la politique de confidentialité",
+          "terms_of_use": " les conditions d’utilisation"
+        },
         "button": "Réserver maintenant"
       }
     },
     "Booking_Confirmation": {
       "title": "Réservation confirmée !",
       "desc": {
-        "span_1": "Vous recevrez une confirmation par e-mail. Les informations sur votre chauffeur vous seront communiquées prochainement, dans un délai maximal de ",
-        "hour": " 1 ", "hour_5": " 5 ", "span_2": " heure."
+        "span_1": "Vous recevrez une confirmation par e-mail. L’envoi des informations sur votre chauffeur est prévu environ ",
+        "hour": " 2 ",
+        "hour_5": " 5 ",
+        "span_2": " heures avant votre trajet."
       },
-      "button": "Voir mes trajets", "button_Back_to_home": "Retour à l’accueil"
+      "button": "Voir mes trajets",
+      "button_Back_to_home": "Retour à l’accueil"
     }
   },
   "about_us": {
-    "about_us_title": "À propos :", "ourStory": "Notre histoire", "customers": "Clients satisfaits", "rating": "Note", "available": "Disponible",
-    "readyTitle": "Prêt à réserver votre prochain trajet ?", "readySubtitle": "Profitez du confort et de la simplicité de notre service de transport haut de gamme",
+    "about_us_title": "À propos :",
+    "ourStory": "Notre histoire",
+    "customers": "Clients satisfaits",
+    "rating": "Note",
+    "available": "Disponible",
+    "readyTitle": "Prêt à réserver votre prochain trajet ?",
+    "readySubtitle": "Profitez du confort et de la simplicité de notre service de transport haut de gamme",
     "company_description_1": {
-      "title": "Airport & City", "titlespan": "Transfer",
+      "title": "Airport & City",
+      "titlespan": "Transfer",
       "desc": "est une société de transport privé avec chauffeur basée à Londres, spécialisée dans les transferts aéroport et en ville. Notre mission : faciliter vos déplacements grâce à un service professionnel, ponctuel et personnalisé. Que vous alliez à l’aéroport, rentriez chez vous ou traversiez la ville, nous veillons au bon déroulement de votre trajet, du départ à l’arrivée."
     },
     "company_description_2": {
@@ -79,134 +163,359 @@
     "company_description_3": "Nos systèmes de réservation et de répartition des courses permettent aux passagers de réserver à l’avance, de suivre leurs trajets et de communiquer facilement. Nous privilégions la transparence : notre tarification claire vous offre un service fiable, sans mauvaise surprise.",
     "company_description_4": "Chez Airport & City Transfer, nous vous offrons plus qu’un trajet : la tranquillité d’esprit.",
     "get_in_touch": {
-      "title": "Envoyez un ", "titlespan": "message", "subtitle": "Envie de découvrir notre service de transport haut de gamme ? Contactez-nous dès aujourd’hui.",
-      "form": { "FullName": "Nom complet", "mail": "Adresse e-mail", "Yourmessage": "Votre message", "button": "Envoyer le message" }
+      "title": "Envoyez un ",
+      "titlespan": "message",
+      "subtitle": "Envie de découvrir notre service de transport haut de gamme ? Contactez-nous dès aujourd’hui.",
+      "form": {
+        "FullName": "Nom complet",
+        "mail": "Adresse e-mail",
+        "Yourmessage": "Votre message",
+        "button": "Envoyer le message"
+      }
     },
-    "btns": { "bookNow": "Réserver maintenant", "learnMore": "En savoir plus", "callUs": "Nous contacter" },
+    "btns": {
+      "bookNow": "Réserver maintenant",
+      "learnMore": "En savoir plus",
+      "callUs": "Nous contacter"
+    },
     "whyUs": {
-      "title": "Pourquoi nous choisir ?", "subtitle": "Découvrez la différence avec notre service de transport haut de gamme",
+      "title": "Pourquoi nous choisir ?",
+      "subtitle": "Découvrez la différence avec notre service de transport haut de gamme",
       "steps": [
-        { "title": "La sécurité avant tout", "desc": "Chauffeurs professionnels et véhicules assurés" },
-        { "title": "Service 24 h/24 et 7 j/7", "desc": "À votre disposition à toute heure" },
-        { "title": "Une expérience haut de gamme", "desc": "Véhicules de luxe et service de qualité" },
-        { "title": "Desserte de Londres", "desc": "Une couverture de l’ensemble du Grand Londres" }
+        {
+          "title": "La sécurité avant tout",
+          "desc": "Chauffeurs professionnels et véhicules assurés"
+        },
+        {
+          "title": "Service 24 h/24 et 7 j/7",
+          "desc": "À votre disposition à toute heure"
+        },
+        {
+          "title": "Une expérience haut de gamme",
+          "desc": "Véhicules de luxe et service de qualité"
+        },
+        {
+          "title": "Desserte de Londres",
+          "desc": "Une couverture de l’ensemble du Grand Londres"
+        }
       ]
     },
     "booking_title": {
-      "span": "Une réservation simple", "title": "Réserver un ", "titlespan": "trajet",
+      "span": "Une réservation simple",
+      "title": "Réserver un ",
+      "titlespan": "trajet",
       "subtitle": "Réservez votre transport haut de gamme en quelques clics. Profitez du confort, de la fiabilité et d’un service professionnel."
     },
     "joinUs": {
       "title": "Rejoignez-nous en quelques instants",
       "subtitle": "Inscrivez-vous comme passager ou enregistrez votre véhicule agréé PCO et commencez à gagner de l’argent dès aujourd’hui.",
-      "passenger": "Passager", "driver": "Chauffeur PCO"
+      "passenger": "Passager",
+      "driver": "Chauffeur PCO"
     },
     "howToWork": [
-      { "title": "Choisissez les lieux", "desc": "Indiquez votre lieu de prise en charge et votre destination" },
-      { "title": "Choisissez la date et l’heure", "desc": "Planifiez votre trajet selon vos besoins" },
-      { "title": "Sélectionnez un véhicule", "desc": "Choisissez parmi notre flotte haut de gamme" },
-      { "title": "Confirmez la réservation", "desc": "Paiement sécurisé et confirmation immédiate" }
+      {
+        "title": "Choisissez les lieux",
+        "desc": "Indiquez votre lieu de prise en charge et votre destination"
+      },
+      {
+        "title": "Choisissez la date et l’heure",
+        "desc": "Planifiez votre trajet selon vos besoins"
+      },
+      {
+        "title": "Sélectionnez un véhicule",
+        "desc": "Choisissez parmi notre flotte haut de gamme"
+      },
+      {
+        "title": "Confirmez la réservation",
+        "desc": "Paiement sécurisé et confirmation immédiate"
+      }
     ],
-    "services": { "title": "Nos services", "subtitle": "Découvrez nos solutions de transport conçues pour votre confort et votre tranquillité" },
+    "services": {
+      "title": "Nos services",
+      "subtitle": "Découvrez nos solutions de transport conçues pour votre confort et votre tranquillité"
+    },
     "sections": [
-      { "title": "Vous arrivez dans une nouvelle ville comme Londres ?", "text": "Découvrir une nouvelle ville est passionnant, mais organiser ses déplacements peut être stressant. Nous sommes là pour vous aider." },
-      { "title": "Le transfert privé avec chauffeur : une solution pratique", "text": "Évitez les files d’attente pour les taxis et les correspondances compliquées. Optez pour un transfert aéroport privé et rejoignez votre destination confortablement." },
-      { "title": "Les avantages de réserver à l’avance", "text": "En réservant à l’avance avec Airport & City Transfer, un chauffeur vous attend à votre arrivée. Pas de négociation du tarif : profitez d’un trajet direct vers votre hôtel ou votre hébergement." },
-      { "title": "Comment ça marche ?", "text": "Réservez votre transfert privé en ligne avant votre départ. Indiquez les détails de votre vol et votre destination, nous nous occupons du reste. Pensez à vous inscrire pour recevoir nos offres." },
-      { "title": "Voyagez l’esprit tranquille", "text": "Commencez votre séjour sereinement grâce à notre service fiable et professionnel. Confiez-nous votre transfert aéroport et profitez de votre nouvelle destination." },
-      { "title": "Réservez votre trajet dès aujourd’hui", "text": "Réservez votre transfert aéroport privé sur le site Airport & City Transfer et commencez votre séjour dans les meilleures conditions." }
+      {
+        "title": "Vous arrivez dans une nouvelle ville comme Londres ?",
+        "text": "Découvrir une nouvelle ville est passionnant, mais organiser ses déplacements peut être stressant. Nous sommes là pour vous aider."
+      },
+      {
+        "title": "Le transfert privé avec chauffeur : une solution pratique",
+        "text": "Évitez les files d’attente pour les taxis et les correspondances compliquées. Optez pour un transfert aéroport privé et rejoignez votre destination confortablement."
+      },
+      {
+        "title": "Les avantages de réserver à l’avance",
+        "text": "En réservant à l’avance avec Airport & City Transfer, un chauffeur vous attend à votre arrivée. Pas de négociation du tarif : profitez d’un trajet direct vers votre hôtel ou votre hébergement."
+      },
+      {
+        "title": "Comment ça marche ?",
+        "text": "Réservez votre transfert privé en ligne avant votre départ. Indiquez les détails de votre vol et votre destination, nous nous occupons du reste. Pensez à vous inscrire pour recevoir nos offres."
+      },
+      {
+        "title": "Voyagez l’esprit tranquille",
+        "text": "Commencez votre séjour sereinement grâce à notre service fiable et professionnel. Confiez-nous votre transfert aéroport et profitez de votre nouvelle destination."
+      },
+      {
+        "title": "Réservez votre trajet dès aujourd’hui",
+        "text": "Réservez votre transfert aéroport privé sur le site Airport & City Transfer et commencez votre séjour dans les meilleures conditions."
+      }
     ]
   },
   "footer": {
     "Our_Company": {
       "title": "Notre société",
-      "Elements": [ { "name": "À propos", "href": "/fr/about-us" }, { "name": "Réserver un trajet", "href": "/fr" }, { "name": "Applications", "href": "/fr/download-app" } ]
+      "Elements": [
+        {
+          "name": "À propos",
+          "href": "/fr/about-us"
+        },
+        {
+          "name": "Réserver un trajet",
+          "href": "/fr"
+        },
+        {
+          "name": "Applications",
+          "href": "/fr/download-app"
+        }
+      ]
     },
     "Call_us": {
       "title": "Coordonnées",
-      "phone_numbers": { "title": "Par téléphone : 📞", "Elements": [ "+44 746 494 0000", "+44 208 153 0303" ] },
-      "Email_us": { "title": "Par e-mail :", "Elements": [ "Info@airportandcitytransfer.com" ] }
+      "phone_numbers": {
+        "title": "Par téléphone : 📞",
+        "Elements": [
+          "+44 746 494 0000",
+          "+44 208 153 0303"
+        ]
+      },
+      "Email_us": {
+        "title": "Par e-mail :",
+        "Elements": [
+          "Info@airportandcitytransfer.com"
+        ]
+      }
     },
-    "Policies": { "title": "Conditions et confidentialité", "Elements": [ { "name": "Applications", "href": "/fr/download-app" } ] },
-    "location": { "title": "Adresse :", "Elements": [ "ACT - 450 Bath Road Heathrow", "Farhat Trading Solutions Ltd", "Office 218", "London", "West Drayton", "UB7 0EB" ] },
-    "logoAlt": "Logo Airport & City Transfer", "registeredCompany": "Société immatriculée : Farhat Trading Solutions Ltd",
+    "Policies": {
+      "title": "Conditions et confidentialité",
+      "Elements": [
+        {
+          "name": "Applications",
+          "href": "/fr/download-app"
+        }
+      ]
+    },
+    "location": {
+      "title": "Adresse :",
+      "Elements": [
+        "ACT - 450 Bath Road Heathrow",
+        "Farhat Trading Solutions Ltd",
+        "Office 218",
+        "London",
+        "West Drayton",
+        "UB7 0EB"
+      ]
+    },
+    "logoAlt": "Logo Airport & City Transfer",
+    "registeredCompany": "Société immatriculée : Farhat Trading Solutions Ltd",
     "copyright": "Tous droits réservés © {year} Airport & City Transfer"
   },
   "policy_and_terms": {
     "policy": {
-      "Open_button": "Politique de confidentialité", "title": "Politique de confidentialité – Airport & City Transfer",
+      "Open_button": "Politique de confidentialité",
+      "title": "Politique de confidentialité – Airport & City Transfer",
       "desc": "Airport & City Transfer (« nous », « notre », « nos ») s’engage à protéger votre vie privée. Cette politique explique comment nous recueillons, utilisons, conservons et protégeons vos données personnelles conformément au règlement général sur la protection des données du Royaume-Uni (UK GDPR) et à la loi britannique de 2018 sur la protection des données (Data Protection Act 2018).",
       "elements": [
-        { "title": "Informations recueillies :", "subDesc": [ "Coordonnées : nom, numéro de téléphone, adresse e-mail", "Informations de réservation : lieux de prise en charge et d’arrivée, dates et heures", "Informations de paiement : traitées de manière sécurisée par des prestataires tiers", "Informations sur les chauffeurs et les véhicules : pour assurer la conformité réglementaire", "Avis et informations relatives aux réclamations" ] },
-        { "title": "Utilisation de vos données :", "subDesc": [ "Traiter les réservations et fournir les services de transport", "Communiquer avec les clients et les chauffeurs", "Tenir nos registres internes et respecter nos obligations légales", "Répondre aux questions, aux avis et aux réclamations", "Respecter les obligations de déclaration auprès de Transport for London (TfL)" ] },
-        { "title": "Bases légales du traitement :", "desc": "Nous recueillons et traitons les données personnelles sur la base de l’exécution d’un contrat, d’une obligation légale ou d’un intérêt légitime. Nous recueillons votre consentement lorsqu’il est requis." },
-        { "title": "Partage de vos informations :", "desc": "Nous ne partageons les données que lorsque cela est nécessaire :", "subDesc": [ "Avec TfL ou d’autres autorités de contrôle lorsque la loi l’exige", "Avec des prestataires tiers, notamment les prestataires de paiement, soumis à de strictes obligations de confidentialité" ], "descEnd": "Nous ne vendons jamais vos données à des tiers." },
-        { "title": "Conservation des données :", "desc": "Les données personnelles ne sont conservées que le temps nécessaire au respect de nos obligations légales, opérationnelles ou financières. Lorsqu’elles ne sont plus nécessaires, elles sont supprimées de manière sécurisée ou anonymisées." },
-        { "title": "Vos droits :", "desc": "Vous disposez de droits d’accès, de rectification, d’effacement et d’opposition au traitement de vos données personnelles. Vous pouvez adresser votre demande par écrit à notre délégué à la protection des données." },
-        { "title": "Mesures de sécurité :", "desc": "Nous utilisons des systèmes chiffrés, un stockage sécurisé et des contrôles d’accès pour protéger vos données. Notre personnel et nos chauffeurs sont formés aux procédures de protection des données." }
+        {
+          "title": "Informations recueillies :",
+          "subDesc": [
+            "Coordonnées : nom, numéro de téléphone, adresse e-mail",
+            "Informations de réservation : lieux de prise en charge et d’arrivée, dates et heures",
+            "Informations de paiement : traitées de manière sécurisée par des prestataires tiers",
+            "Informations sur les chauffeurs et les véhicules : pour assurer la conformité réglementaire",
+            "Avis et informations relatives aux réclamations"
+          ]
+        },
+        {
+          "title": "Utilisation de vos données :",
+          "subDesc": [
+            "Traiter les réservations et fournir les services de transport",
+            "Communiquer avec les clients et les chauffeurs",
+            "Tenir nos registres internes et respecter nos obligations légales",
+            "Répondre aux questions, aux avis et aux réclamations",
+            "Respecter les obligations de déclaration auprès de Transport for London (TfL)"
+          ]
+        },
+        {
+          "title": "Bases légales du traitement :",
+          "desc": "Nous recueillons et traitons les données personnelles sur la base de l’exécution d’un contrat, d’une obligation légale ou d’un intérêt légitime. Nous recueillons votre consentement lorsqu’il est requis."
+        },
+        {
+          "title": "Partage de vos informations :",
+          "desc": "Nous ne partageons les données que lorsque cela est nécessaire :",
+          "subDesc": [
+            "Avec TfL ou d’autres autorités de contrôle lorsque la loi l’exige",
+            "Avec des prestataires tiers, notamment les prestataires de paiement, soumis à de strictes obligations de confidentialité"
+          ],
+          "descEnd": "Nous ne vendons jamais vos données à des tiers."
+        },
+        {
+          "title": "Conservation des données :",
+          "desc": "Les données personnelles ne sont conservées que le temps nécessaire au respect de nos obligations légales, opérationnelles ou financières. Lorsqu’elles ne sont plus nécessaires, elles sont supprimées de manière sécurisée ou anonymisées."
+        },
+        {
+          "title": "Vos droits :",
+          "desc": "Vous disposez de droits d’accès, de rectification, d’effacement et d’opposition au traitement de vos données personnelles. Vous pouvez adresser votre demande par écrit à notre délégué à la protection des données."
+        },
+        {
+          "title": "Mesures de sécurité :",
+          "desc": "Nous utilisons des systèmes chiffrés, un stockage sécurisé et des contrôles d’accès pour protéger vos données. Notre personnel et nos chauffeurs sont formés aux procédures de protection des données."
+        }
       ],
-      "warning": "Veuillez lire attentivement la politique de confidentialité et les conditions d’utilisation avant de continuer. L’utilisation de nos services vaut acceptation de celles-ci.", "button": "Terminé"
+      "warning": "Veuillez lire attentivement la politique de confidentialité et les conditions d’utilisation avant de continuer. L’utilisation de nos services vaut acceptation de celles-ci.",
+      "button": "Terminé"
     },
     "terms": {
-      "Open_button": "Conditions générales", "title": "Conditions générales – Airport & City Transfer",
+      "Open_button": "Conditions générales",
+      "title": "Conditions générales – Airport & City Transfer",
       "elements": [
-        { "title": "Réservations et confirmations", "desc": "Les réservations doivent être effectuées via notre application, notre site web, par téléphone ou auprès de partenaires autorisés. La confirmation est transmise par voie électronique. Il appartient au client de vérifier l’exactitude de toutes les informations de réservation." },
-        { "title": "Paiements et frais", "desc": "Tous les tarifs sont indiqués en livres sterling, GBP (£). Des frais supplémentaires peuvent s’appliquer pour les arrêts additionnels, le temps d’attente ou les services en dehors des horaires habituels. Le paiement doit être effectué à la réservation, sauf accord contraire." },
-        { "title": "Annulations et remboursements", "desc": "Les annulations effectuées plus de 24 heures à l’avance sont intégralement remboursables. Les absences au rendez-vous et les annulations tardives ne sont pas remboursables." },
-        { "title": "Chauffeurs et véhicules agréés par TfL", "desc": "Tous les trajets sont effectués exclusivement par des chauffeurs et des véhicules titulaires d’une licence de Transport for London. Nous procédons à des contrôles réguliers pour vérifier leur conformité." },
-        { "title": "Sécurité et comportement", "desc": "Tous les chauffeurs font l’objet d’un contrôle DBS et respectent notre code de conduite. Les passagers doivent adopter un comportement respectueux et se conformer aux règles de sécurité britanniques." },
-        { "title": "Objets perdus", "desc": "Les objets laissés dans les véhicules sont enregistrés et conservés jusqu’à 6 semaines. Les clients peuvent nous contacter pour organiser leur récupération. Les objets non réclamés sont éliminés de manière sécurisée ou donnés." },
-        { "title": "Procédure de réclamation", "desc": "Les réclamations peuvent être envoyées via notre site web, par téléphone ou par e-mail. Un responsable de la conformité les examine et répond sous 5 jours ouvrés. Les problèmes concernés sont signalés à TfL lorsque cela s’applique." },
-        { "title": "Responsabilité", "desc": "Airport & City Transfer n’est pas responsable des retards dus à des circonstances imprévues, telles que la circulation ou la météo. Notre responsabilité est limitée au montant du tarif payé." },
-        { "title": "Protection des données", "desc": "Nous respectons les exigences du UK GDPR. Veuillez consulter notre politique de confidentialité pour plus de détails." },
-        { "title": "Droit applicable", "desc": "Les présentes conditions sont régies par le droit de l’Angleterre et du pays de Galles." }
+        {
+          "title": "Réservations et confirmations",
+          "desc": "Les réservations doivent être effectuées via notre application, notre site web, par téléphone ou auprès de partenaires autorisés. La confirmation est transmise par voie électronique. Il appartient au client de vérifier l’exactitude de toutes les informations de réservation."
+        },
+        {
+          "title": "Paiements et frais",
+          "desc": "Tous les tarifs sont indiqués en livres sterling, GBP (£). Des frais supplémentaires peuvent s’appliquer pour les arrêts additionnels, le temps d’attente ou les services en dehors des horaires habituels. Le paiement doit être effectué à la réservation, sauf accord contraire."
+        },
+        {
+          "title": "Annulations et remboursements",
+          "desc": "Les annulations effectuées plus de 24 heures à l’avance sont intégralement remboursables. Les absences au rendez-vous et les annulations tardives ne sont pas remboursables."
+        },
+        {
+          "title": "Chauffeurs et véhicules agréés par TfL",
+          "desc": "Tous les trajets sont effectués exclusivement par des chauffeurs et des véhicules titulaires d’une licence de Transport for London. Nous procédons à des contrôles réguliers pour vérifier leur conformité."
+        },
+        {
+          "title": "Sécurité et comportement",
+          "desc": "Tous les chauffeurs font l’objet d’un contrôle DBS et respectent notre code de conduite. Les passagers doivent adopter un comportement respectueux et se conformer aux règles de sécurité britanniques."
+        },
+        {
+          "title": "Objets perdus",
+          "desc": "Les objets laissés dans les véhicules sont enregistrés et conservés jusqu’à 6 semaines. Les clients peuvent nous contacter pour organiser leur récupération. Les objets non réclamés sont éliminés de manière sécurisée ou donnés."
+        },
+        {
+          "title": "Procédure de réclamation",
+          "desc": "Les réclamations peuvent être envoyées via notre site web, par téléphone ou par e-mail. Un responsable de la conformité les examine et répond sous 5 jours ouvrés. Les problèmes concernés sont signalés à TfL lorsque cela s’applique."
+        },
+        {
+          "title": "Responsabilité",
+          "desc": "Airport & City Transfer n’est pas responsable des retards dus à des circonstances imprévues, telles que la circulation ou la météo. Notre responsabilité est limitée au montant du tarif payé."
+        },
+        {
+          "title": "Protection des données",
+          "desc": "Nous respectons les exigences du UK GDPR. Veuillez consulter notre politique de confidentialité pour plus de détails."
+        },
+        {
+          "title": "Droit applicable",
+          "desc": "Les présentes conditions sont régies par le droit de l’Angleterre et du pays de Galles."
+        }
       ],
-      "warning": "Veuillez lire attentivement la politique de confidentialité et les conditions d’utilisation avant de continuer. L’utilisation de nos services vaut acceptation de celles-ci.", "button": "Terminé"
+      "warning": "Veuillez lire attentivement la politique de confidentialité et les conditions d’utilisation avant de continuer. L’utilisation de nos services vaut acceptation de celles-ci.",
+      "button": "Terminé"
     }
   },
   "faqs": {
-    "Open_button": "FAQ", "title": "Questions fréquentes – Airport & City Transfer",
+    "Open_button": "FAQ",
+    "title": "Questions fréquentes – Airport & City Transfer",
     "elements": [
-      { "question": "Comment réserver un trajet avec Airport & City Transfer ?", "answer": "Vous pouvez réserver sur notre site web, via notre application mobile ou en appelant notre service de réservation. Toutes les réservations sont confirmées par e-mail ou SMS." },
-      { "question": "Puis-je réserver à l’avance ?", "answer": "Oui. Nous acceptons les réservations plusieurs semaines à l’avance afin que votre transfert soit planifié et garanti." },
-      { "question": "Comment savoir si mon chauffeur est arrivé ?", "answer": "Vous recevrez une notification lorsque votre chauffeur sera en route, puis à son arrivée. Elle comprendra les informations sur le chauffeur et le véhicule." },
-      { "question": "Que se passe-t-il si mon vol est retardé ?", "answer": "Nous surveillons les retards dans les principaux aéroports. Si votre vol est retardé, nous adaptons l’heure de prise en charge. Vous pouvez également nous informer via l’application ou en contactant notre équipe." },
-      { "question": "Vos chauffeurs sont-ils agréés et contrôlés par le DBS ?", "answer": "Oui. Tous nos chauffeurs sont titulaires d’une licence de Transport for London (TfL) et ont passé un contrôle approfondi du DBS pour votre sécurité." },
-      { "question": "Puis-je annuler ou modifier ma réservation ?", "answer": "Oui. Vous pouvez annuler ou modifier votre réservation en nous contactant au moins 24 heures avant l’heure de prise en charge prévue. Les annulations à moins de 24 heures du départ peuvent ne pas être remboursables." },
-      { "question": "Que faire si j’ai oublié un objet dans le véhicule ?", "answer": "Contactez notre équipe dès que possible. Les objets perdus sont enregistrés, conservés en lieu sûr jusqu’à 6 semaines et peuvent être récupérés ou restitués selon les modalités convenues." },
-      { "question": "Proposez-vous des sièges enfants ou des véhicules accessibles ?", "answer": "Oui. Veuillez en faire la demande lors de la réservation. Nous ferons de notre mieux pour répondre à vos besoins." },
-      { "question": "Comment déposer une réclamation ?", "answer": "Vous pouvez déposer une réclamation sur notre site web ou par e-mail. Notre responsable de la conformité et de l’expérience client traite les réclamations et répond sous 5 jours ouvrés." },
-      { "question": "Mes données personnelles sont-elles protégées ?", "answer": "Oui. Nous respectons les exigences de protection des données et utilisons des systèmes chiffrés pour conserver et protéger vos informations. Consultez notre politique de confidentialité pour en savoir plus." }
+      {
+        "question": "Comment réserver un trajet avec Airport & City Transfer ?",
+        "answer": "Vous pouvez réserver sur notre site web, via notre application mobile ou en appelant notre service de réservation. Toutes les réservations sont confirmées par e-mail ou SMS."
+      },
+      {
+        "question": "Puis-je réserver à l’avance ?",
+        "answer": "Oui. Nous acceptons les réservations plusieurs semaines à l’avance afin que votre transfert soit planifié et garanti."
+      },
+      {
+        "question": "Comment savoir si mon chauffeur est arrivé ?",
+        "answer": "Vous recevrez une notification lorsque votre chauffeur sera en route, puis à son arrivée. Elle comprendra les informations sur le chauffeur et le véhicule."
+      },
+      {
+        "question": "Que se passe-t-il si mon vol est retardé ?",
+        "answer": "Nous surveillons les retards dans les principaux aéroports. Si votre vol est retardé, nous adaptons l’heure de prise en charge. Vous pouvez également nous informer via l’application ou en contactant notre équipe."
+      },
+      {
+        "question": "Vos chauffeurs sont-ils agréés et contrôlés par le DBS ?",
+        "answer": "Oui. Tous nos chauffeurs sont titulaires d’une licence de Transport for London (TfL) et ont passé un contrôle approfondi du DBS pour votre sécurité."
+      },
+      {
+        "question": "Puis-je annuler ou modifier ma réservation ?",
+        "answer": "Oui. Vous pouvez annuler ou modifier votre réservation en nous contactant au moins 24 heures avant l’heure de prise en charge prévue. Les annulations à moins de 24 heures du départ peuvent ne pas être remboursables."
+      },
+      {
+        "question": "Que faire si j’ai oublié un objet dans le véhicule ?",
+        "answer": "Contactez notre équipe dès que possible. Les objets perdus sont enregistrés, conservés en lieu sûr jusqu’à 6 semaines et peuvent être récupérés ou restitués selon les modalités convenues."
+      },
+      {
+        "question": "Proposez-vous des sièges enfants ou des véhicules accessibles ?",
+        "answer": "Oui. Veuillez en faire la demande lors de la réservation. Nous ferons de notre mieux pour répondre à vos besoins."
+      },
+      {
+        "question": "Comment déposer une réclamation ?",
+        "answer": "Vous pouvez déposer une réclamation sur notre site web ou par e-mail. Notre responsable de la conformité et de l’expérience client traite les réclamations et répond sous 5 jours ouvrés."
+      },
+      {
+        "question": "Mes données personnelles sont-elles protégées ?",
+        "answer": "Oui. Nous respectons les exigences de protection des données et utilisons des systèmes chiffrés pour conserver et protéger vos informations. Consultez notre politique de confidentialité pour en savoir plus."
+      }
     ],
-    "warning": "Veuillez lire attentivement ces questions fréquentes. L’utilisation de nos services vaut acceptation des informations présentées.", "button": "Terminé"
+    "warning": "Veuillez lire attentivement ces questions fréquentes. L’utilisation de nos services vaut acceptation des informations présentées.",
+    "button": "Terminé"
   },
   "download_app": {
-    "title": "Télécharger nos applications", "subtitle": "Retrouvez les applications officielles Airport & City Transfer", "downloading": "Téléchargement…",
+    "title": "Télécharger nos applications",
+    "subtitle": "Retrouvez les applications officielles Airport & City Transfer",
+    "downloading": "Téléchargement…",
     "driver": {
-      "title": "Application chauffeur", "subtitle": "Téléchargez l’application officielle Airport & City Transfer pour gérer vos trajets et vos revenus",
+      "title": "Application chauffeur",
+      "subtitle": "Téléchargez l’application officielle Airport & City Transfer pour gérer vos trajets et vos revenus",
       "description": "Téléchargez et installez l’application pour accepter des trajets, suivre vos revenus et gérer votre compte chauffeur.",
-      "downloadButton": "Télécharger l’APK chauffeur", "logoAlt": "Application chauffeur",
+      "downloadButton": "Télécharger l’APK chauffeur",
+      "logoAlt": "Application chauffeur",
       "instructions": {
-        "title": "Instructions d’installation", "downloadButton": "Télécharger les instructions", "downloadFileName": "driver-instructions.pdf",
-        "step1": "Téléchargez le fichier APK sur votre appareil Android", "step2": "Activez l’installation depuis des sources inconnues dans les paramètres de votre appareil",
-        "step3": "Ouvrez le fichier APK téléchargé et suivez les instructions d’installation", "step4": "Lancez l’application et connectez-vous avec vos identifiants chauffeur"
+        "title": "Instructions d’installation",
+        "downloadButton": "Télécharger les instructions",
+        "downloadFileName": "driver-instructions.pdf",
+        "step1": "Téléchargez le fichier APK sur votre appareil Android",
+        "step2": "Activez l’installation depuis des sources inconnues dans les paramètres de votre appareil",
+        "step3": "Ouvrez le fichier APK téléchargé et suivez les instructions d’installation",
+        "step4": "Lancez l’application et connectez-vous avec vos identifiants chauffeur"
       },
       "note": "Remarque : cette application est réservée aux appareils Android. Vérifiez que vous disposez d’assez d’espace de stockage avant de la télécharger."
     },
     "passenger": {
-      "title": "Application passager", "subtitle": "Téléchargez l’application officielle Airport & City Transfer pour réserver et gérer vos trajets",
+      "title": "Application passager",
+      "subtitle": "Téléchargez l’application officielle Airport & City Transfer pour réserver et gérer vos trajets",
       "description": "Téléchargez et installez l’application pour réserver des trajets, les suivre et gérer votre compte passager.",
-      "downloadButton": "Télécharger l’APK passager", "logoAlt": "Application passager",
+      "downloadButton": "Télécharger l’APK passager",
+      "logoAlt": "Application passager",
       "instructions": {
-        "title": "Instructions d’installation", "downloadButton": "Télécharger les instructions", "downloadFileName": "passenger-instructions.pdf",
-        "step1": "Téléchargez le fichier APK sur votre appareil Android", "step2": "Activez l’installation depuis des sources inconnues dans les paramètres de votre appareil",
-        "step3": "Ouvrez le fichier APK téléchargé et suivez les instructions d’installation", "step4": "Lancez l’application et connectez-vous avec vos identifiants passager"
+        "title": "Instructions d’installation",
+        "downloadButton": "Télécharger les instructions",
+        "downloadFileName": "passenger-instructions.pdf",
+        "step1": "Téléchargez le fichier APK sur votre appareil Android",
+        "step2": "Activez l’installation depuis des sources inconnues dans les paramètres de votre appareil",
+        "step3": "Ouvrez le fichier APK téléchargé et suivez les instructions d’installation",
+        "step4": "Lancez l’application et connectez-vous avec vos identifiants passager"
       },
       "note": "Remarque : cette application est réservée aux appareils Android. Vérifiez que vous disposez d’assez d’espace de stockage avant de la télécharger."
     }
   },
   "errorPage": {
-    "code": "404", "title": "Page introuvable", "description": "Désolé, nous ne trouvons pas la page demandée. Elle a peut-être été déplacée ou supprimée, ou elle n’existe pas.",
-    "goHome": "Retour à l’accueil", "goBack": "Retour", "helpText": "Si vous pensez qu’il s’agit d’une erreur, contactez notre équipe."
+    "code": "404",
+    "title": "Page introuvable",
+    "description": "Désolé, nous ne trouvons pas la page demandée. Elle a peut-être été déplacée ou supprimée, ou elle n’existe pas.",
+    "goHome": "Retour à l’accueil",
+    "goBack": "Retour",
+    "helpText": "Si vous pensez qu’il s’agit d’une erreur, contactez notre équipe."
   }
 }

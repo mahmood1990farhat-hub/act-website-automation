@@ -72,7 +72,8 @@ async function main(){
   await page.getByRole('button',{name:'Chauffeur',exact:true}).click();
   await page.waitForURL('**/en/auth?captain=1');
   for(const [route,tab,submit] of [['complaints','Envoyer une réclamation','Envoyer la réclamation'],['lost-property','Faire une déclaration','Envoyer la déclaration']]){
-   await page.goto(origin+'/fr/'+route,{waitUntil:'networkidle'});
+   await page.goto(origin+'/fr/'+route,{waitUntil:'domcontentloaded'});
+   await page.getByRole('button',{name:tab,exact:true}).waitFor({state:'visible'});
    await page.getByRole('button',{name:tab,exact:true}).click();
    // Empty submission exercises client validation only; no support request is sent.
    await page.getByRole('button',{name:submit,exact:true}).click();

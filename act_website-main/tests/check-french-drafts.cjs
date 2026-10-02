@@ -59,7 +59,10 @@ const enHome = json('src/dictionaries/en/home.json'), frHome = json('src/diction
 assert.deepEqual(frHome.footer.Call_us.phone_numbers.Elements, enHome.footer.Call_us.phone_numbers.Elements);
 assert.deepEqual(frHome.footer.Call_us.Email_us.Elements, enHome.footer.Call_us.Email_us.Elements);
 assert.deepEqual(frHome.footer.location.Elements, enHome.footer.location.Elements);
-for (const key of ['hour', 'hour_5']) assert.equal(frHome.home.Booking_Confirmation.desc[key], enHome.home.Booking_Confirmation.desc[key]);
+assert.equal(frHome.home.Booking_Confirmation.desc.hour.trim(), '2', 'Approved master: driver details about two hours before journey');
+assert.ok(frHome.home.Booking_Confirmation.desc.span_2.includes('avant votre trajet'));
+assert.equal(frHome.home.Booking_Confirmation.desc.hour_5, enHome.home.Booking_Confirmation.desc.hour_5);
+assert.equal(frHome.home.Confir_flight_details.vat_20, 'Majoration commerciale (20 %)');
 const airports = json('src/dictionaries/fr/airports.json');
 const airportSlugs = ['heathrow', 'gatwick', 'stansted', 'luton', 'london-city'].map(x => `${x}-airport-transfer`);
 assert.deepEqual(Object.keys(airports.pages).sort(), airportSlugs.sort());
