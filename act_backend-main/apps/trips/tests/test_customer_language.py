@@ -54,7 +54,7 @@ def email_functions(captured):
     module = ast.Module(body=[n for n in source.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[])
     env = dict(globals(), logger=logging.getLogger("offline"), settings=settings,
                _send_mail_async=lambda *a, **kw: captured.append((a, kw)),
-               _email_asset_url=lambda p: "", _absolute_app_url=lambda p: p,
+               _email_asset_url=lambda p: "https://assets.example.invalid/" + p, _absolute_app_url=lambda p: p,
                _trip_locations_for_email=lambda t: (t.pickup_str,t.dropoff_str), place_to_string=lambda p: None)
     exec(compile(module, str(BASE / "utils/common/email.py"), "exec"), env)
     return env
@@ -100,6 +100,7 @@ class CustomerLanguageTests(unittest.TestCase):
                     self.assertEqual(args[2],[user.email])
                     if language=="ar":
                         self.assertIn('dir="rtl"',kw["html_message"])
+                        self.assertIn('src="https://assets.example.invalid/trip_accepted/footer-logo.png"',kw["html_message"])
                         self.assertIn("/ar",args[1])
                     self.assertEqual(get_language(),"ar" if language=="en" else "en")
                 env["send_trip_accepted_to_passenger"](user,t,is_guest_driver=True,guest_driver_info={"name":"Driver","phone":"+44123","car":{"brand_model":"Mercedes","registration_number":"AB12"}})

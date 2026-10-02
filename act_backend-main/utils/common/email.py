@@ -173,7 +173,8 @@ def _send_arabic_customer_email(user, trip, kind, refund_message="", driver=None
     file_field = getattr(trip, "cancellation_confirmation_pdf" if kind == "cancellation" else "booking_confirmation_pdf", None)
     download_url = _absolute_app_url(file_field.url) if file_field else ""
     subject, html, text = render_arabic_document(
-        trip, kind, refund_message=refund_message, driver=driver, download_url=download_url
+        trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
+        logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
     )
     _send_mail_async(subject, text, [recipient], html_message=html, fail_silently=True)
     return True
@@ -1230,4 +1231,3 @@ Airport & City Transfer Team
         import traceback
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")       
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
-
