@@ -227,6 +227,7 @@ export default function ModernConfirmFlightDetails({
 		try {
 			const res = await postData<any>({
 				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
+				queryParams: { locale },
 				token: token || undefined,
 				body: {
 					...bodyData,
@@ -770,3 +771,4 @@ export default function ModernConfirmFlightDetails({
 		</div>
 	);
 }
+

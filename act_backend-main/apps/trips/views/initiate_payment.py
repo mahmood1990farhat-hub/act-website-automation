@@ -1,3 +1,4 @@
+from apps.trips.services.customer_language import details_with_language
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -119,6 +120,8 @@ class InitiatePaymentView(EMADBaseView):
                 booking_details,
             )
         )
+
+        booking_details = details_with_language(booking_details, locale)
 
         meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
@@ -307,6 +310,8 @@ class InitiateGuestPaymentView(EMADBaseView):
                 booking_details,
             )
         )
+        booking_details = details_with_language(booking_details, locale)
+
         meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
         if not total_cost or total_cost <= 0:
@@ -396,6 +401,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             "pending_payment_id": pending_payment.id,
             "price_breakdown": price_breakdown,
         }, status=status.HTTP_200_OK)
+
 
 
 

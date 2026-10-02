@@ -1,3 +1,4 @@
+from apps.trips.services.customer_language import details_with_language, booking_language
 
 from rest_framework import serializers
 from ..models import Trip , StopPoint
@@ -61,9 +62,20 @@ class TripSerializer(serializers.ModelSerializer):
         validated_data['route_polyline'], validated_data['cost'] = self._process_trip_data(validated_data, stop_points)
         self._enrich_address_info(validated_data, locale)
 
+        validated_data['booking_details'] = details_with_language(
+            validated_data.get('booking_details'), locale
+        )
         trip = super().create(validated_data)
         self._create_stop_points(trip, stop_points)
         return trip
+
+    def update(self, instance, validated_data):
+        # Staff edits must not reset the customer's saved language.
+        if 'booking_details' in validated_data:
+            validated_data['booking_details'] = details_with_language(
+                validated_data['booking_details'], booking_language(instance)
+            )
+        return super().update(instance, validated_data)
 
     def _validate_trip_datetime(self, data, request):
         trip_date = data.get("trip_date")
@@ -425,6 +437,7 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
                 "phone_number": user.phone_number
             }
         }
+
 
 
 

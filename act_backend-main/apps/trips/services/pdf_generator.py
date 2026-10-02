@@ -1,3 +1,5 @@
+from apps.trips.services.customer_language import booking_language
+from apps.trips.services.customer_documents import render_arabic_document
 from io import BytesIO
 import os
 from pathlib import Path
@@ -60,6 +62,13 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate booking confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
+    if booking_language(trip) == "ar":
+        _, html, _ = render_arabic_document(trip, "booking")
+        buffer = BytesIO()
+        HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
+        buffer.seek(0)
+        return buffer
+
     passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
@@ -149,6 +158,13 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate cancellation confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
+    if booking_language(trip) == "ar":
+        _, html, _ = render_arabic_document(trip, "cancellation")
+        buffer = BytesIO()
+        HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
+        buffer.seek(0)
+        return buffer
+
     passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
@@ -216,5 +232,6 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
     buffer.seek(0)
     return buffer
+
 
 
