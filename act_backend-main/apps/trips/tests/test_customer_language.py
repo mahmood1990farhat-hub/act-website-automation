@@ -61,6 +61,11 @@ def email_functions(captured):
 
 
 class CustomerLanguageTests(unittest.TestCase):
+    def test_english_driver_registration(self):
+        html = render_to_string("emails/trip_driver_details_passenger.html", {"vehicle_registration": "TEST123"})
+        self.assertIn("TEST123", html)
+        self.assertNotIn("{{ vehicle_registration", html)
+
     def test_language_allowlist_and_legacy(self):
         self.assertEqual(normalize_language("AR-eg"), "ar")
         self.assertEqual(normalize_language("fr"), "en")

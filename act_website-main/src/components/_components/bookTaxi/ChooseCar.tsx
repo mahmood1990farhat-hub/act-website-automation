@@ -63,8 +63,8 @@ export default function ModernChooseCar({
     premiumComfort: isRTL ? "راحة فائقة" : "Premium Comfort",
     meetGreet: isRTL ? "استقبال ومرافقة" : "Meet & Greet",
     freeCancellation: isRTL
-      ? "إلغاء مجاني حتى ساعة واحدة"
-      : "Free cancellation up to 1 hour",
+      ? "استرداد كامل عند الإلغاء قبل موعد الاستلام بـ24 ساعة على الأقل"
+      : "Full refund when cancelled at least 24 hours before pickup",
     realTimeTracking: isRTL ? "تتبع فوري متضمن" : "Real-time tracking included",
     continue: isRTL ? "متابعة" : "Continue",
     selectVehicle: isRTL
@@ -129,7 +129,7 @@ export default function ModernChooseCar({
           ) : (
             <>
               <ChevronLeft className="w-5 h-5 mr-2" />
-              Back
+              {texts.back}
             </>
           )}
         </Button>
@@ -190,7 +190,7 @@ export default function ModernChooseCar({
                       )}
                       {isDisabled && (
                         <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
-                          Coming Soon
+                          {isRTL ? "قريبًا" : "Coming Soon"}
                         </div>
                       )}
                     </div>

@@ -1,4 +1,5 @@
 # Booking language checkpoint
+Latest status: booking-screen work and focused build/tests are complete. See `RELEASE_APPROVAL_2026-10-02.md` for the current approval checklist; the remaining-work list below records the earlier checkpoint.
 Prepared 2 October 2026. Unpublished changes on the policy release branch.
 
 ## Trace and fixes

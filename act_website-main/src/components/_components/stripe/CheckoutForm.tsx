@@ -233,7 +233,7 @@ export default function CheckoutForm({
     });
 
     if (result.error) {
-      setErrorMsg(result.error.message || "Payment failed");
+      setErrorMsg(locale === "ar" ? "تعذّر إتمام الدفع. يرجى التحقق من بيانات البطاقة والمحاولة مجددًا، أو التواصل معنا إذا استمرت المشكلة." : result.error.message || "Payment failed");
     } else if (result.paymentIntent.status === "succeeded") {
       await fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();
@@ -297,7 +297,7 @@ export default function CheckoutForm({
           </div>
           <div className="w-full">
             <label>
-              <p>CVC</p>
+              <p>{locale === "ar" ? "رمز الأمان (CVC)" : "CVC"}</p>
             </label>
             <div className="w-full p-2.5 border-2 bg-white text-foreground border-muted rounded-lg">
               <CardCvcElement

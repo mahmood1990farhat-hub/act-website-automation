@@ -1,4 +1,5 @@
 "use client";
+import { bookingText } from "./booking-text";
 import React, { useState } from "react";
 import LocationSelector, { PlaceSuggestion } from "./LocationSelector";
 import { IoLocation } from "react-icons/io5";
@@ -73,6 +74,7 @@ export default function RoutePoints({
   nextStep,
 }: TaxiFormProps) {
   const isRTL = locale === 'ar';
+  const t = (text: string) => bookingText(locale, text);
   const [isRequired, setIsRequired] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -194,7 +196,7 @@ export default function RoutePoints({
 
       if (inputValues.adults < 1 || inputValues.numberOfPassengers < 1) {
         setIsRequired(true);
-        setSubmitError("Adults must be at least 1.");
+        setSubmitError(t("Adults must be at least 1."));
         return;
       }
 
@@ -405,7 +407,7 @@ export default function RoutePoints({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label htmlFor="adult-count">
-                      <p className="text-sm text-muted">Adults</p>
+                      <p className="text-sm text-muted">{t("Adults")}</p>
                     </label>
                     <input
                       id="adult-count"
@@ -418,7 +420,7 @@ export default function RoutePoints({
                   </div>
                   <div>
                     <label htmlFor="child-count">
-                      <p className="text-sm text-muted">Children (4-11)</p>
+                      <p className="text-sm text-muted">{t("Children (4-11)")}</p>
                     </label>
                     <input
                       id="child-count"
@@ -431,7 +433,7 @@ export default function RoutePoints({
                   </div>
                   <div>
                     <label htmlFor="infant-count">
-                      <p className="text-sm text-muted">Infants (0-3)</p>
+                      <p className="text-sm text-muted">{t("Infants (0-3)")}</p>
                     </label>
                     <input
                       id="infant-count"
@@ -445,12 +447,12 @@ export default function RoutePoints({
                 </div>
                 {isRequired && formDetails.adults < 1 && (
                   <span className="text-red-600 font-semibold text-sm">
-                    Adults must be at least 1.
+                    {t("Adults must be at least 1.")}
                   </span>
                 )}
               </div>
               <div className="w-full">
-                <p>Luggage</p>
+                <p>{t("Luggage")}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label htmlFor="large_suitcase">
