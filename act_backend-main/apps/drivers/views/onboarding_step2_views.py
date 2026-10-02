@@ -15,6 +15,7 @@ from utils.common.error_handlers import (
     get_bilingual_error_message
 )
 from ..models import DriverOnboardingRequest
+from utils.integrations.n8n import send_event
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,11 @@ class DriverOnboardingStep2View(EMADBaseView):
         
         # Mark documents as uploaded
         onboarding_request.mark_documents_uploaded()
+        send_event('driver.onboarding.documents_uploaded', {
+            'onboarding_request_id': onboarding_request.id,
+            'user_id': onboarding_request.user_id,
+            'status': onboarding_request.status,
+        })
         
         return Response({
             'message': _('Documents uploaded successfully! Your application is now pending final review.'),
@@ -221,6 +227,13 @@ class DriverOnboardingStep2View(EMADBaseView):
                     logger.warning(f"Failed to send notification to admin {admin_user.id}: {str(e)}")
         except Exception as e:
             logger.warning(f"Failed to send admin notifications: {str(e)}")
+
+        send_event('driver.onboarding.documents_uploaded', {
+            'onboarding_request_id': onboarding_request.id,
+            'user_id': onboarding_request.user_id,
+            'status': onboarding_request.status,
+            'modification_confirmed': onboarding_request.modification_confirmed,
+        })
         
         return Response({
             'message': _('Files uploaded and submitted for review successfully!'),
@@ -554,6 +567,12 @@ class DriverOnboardingStep3AdminView(EMADBaseView):
         try:
             if action == 'approve':
                 onboarding_request.approve_final(request.user, notes)
+                send_event('driver.onboarding.final_approved', {
+                    'onboarding_request_id': onboarding_request.id,
+                    'user_id': onboarding_request.user_id,
+                    'status': onboarding_request.status,
+                    'reviewed_by': request.user.id,
+                })
                 from utils.common.email import send_driver_final_approval
                 send_driver_final_approval(onboarding_request)
                 
