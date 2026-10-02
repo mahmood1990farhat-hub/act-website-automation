@@ -11,10 +11,17 @@ export default function FrenchAirportPage({ slug }: { slug: FrenchAirportSlug })
   const text = (value: string) => value.replaceAll("{airport}", page.airport);
   const paragraphs = "serviceParagraphs" in page ? page.serviceParagraphs : shared.serviceParagraphs;
   const faqs = shared.faqs.map((faq, i) => i === 2 && "vehicleFaq" in page ? page.vehicleFaq : faq);
+  const url = `https://airportandcitytransfer.com/fr/${slug}`;
+  const structuredData = { "@context": "https://schema.org", "@graph": [
+    { "@type": "WebPage", "@id": url, url, name: page.metadata.title, description: page.metadata.description, inLanguage: "fr" },
+    { "@type": "Service", "@id": url + "#service", url, name: page.heading, description: text(shared.intro), areaServed: [page.airport, "London"], provider: { "@type": "Organization", name: "Airport & City Transfer", url: "https://airportandcitytransfer.com" } },
+    { "@type": "FAQPage", "@id": url + "#faq", inLanguage: "fr", mainEntity: faqs.map(faq => ({ "@type": "Question", name: text(faq.q), acceptedAnswer: { "@type": "Answer", text: text(faq.a) } })) }
+  ] };
   const card = "rounded-2xl border border-yellow-500/30 bg-zinc-900 p-6";
   const section = "mx-auto max-w-6xl px-6 py-12 md:px-12";
   const book = <Link href="/fr#book-now" className="inline-block rounded-lg bg-yellow-500 px-5 py-3 font-semibold text-black">{shared.bookNow}</Link>;
   return <article className="bg-black text-white" lang="fr" dir="ltr">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(structuredData).replace(/</g, "\\u003c")}} />
     <section className={section + " md:py-20"}>
       <span className="rounded-full bg-yellow-500 px-3 py-1 text-sm text-black">{page.badge}</span>
       <h1 className="mt-7 max-w-4xl text-4xl font-bold leading-tight md:text-6xl">{page.heading}</h1>

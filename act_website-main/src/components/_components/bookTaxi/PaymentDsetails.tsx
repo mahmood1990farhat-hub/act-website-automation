@@ -42,9 +42,10 @@ export default function PaymentDsetails({ trans, nextStep,prevStep, clientSecret
 
   return (
        <div className="max-w-lg mx-auto mt-10">
-         <StripeWrapper clientSecret={clientSecret}>
+         <StripeWrapper clientSecret={clientSecret} locale={locale}>
            <CheckoutForm nextStep={nextStep} prevStep={prevStep } trans={trans} clientSecret={clientSecret} bookingTotal={bookingTotal} currency={currency} policy_and_terms={policy_and_terms} locale={locale}/>
          </StripeWrapper>
        </div>
   );
 }
+

@@ -197,7 +197,12 @@ export default async function AboutPage({ params }: PageProps) {
             </div>
 
             <Card className="shadow-xl border-0 p-0 max-w-3xl mx-auto my-7">
-                <ContactUs form={about_us.get_in_touch.form} />
+                {locale === "fr" ? <div className="p-6 space-y-4 text-black" data-testid="french-contact">
+                  <p>Pour toute question ou demande de réservation, contactez ACT par e-mail ou par téléphone.</p>
+                  <a className="block underline break-all" href="mailto:info@airportandcitytransfer.com">info@airportandcitytransfer.com</a>
+                  <a className="block underline" href="tel:+442081530303">+44 208 153 0303</a>
+                  <p className="text-sm">Le lien e-mail ouvre votre messagerie. Aucun message n’est envoyé depuis cette page. L’assistance téléphonique en français n’est pas garantie.</p>
+                </div> : <ContactUs form={about_us.get_in_touch.form} />}
             </Card>
           </div>
         </div>

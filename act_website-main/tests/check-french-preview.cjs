@@ -15,7 +15,17 @@ async function main(){
   const response=await fetch(`${origin}/fr/${slug}-airport-transfer`);assert.equal(response.status,200);
   const html=await response.text(); assert.match(html,/<html[^>]*lang="fr"[^>]*dir="ltr"/);
   assert.match(html,/<meta[^>]*name="robots"[^>]*content="noindex, nofollow"/);
+  const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+  const graph=schemas.find(s=>s['@graph'])?.['@graph'];
+  assert.ok(graph,'French airport structured data');
+  assert.equal(graph.find(s=>s['@type']==='WebPage').inLanguage,'fr');
+  assert.equal(graph.find(s=>s['@type']==='FAQPage').mainEntity.length,4);
   assert.ok(html.includes('Transfert aéroport'));assert.ok(html.includes('href="/fr#book-now"'));
+ }
+ for(const [route,title] of [['download-app','Application ACT'],['complaints','Réclamations'],['lost-property','Objets perdus']]){
+  const html=await (await fetch(origin+'/fr/'+route)).text();
+  assert.ok(html.includes(title),route+' French metadata');
+  assert.match(html,/<meta[^>]*name="robots"[^>]*content="noindex, nofollow"/);
  }
  const sitemap=await (await fetch(origin+'/sitemap.xml')).text();assert.ok(!sitemap.includes('/fr'));
  for(const lang of ['de','tr','es','zh-CN'])assert.equal((await fetch(origin+'/'+lang)).status,404);
@@ -45,6 +55,29 @@ async function main(){
   }
   await page.goto(origin+'/fr/heathrow-airport-transfer',{waitUntil:'networkidle'});
   await page.locator('article a[href="/fr/about-us#contact-us"]').click();await page.locator('#contact-us').waitFor({state:'visible'});
+  assert.equal(await page.getByTestId('french-contact').locator('a[href="mailto:info@airportandcitytransfer.com"]').count(),1);
+  assert.equal(await page.getByTestId('french-contact').locator('form').count(),0);
+  await page.screenshot({path:`${out}/fr-contact-${device}.png`});
+  await page.goto(origin+'/fr/auth',{waitUntil:'networkidle'});
+  await page.getByRole('button',{name:'Se connecter',exact:true}).click();
+  assert.ok(await page.getByText('Champ obligatoire',{exact:true}).count()>=2);
+  assert.equal(await page.locator('form').evaluate(el=>getComputedStyle(el).direction),'ltr');
+  await page.getByText('Créer un compte',{exact:true}).click();
+  await page.getByRole('heading',{name:'Créer un compte',exact:true}).waitFor();
+  assert.equal(await page.locator('select option[value="FR"]').innerText(),'France');
+  await page.locator('select').selectOption('FR');
+  assert.ok((await page.locator('input[type="tel"]').inputValue()).includes('+33'));
+  await page.screenshot({path:`${out}/fr-signup-${device}.png`});
+  await page.goto(origin+'/fr/auth',{waitUntil:'networkidle'});
+  await page.getByRole('button',{name:'Chauffeur',exact:true}).click();
+  await page.waitForURL('**/en/auth?captain=1');
+  for(const [route,tab,submit] of [['complaints','Envoyer une réclamation','Envoyer la réclamation'],['lost-property','Faire une déclaration','Envoyer la déclaration']]){
+   await page.goto(origin+'/fr/'+route,{waitUntil:'networkidle'});
+   await page.getByRole('button',{name:tab,exact:true}).click();
+   // Empty submission exercises client validation only; no support request is sent.
+   await page.getByRole('button',{name:submit,exact:true}).click();
+   await page.getByText('Veuillez sélectionner un trajet',{exact:true}).waitFor();
+  }
   await page.goto(origin+'/fr#book-now',{waitUntil:'networkidle'});
   for(const placeholder of ['Rechercher un lieu à Londres…','Rechercher un lieu au Royaume-Uni…']){
    const field=page.getByPlaceholder(placeholder,{exact:true});await field.fill('Synthetic London');
@@ -60,10 +93,17 @@ async function main(){
   await page.getByRole('button',{name:'Obtenir un tarif',exact:true}).click();
   await page.getByText('Preview vehicle — synthetic data',{exact:true}).click();
   await page.getByText('Coordonnées du passager',{exact:true}).waitFor();
+  const country=page.locator('#passenger-country-code');
+  assert.equal(await country.inputValue(),'+44 United Kingdom');
+  for(const value of ['+33 France','+32 Belgium','+41 Switzerland','+1 Canada','+49 Germany','+34 Spain','+86 China']){
+   assert.equal(await country.locator(`option[value="${value}"]`).count(),1,value+' phone choice');
+  }
+  assert.equal(await country.locator('option[value^="+90 "]').count(),1);
+  await country.selectOption('+33 France');
   await page.screenshot({path:`${out}/fr-passenger-${device}.png`});
   await page.getByRole('button',{name:'Continuer',exact:true}).click();
   await page.getByText('Le nom du passager, l’adresse e-mail, l’indicatif du pays et le numéro de téléphone portable sont obligatoires.',{exact:true}).waitFor();
-  await page.locator('#passenger-full-name').fill('Passager Démonstration');await page.locator('#passenger-email').fill('preview@example.invalid');await page.locator('#passenger-mobile').fill('7700900000');
+  await page.locator('#passenger-full-name').fill('Passager Démonstration');await page.locator('#passenger-email').fill('preview@example.invalid');await page.locator('#passenger-mobile').fill('612345678');
   await page.getByRole('button',{name:'Continuer',exact:true}).click();
   await page.getByText('Informations sur le vol',{exact:true}).waitFor();
   await page.screenshot({path:`${out}/fr-flight-${device}.png`});
@@ -71,6 +111,7 @@ async function main(){
   await page.locator('#notes-to-driver').waitFor();await page.getByRole('button',{name:'Continuer',exact:true}).click();
   await page.getByText('Vérifiez les détails de votre trajet avant de continuer',{exact:true}).waitFor();
   assert.ok(await page.getByRole('button',{name:'Confirmer et continuer',exact:true}).isVisible());
+  assert.ok((await page.locator('body').innerText()).includes('+33 France 612345678'));
   // Deliberately stop before the booking/payment creation button.
   console.log('PASS',device,'French navigation, dates, simulated quote, passenger validation, flight, notes and review; stopped before booking');
   await context.close();

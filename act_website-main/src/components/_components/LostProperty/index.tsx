@@ -126,7 +126,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
       });
     },
     onError: (error: any) => {
-      const errorMessage = extract_error(error) || error?.message || trans.submit_form.error_message;
+      const errorMessage = locale === "fr" ? trans.submit_form.error_message : extract_error(error) || error?.message || trans.submit_form.error_message;
       toast.error(errorMessage);
     },
   });
@@ -554,7 +554,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                         </span>
                         <span>
                           {new Date(report.created_at).toLocaleDateString(
-                            locale === "ar" ? "ar-EG" : "en-US"
+                            locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
                           )}
                         </span>
                       </div>
@@ -577,7 +577,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                       </span>
                       <span className="text-green-400">
                         {new Date(report.found_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : "en-US"
+                          locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
                         )}
                       </span>
                     </div>
@@ -590,7 +590,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                       </span>
                       <span className="text-emerald-400">
                         {new Date(report.returned_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : "en-US"
+                          locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
                         )}
                       </span>
                     </div>
@@ -620,7 +620,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
           </h2>
           <p className="text-gray-400 mb-6">{trans.submit_form.subtitle}</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate={locale === "fr"} className="space-y-6">
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Trip Selection */}
@@ -853,4 +853,5 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
     </div>
   );
 }
+
 

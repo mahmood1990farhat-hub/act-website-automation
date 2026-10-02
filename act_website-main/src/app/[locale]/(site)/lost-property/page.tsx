@@ -9,7 +9,7 @@ type PageProps = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
-  return getPublicPageSeo(locale, "lost-property")
+  return getPublicPageSeo(locale, "lost-property", locale === "fr" ? {"title": "Objets perdus | Airport & City Transfer", "description": "Signalez un objet oublié lors de votre trajet avec Airport & City Transfer."} : {})
 }
 
 export default async function LostPropertyPage({params}: PageProps) {
@@ -27,4 +27,5 @@ export default async function LostPropertyPage({params}: PageProps) {
     </div>
   )
 }
+
 

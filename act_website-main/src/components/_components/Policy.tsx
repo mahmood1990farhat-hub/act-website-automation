@@ -23,7 +23,7 @@ export default function Policy({
   useEffect(() => {
     if (isOpen && !instructionFile && !useFallback) {
       setIsLoading(true);
-      getInstructionFile("PRIVACY_POLICY", locale)
+      getInstructionFile("PRIVACY_POLICY", locale === "fr" ? "en" as languageType : locale)
         .then((file) => {
           if (file) {
             setInstructionFile(file);
@@ -69,11 +69,12 @@ export default function Policy({
                 {instructionFile.description && (
                   <p className="text-sm text-gray-600">{instructionFile.description}</p>
                 )}
+                {locale === "fr" && <p className="text-sm">Ce document PDF est fourni en anglais.</p>}
                 <div className="w-full h-[calc(100vh-250px)]">
                   <iframe
                     src={instructionFile.file_url}
                     className="w-full h-full border rounded-lg"
-                    title={instructionFile.title || "Privacy Policy"}
+                    title={instructionFile.title || trans.title}
                   />
                 </div>
                 <div className="flex items-center gap-4 w-full">
@@ -83,14 +84,14 @@ export default function Policy({
                     rel="noopener noreferrer"
                     className="text-primary hover:underline text-sm"
                   >
-                    Open in new tab
+                    {locale === "fr" ? "Ouvrir dans un nouvel onglet" : "Open in new tab"}
                   </a>
                   <a
                     href={instructionFile.file_url}
                     download
                     className="text-primary hover:underline text-sm"
                   >
-                    Download PDF
+                    {locale === "fr" ? "Télécharger le PDF" : "Download PDF"}
                   </a>
                 </div>
                 <h4 className="text-gray-500 text-xs flex items-center gap-2">
@@ -139,3 +140,4 @@ export default function Policy({
     </div>
   );
 }
+

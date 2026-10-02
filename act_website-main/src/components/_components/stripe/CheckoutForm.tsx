@@ -1,4 +1,5 @@
 "use client";
+import { frenchPaymentError } from "@/lib/french-payment-error";
 
 import {
   CardNumberElement,
@@ -233,7 +234,7 @@ export default function CheckoutForm({
     });
 
     if (result.error) {
-      setErrorMsg(result.error.message || (locale === "fr" ? "Le paiement a échoué" : "Payment failed"));
+      setErrorMsg(locale === "fr" ? frenchPaymentError(result.error) : result.error.message || "Payment failed");
     } else if (result.paymentIntent.status === "succeeded") {
       await fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();

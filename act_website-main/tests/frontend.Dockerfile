@@ -5,7 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY . .
 ARG ACT_TEST_FRENCH_PREVIEW=0
-RUN --network=none if [ "$ACT_TEST_FRENCH_PREVIEW" = "1" ]; then node tests/check-language-foundation.cjs && node tests/check-french-drafts.cjs && node tests/prepare-french-preview.cjs; fi
+RUN --network=none if [ "$ACT_TEST_FRENCH_PREVIEW" = "1" ]; then node tests/check-language-foundation.cjs && node tests/check-french-drafts.cjs && node tests/check-french-payment-errors.cjs && node tests/prepare-french-preview.cjs; fi
 RUN --network=none npm run build
 RUN mkdir -p /app/.next/cache/images && chown -R node:node /app/.next/cache
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers

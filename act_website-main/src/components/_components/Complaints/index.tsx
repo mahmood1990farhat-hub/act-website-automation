@@ -96,7 +96,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
       });
     },
     onError: (error: any) => {
-      const errorMessage = extract_error(error) || error?.message || trans.submit_form.error_message;
+      const errorMessage = locale === "fr" ? trans.submit_form.error_message : extract_error(error) || error?.message || trans.submit_form.error_message;
       toast.error(errorMessage);
     },
   });
@@ -352,7 +352,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
                         </span>
                         <span>
                           {new Date(complaint.created_at).toLocaleDateString(
-                            locale === "ar" ? "ar-EG" : "en-US"
+                            locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
                           )}
                         </span>
                       </div>
@@ -375,7 +375,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
                       </span>
                       <span className="text-green-400">
                         {new Date(complaint.resolved_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : "en-US"
+                          locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
                         )}
                       </span>
                     </div>
@@ -405,7 +405,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
           </h2>
           <p className="text-gray-400 mb-6">{trans.submit_form.subtitle}</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate={locale === "fr"} className="space-y-6">
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Trip Selection */}
@@ -504,4 +504,5 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
     </div>
   );
 }
+
 
