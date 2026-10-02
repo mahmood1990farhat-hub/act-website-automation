@@ -1,42 +1,38 @@
 name: Deploy ACT backend
-
 on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Exact 40-character Git commit SHA
+        description: Expected release SHA (diagnostic only; no deployment)
         required: true
       apply_migrations:
-        description: Apply reviewed migrations (disabled until backup hook is configured)
+        description: Unused for read-only diagnostics
         type: boolean
         default: false
-
+permissions:
+  contents: read
 concurrency:
   group: act-backend-production
   cancel-in-progress: false
-
-permissions:
-  contents: read
-
 jobs:
-  deploy:
+  diagnose:
     runs-on: self-hosted
     environment: production
     steps:
-      - name: Validate SHA
+      - name: Read service health and filtered startup failures
         shell: bash
-        run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
-
-      - name: Deploy exact commit
-        shell: bash
-        env:
-          GH_TOKEN: "${{ github.token }}"
         run: |
-          args=("${{ inputs.commit_sha }}" --github-token-stdin)
-          if [[ "${{ inputs.apply_migrations }}" == true ]]; then args+=(--migrate); fi
-          printf '%s\n' "$GH_TOKEN" | sudo /usr/local/sbin/act-backend-deploy "${args[@]}" | tee "$RUNNER_TEMP/act-backend-deploy.log"
-
-      - name: Deployment summary
-        if: always()
-        shell: bash
-        run: tail -n 80 "$RUNNER_TEMP/act-backend-deploy.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          set -uo pipefail
+          for unit in act.service act-celery-beat.service; do
+            systemctl show "$unit" -p ActiveState -p SubState -p Result -p ExecMainStatus -p User -p WorkingDirectory -p ExecStart
+          done
+          sudo -n journalctl -u act-celery-beat.service --since '2026-10-02 15:53:00 UTC' -n 120 --no-pager -o cat 2>/dev/null | python3 -c '
+          import sys,re
+          lines=sys.stdin.read().splitlines()
+          for line in lines:
+              if any(s in line.lower() for s in ("error","exception","permission denied","no such file","failed at step","cannot","traceback","celery","schedule","code=")):
+                  line=re.sub(r"[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+","[REDACTED_URI]",line)
+                  line=re.sub(r"(?i)(password|secret|token|api[_-]?key)\s*[=:]\s*\S+",r"\1=[REDACTED]",line)
+                  print(line[:500])
+          '
+          fc-match 'DejaVu Sans' -f '%{family}\n' || true
