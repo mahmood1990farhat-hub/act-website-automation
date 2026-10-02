@@ -1,3 +1,5 @@
+from apps.trips.services.customer_language import booking_language, use_booking_language
+from apps.trips.services.customer_documents import render_arabic_document
 import threading
 import logging
 import re
@@ -163,6 +165,21 @@ def send_passenger_registration_confirmation(user) -> None:
         logger.error(f"Failed to send passenger registration email to {user.email}: {str(e)}")
 
 
+
+def _send_arabic_customer_email(user, trip, kind, refund_message="", driver=None):
+    recipient = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
+    if not recipient:
+        return False
+    file_field = getattr(trip, "cancellation_confirmation_pdf" if kind == "cancellation" else "booking_confirmation_pdf", None)
+    download_url = _absolute_app_url(file_field.url) if file_field else ""
+    subject, html, text = render_arabic_document(
+        trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
+        logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
+    )
+    _send_mail_async(subject, text, [recipient], html_message=html, fail_silently=True)
+    return True
+
+@use_booking_language
 def send_passenger_confirmation(user, trip) -> bool:
     """
     Send trip confirmation email to passenger
@@ -170,6 +187,8 @@ def send_passenger_confirmation(user, trip) -> bool:
     user_id = getattr(user, "id", "guest")
     logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
+        if booking_language(trip) == "ar":
+            return _send_arabic_customer_email(user, trip, "booking")
         recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
         if not recipient_email:
             logger.warning(
@@ -642,6 +661,7 @@ def _absolute_app_url(relative_url: str) -> str:
     return f"{base}{path}"
 
 
+@use_booking_language
 def send_trip_accepted_to_passenger(
     user,
     trip,
@@ -723,6 +743,12 @@ def send_trip_accepted_to_passenger(
             "support_website": "https://airportandcitytransfer.com/en",
             "footer_logo_image_url": _email_asset_url("trip_accepted/footer-logo.png"),
         }
+        if booking_language(trip) == "ar":
+            return _send_arabic_customer_email(user, trip, "driver", driver={
+                "name": driver_name, "phone": driver_phone,
+                "vehicle": (getattr(vehicle_type, "name_ar", None) or vehicle_label) if not (is_guest_driver and guest_driver_info) else vehicle_label,
+                "registration": registration_number, "color": vehicle_color, "pco_url": driver_pco_url,
+            })
         subject = _("Your Driver Details – Airport & City Transfer")
         html_message = render_to_string("emails/trip_driver_details_passenger.html", context)
         message = strip_tags(html_message)
@@ -767,12 +793,15 @@ def send_trip_accepted_to_admin(trip, driver_user) -> None:
         logger.error(f"[EMAIL] send_trip_accepted_to_admin failed for trip #{trip.id}: {e}")
 
 
+@use_booking_language
 def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: str = "") -> None:
     """
     Email to passenger when they cancel their own trip (full cancellation, not driver reassign flow).
     """
     logger.info(f"[EMAIL] send_passenger_trip_cancellation_to_passenger trip #{trip.id}")
     try:
+        if booking_language(trip) == "ar":
+            return _send_arabic_customer_email(user, trip, "cancellation", refund_message=refund_message)
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send passenger cancel email: user {user.id} has no email")
             return
@@ -830,6 +859,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
             "Hello %(first_name)s,\n\n"
             "Your booking with Airport & City Transfer has been successfully cancelled.\n\n"
             "%(refund_message_text)s"
+            'Refund eligibility follows the terms agreed when you booked. We initiate any confirmed refund to the original payment method within 5 working days of confirming the refund amount. Your bank or payment provider may take longer to credit the funds.\n\nFor cancellation or amendment requests, email info@airportandcitytransfer.com with your booking reference. For urgent changes, also telephone +44 208 153 0303. Keep a copy of your request; notice is measured from when ACT receives it, not when staff reply.\n\n'
             "Passenger & Travel Details\n"
             "%(booking_details_text)s\n"
             "If you would like to arrange a new journey, visit:\n"
@@ -909,12 +939,15 @@ def send_admin_onboarding_notification(onboarding_request) -> None:
 
 # ========== DRIVER CANCELLATION AND REASSIGNMENT EMAILS ==========
 
+@use_booking_language
 def send_driver_cancellation_to_passenger(user, trip) -> None:
     """
     Send email to passenger when driver cancels their trip
     """
     logger.info(f"[EMAIL] send_driver_cancellation_to_passenger called for trip #{trip.id}, user {user.id}")
     try:
+        if booking_language(trip) == "ar":
+            return _send_arabic_customer_email(user, trip, "driver_cancelled")
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send driver cancellation email: user {user.id} has no email address")
             return
@@ -1024,6 +1057,7 @@ def send_driver_cancellation_to_admin(trip) -> None:
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
 
 
+@use_booking_language
 def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_driver_info=None) -> None:
     """
     Send email to passenger when trip is reassigned to a new driver (system or guest)
@@ -1120,6 +1154,11 @@ def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_d
                 "driver_phone": driver_phone,
             }
         
+        if booking_language(trip) == "ar":
+            return _send_arabic_customer_email(user, trip, "reassigned", driver={
+                "name": driver_name, "phone": driver_phone,
+                "company": driver_company if is_guest_driver and guest_driver_info else "",
+            })
         logger.info(f"[EMAIL] Preparing trip reassignment email for trip #{trip.id} to {user.email}")
         _send_mail_async(subject, message, [user.email], fail_silently=True)
         logger.info(f"[EMAIL] Trip reassignment email sent to passenger {user.email}")

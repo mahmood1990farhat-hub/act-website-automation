@@ -61,7 +61,7 @@ export function TimeInput({
     if (!time) return "";
 
     const hour = time.hour % 12 || 12;
-    const period = time.hour >= 12 ? "PM" : "AM";
+    const period = isRTL ? (time.hour >= 12 ? "مساءً" : "صباحًا") : (time.hour >= 12 ? "PM" : "AM");
 
     return `${hour}:${time.minute.toString().padStart(2, "0")} ${period}`;
   };

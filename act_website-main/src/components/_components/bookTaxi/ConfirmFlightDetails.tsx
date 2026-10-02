@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { bookingText } from "./booking-text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -86,6 +87,7 @@ export default function ModernConfirmFlightDetails({
 	const [token, setToken] = useState<string | undefined>();
 	const [isLoading, setIsLoading] = useState(false);
 	const isRTL = locale === "ar";
+  const t = (text: string) => bookingText(locale, text);
 
 	useEffect(() => {
 		setToken(getCookie("userToken") as string | undefined);
@@ -113,7 +115,7 @@ export default function ModernConfirmFlightDetails({
 		passengerInfo: isRTL ? "معلومات الركاب" : "Passenger Information",
 		vehicleDetails: isRTL ? "تفاصيل المركبة" : "Vehicle Details",
 		costBreakdown: trans.Confir_flight_details.cost_breakdown,
-		back: isRTL ? "العودة" : "Back",
+		back: isRTL ? "العودة" : t("Back"),
 		edit: isRTL ? "تعديل" : "Edit",
 		confirm: isRTL ? "التأكيد و المتابعة" : "Confirm & Continue",
 		pickup: isRTL ? "نقطة الانطلاق" : "Pickup Location",
@@ -227,6 +229,7 @@ export default function ModernConfirmFlightDetails({
 		try {
 			const res = await postData<any>({
 				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
+				queryParams: { locale },
 				token: token || undefined,
 				body: {
 					...bodyData,
@@ -446,23 +449,23 @@ export default function ModernConfirmFlightDetails({
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
 								<Users className="w-5 h-5 text-[#ffd100]" />
-								Passenger Details
+								{t("Passenger Details")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Full Name</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Full Name")}</p>
 									<p className="text-white text-sm">{data.passengerDetails.fullName || "-"}</p>
 								</div>
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Email</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Email")}</p>
 									<p className="text-white text-sm break-words">{data.passengerDetails.email || "-"}</p>
 								</div>
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Mobile Number</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Mobile Number")}</p>
 									<p className="text-white text-sm">
-										{data.passengerDetails.countryCode || "-"} {data.passengerDetails.mobileNumber || ""}
+										{t(data.passengerDetails.countryCode || "-")} {data.passengerDetails.mobileNumber || ""}
 									</p>
 								</div>
 							</div>
@@ -474,26 +477,26 @@ export default function ModernConfirmFlightDetails({
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
 								<Users className="w-5 h-5 text-[#ffd100]" />
-								Passenger Count
+								{isRTL ? "عدد الركاب" : "Passenger Count"}
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.adults}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Adults</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Adults")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.children}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Children (4-11)</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Children (4-11)")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.infants}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Infants (0-3)</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Infants (0-3)")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.numberOfPassengers}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Total passengers</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Total passengers")}</p>
 								</div>
 							</div>
 						</CardContent>
@@ -504,20 +507,20 @@ export default function ModernConfirmFlightDetails({
 							<CardHeader className="pb-4">
 								<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
 									<CheckCircle className="w-5 h-5 text-[#ffd100]" />
-									Child & Infant Travel Information
+									{isRTL ? "معلومات سفر الأطفال والرُضّع" : "Child & Infant Travel Information"}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
 								{data.infants > 0 && (
 									<div>
-										<p className="text-white/60 text-xs sm:text-sm">Infant seat option selected</p>
-										<p className="text-white text-sm">{data.childInfantTravel.infantSeatOption || "-"}</p>
+										<p className="text-white/60 text-xs sm:text-sm">{t("Infant seat option selected")}</p>
+										<p className="text-white text-sm">{t(data.childInfantTravel.infantSeatOption || "-")}</p>
 									</div>
 								)}
 								{data.children > 0 && (
 									<div>
-										<p className="text-white/60 text-xs sm:text-sm">Child seat option selected</p>
-										<p className="text-white text-sm">{data.childInfantTravel.childSeatOption || "-"}</p>
+										<p className="text-white/60 text-xs sm:text-sm">{t("Child seat option selected")}</p>
+										<p className="text-white text-sm">{t(data.childInfantTravel.childSeatOption || "-")}</p>
 									</div>
 								)}
 							</CardContent>
@@ -529,42 +532,42 @@ export default function ModernConfirmFlightDetails({
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
 								<Navigation className="w-5 h-5 text-[#ffd100]" />
-								Flight Details
+								{t("Flight Details")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Flight Type</p>
+								<p className="text-white/60 text-xs sm:text-sm">{t("Flight Type")}</p>
 								<p className="text-white text-sm">
 									{data.flightDetails.flightType === "arrival"
-										? "Arrival"
+										? t("Arrival")
 										: data.flightDetails.flightType === "departure"
-											? "Departure"
+											? t("Departure")
 											: "-"}
 								</p>
 							</div>
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Flight Number</p>
+								<p className="text-white/60 text-xs sm:text-sm">{t("Flight Number")}</p>
 								<p className="text-white text-sm">{data.flightDetails.flightNumber || "-"}</p>
 							</div>
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Airline</p>
+								<p className="text-white/60 text-xs sm:text-sm">{t("Airline")}</p>
 								<p className="text-white text-sm">{data.flightDetails.airline || "-"}</p>
 							</div>
 							{data.flightDetails.flightType === "arrival" && (
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Landing Time</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Landing Time")}</p>
 									<p className="text-white text-sm">{data.flightDetails.landingTime || "-"}</p>
 								</div>
 							)}
 							{data.flightDetails.flightType === "departure" && (
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Departure Time</p>
+									<p className="text-white/60 text-xs sm:text-sm">{t("Departure Time")}</p>
 									<p className="text-white text-sm">{data.flightDetails.departureTime || "-"}</p>
 								</div>
 							)}
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Pick-up Sign Name</p>
+								<p className="text-white/60 text-xs sm:text-sm">{t("Pick-up Sign Name")}</p>
 								<p className="text-white text-sm">{data.flightDetails.pickupSignName || "-"}</p>
 							</div>
 						</CardContent>
@@ -729,8 +732,8 @@ export default function ModernConfirmFlightDetails({
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
 								<span>
 									{isRTL
-										? "استمتع بإلغاء مجاني حتى 24 ساعة قبل موعد الاستلام المحدد"
-										: "Enjoy free cancellation up to 24 hours before your scheduled pickup"}
+										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ24 ساعة على الأقل"
+										: "Full refund when cancelled at least 24 hours before your scheduled pickup"}
 								</span>
 							</div>
 									<div className="flex items-center justify-center gap-1 text-nowrap">

@@ -1,3 +1,5 @@
+from apps.trips.services.customer_language import booking_language
+from apps.trips.services.customer_documents import render_arabic_document
 from io import BytesIO
 import os
 from pathlib import Path
@@ -60,6 +62,16 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate booking confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
+    if booking_language(trip) == "ar":
+        _, html, _ = render_arabic_document(
+            trip, "booking",
+            logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
+        )
+        buffer = BytesIO()
+        HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
+        buffer.seek(0)
+        return buffer
+
     passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
@@ -100,6 +112,7 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
             "Your journey has been successfully confirmed. Please take a moment to "
             "review your booking details and keep this confirmation for reference. We "
             "look forward to delivering a seamless and premium travel experience."
+            ' For cancellation or amendment requests, email info@airportandcitytransfer.com with your booking reference. For urgent changes, also telephone +44 208 153 0303. Keep a copy of your request; notice is measured from when ACT receives it, not when staff reply.'
         ),
         "booking_details_title": "Your Booking Details",
         "journey_title": "JOURNEY",
@@ -148,6 +161,16 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate cancellation confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
+    if booking_language(trip) == "ar":
+        _, html, _ = render_arabic_document(
+            trip, "cancellation",
+            logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
+        )
+        buffer = BytesIO()
+        HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
+        buffer.seek(0)
+        return buffer
+
     passenger_name = _passenger_name(trip)
 
     logo_path = os.path.join(
@@ -186,7 +209,7 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
         "intro_title": "Dear Customer",
         "intro_text": (
             "We confirm that your booking has been successfully cancelled. "
-            "If you are eligible for a refund, it will be processed to your original payment method. "
+            'Refund eligibility follows the terms agreed when you booked. We initiate any confirmed refund to the original payment method within 5 working days of confirming the refund amount. Your bank or payment provider may take longer to credit the funds. For cancellation or amendment requests, email info@airportandcitytransfer.com with your booking reference. For urgent changes, also telephone +44 208 153 0303. Keep a copy of your request; notice is measured from when ACT receives it, not when staff reply. '
             "To make a new booking, please visit airportandcitytransfer.com."
         ),
         "booking_details_title": "Your Booking Details",
@@ -215,4 +238,5 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     HTML(string=html, base_url=settings.BASE_DIR).write_pdf(target=buffer)
     buffer.seek(0)
     return buffer
+
 

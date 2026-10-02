@@ -12,10 +12,10 @@ type typeProps = {
 
 export default function BookingConfirmation({ trans, locale }: typeProps) {
   const isRTL = locale === 'ar';
-  const urlMytrip = trans.desc.hour === " 1 " ? "/en/my-trips" : "/ar/my-trips";
+  const urlMytrip = `/${locale}/my-trips`;
 
   return (
-    <div className="min-h-screen bg-white/10 backdrop-blur-sm flex items-center justify-center p-8 rounded-2xl max-sm:p-1">
+    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-white/10 backdrop-blur-sm flex items-center justify-center p-8 rounded-2xl max-sm:p-1">
       <div className="w-full max-w-md">
 
         {/* Main Content Card */}
@@ -44,7 +44,7 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             {/* Divider */}
             <div className="flex items-center space-x-4">
               <div className="flex-1 h-px bg-gray-200"></div>
-              <div className="text-xs text-gray-400 font-medium">NEXT STEPS</div>
+              <div className="text-xs text-gray-400 font-medium">{isRTL ? "الخطوات التالية" : "NEXT STEPS"}</div>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -71,12 +71,12 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             </div>
 
             {/* Additional Info */}
-            {!isRTL && <div className="rounded-xl p-4 text-center">
+            {<div className="rounded-xl p-4 text-center">
               <p className="text-xs text-muted leading-none">
-                Confirmation details sent to your email
+                {isRTL ? "تم إرسال تفاصيل التأكيد إلى بريدك الإلكتروني" : "Confirmation details sent to your email"}
               </p>
               <p className="text-xs text-muted mt-1">
-                Need help? Contact our support team 24/7
+                {isRTL ? "هل تحتاج إلى مساعدة؟ تواصل مع فريق الدعم على مدار الساعة" : "Need help? Contact our support team 24/7"}
               </p>
             </div>}
           </div>

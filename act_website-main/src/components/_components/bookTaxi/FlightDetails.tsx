@@ -1,4 +1,5 @@
 "use client";
+import { bookingText } from "./booking-text";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,7 @@ export default function FlightDetails({
   changePickupTime,
 }: Props) {
   const isRTL = locale === "ar";
+  const t = (text: string) => bookingText(locale, text);
   const [isRequired, setIsRequired] = useState(false);
   const inputClass =
     "w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg";
@@ -65,9 +67,9 @@ export default function FlightDetails({
   const isDirectionDetected = journeyDirection !== "manual";
   const timingWarning =
     flightDetails.flightType === "arrival"
-      ? getArrivalGuidance(pickupTime, flightDetails.landingTime)
+      ? getArrivalGuidance(pickupTime, flightDetails.landingTime, locale)
       : flightDetails.flightType === "departure"
-        ? getDepartureGuidance(pickupTime, flightDetails.departureTime)
+        ? getDepartureGuidance(pickupTime, flightDetails.departureTime, locale)
         : "";
 
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function FlightDetails({
           className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 cursor-pointer hover:text-white"
         >
           <ChevronLeft className={`w-5 h-5 ${isRTL ? "rotate-180 ml-2" : "mr-2"}`} />
-          Back
+          {t("Back")}
         </Button>
       </div>
 
@@ -127,12 +129,12 @@ export default function FlightDetails({
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2 text-xl sm:text-2xl">
             <Plane className="w-5 h-5 text-[#ffd100]" />
-            Flight Details
+            {t("Flight Details")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <p className="text-white">Flight Type</p>
+            <p className="text-white">{t("Flight Type")}</p>
             <div
               className={`grid grid-cols-1 ${isDirectionDetected ? "" : "sm:grid-cols-2"} gap-2`}
             >
@@ -144,7 +146,7 @@ export default function FlightDetails({
                   checked={flightDetails.flightType === "arrival"}
                   onChange={() => updateField("flightType", "arrival")}
                 />
-                <span>Arrival</span>
+                <span>{t("Arrival")}</span>
               </label>
               )}
               {journeyDirection !== "arrival" && (
@@ -155,16 +157,16 @@ export default function FlightDetails({
                   checked={flightDetails.flightType === "departure"}
                   onChange={() => updateField("flightType", "departure")}
                 />
-                <span>Departure</span>
+                <span>{t("Departure")}</span>
               </label>
               )}
             </div>
             <p className="text-xs text-white/60">
               {journeyDirection === "arrival"
-                ? "Arrival is selected because your journey starts at an airport."
+                ? t("Arrival is selected because your journey starts at an airport.")
                 : journeyDirection === "departure"
-                  ? "Departure is selected because your journey ends at an airport."
-                  : "Flight type is optional. Select one if you would like to add flight timing details."}
+                  ? t("Departure is selected because your journey ends at an airport.")
+                  : t("Flight type is optional. Select one if you would like to add flight timing details.")}
             </p>
           </div>
 
@@ -172,17 +174,17 @@ export default function FlightDetails({
             <>
           <div className="rounded-lg border border-[#ffd100]/30 bg-[#ffd100]/10 p-3">
             <p className="text-[#ffd100] text-sm font-semibold">
-              Please enter the scheduled flight landing/departure time.
+              {t("Please enter the scheduled flight landing/departure time.")}
             </p>
             <p className="text-white/70 text-xs mt-1">
               {flightDetails.flightType === "arrival"
-                ? "For arrivals, your pickup time should allow enough time for immigration, baggage collection, and meeting your driver."
-                : "For departures, allow enough travel and airport check-in time before your scheduled flight."}
+                ? t("For arrivals, your pickup time should allow enough time for immigration, baggage collection, and meeting your driver.")
+                : t("For departures, allow enough travel and airport check-in time before your scheduled flight.")}
             </p>
           </div>
           <div>
             <label htmlFor="flight-number">
-              <p className="text-white">Flight Number</p>
+              <p className="text-white">{t("Flight Number")}</p>
             </label>
             <input
               id="flight-number"
@@ -193,7 +195,7 @@ export default function FlightDetails({
           </div>
           <div>
             <label htmlFor="airline">
-              <p className="text-white">Airline</p>
+              <p className="text-white">{t("Airline")}</p>
             </label>
             <input
               id="airline"
@@ -205,14 +207,14 @@ export default function FlightDetails({
           {flightDetails.flightType === "arrival" && (
             <div>
               <label htmlFor="landing-time">
-                <p className="text-white">Landing Time</p>
+                <p className="text-white">{t("Landing Time")}</p>
               </label>
               <TimeInput
                 id="landing-time"
                 value={parseTimeValue(flightDetails.landingTime)}
                 language={locale}
                 required={isRequired}
-                placeholder="Select landing time"
+                placeholder={t("Select landing time")}
                 setFormattedTime={(time) => updateField("landingTime", time)}
                 className="border-muted"
               />
@@ -221,14 +223,14 @@ export default function FlightDetails({
           {flightDetails.flightType === "departure" && (
             <div>
               <label htmlFor="departure-time">
-                <p className="text-white">Departure Time</p>
+                <p className="text-white">{t("Departure Time")}</p>
               </label>
               <TimeInput
                 id="departure-time"
                 value={parseTimeValue(flightDetails.departureTime)}
                 language={locale}
                 required={isRequired}
-                placeholder="Select departure time"
+                placeholder={t("Select departure time")}
                 setFormattedTime={(time) => updateField("departureTime", time)}
                 className="border-muted"
               />
@@ -243,13 +245,13 @@ export default function FlightDetails({
                 onClick={changePickupTime}
                 className="mt-2 h-auto p-0 font-bold text-[#ffd100] hover:text-[#ffd100]/80"
               >
-                Go back and change pickup time
+                {t("Go back and change pickup time")}
               </Button>
             </div>
           )}
           <div>
             <label htmlFor="pickup-sign-name">
-              <p className="text-white">Pick-up Sign Name</p>
+              <p className="text-white">{t("Pick-up Sign Name")}</p>
             </label>
             <input
               id="pickup-sign-name"
@@ -264,8 +266,8 @@ export default function FlightDetails({
           {isRequired && (
             <p className="text-red-300 text-sm font-semibold">
               {flightDetails.flightType === "departure"
-                ? "Departure Time is required for departure flights."
-                : "Landing Time is required for arrival flights."}
+                ? t("Departure Time is required for departure flights.")
+                : t("Landing Time is required for arrival flights.")}
             </p>
           )}
 
@@ -274,7 +276,7 @@ export default function FlightDetails({
             onClick={onSubmit}
             className="w-full bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold py-6 text-base sm:text-lg shadow-xl cursor-pointer"
           >
-            Continue
+            {t("Continue")}
           </Button>
           <Button
             type="button"
@@ -282,7 +284,7 @@ export default function FlightDetails({
             variant="outline"
             className="w-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white font-semibold py-6 text-base sm:text-lg cursor-pointer"
           >
-            Skip — Not applicable for this journey
+            {t("Skip — Not applicable for this journey")}
           </Button>
         </CardContent>
       </Card>

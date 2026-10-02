@@ -202,8 +202,8 @@ export function ActTimePicker({
     value: minute,
   }));
   const periodOptions: WheelOption[] = [
-    { label: "AM", value: "AM" },
-    { label: "PM", value: "PM" },
+    { label: isRTL ? "صباحًا" : "AM", value: "AM" },
+    { label: isRTL ? "مساءً" : "PM", value: "PM" },
   ];
 
   const handleOK = () => {
@@ -217,7 +217,7 @@ export function ActTimePicker({
     onClose();
   };
 
-  const displayTime = `${tempTime.hour}:${String(tempTime.minute).padStart(2, "0")} ${tempTime.period}`;
+  const displayTime = `${tempTime.hour}:${String(tempTime.minute).padStart(2, "0")} ${isRTL ? (tempTime.period === "AM" ? "صباحًا" : "مساءً") : tempTime.period}`;
 
   const pickerContent = (
     <div

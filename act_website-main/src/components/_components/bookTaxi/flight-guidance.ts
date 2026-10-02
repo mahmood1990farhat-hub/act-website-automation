@@ -76,17 +76,17 @@ export const parseTimeToMinutes = (time: string) => {
 const normalizeMinutes = (minutes: number) =>
   ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 
-export const formatCustomerTime = (minutes: number) => {
+export const formatCustomerTime = (minutes: number, locale = "en") => {
   const normalized = normalizeMinutes(minutes);
   const hour24 = Math.floor(normalized / 60);
   const minute = normalized % 60;
   const hour12 = hour24 % 12 || 12;
-  const period = hour24 >= 12 ? "PM" : "AM";
+  const period = locale === "ar" ? (hour24 >= 12 ? "مساءً" : "صباحًا") : (hour24 >= 12 ? "PM" : "AM");
 
   return `${hour12}:${String(minute).padStart(2, "0")} ${period}`;
 };
 
-export const getDepartureGuidance = (pickupTime: string, flightTime: string) => {
+export const getDepartureGuidance = (pickupTime: string, flightTime: string, locale = "en") => {
   const pickupMinutes = parseTimeToMinutes(pickupTime);
   const flightMinutes = parseTimeToMinutes(flightTime);
   if (pickupMinutes === undefined || flightMinutes === undefined) return "";
@@ -94,13 +94,15 @@ export const getDepartureGuidance = (pickupTime: string, flightTime: string) => 
   const minutesBeforeFlight = normalizeMinutes(flightMinutes - pickupMinutes);
   if (minutesBeforeFlight >= 120 && minutesBeforeFlight <= 180) return "";
 
-  const windowStart = formatCustomerTime(flightMinutes - 180);
-  const windowEnd = formatCustomerTime(flightMinutes - 120);
+  const windowStart = formatCustomerTime(flightMinutes - 180, locale);
+  const windowEnd = formatCustomerTime(flightMinutes - 120, locale);
+
+  if (locale === "ar") return `لرحلات المغادرة، نوصي بوقت استلام يسبق موعد إقلاع الطائرة بساعتين إلى ثلاث ساعات. قد يكون الوقت المحدد قريبًا جدًا أو مبكرًا جدًا. وقت الاستلام المقترح: بين ${windowStart} و${windowEnd}.`;
 
   return `For airport departures, we recommend choosing a pickup time around 2–3 hours before your flight departure. Your selected pickup time may be too close or too early. Suggested pickup time: between ${windowStart} and ${windowEnd}.`;
 };
 
-export const getArrivalGuidance = (pickupTime: string, landingTime: string) => {
+export const getArrivalGuidance = (pickupTime: string, landingTime: string, locale = "en") => {
   const pickupMinutes = parseTimeToMinutes(pickupTime);
   const landingMinutes = parseTimeToMinutes(landingTime);
   if (pickupMinutes === undefined || landingMinutes === undefined) return "";
@@ -110,7 +112,9 @@ export const getArrivalGuidance = (pickupTime: string, landingTime: string) => {
     minutesAfterLanding >= 60 && minutesAfterLanding <= 12 * 60;
   if (looksLikeExpectedArrivalPickup) return "";
 
-  const suggestedPickup = formatCustomerTime(landingMinutes + 60);
+  const suggestedPickup = formatCustomerTime(landingMinutes + 60, locale);
+
+  if (locale === "ar") return `لرحلات الوصول، نوصي بوقت استلام بعد هبوط الطائرة بساعة على الأقل لإتاحة وقت لإجراءات الجوازات واستلام الأمتعة ولقاء السائق. وقت الاستلام المقترح: ${suggestedPickup} أو بعد ذلك.`;
 
   return `For airport arrivals, we recommend choosing a pickup time at least 1 hour after landing to allow time for immigration, baggage collection, and meeting your driver. Suggested pickup time: ${suggestedPickup} or later.`;
 };
