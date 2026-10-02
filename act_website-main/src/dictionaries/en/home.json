@@ -1,14 +1,41 @@
 {
   "navbar": {
     "navLinks": [
-      { "name": "Home", "url": "/en", "protected": false },
-      { "name": "About us", "url": "/en/about-us", "protected": false },
-      { "name": "Contact us", "url": "/en/about-us#contact-us", "protected": false },
-      { "name": "My trips", "url": "/en/my-trips", "protected": true },
-      { "name": "download app", "url": "/en/download-app", "protected": false },
-      { "name": "Lost Property", "url": "/en/lost-property", "protected": true },
-      { "name": "Complaints", "url": "/en/complaints", "protected": true }
-     
+      {
+        "name": "Home",
+        "url": "/en",
+        "protected": false
+      },
+      {
+        "name": "About us",
+        "url": "/en/about-us",
+        "protected": false
+      },
+      {
+        "name": "Contact us",
+        "url": "/en/about-us#contact-us",
+        "protected": false
+      },
+      {
+        "name": "My trips",
+        "url": "/en/my-trips",
+        "protected": true
+      },
+      {
+        "name": "download app",
+        "url": "/en/download-app",
+        "protected": false
+      },
+      {
+        "name": "Lost Property",
+        "url": "/en/lost-property",
+        "protected": true
+      },
+      {
+        "name": "Complaints",
+        "url": "/en/complaints",
+        "protected": true
+      }
     ],
     "languages": {
       "English": "English",
@@ -53,7 +80,6 @@
         "button": "Get a Price Now",
         "smallSuitcase": " Small suitcase",
         "largeSuitcase": "Large suitcase ",
-
         "NumberOfPassenger": "Number of passenger",
         "error_message": "Sorry, we couldn't calculate directions.",
         "error_button": "Close"
@@ -92,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Payments Details",
-      "subtitle": "Please enter your payment details",
+      "subtitle": "Cancellation received at least 24 hours before pickup: full refund. Within 24 hours or for a no-show, reasonable evidenced losses may be deducted, capped at the booking price and allowing for costs saved or replacement work. Please read the Terms & Conditions before paying.",
       "form": {
         "Card_Number": "Card Number",
         "Expired_date": "Expired date",
@@ -136,7 +162,6 @@
     },
     "company_description_3": "Our operations are supported by advanced booking and dispatch systems that allow passengers to pre-book, track their rides, and communicate easily. We prioritise transparency, and our clear pricing structure means no surprises — just straightforward, dependable service.",
     "company_description_4": "At Airport & City Transfer, we don’t just offer a ride — we deliver peace of mind.",
-
     "get_in_touch": {
       "title": "Send a ",
       "titlespan": "message",
@@ -157,31 +182,58 @@
       "title": "Why Choose Us",
       "subtitle": "Experience the difference with our premium transport service",
       "steps": [
-        { "title": "Safety First", "desc": "Professional drivers, fully insured vehicles" },
-        { "title": "24/7 Service", "desc": "Available round the clock for your convenience" },
-        { "title": "Premium Experience", "desc": "Luxury vehicles and exceptional service" },
-        { "title": "London Coverage", "desc": "Complete coverage across Greater London" }
+        {
+          "title": "Safety First",
+          "desc": "Professional drivers, fully insured vehicles"
+        },
+        {
+          "title": "24/7 Service",
+          "desc": "Available round the clock for your convenience"
+        },
+        {
+          "title": "Premium Experience",
+          "desc": "Luxury vehicles and exceptional service"
+        },
+        {
+          "title": "London Coverage",
+          "desc": "Complete coverage across Greater London"
+        }
       ]
     },
-
-    "booking_title": { "span": "Simple booking Process", "title": "Booking a ", "titlespan": "trip", "subtitle": "Book your premium transport in just a few clicks. Experience luxury, reliability, and professional service." },
-
+    "booking_title": {
+      "span": "Simple booking Process",
+      "title": "Booking a ",
+      "titlespan": "trip",
+      "subtitle": "Book your premium transport in just a few clicks. Experience luxury, reliability, and professional service."
+    },
     "joinUs": {
       "title": "Join the ride in seconds",
       "subtitle": "Sign up as a passenger or register your PCO vehicle and start earning today.",
       "passenger": "Passenger",
       "driver": "PCO Driver"
     },
-
     "howToWork": [
-      {"title": "Choose Location", "desc": "Select your pickup and drop-off locations"},
-      {"title": "Pick Date & Time", "desc": "Schedule your trip at your convenience"},
-      {"title": "Select Vehicle", "desc": "Choose from our premium fleet"},
-      {"title": "Confirm Booking", "desc": "Secure payment and instant confirmation"}
+      {
+        "title": "Choose Location",
+        "desc": "Select your pickup and drop-off locations"
+      },
+      {
+        "title": "Pick Date & Time",
+        "desc": "Schedule your trip at your convenience"
+      },
+      {
+        "title": "Select Vehicle",
+        "desc": "Choose from our premium fleet"
+      },
+      {
+        "title": "Confirm Booking",
+        "desc": "Secure payment and instant confirmation"
+      }
     ],
-
-    "services": {"title": "Our Services", "subtitle": "Discover our comprehensive transport solutions designed for your comfort and convenience"},
-
+    "services": {
+      "title": "Our Services",
+      "subtitle": "Discover our comprehensive transport solutions designed for your comfort and convenience"
+    },
     "sections": [
       {
         "title": "Arriving in a New City LIKE LONDON?",
@@ -231,18 +283,21 @@
       "title": "Contact details ",
       "phone_numbers": {
         "title": "By phone :📞",
-        "Elements": [ "+44 746 494 0000","+44 208 153 0303"]
+        "Elements": [
+          "+44 746 494 0000",
+          "+44 208 153 0303"
+        ]
       },
       "Email_us": {
         "title": "Email us @:",
-        "Elements": ["Info@airportandcitytransfer.com"]
+        "Elements": [
+          "Info@airportandcitytransfer.com"
+        ]
       }
     },
     "Policies": {
       "title": "Policies",
       "Elements": [
-
-
         {
           "name": "Apps",
           "href": "/download-app"
@@ -264,121 +319,144 @@
     "registeredCompany": "Registered Company: Farhat Trading Solutions Ltd",
     "copyright": "All Copyright © {year} Airport taxi Transfer Company"
   },
-  "policy_and_terms":{
- "policy": {
-    "Open_button":"Privacy Policy",
-    "title": "Privacy Policy – Airport & City Transfer",
-    "desc": "Airport & City Transfer (“we”, “our”, “us”) is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.",
-    "elements": [
-      {
-        "title": " Information We Collect:",
-        "subDesc": [
-          " Contact details: name, phone number, email",
-          " Booking information: pickup/drop-off locations, dates, times",
-          " Payment information: processed securely through third-party providers",
-          " Driver and vehicle information: for regulatory compliance",
-          " Feedback and complaint information"
-        ]
-      },
-      {
-        "title": "  How We Use Your Data:",
-        "subDesc": [
-          " To process bookings and deliver transport services",
-          " To communicate with customers and drivers",
-          " For internal record-keeping and legal compliance",
-          " To respond to queries, feedback, or complaints",
-          " To comply with Transport for London (TfL) reporting requirements"
-        ]
-      },
-      {
-        "title": "Lawful Basis for Processing:",
-
-        "desc": "We collect and process personal data under the legal basis of contract performance, legal obligation, or legitimate interest. Consent is obtained where required."
-      },
-      {
-        "title": "Sharing Your Information:",
-
-        "desc": "We only share data when necessary:",
-        "subDesc": [
-          " With TfL or other regulators when required by law",
-          " With third-party service providers (e.g. payment processors) under strict confidentiality"
-        ],
-        "descEnd": "We never sell your data to third parties."
-      },
-      {
-        "title": "Data Retention:",
-
-        "desc": "Personal data is retained only as long as necessary to fulfil legal, operational, or financial obligations. Once no longer required, it is securely deleted or anonymised."
-      },
-      {
-        "title": "Your Rights:",
-
-        "desc": "You have the right to access, correct, erase, or object to the processing of your personal data. Requests can be made in writing to our Data Protection Officer."
-      },
-      {
-        "title": "Security Measures:",
-
-        "desc": "We use encrypted systems, secure storage, and access controls to protect your data. Our staff and drivers are trained in data protection procedures."
-      }
-    ],
-    "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
-    "button": "Done"
+  "policy_and_terms": {
+    "policy": {
+      "Open_button": "Privacy Policy",
+      "title": "Privacy Policy – Airport & City Transfer",
+      "desc": "Airport & City Transfer (“we”, “our”, “us”) is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.",
+      "elements": [
+        {
+          "title": " Information We Collect:",
+          "subDesc": [
+            " Contact details: name, phone number, email",
+            " Booking information: pickup/drop-off locations, dates, times",
+            " Payment information: processed securely through third-party providers",
+            " Driver and vehicle information: for regulatory compliance",
+            " Feedback and complaint information"
+          ]
+        },
+        {
+          "title": "  How We Use Your Data:",
+          "subDesc": [
+            " To process bookings and deliver transport services",
+            " To communicate with customers and drivers",
+            " For internal record-keeping and legal compliance",
+            " To respond to queries, feedback, or complaints",
+            " To comply with Transport for London (TfL) reporting requirements"
+          ]
+        },
+        {
+          "title": "Lawful Basis for Processing:",
+          "desc": "We collect and process personal data under the legal basis of contract performance, legal obligation, or legitimate interest. Consent is obtained where required."
+        },
+        {
+          "title": "Sharing Your Information:",
+          "desc": "We only share data when necessary:",
+          "subDesc": [
+            " With TfL or other regulators when required by law",
+            " With third-party service providers (e.g. payment processors) under strict confidentiality"
+          ],
+          "descEnd": "We never sell your data to third parties."
+        },
+        {
+          "title": "Data Retention:",
+          "desc": "Personal data is retained only as long as necessary to fulfil legal, operational, or financial obligations. Once no longer required, it is securely deleted or anonymised."
+        },
+        {
+          "title": "Your Rights:",
+          "desc": "You have the right to access, correct, erase, or object to the processing of your personal data. Requests can be made in writing to our Data Protection Officer."
+        },
+        {
+          "title": "Security Measures:",
+          "desc": "We use encrypted systems, secure storage, and access controls to protect your data. Our staff and drivers are trained in data protection procedures."
+        }
+      ],
+      "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+      "button": "Done"
+    },
+    "terms": {
+      "Open_button": "Terms & Conditions",
+      "title": "Terms and Conditions – Airport & City Transfer",
+      "elements": [
+        {
+          "title": " Bookings and Confirmations",
+          "desc": "All bookings must be made via our app, website, phone, or authorised partners. Confirmation is provided electronically. It is the customer’s responsibility to ensure all booking details are accurate."
+        },
+        {
+          "title": " Payments and Charges",
+          "desc": "All fares are quoted in GBP (£). Additional fees may apply for extra stops, waiting time, or out-of-hours service. Payments must be made at booking unless agreed otherwise."
+        },
+        {
+          "title": "Cancellation at least 24 hours before pickup",
+          "desc": "If ACT receives your cancellation at least 24 hours before the confirmed pickup time, including exactly 24 hours beforehand, you receive a full refund."
+        },
+        {
+          "title": "Cancellation within 24 hours",
+          "desc": "ACT may deduct reasonable, evidenced losses directly caused by your cancellation, up to the booking price. We take reasonable steps to reduce these losses and account for costs saved or replacement work. Any remaining balance is refunded."
+        },
+        {
+          "title": "Passenger no-show",
+          "desc": "A no-show is assessed only after the agreed waiting period and documented attempts to contact the passenger. Any deduction follows the same loss-based rule as a cancellation within 24 hours and is capped at the booking price."
+        },
+        {
+          "title": "Waiting periods",
+          "desc": "The waiting period is 15 minutes for ordinary pickups and 60 minutes for airport pickups, measured from the agreed pickup time. Any charge for additional waiting must be disclosed and agreed."
+        },
+        {
+          "title": "If ACT cannot provide the journey",
+          "desc": "We offer an alternative for you to accept or a full refund for the journey that cannot be provided."
+        },
+        {
+          "title": "Flight delays or cancellations",
+          "desc": "Contact ACT with any change to your flight. We review and agree revised pickup arrangements. A known flight delay is not automatically treated as a passenger no-show."
+        },
+        {
+          "title": "Booking amendments",
+          "desc": "Changes are subject to availability. Any revised price is disclosed before you accept the change."
+        },
+        {
+          "title": "Refund processing",
+          "desc": "We initiate refunds to the original payment method within 5 working days of confirming the refund amount. Your bank or payment provider may take longer to credit the funds."
+        },
+        {
+          "title": "How to cancel or amend a booking",
+          "desc": "Email info@airportandcitytransfer.com with your booking reference. For urgent changes, also telephone +44 208 153 0303. Cancellation notice is measured from when ACT receives it, using the confirmed pickup time, not when staff reply."
+        },
+        {
+          "title": " Use of TfL-Licensed Personnel",
+          "desc": "All journeys are carried out exclusively by drivers and vehicles licensed by Transport for London. We conduct regular checks to ensure compliance."
+        },
+        {
+          "title": " Safety and Conduct",
+          "desc": "All drivers are DBS-checked and follow our code of conduct. Passengers are expected to behave respectfully and comply with UK safety regulations."
+        },
+        {
+          "title": " Lost Property",
+          "desc": "Items left in vehicles are logged and stored for up to 6 weeks. Customers can contact us to arrange retrieval. Unclaimed items are either securely disposed of or donated."
+        },
+        {
+          "title": "Complaints Procedure",
+          "desc": "Complaints can be submitted via our website, phone, or email. A Compliance Officer investigates and responds within 5 working days. Relevant issues are reported to TfL where applicable."
+        },
+        {
+          "title": "Liability ",
+          "desc": "Airport & City Transfer is not liable for delays due to unforeseen circumstances such as traffic or weather. Our liability is limited to the fare paid."
+        },
+        {
+          "title": "Data Protection ",
+          "desc": "We comply with all UK GDPR requirements. Please refer to our Privacy Policy for full details."
+        },
+        {
+          "title": "Governing Law ",
+          "desc": "These terms are governed by the laws of England and Wales."
+        }
+      ],
+      "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
+      "button": "Done"
+    }
   },
-  "terms": {
-    "Open_button":"Terms & Conditions",
-    "title": "Terms and Conditions – Airport & City Transfer",
-    "elements": [
-      {
-        "title": " Bookings and Confirmations",
-      "desc": "All bookings must be made via our app, website, phone, or authorised partners. Confirmation is provided electronically. It is the customer’s responsibility to ensure all booking details are accurate."
-      },
-      {
-        "title": " Payments and Charges",
-      "desc": "All fares are quoted in GBP (£). Additional fees may apply for extra stops, waiting time, or out-of-hours service. Payments must be made at booking unless agreed otherwise."
-      },
-      {
-        "title": " Cancellations and Refunds",
-      "desc": "Cancellations made more than 24 hours in advance are fully refundable. No-shows and late cancellations are non-refundable."
-      },
-      {
-        "title": " Use of TfL-Licensed Personnel",
-      "desc": "All journeys are carried out exclusively by drivers and vehicles licensed by Transport for London. We conduct regular checks to ensure compliance."
-      },
-      {
-        "title": " Safety and Conduct",
-      "desc": "All drivers are DBS-checked and follow our code of conduct. Passengers are expected to behave respectfully and comply with UK safety regulations."
-      },
-      {
-        "title": " Lost Property",
-      "desc": "Items left in vehicles are logged and stored for up to 6 weeks. Customers can contact us to arrange retrieval. Unclaimed items are either securely disposed of or donated."
-      },
-
-      {
-        "title": "Complaints Procedure",
-      "desc": "Complaints can be submitted via our website, phone, or email. A Compliance Officer investigates and responds within 5 working days. Relevant issues are reported to TfL where applicable."
-      },
-
-      {
-        "title": "Liability ",
-      "desc": "Airport & City Transfer is not liable for delays due to unforeseen circumstances such as traffic or weather. Our liability is limited to the fare paid."
-      },
-      {
-        "title": "Data Protection ",
-      "desc": "We comply with all UK GDPR requirements. Please refer to our Privacy Policy for full details."
-      },
-      {
-        "title": "Governing Law ",
-      "desc": "These terms are governed by the laws of England and Wales."
-      }
-
-    ],
-    "warning": "Please make sure to carefully read the Privacy Policy and Terms of Use before proceeding, as using our services indicates your full agreement.",
-    "button": "Done"
-  }
-  }
- ,
   "faqs": {
-      "Open_button":"FAQ’s",
+    "Open_button": "FAQ’s",
     "title": "Frequently Asked Questions – Airport & City Transfer",
     "elements": [
       {
@@ -395,7 +473,7 @@
       },
       {
         "question": "What happens if my flight is delayed?",
-        "answer": "We monitor major airports for delays. If your flight is late, we’ll adjust your pickup time accordingly. You can also inform us of delays using the app or by contacting support."
+        "answer": "Contact ACT with any flight delay or cancellation so we can review and agree revised pickup arrangements. A known flight delay is not automatically treated as a passenger no-show."
       },
       {
         "question": "Are your drivers licensed and DBS-checked?",
@@ -403,7 +481,7 @@
       },
       {
         "question": "Can I cancel or change my booking?",
-        "answer": "Yes. You can cancel or modify your booking by contacting us at least 24 hours before your scheduled pickup. Cancellations within 24 hours may not be refundable."
+        "answer": "Yes. If ACT receives your cancellation at least 24 hours before the confirmed pickup time, you receive a full refund. Within 24 hours, reasonable evidenced cancellation losses may be deducted, capped at the booking price and reduced for costs saved or replacement work. Changes depend on availability; any revised price requires your acceptance. Email info@airportandcitytransfer.com with your booking reference and telephone +44 208 153 0303 for urgent changes. See our Terms & Conditions for waiting, no-show and refund-processing details."
       },
       {
         "question": "What if I’ve left something in the vehicle?",

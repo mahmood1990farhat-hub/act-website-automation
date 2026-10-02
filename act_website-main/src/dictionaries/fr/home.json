@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Informations de paiement",
-      "subtitle": "Veuillez saisir vos informations de paiement",
+      "subtitle": "Annulation reçue au moins 24 heures avant la prise en charge : remboursement intégral. À moins de 24 heures ou en cas d’absence, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation et en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Veuillez lire les conditions générales avant de payer.",
       "form": {
         "Card_Number": "Numéro de carte",
         "Expired_date": "Date d’expiration",
@@ -387,8 +387,40 @@
           "desc": "Tous les tarifs sont indiqués en livres sterling, GBP (£). Des frais supplémentaires peuvent s’appliquer pour les arrêts additionnels, le temps d’attente ou les services en dehors des horaires habituels. Le paiement doit être effectué à la réservation, sauf accord contraire."
         },
         {
-          "title": "Annulations et remboursements",
-          "desc": "Les annulations effectuées plus de 24 heures à l’avance sont intégralement remboursables. Les absences au rendez-vous et les annulations tardives ne sont pas remboursables."
+          "title": "Annulation au moins 24 heures avant la prise en charge",
+          "desc": "Si ACT reçoit votre annulation au moins 24 heures avant l’heure de prise en charge confirmée, y compris exactement 24 heures avant, vous bénéficiez d’un remboursement intégral."
+        },
+        {
+          "title": "Annulation moins de 24 heures avant la prise en charge",
+          "desc": "ACT peut déduire les pertes raisonnables et justifiées directement causées par votre annulation, dans la limite du prix de la réservation. Nous prenons des mesures raisonnables pour réduire ces pertes et tenons compte des coûts économisés ou des prestations de remplacement obtenues. Le solde éventuel vous est remboursé."
+        },
+        {
+          "title": "Absence du passager",
+          "desc": "Une absence n’est constatée qu’après le délai d’attente convenu et des tentatives documentées de contacter le passager. Toute retenue suit la même règle fondée sur les pertes que pour une annulation à moins de 24 heures et reste limitée au prix de la réservation."
+        },
+        {
+          "title": "Délais d’attente",
+          "desc": "Le délai d’attente est de 15 minutes pour les prises en charge ordinaires et de 60 minutes pour les prises en charge à l’aéroport, à compter de l’heure de prise en charge convenue. Tous frais d’attente supplémentaires doivent être annoncés et acceptés."
+        },
+        {
+          "title": "Si ACT ne peut pas assurer le trajet",
+          "desc": "Nous vous proposons une solution de remplacement à accepter, ou un remboursement intégral du trajet qui ne peut pas être assuré."
+        },
+        {
+          "title": "Retards ou annulations de vols",
+          "desc": "Contactez ACT en cas de changement concernant votre vol. Nous examinons et convenons de nouvelles modalités de prise en charge. Un retard de vol connu n’est pas automatiquement considéré comme une absence du passager."
+        },
+        {
+          "title": "Modification de réservation",
+          "desc": "Les modifications dépendent des disponibilités. Tout nouveau prix vous est communiqué avant votre acceptation de la modification."
+        },
+        {
+          "title": "Traitement des remboursements",
+          "desc": "Nous lançons le remboursement sur le moyen de paiement d’origine dans les 5 jours ouvrés suivant la confirmation du montant à rembourser. Votre banque ou prestataire de paiement peut prendre davantage de temps pour créditer les fonds."
+        },
+        {
+          "title": "Comment annuler ou modifier une réservation",
+          "desc": "Envoyez un e-mail à info@airportandcitytransfer.com en indiquant votre référence de réservation. Pour les changements urgents, appelez également le +44 208 153 0303. Le délai d’annulation est calculé à partir de la réception de votre demande par ACT, par rapport à l’heure de prise en charge confirmée, et non à partir de la réponse de notre équipe."
         },
         {
           "title": "Chauffeurs et véhicules agréés par TfL",
@@ -441,7 +473,7 @@
       },
       {
         "question": "Que se passe-t-il si mon vol est retardé ?",
-        "answer": "Nous surveillons les retards dans les principaux aéroports. Si votre vol est retardé, nous adaptons l’heure de prise en charge. Vous pouvez également nous informer via l’application ou en contactant notre équipe."
+        "answer": "Contactez ACT en cas de retard ou d’annulation de votre vol afin de convenir de nouvelles modalités de prise en charge. Un retard de vol connu n’est pas automatiquement considéré comme une absence du passager."
       },
       {
         "question": "Vos chauffeurs sont-ils agréés et contrôlés par le DBS ?",
@@ -449,7 +481,7 @@
       },
       {
         "question": "Puis-je annuler ou modifier ma réservation ?",
-        "answer": "Oui. Vous pouvez annuler ou modifier votre réservation en nous contactant au moins 24 heures avant l’heure de prise en charge prévue. Les annulations à moins de 24 heures du départ peuvent ne pas être remboursables."
+        "answer": "Oui. Si ACT reçoit votre annulation au moins 24 heures avant l’heure de prise en charge confirmée, vous bénéficiez d’un remboursement intégral. À moins de 24 heures, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation, en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Les modifications dépendent des disponibilités ; tout nouveau prix nécessite votre accord. Écrivez à info@airportandcitytransfer.com avec votre référence de réservation et appelez le +44 208 153 0303 pour les changements urgents. Consultez les conditions générales pour les délais d’attente, les absences et le traitement des remboursements."
       },
       {
         "question": "Que faire si j’ai oublié un objet dans le véhicule ?",
