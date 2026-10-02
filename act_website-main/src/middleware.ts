@@ -34,6 +34,12 @@ export function middleware(request: NextRequest) {
   if (isSupportedLocale(localeSegment) && !isEnabledLocale(localeSegment)) {
     return new NextResponse("Not found", { status: 404, headers: { "X-Robots-Tag": "noindex" } });
   }
+  // New customer language does not translate or bypass operational account routes.
+  if (localeSegment === "fr" && (/^\/fr\/(driver|dashboard|admin|upload-documents)(\/|$)/.test(pathname) || request.nextUrl.searchParams.has("captain"))) {
+    const destination = request.nextUrl.clone();
+    destination.pathname = pathname.replace(/^\/fr(?=\/|$)/, "/en");
+    return NextResponse.redirect(destination);
+  }
   const hostname = request.nextUrl.hostname;
   const requestHost = request.headers.get("host")?.split(":")[0];
   const forwardedHost = request.headers
@@ -198,3 +204,4 @@ export const config = {
     '/((?!api|_next|.*\\..*|.*\\.html$).*)',
   ],
 }
+

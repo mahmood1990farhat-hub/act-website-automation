@@ -1,3 +1,4 @@
+import french from "@/dictionaries/fr/bookingSupplement.json";
 export type AirportJourneyDirection = "arrival" | "departure" | "manual";
 
 type RoutePointLike = {
@@ -86,7 +87,7 @@ export const formatCustomerTime = (minutes: number) => {
   return `${hour12}:${String(minute).padStart(2, "0")} ${period}`;
 };
 
-export const getDepartureGuidance = (pickupTime: string, flightTime: string) => {
+export const getDepartureGuidance = (pickupTime: string, flightTime: string, locale = "en") => {
   const pickupMinutes = parseTimeToMinutes(pickupTime);
   const flightMinutes = parseTimeToMinutes(flightTime);
   if (pickupMinutes === undefined || flightMinutes === undefined) return "";
@@ -97,10 +98,11 @@ export const getDepartureGuidance = (pickupTime: string, flightTime: string) => 
   const windowStart = formatCustomerTime(flightMinutes - 180);
   const windowEnd = formatCustomerTime(flightMinutes - 120);
 
+  if (locale === "fr") return french.flight.departureGuidance.replace("{windowStart}", windowStart).replace("{windowEnd}", windowEnd);
   return `For airport departures, we recommend choosing a pickup time around 2–3 hours before your flight departure. Your selected pickup time may be too close or too early. Suggested pickup time: between ${windowStart} and ${windowEnd}.`;
 };
 
-export const getArrivalGuidance = (pickupTime: string, landingTime: string) => {
+export const getArrivalGuidance = (pickupTime: string, landingTime: string, locale = "en") => {
   const pickupMinutes = parseTimeToMinutes(pickupTime);
   const landingMinutes = parseTimeToMinutes(landingTime);
   if (pickupMinutes === undefined || landingMinutes === undefined) return "";
@@ -112,5 +114,7 @@ export const getArrivalGuidance = (pickupTime: string, landingTime: string) => {
 
   const suggestedPickup = formatCustomerTime(landingMinutes + 60);
 
+  if (locale === "fr") return french.flight.arrivalGuidance.replace("{suggestedPickup}", suggestedPickup);
   return `For airport arrivals, we recommend choosing a pickup time at least 1 hour after landing to allow time for immigration, baggage collection, and meeting your driver. Suggested pickup time: ${suggestedPickup} or later.`;
 };
+

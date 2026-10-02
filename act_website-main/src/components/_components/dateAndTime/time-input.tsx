@@ -18,6 +18,7 @@ interface TimeValue {
 const placeholders = {
   ar: "اختر الوقت",
   en: "Select time",
+  fr: "Choisir une heure",
 };
 
 interface TimeInputProps {
@@ -45,7 +46,7 @@ export function TimeInput({
 }: TimeInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[dictionaryLocale(language)];
+  const defaultPlaceholder = placeholder || placeholders[language === "fr" ? "fr" : dictionaryLocale(language)];
   const isRTL = language === "ar";
 
   const handleTimeSelect = (time: TimeValue) => {
@@ -98,9 +99,10 @@ export function TimeInput({
         onSelect={handleTimeSelect}
         selectedTime={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={dictionaryLocale(language)}
+        language={language === "fr" ? "fr" : dictionaryLocale(language)}
       />
     </>
   );
 }
+
 

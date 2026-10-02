@@ -1,5 +1,5 @@
 import { Languages } from "./src/constants/enums";
-export type Locale = Languages.ARABIC | Languages.ENGLISH;
+export type Locale = Languages.ARABIC | Languages.ENGLISH | "fr";
 export type languageType = Locale;
 export type SupportedLocale = `${Locale}` | "zh-CN" | "tr" | "es" | "fr" | "de";
 export const localeRegistry: Record<SupportedLocale, { label: string; direction: "ltr" | "rtl"; enabled: boolean }> = {
@@ -19,7 +19,7 @@ export const isEnabledLocale = (value: string): value is Locale =>
 export const enabledLocales = (Object.keys(localeRegistry) as SupportedLocale[]).filter(isEnabledLocale);
 export const i18n = { defaultLocale: Languages.ARABIC, locales: enabledLocales };
 export const directionFor = (locale: string) => locale === "ar" ? "rtl" : "ltr";
-export const dictionaryLocale = (locale: string): Locale => locale === "ar" ? Languages.ARABIC : Languages.ENGLISH;
+export const dictionaryLocale = (locale: string): Languages.ARABIC | Languages.ENGLISH => locale === "ar" ? Languages.ARABIC : Languages.ENGLISH;
 export const localeFromPath = (path: string): Locale | undefined => {
   const segment = path.split(/[?#]/, 1)[0].split("/")[1];
   return isEnabledLocale(segment || "") ? segment as Locale : undefined;
@@ -39,4 +39,5 @@ export const publicRoutes = ["", "about-us", "download-app", "complaints", "lost
   "heathrow-airport-transfer", "gatwick-airport-transfer", "stansted-airport-transfer",
   "luton-airport-transfer", "london-city-airport-transfer"];
 export const publishedLocalesFor = (path: string): Locale[] =>
-  publicRoutes.includes(path.replace(/^\/+|\/+$/g, "")) ? enabledLocales : [];
+  publicRoutes.includes(path.replace(/^\/+|\/+$/g, "")) ? enabledLocales.filter(code => code !== "fr") : [];
+

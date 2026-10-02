@@ -33,3 +33,4 @@ export default function SelectLanguage({ locale, language }: {
     </ul>}
   </div>;
 }
+

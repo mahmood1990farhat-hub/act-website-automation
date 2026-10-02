@@ -233,7 +233,7 @@ export default function CheckoutForm({
     });
 
     if (result.error) {
-      setErrorMsg(result.error.message || "Payment failed");
+      setErrorMsg(result.error.message || (locale === "fr" ? "Le paiement a échoué" : "Payment failed"));
     } else if (result.paymentIntent.status === "succeeded") {
       await fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();
@@ -297,7 +297,7 @@ export default function CheckoutForm({
           </div>
           <div className="w-full">
             <label>
-              <p>CVC</p>
+              <p>{locale === "fr" ? "Cryptogramme visuel (CVC)" : "CVC"}</p>
             </label>
             <div className="w-full p-2.5 border-2 bg-white text-foreground border-muted rounded-lg">
               <CardCvcElement
@@ -357,3 +357,4 @@ export default function CheckoutForm({
     </div>
   );
 }
+

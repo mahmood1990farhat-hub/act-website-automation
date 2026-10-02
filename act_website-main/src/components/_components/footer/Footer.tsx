@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import Image from "next/image";
 import React from "react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
@@ -135,32 +136,22 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
         </div>
         {/* Airports */}
         <div className="">
-          <h1 className="font-bold text-white">Airports</h1>
+          <h1 className="font-bold text-white">{customerText(locale, "Airports")}</h1>
           <ul className="text-muted text-sm space-y-3 mt-5">
             <li>
-              <Link href={`/${locale}/heathrow-airport-transfer`} className="cursor-pointer hover:text-gray-400">
-                Heathrow Airport Transfer
-              </Link>
+              <Link href={`/${locale}/heathrow-airport-transfer`} className="cursor-pointer hover:text-gray-400">{customerText(locale, "Heathrow Airport Transfer")}</Link>
             </li>
             <li>
-              <Link href={`/${locale}/gatwick-airport-transfer`} className="cursor-pointer hover:text-gray-400">
-                Gatwick Airport Transfer
-              </Link>
+              <Link href={`/${locale}/gatwick-airport-transfer`} className="cursor-pointer hover:text-gray-400">{customerText(locale, "Gatwick Airport Transfer")}</Link>
             </li>
             <li>
-              <Link href={`/${locale}/stansted-airport-transfer`} className="cursor-pointer hover:text-gray-400">
-                Stansted Airport Transfer
-              </Link>
+              <Link href={`/${locale}/stansted-airport-transfer`} className="cursor-pointer hover:text-gray-400">{customerText(locale, "Stansted Airport Transfer")}</Link>
             </li>
             <li>
-              <Link href={`/${locale}/luton-airport-transfer`} className="cursor-pointer hover:text-gray-400">
-                Luton Airport Transfer
-              </Link>
+              <Link href={`/${locale}/luton-airport-transfer`} className="cursor-pointer hover:text-gray-400">{customerText(locale, "Luton Airport Transfer")}</Link>
             </li>
             <li>
-              <Link href={`/${locale}/london-city-airport-transfer`} className="cursor-pointer hover:text-gray-400">
-                London City Airport Transfer
-              </Link>
+              <Link href={`/${locale}/london-city-airport-transfer`} className="cursor-pointer hover:text-gray-400">{customerText(locale, "London City Airport Transfer")}</Link>
             </li>
           </ul>
         </div>
@@ -258,3 +249,4 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
     </footer>
   );
 }
+

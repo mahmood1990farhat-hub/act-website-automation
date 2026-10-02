@@ -17,6 +17,7 @@ export const getPublicPageSeo = (
   metadata: Metadata = {}
 ): Metadata => ({
   ...metadata,
+  ...(locale === "fr" ? { robots: { index: false, follow: false } } : {}),
   alternates: {
     ...metadata.alternates,
     canonical: buildLocalizedUrl(locale, path),
@@ -33,3 +34,4 @@ export const privatePageSeo: Metadata = {
     follow: false,
   },
 };
+

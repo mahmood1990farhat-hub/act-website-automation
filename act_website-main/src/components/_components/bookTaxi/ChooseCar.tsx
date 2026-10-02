@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -56,20 +57,20 @@ export default function ModernChooseCar({
 
   // Arabic text alternatives
   const texts = {
-    back: isRTL ? "العودة" : "Back",
-    mostPopular: isRTL ? "الأكثر شعبية" : "Most Popular",
-    passengers: isRTL ? "راكب" : "passengers",
-    professionalDriver: isRTL ? "سائق محترف" : "Professional Driver",
-    premiumComfort: isRTL ? "راحة فائقة" : "Premium Comfort",
-    meetGreet: isRTL ? "استقبال ومرافقة" : "Meet & Greet",
+    back: isRTL ? "العودة" : customerText(locale, "Back"),
+    mostPopular: isRTL ? "الأكثر شعبية" : customerText(locale, "Most Popular"),
+    passengers: isRTL ? "راكب" : customerText(locale, "passengers"),
+    professionalDriver: isRTL ? "سائق محترف" : customerText(locale, "Professional Driver"),
+    premiumComfort: isRTL ? "راحة فائقة" : customerText(locale, "Premium Comfort"),
+    meetGreet: isRTL ? "استقبال ومرافقة" : customerText(locale, "Meet & Greet"),
     freeCancellation: isRTL
       ? "إلغاء مجاني حتى ساعة واحدة"
       : "Free cancellation up to 1 hour",
     realTimeTracking: isRTL ? "تتبع فوري متضمن" : "Real-time tracking included",
-    continue: isRTL ? "متابعة" : "Continue",
+    continue: isRTL ? "متابعة" : customerText(locale, "Continue"),
     selectVehicle: isRTL
       ? "اختر مركبتك المفضلة من أسطولنا المميز"
-      : "Select your preferred vehicle from our premium fleet",
+      : customerText(locale, "Select your preferred vehicle from our premium fleet"),
   };
 
   const SkeletonCard = () => (
@@ -128,9 +129,7 @@ export default function ModernChooseCar({
             </>
           ) : (
             <>
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Back
-            </>
+              <ChevronLeft className="w-5 h-5 mr-2" />{customerText(locale, "Back")}</>
           )}
         </Button>
       </div>
@@ -189,9 +188,7 @@ export default function ModernChooseCar({
                         </div>
                       )}
                       {isDisabled && (
-                        <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
-                          Coming Soon
-                        </div>
+                        <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-xs sm:text-sm font-semibold">{customerText(locale, "Coming Soon")}</div>
                       )}
                     </div>
 
@@ -331,4 +328,5 @@ export default function ModernChooseCar({
     </div>
   );
 }
+
 

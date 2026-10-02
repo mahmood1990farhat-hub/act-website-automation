@@ -22,10 +22,21 @@ const loaders = {
     dashboard: () => import("@/dictionaries/ar/dashboard.json").then(m => m.default),
   },
 };
+const frenchLoaders = {
+  home: () => import("@/dictionaries/fr/home.json").then(m => m.default),
+  auth: () => import("@/dictionaries/fr/auth.json").then(m => m.default),
+  complaints: () => import("@/dictionaries/fr/complaints.json").then(m => m.default),
+  lostProperty: () => import("@/dictionaries/fr/lostProperty.json").then(m => m.default),
+  tripsPassenger: () => import("@/dictionaries/fr/tripsPassenger.json").then(m => m.default),
+};
 export default async function getTrans(locale: SupportedLocale, section: string): Promise<any> {
   if (!Object.prototype.hasOwnProperty.call(loaders.en, section)) throw new Error(`Unknown translation section: ${section}`);
   const key = section as keyof typeof loaders.en;
   const english = await loaders.en[key]();
+  if (locale === "fr" && Object.prototype.hasOwnProperty.call(frenchLoaders, section)) {
+    return mergeDictionary(english, await frenchLoaders[section as keyof typeof frenchLoaders]());
+  }
   const language = dictionaryLocale(locale);
   return language === "en" ? english : mergeDictionary(english, await loaders[language][key]());
 }
+

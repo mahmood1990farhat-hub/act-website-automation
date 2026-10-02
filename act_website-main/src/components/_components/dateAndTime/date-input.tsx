@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 // import { format } from "date-fns"
-import { ar, enUS } from "date-fns/locale";
+import { ar, enUS, fr } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ type Language = SupportedLocale;
 const placeholders = {
   ar: "اختر التاريخ",
   en: "Select date",
+  fr: "Choisir une date",
 };
 
 interface DateInputProps {
@@ -47,8 +48,8 @@ export function DateInput({
 }: DateInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[dictionaryLocale(language)];
-  const locale = language === "ar" ? ar : enUS;
+  const defaultPlaceholder = placeholder || placeholders[language === "fr" ? "fr" : dictionaryLocale(language)];
+  const locale = language === "ar" ? ar : language === "fr" ? fr : enUS;
   const isRTL = language === "ar";
 
   const handleDateSelect = (date: Date) => {
@@ -65,6 +66,7 @@ export function DateInput({
 
 
   const formatDate = (date: Date) => {
+    if (language === "fr") return format(date, "d MMMM yyyy", { locale });
     if (language === "ar") {
       return format(date, "d/M/yyyy", { locale });
     } else {
@@ -105,9 +107,10 @@ export function DateInput({
         onSelect={handleDateSelect}
         selectedDate={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={dictionaryLocale(language)}
+        language={language === "fr" ? "fr" : dictionaryLocale(language)}
       />
     </>
   );
 }
+
 

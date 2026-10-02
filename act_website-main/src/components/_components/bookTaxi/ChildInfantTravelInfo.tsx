@@ -1,4 +1,5 @@
 "use client";
+import french from "@/dictionaries/fr/bookingSupplement.json";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +64,7 @@ export default function ChildInfantTravelInfo({
           className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 cursor-pointer hover:text-white"
         >
           <ChevronLeft className={`w-5 h-5 ${isRTL ? "rotate-180 ml-2" : "mr-2"}`} />
-          Back
+          {locale === "fr" ? "Retour" : "Back"}
         </Button>
       </div>
 
@@ -71,18 +72,18 @@ export default function ChildInfantTravelInfo({
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2 text-xl sm:text-2xl">
             <Baby className="w-5 h-5 text-[#ffd100]" />
-            Travelling with Children or Infants?
+            {locale === "fr" ? french.childSeats.title : "Travelling with Children or Infants?"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm sm:text-base text-white/80">
-            UK guidance generally requires children to use an appropriate child restraint based on age, height and weight. Please confirm how child or infant seats will be handled for this booking.
+            {locale === "fr" ? french.childSeats.description : "UK guidance generally requires children to use an appropriate child restraint based on age, height and weight. Please confirm how child or infant seats will be handled for this booking."}
           </p>
 
           {passengerCounts.infants > 0 && (
             <div className="space-y-3">
-              <h3 className="text-white font-bold">Infant Seat Requirement</h3>
-              {infantOptions.map((option) => (
+              <h3 className="text-white font-bold">{locale === "fr" ? french.childSeats.infantTitle : "Infant Seat Requirement"}</h3>
+              {infantOptions.map((option, index) => (
                 <label key={option} className={optionClass}>
                   <input
                     type="radio"
@@ -94,7 +95,7 @@ export default function ChildInfantTravelInfo({
                     }
                     className="mt-1"
                   />
-                  <span>{option}</span>
+                  <span>{locale === "fr" ? french.childSeats.infantOptions[index] : option}</span>
                 </label>
               ))}
             </div>
@@ -102,8 +103,8 @@ export default function ChildInfantTravelInfo({
 
           {passengerCounts.children > 0 && (
             <div className="space-y-3">
-              <h3 className="text-white font-bold">Child Seat Requirement</h3>
-              {childOptions.map((option) => (
+              <h3 className="text-white font-bold">{locale === "fr" ? french.childSeats.childTitle : "Child Seat Requirement"}</h3>
+              {childOptions.map((option, index) => (
                 <label key={option} className={optionClass}>
                   <input
                     type="radio"
@@ -115,7 +116,7 @@ export default function ChildInfantTravelInfo({
                     }
                     className="mt-1"
                   />
-                  <span>{option}</span>
+                  <span>{locale === "fr" ? french.childSeats.childOptions[index] : option}</span>
                 </label>
               ))}
             </div>
@@ -123,18 +124,18 @@ export default function ChildInfantTravelInfo({
 
           <details className="rounded-lg border border-white/20 bg-white/5 p-4 text-white">
             <summary className="cursor-pointer text-sm font-semibold text-[#ffd100]">
-              Read UK guidance
+              {locale === "fr" ? french.childSeats.guidanceTitle : "Read UK guidance"}
             </summary>
             <ul className="mt-3 space-y-2 text-sm text-white/80">
-              <li>• Infants (0-3 years): Should travel in a suitable infant or child seat.</li>
-              <li>• Children (4-11 years): Should normally use a suitable child seat until 12 years old or 135cm tall, whichever comes first.</li>
-              <li>• Children aged 12+ or taller than 135cm: Must use an adult seat belt.</li>
+              <li>{locale === "fr" ? french.childSeats.guidance[0] : "\u2022 Infants (0-3 years): Should travel in a suitable infant or child seat."}</li>
+              <li>{locale === "fr" ? french.childSeats.guidance[1] : "\u2022 Children (4-11 years): Should normally use a suitable child seat until 12 years old or 135cm tall, whichever comes first."}</li>
+              <li>{locale === "fr" ? french.childSeats.guidance[2] : "\u2022 Children aged 12+ or taller than 135cm: Must use an adult seat belt."}</li>
             </ul>
           </details>
 
           {isRequired && (
             <p className="text-red-300 text-sm font-semibold">
-              Please select the required child or infant seat option before continuing.
+              {locale === "fr" ? french.childSeats.required : "Please select the required child or infant seat option before continuing."}
             </p>
           )}
 
@@ -143,10 +144,11 @@ export default function ChildInfantTravelInfo({
             onClick={onSubmit}
             className="w-full bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold py-6 text-base sm:text-lg shadow-xl cursor-pointer"
           >
-            Continue
+            {locale === "fr" ? "Continuer" : "Continue"}
           </Button>
         </CardContent>
       </Card>
     </div>
   );
 }
+

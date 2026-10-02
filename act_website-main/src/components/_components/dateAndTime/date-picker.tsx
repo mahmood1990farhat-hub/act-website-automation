@@ -13,12 +13,13 @@ import {
   isToday,
   startOfDay,
 } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import { ar, enUS, fr } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const translations = {
+  fr: { selectDate: "Choisir une date", close: "Fermer", cancel: "Annuler", ok: "Valider", months: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"], days: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."] },
   ar: {
     selectDate: "اختر التاريخ",
     close: "إغلاق",
@@ -63,7 +64,7 @@ const translations = {
   },
 };
 
-type Language = "ar" | "en";
+type Language = "ar" | "en" | "fr";
 
 interface MobileDatePickerProps {
   isOpen?: boolean;
@@ -92,7 +93,7 @@ export function DatePicker({
   if (!isOpen) return null;
 
   const t = translations[language];
-  const locale = language === "ar" ? ar : enUS;
+  const locale = language === "ar" ? ar : language === "fr" ? fr : enUS;
   const isRTL = language === "ar";
   const today = new Date();
 
@@ -390,3 +391,4 @@ export function DatePicker({
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,32 +109,32 @@ export default function ModernConfirmFlightDetails({
 
 	// Arabic text alternatives
 	const texts = {
-		confirmDetails: isRTL ? "تأكيد تفاصيل الحجز" : "Confirm Booking Details",
-		tripDetails: isRTL ? "تفاصيل الرحلة" : "Trip Details",
-		passengerInfo: isRTL ? "معلومات الركاب" : "Passenger Information",
-		vehicleDetails: isRTL ? "تفاصيل المركبة" : "Vehicle Details",
+		confirmDetails: isRTL ? "تأكيد تفاصيل الحجز" : customerText(locale, "Confirm Booking Details"),
+		tripDetails: isRTL ? "تفاصيل الرحلة" : customerText(locale, "Trip Details"),
+		passengerInfo: isRTL ? "معلومات الركاب" : customerText(locale, "Passenger Information"),
+		vehicleDetails: isRTL ? "تفاصيل المركبة" : customerText(locale, "Vehicle Details"),
 		costBreakdown: trans.Confir_flight_details.cost_breakdown,
-		back: isRTL ? "العودة" : "Back",
-		edit: isRTL ? "تعديل" : "Edit",
-		confirm: isRTL ? "التأكيد و المتابعة" : "Confirm & Continue",
-		pickup: isRTL ? "نقطة الانطلاق" : "Pickup Location",
-		dropoff: isRTL ? "نقطة الوصول" : "Drop-off Location",
-		stops: isRTL ? "نقاط التوقف" : "Stop Points",
+		back: isRTL ? "العودة" : customerText(locale, "Back"),
+		edit: isRTL ? "تعديل" : customerText(locale, "Edit"),
+		confirm: isRTL ? "التأكيد و المتابعة" : customerText(locale, "Confirm & Continue"),
+		pickup: isRTL ? "نقطة الانطلاق" : customerText(locale, "Pickup Location"),
+		dropoff: isRTL ? "نقطة الوصول" : customerText(locale, "Drop-off Location"),
+		stops: isRTL ? "نقاط التوقف" : customerText(locale, "Stop Points"),
 		distance: isRTL ? "المسافة" : "Distance",
 		date: isRTL ? "التاريخ" : "Date",
-		time: isRTL ? "الوقت المتوقع للوصول" : "ETA",
-		timeTrip: isRTL ? "مدة الرحلة" : "Trip Duration",
-		passengers: isRTL ? "عدد الركاب" : "Passengers",
-		smallLuggage: isRTL ? "حقائب صغيرة" : "Small Luggage",
-		largeLuggage: isRTL ? "حقائب كبيرة" : "Large Luggage",
-		vehicleType: isRTL ? "نوع المركبة" : "Vehicle Type",
+		time: isRTL ? "الوقت المتوقع للوصول" : customerText(locale, "ETA"),
+		timeTrip: isRTL ? "مدة الرحلة" : customerText(locale, "Trip Duration"),
+		passengers: isRTL ? "عدد الركاب" : customerText(locale, "Passengers"),
+		smallLuggage: isRTL ? "حقائب صغيرة" : customerText(locale, "Small Luggage"),
+		largeLuggage: isRTL ? "حقائب كبيرة" : customerText(locale, "Large Luggage"),
+		vehicleType: isRTL ? "نوع المركبة" : customerText(locale, "Vehicle Type"),
 		baseCost: trans.Confir_flight_details.transfer_fare,
 		airportVAT: trans.Confir_flight_details.airport_access_fee,
 		regularVAT: trans.Confir_flight_details.vat_20,
 		meetAndGreet: trans.Confir_flight_details.meet_and_greet,
 		included: trans.Confir_flight_details.included,
 		totalCost: trans.Confir_flight_details.total_price,
-		routeMap: isRTL ? "خريطة المسار" : "Route Map",
+		routeMap: isRTL ? "خريطة المسار" : customerText(locale, "Route Map"),
 	};
 
 	const onSubmit = async () => {
@@ -253,7 +254,7 @@ export default function ModernConfirmFlightDetails({
 				<p className="text-white/80 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
 					{isRTL
 						? "تأكد من تفاصيل رحلتك قبل المتابعة"
-						: "Review your trip details before proceeding"}
+						: customerText(locale, "Review your trip details before proceeding")}
 				</p>
 			</div>
 
@@ -445,22 +446,20 @@ export default function ModernConfirmFlightDetails({
 					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
-								<Users className="w-5 h-5 text-[#ffd100]" />
-								Passenger Details
-							</CardTitle>
+								<Users className="w-5 h-5 text-[#ffd100]" />{customerText(locale, "Passenger Details")}</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Full Name</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Full Name")}</p>
 									<p className="text-white text-sm">{data.passengerDetails.fullName || "-"}</p>
 								</div>
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Email</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Email")}</p>
 									<p className="text-white text-sm break-words">{data.passengerDetails.email || "-"}</p>
 								</div>
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Mobile Number</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Mobile Number")}</p>
 									<p className="text-white text-sm">
 										{data.passengerDetails.countryCode || "-"} {data.passengerDetails.mobileNumber || ""}
 									</p>
@@ -481,19 +480,19 @@ export default function ModernConfirmFlightDetails({
 							<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.adults}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Adults</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Adults")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.children}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Children (4-11)</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Children (4-11)")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.infants}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Infants (0-3)</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Infants (0-3)")}</p>
 								</div>
 								<div>
 									<p className="text-white font-bold text-lg sm:text-xl">{data.numberOfPassengers}</p>
-									<p className="text-white/60 text-xs sm:text-sm">Total passengers</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Total passengers")}</p>
 								</div>
 							</div>
 						</CardContent>
@@ -510,13 +509,13 @@ export default function ModernConfirmFlightDetails({
 							<CardContent className="space-y-3">
 								{data.infants > 0 && (
 									<div>
-										<p className="text-white/60 text-xs sm:text-sm">Infant seat option selected</p>
+										<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Infant seat option selected")}</p>
 										<p className="text-white text-sm">{data.childInfantTravel.infantSeatOption || "-"}</p>
 									</div>
 								)}
 								{data.children > 0 && (
 									<div>
-										<p className="text-white/60 text-xs sm:text-sm">Child seat option selected</p>
+										<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Child seat option selected")}</p>
 										<p className="text-white text-sm">{data.childInfantTravel.childSeatOption || "-"}</p>
 									</div>
 								)}
@@ -528,43 +527,41 @@ export default function ModernConfirmFlightDetails({
 					<Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
-								<Navigation className="w-5 h-5 text-[#ffd100]" />
-								Flight Details
-							</CardTitle>
+								<Navigation className="w-5 h-5 text-[#ffd100]" />{customerText(locale, "Flight Details")}</CardTitle>
 						</CardHeader>
 						<CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Flight Type</p>
+								<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Flight Type")}</p>
 								<p className="text-white text-sm">
 									{data.flightDetails.flightType === "arrival"
-										? "Arrival"
+										? customerText(locale, "Arrival")
 										: data.flightDetails.flightType === "departure"
-											? "Departure"
+											? customerText(locale, "Departure")
 											: "-"}
 								</p>
 							</div>
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Flight Number</p>
+								<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Flight Number")}</p>
 								<p className="text-white text-sm">{data.flightDetails.flightNumber || "-"}</p>
 							</div>
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Airline</p>
+								<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Airline")}</p>
 								<p className="text-white text-sm">{data.flightDetails.airline || "-"}</p>
 							</div>
 							{data.flightDetails.flightType === "arrival" && (
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Landing Time</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Landing Time")}</p>
 									<p className="text-white text-sm">{data.flightDetails.landingTime || "-"}</p>
 								</div>
 							)}
 							{data.flightDetails.flightType === "departure" && (
 								<div>
-									<p className="text-white/60 text-xs sm:text-sm">Departure Time</p>
+									<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Departure Time")}</p>
 									<p className="text-white text-sm">{data.flightDetails.departureTime || "-"}</p>
 								</div>
 							)}
 							<div>
-								<p className="text-white/60 text-xs sm:text-sm">Pick-up Sign Name</p>
+								<p className="text-white/60 text-xs sm:text-sm">{customerText(locale, "Pick-up Sign Name")}</p>
 								<p className="text-white text-sm">{data.flightDetails.pickupSignName || "-"}</p>
 							</div>
 						</CardContent>
@@ -631,7 +628,7 @@ export default function ModernConfirmFlightDetails({
 											variant="outline"
 											className="bg-[#ffd100]/20 border-[#ffd100]/50 text-[#ffd100] text-xs"
 										>
-											{isRTL ? "فئة مميزة" : "Premium"}
+											{isRTL ? "فئة مميزة" : customerText(locale, "Premium")}
 										</Badge>
 									</div>
 								</div>
@@ -711,7 +708,7 @@ export default function ModernConfirmFlightDetails({
 							{isLoading ? (
 								<div className="flex items-center gap-2">
 									<CarLoading />
-									<span>{isRTL ? "جاري المعالجة..." : "Processing..."}</span>
+									<span>{isRTL ? "جاري المعالجة..." : customerText(locale, "Processing...")}</span>
 								</div>
 							) : (
 								<div className="flex items-center gap-2">
@@ -730,12 +727,12 @@ export default function ModernConfirmFlightDetails({
 								<span>
 									{isRTL
 										? "استمتع بإلغاء مجاني حتى 24 ساعة قبل موعد الاستلام المحدد"
-										: "Enjoy free cancellation up to 24 hours before your scheduled pickup"}
+										: customerText(locale, "Enjoy free cancellation up to 24 hours before your scheduled pickup")}
 								</span>
 							</div>
 									<div className="flex items-center justify-center gap-1 text-nowrap">
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-								<span>{isRTL ? "دفع آمن" : "Secure Payment"}</span>
+								<span>{isRTL ? "دفع آمن" : customerText(locale, "Secure Payment")}</span>
 							</div>
 						</div>
 					</div>
@@ -770,3 +767,4 @@ export default function ModernConfirmFlightDetails({
 		</div>
 	);
 }
+

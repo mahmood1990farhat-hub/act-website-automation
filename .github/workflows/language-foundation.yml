@@ -1,4 +1,4 @@
-name: ACT hidden language foundation
+name: ACT private French preview
 "on":
   push:
     branches: [codex/language-foundation-20261001]
@@ -12,13 +12,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Build isolated frontend
-        run: docker build -f act_website-main/tests/frontend.Dockerfile -t act-language act_website-main
-      - name: Registry dictionary and routing checks
-        run: docker run --rm --network none act-language node tests/check-language-foundation.cjs
-      - name: Existing public route checks
+      - name: Build disposable private French image
+        run: docker build --build-arg ACT_TEST_FRENCH_PREVIEW=1 -f act_website-main/tests/frontend.Dockerfile -t act-language act_website-main
+      - name: Existing English and Arabic public routes
         run: docker run --rm --network none act-language node tests/check-rendered-seo.cjs
-      - name: Language menu desktop and mobile
-        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-language node tests/check-language-browser.cjs
-      - name: Existing booking entry
+      - name: Existing English and Arabic booking entry
         run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-language node tests/check-client-booking.cjs
+      - name: French private browser preview
+        run: |
+          docker create --name act-french-preview --network none --cap-drop ALL --security-opt no-new-privileges act-language node tests/check-french-preview.cjs
+          docker start -a act-french-preview
+          exit "$(docker inspect -f '{{.State.ExitCode}}' act-french-preview)"
+      - name: Collect preview screenshots
+        if: always()
+        run: docker cp act-french-preview:/tmp/french-previews ./french-previews
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-private-french-previews
+          path: french-previews
+          if-no-files-found: warn
+          retention-days: 14

@@ -82,7 +82,7 @@ assert.equal(supplement.childSeats.childOptions.length, 3);
 assert.equal(Object.keys(supplement.passenger.countryLabels).length, 8);
 assert.ok(supplement.languageNotices.booking.includes('GBP'));
 assert.match(read('i18n.config.ts'), /fr:\s*\{[^}]*enabled:\s*false/);
-assert.ok(!read('src/lib/translation.ts').includes('dictionaries/fr/'), 'Drafts must not be loaded before integration/review');
+assert.ok(read('src/lib/translation.ts').includes('dictionaries/fr/'), 'French drafts wired for isolated preview; publication still disabled');
 assert.match(read('src/middleware.ts'), /isSupportedLocale/);
 assert.match(read('src/middleware.ts'), /noindex/);
 console.log(JSON.stringify({status: 'PASS', stringValuesBySection: summary, airportPages: 5, authExclusions: excludedAuth, unchangedStringsForHumanReview: unchanged, scope: 'Content structure, tokens, route targets, protected values and source-level hidden-state checks only; not a UI, legal or live-payment acceptance test.'}, null, 2));

@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import React from "react";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ type typeProps = {
 
 export default function BookingConfirmation({ trans, locale }: typeProps) {
   const isRTL = locale === 'ar';
-  const urlMytrip = trans.desc.hour === " 1 " ? "/en/my-trips" : "/ar/my-trips";
+  const urlMytrip = `/${locale}/my-trips`;
 
   return (
     <div className="min-h-screen bg-white/10 backdrop-blur-sm flex items-center justify-center p-8 rounded-2xl max-sm:p-1">
@@ -44,7 +45,7 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             {/* Divider */}
             <div className="flex items-center space-x-4">
               <div className="flex-1 h-px bg-gray-200"></div>
-              <div className="text-xs text-gray-400 font-medium">NEXT STEPS</div>
+              <div className="text-xs text-gray-400 font-medium">{customerText(locale, "NEXT STEPS")}</div>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -72,12 +73,8 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
 
             {/* Additional Info */}
             {!isRTL && <div className="rounded-xl p-4 text-center">
-              <p className="text-xs text-muted leading-none">
-                Confirmation details sent to your email
-              </p>
-              <p className="text-xs text-muted mt-1">
-                Need help? Contact our support team 24/7
-              </p>
+              <p className="text-xs text-muted leading-none">{customerText(locale, "Confirmation details sent to your email")}</p>
+              <p className="text-xs text-muted mt-1">{customerText(locale, "Need help? Contact our support team 24/7")}</p>
             </div>}
           </div>
         </div>

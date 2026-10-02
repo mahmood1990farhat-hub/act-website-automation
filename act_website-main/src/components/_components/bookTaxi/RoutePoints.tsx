@@ -1,4 +1,5 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import React, { useState } from "react";
 import LocationSelector, { PlaceSuggestion } from "./LocationSelector";
 import { IoLocation } from "react-icons/io5";
@@ -81,7 +82,7 @@ export default function RoutePoints({
   const [submitError, setSubmitError] = useState("");
 
   const tripCalculationErrorMessage =
-    "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.";
+    customerText(locale, "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.");
 
   const addStopPoint = () => {
     const dropoff = routePoints.find((p) => p.type === "dropoff");
@@ -183,7 +184,7 @@ export default function RoutePoints({
 
     if (!validateForm()) {
       setIsRequired(true);
-      setSubmitError(locationValidationMessage);
+      setSubmitError(locale === "fr" ? "Sélectionnez des lieux valides, une date et une heure avant de continuer." : locationValidationMessage);
       return;
     }
 
@@ -194,7 +195,7 @@ export default function RoutePoints({
 
       if (inputValues.adults < 1 || inputValues.numberOfPassengers < 1) {
         setIsRequired(true);
-        setSubmitError("Adults must be at least 1.");
+        setSubmitError(customerText(locale, "Adults must be at least 1."));
         return;
       }
 
@@ -405,7 +406,7 @@ export default function RoutePoints({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label htmlFor="adult-count">
-                      <p className="text-sm text-muted">Adults</p>
+                      <p className="text-sm text-muted">{customerText(locale, "Adults")}</p>
                     </label>
                     <input
                       id="adult-count"
@@ -418,7 +419,7 @@ export default function RoutePoints({
                   </div>
                   <div>
                     <label htmlFor="child-count">
-                      <p className="text-sm text-muted">Children (4-11)</p>
+                      <p className="text-sm text-muted">{customerText(locale, "Children (4-11)")}</p>
                     </label>
                     <input
                       id="child-count"
@@ -431,7 +432,7 @@ export default function RoutePoints({
                   </div>
                   <div>
                     <label htmlFor="infant-count">
-                      <p className="text-sm text-muted">Infants (0-3)</p>
+                      <p className="text-sm text-muted">{customerText(locale, "Infants (0-3)")}</p>
                     </label>
                     <input
                       id="infant-count"
@@ -444,13 +445,11 @@ export default function RoutePoints({
                   </div>
                 </div>
                 {isRequired && formDetails.adults < 1 && (
-                  <span className="text-red-600 font-semibold text-sm">
-                    Adults must be at least 1.
-                  </span>
+                  <span className="text-red-600 font-semibold text-sm">{customerText(locale, "Adults must be at least 1.")}</span>
                 )}
               </div>
               <div className="w-full">
-                <p>Luggage</p>
+                <p>{customerText(locale, "Luggage")}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label htmlFor="large_suitcase">
@@ -513,3 +512,4 @@ export default function RoutePoints({
     </div>
   );
 }
+

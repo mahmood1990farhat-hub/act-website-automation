@@ -1,3 +1,4 @@
+import FrenchAirportPage, { frenchAirportMetadata } from "@/components/_components/FrenchAirportPage";
 import ArabicGatwickPage, { arabicMetadata } from "./ArabicGatwickPage";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -19,6 +20,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  if (locale === "fr") return frenchAirportMetadata("gatwick-airport-transfer");
   if (locale === "ar") return getPublicPageSeo(locale, "gatwick-airport-transfer", arabicMetadata);
   return getPublicPageSeo(locale, "gatwick-airport-transfer", pageMetadata);
 }
@@ -74,6 +76,7 @@ export default async function GatwickAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
+  if (locale === "fr") return <FrenchAirportPage slug="gatwick-airport-transfer" />;
   if (locale === "ar") return <ArabicGatwickPage />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;
@@ -241,3 +244,4 @@ export default async function GatwickAirportTransferPage({
     </main>
   );
 }
+
