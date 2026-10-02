@@ -55,7 +55,8 @@ async function main(){
   // Move to next month using the actual calendar control; stored format stays unchanged.
   await page.locator('button').filter({has:page.locator('svg.lucide-chevron-right')}).last().click();
   await page.getByRole('button',{name:'15',exact:true}).click();await page.getByRole('button',{name:'Valider',exact:true}).click();
-  await page.getByRole('button',{name:'Choisir une heure',exact:true}).click();await page.getByRole('button',{name:'Valider',exact:true}).click();
+  assert.equal(await page.locator('#ride-time').innerText(),'Choisir une heure');
+  await page.locator('#ride-time').click();await page.getByRole('button',{name:'Valider',exact:true}).click();
   await page.getByRole('button',{name:'Obtenir un tarif',exact:true}).click();
   await page.getByText('Preview vehicle — synthetic data',{exact:true}).click();
   await page.getByText('Coordonnées du passager',{exact:true}).waitFor();
