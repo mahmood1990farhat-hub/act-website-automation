@@ -1,7 +1,7 @@
 # French release readiness — 2 October 2026
 
 Status: focused implementation complete on the unpublished language branch;
-verification pending. This is NOT a production release or live-payment acceptance.
+focused verification PASS. This is NOT a production release or live-payment acceptance.
 
 ## Completed changes
 
@@ -74,7 +74,28 @@ desktop/mobile contact/auth/support validation and synthetic quote-to-review.
 No valid account/support request, booking, payment, email or OTP is sent.
 Stop after a successful candidate pass; repair concrete failures only.
 
-Final evidence will be recorded after the check finishes.
+Final candidate: `d5ecbc7a6546eab99ee624544d97c6b1849e027d`.
+Successful run: https://github.com/mahmood1990farhat-hub/act-website-automation/actions/runs/36980813067
+Job 110754679435; artifact 11215084421 contains 18 screenshots and result.json.
+All listed checks passed. Two synthetic quotes; zero real bookings/payments;
+zero submitted accounts, support cases, emails or OTPs. Six known offline Stripe
+loader errors; no other browser page errors. Only desktop/mobile simulated quote
+requests were attempted. No production secrets or external provider traffic.
+
+The initial candidate b523b4a built and passed English/Arabic checks; its support
+browser check timed out waiting for network idle. The final check waits for the
+actual form controls and verifies translated validation, without removing the
+acceptance checks. The final candidate also includes master-grounded copy fixes.
+Testing stopped after this successful pass.
+
+Production main remains `29de5e0cf4f3a1d3d12944e0b435d0cd7a0476ea`.
+French registry disabled; no merge/deployment or public French route enabled.
+
+Provider implementation references: Stripe Elements locale documentation
+https://docs.stripe.com/js/elements_object/create and the installed
+react-phone-number-input locale/calling-code APIs documented at
+https://github.com/catamphetamine/react-phone-number-input . These are interface
+references, not evidence of a completed live payment.
 
 Next recommended task: settle the cancellation/refund policy conflict, then
 complete the specific provider/transaction acceptance gate before requesting
