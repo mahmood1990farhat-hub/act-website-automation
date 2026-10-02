@@ -383,4 +383,3 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   );
 }
 
-

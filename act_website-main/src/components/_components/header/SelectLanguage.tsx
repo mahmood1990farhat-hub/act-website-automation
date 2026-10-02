@@ -18,7 +18,7 @@ export default function SelectLanguage({ locale, language }: {
   }, []);
   useEffect(() => setOpen(false), [pathname]);
   return <div ref={ref} className="relative" onKeyDown={e => { if (e.key === "Escape") setOpen(false); }}>
-    <button type="button" aria-label={locale === "ar" ? "اختر اللغة" : "Choose language"}
+    <button type="button" aria-label={locale === "ar" ? "اختر اللغة" : locale === "fr" ? "Choisir une langue" : "Choose language"}
       aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(!open)}
       className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary rounded-lg border border-primary/30">
       <TbWorld /><span>{localeRegistry[locale as Locale]?.label || "English"}</span>

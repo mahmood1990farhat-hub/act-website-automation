@@ -48,4 +48,3 @@ export default function PaymentDsetails({ trans, nextStep,prevStep, clientSecret
        </div>
   );
 }
-

@@ -60,4 +60,3 @@ export function buildTripQuoteRequest({
   if (stopPoints.length) request.stop_points = stopPoints;
   return request;
 }
-

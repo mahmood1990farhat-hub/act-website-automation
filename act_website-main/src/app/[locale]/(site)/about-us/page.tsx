@@ -16,7 +16,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params;
-  return getPublicPageSeo(locale, "about-us");
+  return getPublicPageSeo(locale, "about-us", locale === "fr" ? { title: "À propos et contact | Airport & City Transfer", description: "Découvrez Airport & City Transfer et contactez notre équipe pour votre trajet à Londres." } : {});
 }
 
 export default async function AboutPage({ params }: PageProps) {

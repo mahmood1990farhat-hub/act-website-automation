@@ -233,4 +233,3 @@ export default function GuardedMapView(props: Props) {
 
 // darkMapStyle هو الثيم الداكن الذي ناقشناه سابقاً
 
-
