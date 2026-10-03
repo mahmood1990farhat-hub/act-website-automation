@@ -75,6 +75,10 @@ Checks: seven-language production component SSR (login, registration, password/e
 
 New action checks: `node tests/check-customer-account-actions.cjs` from `act_website-main`.
 
+## Expanded coverage audit
+
+The owner-requested audit on 3 October is recorded in [TRANSLATION_COVERAGE_AUDIT_2026-10-03.md](TRANSLATION_COVERAGE_AUDIT_2026-10-03.md). It adds explicit release gates for uploaded privacy/terms/FAQ/guide language selection, language switching without lost booking state, preference persistence, accessibility/transient states, provider-controlled text and all customer document entry points. The audit confirms these areas are not yet complete.
+
 ## Remaining work, in order
 
 1. Complete German, Spanish, Turkish and Simplified Chinese dictionaries and customer interfaces. Generalise French-only routing, phone-country labels, date/time labels, payment-error handling and airport pages without changing stored API values. Finish remaining French hard-coded strings and outdated private notices.
