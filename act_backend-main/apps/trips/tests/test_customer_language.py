@@ -21,7 +21,7 @@ if not settings.configured:
                                    "DIRS": [str(BASE / "apps/trips/templates")], "APP_DIRS": False}])
     import django
     django.setup()
-from apps.trips.services.customer_language import booking_language, details_with_language, normalize_language, use_booking_language
+from apps.trips.services.customer_language import booking_language, details_with_language, normalize_language, use_booking_language, use_internal_language
 from apps.trips.services.customer_documents import render_arabic_document
 from apps.trips.services.localized_documents import render_customer_document, document_catalog, DOCUMENT_LOCALES
 from apps.accounts.customer_messages import account_message
@@ -63,6 +63,75 @@ def email_functions(captured):
 
 
 class CustomerLanguageTests(unittest.TestCase):
+    def test_verification_provider_receives_explicit_language(self):
+        calls = []
+        service = NS(verifications=NS(create=lambda **kw: (calls.append(kw) or NS(status="pending"))))
+        source = ast.parse((BASE / "utils/common/twilio_verify.py").read_text())
+        fn = next(n for n in source.body if isinstance(n, ast.FunctionDef) and n.name == "send_verification_code")
+        env = {"client": NS(verify=NS(v2=NS(services=lambda sid: service))), "settings": NS(TWILIO_VERIFY_SERVICE_SID="offline"), "normalize_language": normalize_language}
+        exec(compile(ast.Module(body=[fn], type_ignores=[]), "twilio_verify.py", "exec"), env)
+        for locale in ("en", "ar", "fr", "de", "es", "tr", "zh-CN"):
+            self.assertEqual(env["send_verification_code"]("+447700900000", locale=locale), "pending")
+            self.assertEqual(calls[-1], {"to": "+447700900000", "channel": "sms", "locale": locale})
+        env["send_verification_code"]("+447700900000")
+        self.assertNotIn("locale", calls[-1])
+
+    def test_customer_download_links_use_the_correct_stored_pdf(self):
+        captured = []; env = email_functions(captured)
+        for locale in ("en", "ar", *DOCUMENT_LOCALES):
+            trip = sample(locale)
+            trip.booking_confirmation_pdf = NS(url=f"/media/{locale}/booking.pdf")
+            trip.cancellation_confirmation_pdf = NS(url=f"/media/{locale}/cancellation.pdf")
+            for function, expected, wrong in (
+                ("send_passenger_confirmation", "booking.pdf", "cancellation.pdf"),
+                ("send_passenger_trip_cancellation_to_passenger", "cancellation.pdf", "booking.pdf"),
+            ):
+                before = len(captured)
+                with override("tr" if locale != "tr" else "ar"):
+                    env[function](trip.passenger.user, trip)
+                self.assertEqual(len(captured), before + 1)
+                html = captured[-1][1]["html_message"]
+                self.assertIn(f"/media/{locale}/{expected}", html)
+                self.assertNotIn(f"/media/{locale}/{wrong}", html)
+
+    def test_internal_notifications_are_always_english(self):
+        from datetime import datetime, timezone
+        from django.utils import timezone as django_timezone
+        source = ast.parse((BASE / "utils/common/email.py").read_text())
+        names = {"send_internal_notification", "send_trip_accepted_to_admin",
+                 "send_passenger_trip_cancellation_to_admin", "send_driver_cancellation_to_admin",
+                 "_format_booking_details_text", "_format_trip_luggage_label", "_booking_reference",
+                 "_dial_code_only", "_format_passenger_phone"}
+        module = ast.Module(body=[n for n in source.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[])
+        captured = []
+        def send(*args, **kwargs):
+            self.assertEqual(get_language(), "en")
+            captured.append((args, kwargs))
+        env = dict(globals(), logger=logging.getLogger("offline-internal"), django_timezone=django_timezone,
+                   _send_mail_async=send, _trip_locations_for_email=lambda t:(t.pickup_str,t.dropoff_str),
+                   place_to_string=lambda _:None, _email_asset_url=lambda _:"", settings=NS(ADMIN_EMAIL="owner@example.invalid"))
+        exec(compile(module, "internal_email_production", "exec"), env)
+        for locale in ("en", "ar", *DOCUMENT_LOCALES):
+            trip = sample(locale)
+            trip.created_at = datetime(2026,10,3,tzinfo=timezone.utc)
+            trip.is_paid=True; trip.stripe_payment_intent="pi_synthetic"; trip.large_suitcase=1; trip.small_suitcase=1
+            trip.cancelled_at = trip.created_at
+            trip.status="cancelled"; trip.cancellation_reason="Original customer text"
+            for function, extra, subject in (
+                ("send_internal_notification", (), "New Booking Received"),
+                ("send_trip_accepted_to_admin", (None,), "Trip confirmed by driver"),
+                ("send_passenger_trip_cancellation_to_admin", (), "Passenger cancelled trip"),
+                ("send_driver_cancellation_to_admin", (), "Driver Cancelled Trip"),
+            ):
+                before = len(captured)
+                with override(locale):
+                    env[function](trip, *extra)
+                    self.assertEqual(get_language(), locale.lower())
+                self.assertEqual(len(captured), before+1, function)
+                self.assertIn(subject, captured[-1][0][0])
+                self.assertEqual(captured[-1][0][2], ["owner@example.invalid"])
+                self.assertIn("Heathrow Terminal 5", captured[-1][0][1])
+
     def test_all_new_locales_dispatch_from_booking(self):
         captured = []
         env = email_functions(captured)

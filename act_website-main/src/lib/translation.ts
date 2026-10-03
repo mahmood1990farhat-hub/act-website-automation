@@ -31,18 +31,34 @@ const frenchLoaders = {
 };
 const customerLoaders = {
   "de": {
+    home: () => import("@/dictionaries/de/home.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/de/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/de/lostProperty.json").then(m => m.default),
+
     auth: () => import("@/dictionaries/de/auth.json").then(m => m.default),
     tripsPassenger: () => import("@/dictionaries/de/tripsPassenger.json").then(m => m.default),
   },
   "es": {
+    home: () => import("@/dictionaries/es/home.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/es/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/es/lostProperty.json").then(m => m.default),
+
     auth: () => import("@/dictionaries/es/auth.json").then(m => m.default),
     tripsPassenger: () => import("@/dictionaries/es/tripsPassenger.json").then(m => m.default),
   },
   "tr": {
+    home: () => import("@/dictionaries/tr/home.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/tr/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/tr/lostProperty.json").then(m => m.default),
+
     auth: () => import("@/dictionaries/tr/auth.json").then(m => m.default),
     tripsPassenger: () => import("@/dictionaries/tr/tripsPassenger.json").then(m => m.default),
   },
   "zh-CN": {
+    home: () => import("@/dictionaries/zh-CN/home.json").then(m => m.default),
+    complaints: () => import("@/dictionaries/zh-CN/complaints.json").then(m => m.default),
+    lostProperty: () => import("@/dictionaries/zh-CN/lostProperty.json").then(m => m.default),
+
     auth: () => import("@/dictionaries/zh-CN/auth.json").then(m => m.default),
     tripsPassenger: () => import("@/dictionaries/zh-CN/tripsPassenger.json").then(m => m.default),
   },
@@ -56,8 +72,8 @@ export default async function getTrans(locale: SupportedLocale, section: string)
   }
   if (Object.prototype.hasOwnProperty.call(customerLoaders, locale)) {
     const customer = customerLoaders[locale as keyof typeof customerLoaders];
-    if (section === "auth" || section === "tripsPassenger") {
-      return mergeDictionary(english, await customer[section]());
+    if (Object.prototype.hasOwnProperty.call(customer, section)) {
+      return mergeDictionary(english, await customer[section as keyof typeof customer]());
     }
   }
   const language = dictionaryLocale(locale);

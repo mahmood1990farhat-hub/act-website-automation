@@ -1,6 +1,6 @@
 require('../scripts/check-booking-language.cjs');
 const assert = require('node:assert/strict');
-const {getInstructionFile}=require('../src/lib/api/fetchInstructionFile.ts');
+const {getInstructionFile,getCustomerDocument}=require('../src/lib/api/fetchInstructionFile.ts');
 const {documentText}=require('../src/lib/document-text.ts');
 process.env.NEXT_PUBLIC_API_BASE_URL='https://offline.example.invalid';
 (async()=>{
@@ -13,6 +13,10 @@ process.env.NEXT_PUBLIC_API_BASE_URL='https://offline.example.invalid';
     assert.equal((await getInstructionFile('FAQ',locale)).file_url,`/${locale}.pdf`);
     files.splice(files.findIndex(f=>f.language===locale&&f.file_type==='FAQ'),1);
     assert.equal(await getInstructionFile('FAQ',locale),null,'Never return another language or legacy file');
+    for(const [kind,slug] of [['FAQ','faq'],['PRIVACY_POLICY','privacy-policy'],['TERMS_AND_CONDITIONS','terms-and-conditions'],['DRIVER_GUIDELINES','driver-instructions'],['PASSENGER_GUIDELINES','passenger-instructions']]){
+      global.fetch=async()=>({ok:true,json:async()=>({success:true,data:{instruction_files:[]}})});
+      assert.equal((await getCustomerDocument(kind,locale)).file_url,`/documents/${locale}/${slug}.pdf`);
+    }
     for(const key of ['open','download','unavailable'])assert(documentText(locale,key));
   }
   console.log('PASS: exact language/type selection, missing-language fallback, legacy rejection and seven-language document controls');

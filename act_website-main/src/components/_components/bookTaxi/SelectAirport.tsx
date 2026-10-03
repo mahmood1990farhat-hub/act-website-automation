@@ -1,3 +1,4 @@
+import { runtimeText } from "@/lib/customer-runtime";
 import React, { useState, useEffect, useRef } from "react";
 import { Locale, dictionaryLocale } from "../../../../i18n.config";
 import { IoIosAirplane } from "react-icons/io";
@@ -99,7 +100,7 @@ export default function SelectAirport({ setValue, value, locale }: typeProps) {
   };
 
   if (isError) {
-    return <div>error</div>
+    return <div role="alert">{runtimeText(locale, "airportError")}</div>
   }
   return (
     <div ref={containerRef} className="relative w-full">
@@ -129,7 +130,7 @@ export default function SelectAirport({ setValue, value, locale }: typeProps) {
 
       {showOptions && filteredAirports.length === 0 && (
         <div className="absolute z-10 w-full bg-foreground border border-muted rounded-md shadow-md p-4 text-center  text-muted">
-There are no airports
+{runtimeText(locale, "noAirports")}
         </div>
       )}
     </div>

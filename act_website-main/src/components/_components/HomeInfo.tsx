@@ -1,3 +1,4 @@
+import { runtimeText } from "@/lib/customer-runtime";
 import { customerText } from "@/lib/customer-text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -156,7 +157,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                   <Link href={`/${locale}/auth/`}>
                     <Button className="text-lg p-6 cursor-pointer">{customerText(locale, "Passenger")}</Button>
                   </Link>{" "}
-                  <Link href={`/${locale === "fr" ? "en" : locale}/auth?captain=1`}>
+                  <Link href={`/${locale === "ar" ? "ar" : "en"}/auth?captain=1`}>
                     <Button className="text-lg p-6 cursor-pointer">{customerText(locale, "PCO Driver")}</Button>
                   </Link>{" "}
                 </div>
@@ -176,15 +177,8 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
           <section className="bg-foreground text-white mb-28 py-20 md:py-32">
             <div className="container mx-auto px-4 flex flex-col items-center gap-12 xl:flex-row  xl:justify-between xl:items-start text-center">
               <div className="flex flex-col items-center ">
-                <div className="relative w-[220px] h-[120px] mx-auto mb-8">
-                  <Image
-                    src="/images/button-signup.png"
-                    alt="SIGN UP!"
-                    fill
-                    className="object-contain"
-                    quality={100}
-                    priority
-                  />
+                <div className="max-w-xs mx-auto mb-8 rounded-3xl border-4 border-yellow-300 bg-primary px-6 py-5 text-2xl font-black text-black shadow-lg -rotate-3">
+                  {runtimeText(locale, "signupBadge")}
                 </div>
                 <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
                   {booking_data.joinUs.title}
@@ -198,7 +192,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                       {booking_data.joinUs.passenger}
                     </Button>
                   </Link>
-                  <Link href={`/${locale === "fr" ? "en" : locale}/auth?captain=1`}>
+                  <Link href={`/${locale === "ar" ? "ar" : "en"}/auth?captain=1`}>
                     <Button size="lg" variant="outline" className="text-black text-lg px-8 py-6 cursor-pointer border-none hover:text-white">
                       {booking_data.joinUs.driver}
                     </Button>
@@ -207,7 +201,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
               </div>
 
               <div className="max-w-[650px]">
-                <Image src={DriverPic} alt="driver" className="sepia-50" />
+                <Image src={DriverPic} alt={booking_data.joinUs.driver} className="sepia-50" />
               </div>
 
             </div>
@@ -249,7 +243,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                 <div className="relative w-full aspect-[4/2.65] rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src={ServiceImage2}
-                    alt="Premium transport service"
+                    alt={runtimeText(locale, "premiumTransport")}
                     fill
                     className="object-contain sepia-50"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -270,7 +264,7 @@ export default function HomeUI({ booking_data, locale }: BookingSectionProps) {
                 <div className="relative w-full aspect-[4/2.65] rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src={ServiceImage1}
-                    alt="Professional chauffeur service"
+                    alt={runtimeText(locale, "professionalChauffeur")}
                     fill
                     className="object-contain sepia-50"
                     sizes="(max-width: 768px) 100vw, 50vw"

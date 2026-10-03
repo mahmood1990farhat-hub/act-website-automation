@@ -7,7 +7,7 @@ import Policy from "../Policy";
 import Terms from "../Terms";
 import Faqs from "../Faqs";
 import Link from "next/link";
-import { languageType, Locale } from "../../../../i18n.config";
+import { languageType, Locale, localizedPath } from "../../../../i18n.config";
 
 type typeProps = {
   faqs :any ,terms:any ,privacyPolicy:any
@@ -61,16 +61,7 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
           <ul className="flex flex-col text-muted text-sm gap-3 mt-5">
             {footer.Our_Company.Elements.map((item) => {
               // Fix /apps links to go to /download-app with locale
-              let href = item.href;
-              if (item.href === "/apps" || item.href === "/download-app") {
-                href = `/${locale}/download-app`;
-              } else if (item.href === "/en" || item.href === "/ar") {
-                // Normalize home links to current locale
-                href = `/${locale}`;
-              } else {
-                // Replace any locale prefix with current locale
-                href = item.href.replace(/^\/(en|ar)/, `/${locale}`);
-              }
+              const href = localizedPath(item.href === "/apps" ? "/download-app" : item.href, locale);
               return (
                 <Link key={item.href} href={href} className="cursor-pointer hover:text-gray-400">{item.name}</Link>
               );
@@ -107,7 +98,7 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
           <div className="relative w-[200px] h-[250px]   me-auto ">
             <Image
               src="/images/park-code.png"
-              alt="landing_image"
+              alt="Airport & City Transfer"
               fill
               className="object-contain "
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1000px"
@@ -169,7 +160,7 @@ export default function Footer({ footer ,faqs ,terms ,privacyPolicy, locale = "e
         <div className="relative w-[200px] h-[250px] me-auto rounded-xl overflow-hidden">
           <Image
             src="/images/park-code.png"
-            alt="landing_image"
+            alt="Airport & City Transfer"
             fill
             className="object-contain rounded-xl overflow-hidden"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1000px"

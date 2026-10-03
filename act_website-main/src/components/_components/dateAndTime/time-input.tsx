@@ -1,4 +1,5 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
 
 import { useState } from "react";
 import { Clock } from "lucide-react";
@@ -46,7 +47,7 @@ export function TimeInput({
 }: TimeInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[language === "fr" ? "fr" : dictionaryLocale(language)];
+  const defaultPlaceholder = placeholder || runtimeText(language, "selectTime");
   const isRTL = language === "ar";
 
   const handleTimeSelect = (time: TimeValue) => {
@@ -62,10 +63,8 @@ export function TimeInput({
   const formatTime = (time: TimeValue) => {
     if (!time) return "";
 
-    const hour = time.hour % 12 || 12;
-    const period = isRTL ? (time.hour >= 12 ? "مساءً" : "صباحًا") : (time.hour >= 12 ? "PM" : "AM");
-
-    return `${hour}:${time.minute.toString().padStart(2, "0")} ${period}`;
+    const date = new Date(2026, 0, 1, time.hour, time.minute);
+    return new Intl.DateTimeFormat(language, { hour: "numeric", minute: "2-digit" }).format(date);
   };
 
   return (
@@ -99,7 +98,7 @@ export function TimeInput({
         onSelect={handleTimeSelect}
         selectedTime={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={language === "fr" ? "fr" : dictionaryLocale(language)}
+        language={language}
       />
     </>
   );

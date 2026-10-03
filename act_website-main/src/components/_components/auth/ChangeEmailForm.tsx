@@ -1,4 +1,6 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+
 import { accountText } from "@/lib/customer-account-text";
 import { Button } from "@/components/ui/button";
 import React, { useState, useRef, useEffect } from "react";
@@ -270,7 +272,7 @@ export default function ChangeEmailForm({
       </div>
       {currentEmail && (
         <div className="text-sm text-center text-muted">
-          Current email: {currentEmail}
+          {runtimeText(locale, "currentEmail")} {currentEmail}
         </div>
       )}
       <form onSubmit={handleSubmit(onRequestChange)} className="space-y-5">

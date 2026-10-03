@@ -1,5 +1,7 @@
 # Website translation coverage audit — 3 October 2026
 
+**Latest implementation:** [Seven-language implementation and evidence — 3 October](SEVEN_LANGUAGE_IMPLEMENTATION_2026-10-03.md) supersedes the source-code gaps listed below. All seven customer catalogues and matching bundled documents are implemented and tested in the draft; production/provider acceptance and coordinated publication are still unverified. Earlier sections remain historical records.
+
 Requested by the owner: check privacy, terms and conditions, FAQs, and anything affected by language changes or selection.
 
 **Verdict: not complete; the five additional languages must remain unpublished.** This is a source and offline-test audit of draft PR #70, remote implementation commit `a3bc6db5d69718dc924728043d37d6f42aeb33a0` (local equivalent tree `8489f6d89b9e838110bf38d4f8cb1070af92bae3`). It is not a fresh production crawl, a review of uploaded production files, a legal-content review, or provider-delivery acceptance.

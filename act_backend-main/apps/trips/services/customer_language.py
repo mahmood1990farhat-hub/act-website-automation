@@ -32,3 +32,12 @@ def use_booking_language(function):
         with override(booking_language(trip)):
             return function(user, trip, *args, **kwargs)
     return wrapped
+
+
+def use_internal_language(function):
+    """Owner/operations messages always use English, never a customer's locale."""
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        with override("en"):
+            return function(*args, **kwargs)
+    return wrapped

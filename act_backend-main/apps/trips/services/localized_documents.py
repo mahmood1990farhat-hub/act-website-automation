@@ -38,7 +38,7 @@ def document_catalog(locale):
     return json.loads((Path(__file__).parent / "document_locales" / (locale + ".json")).read_text(encoding="utf-8"))
 
 
-def localized_document_context(trip, kind, refund_message="", driver=None, download_url="", logo_uri="", payment_method="Card Payment"):
+def localized_document_context(trip, kind, refund_message="", driver=None, download_url="", logo_uri="", payment_method="Card Payment", font_uri=""):
     locale = booking_language(trip)
     if kind not in KINDS:
         raise ValueError("Unsupported document kind")
@@ -65,7 +65,10 @@ def localized_document_context(trip, kind, refund_message="", driver=None, downl
         rows.append((labels[key], value))
     add("reference", f"ACT-{int(trip.id):06d}")
     add("passenger", name)
-    add("vehicle", getattr(car, "name_en", None) or labels["private_transfer"])
+    vehicle_name = getattr(car, "name_en", None) or ""
+    vehicle_keys = {"standard phv": "standardVehicle", "standard car": "standardVehicle", "saloon": "standardVehicle", "7 seaters phv": "sevenSeater", "7 seater": "sevenSeater", "7 seaters": "sevenSeater", "luxury": "luxuryVehicle", "luxury van": "luxuryVan", "vip business phv": "executiveVehicle", "executive": "executiveVehicle"}
+    vehicle_key = vehicle_keys.get(vehicle_name.strip().lower())
+    add("vehicle", labels[vehicle_key] if vehicle_key else vehicle_name or labels["private_transfer"])
     add("pickup", location("pickup")); add("dropoff", location("dropoff"))
     # ISO date and 24-hour pickup time are unambiguous for international guests.
     add("date", trip.trip_date.isoformat()); add("time", trip.trip_time.strftime("%H:%M"))
@@ -104,7 +107,7 @@ def localized_document_context(trip, kind, refund_message="", driver=None, downl
         "No card payment was refunded for this booking.": "refund_none",
     }
     return dict(locale=locale, title=labels[kind + "_title"], intro=labels[kind + "_intro"], rows=rows,
-                labels=labels, contact=labels["contact"], logo_uri=logo_uri,
+                labels=labels, contact=labels["contact"], logo_uri=logo_uri, font_uri=font_uri,
                 website_url="https://airportandcitytransfer.com/" + locale,
                 refund_message=labels[refunds.get(refund_message, "refund_unknown")] if refund_message else "",
                 download_url=download_url, driver_pco_url=driver.get("pco_url", ""))
@@ -113,6 +116,7 @@ def localized_document_context(trip, kind, refund_message="", driver=None, downl
 def render_customer_document(trip, kind, **kwargs):
     if booking_language(trip) == "ar":
         kwargs.pop("payment_method", None)
+        kwargs.pop("font_uri", None)
         return render_arabic_document(trip, kind, **kwargs)
     context = localized_document_context(trip, kind, **kwargs)
     html = render_to_string("customer/localized_confirmation.html", context)

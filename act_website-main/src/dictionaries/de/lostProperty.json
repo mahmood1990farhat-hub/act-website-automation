@@ -1,0 +1,144 @@
+{
+  "title": "Fundsachen",
+  "subtitle": "Verlorene Gegenstände melden und Meldungen verfolgen",
+  "tabs": {
+    "my_reports": "Meine Meldungen",
+    "submit_report": "Meldung einreichen"
+  },
+  "stats": {
+    "total": "Meldungen insgesamt",
+    "reported": "Gemeldet",
+    "under_investigation": "Wird untersucht",
+    "found": "Gefunden",
+    "returned": "Zurückgegeben",
+    "not_found": "Nicht gefunden",
+    "closed": "Geschlossen"
+  },
+  "report_list": {
+    "title": "Fundsachenmeldungen",
+    "empty": "Keine Fundsachenmeldungen gefunden",
+    "filter": {
+      "all": "Alle",
+      "status_label": "Nach Status filtern",
+      "item_type_label": "Nach Gegenstandsart filtern"
+    },
+    "item_types": {
+      "all": "Alle Gegenstände",
+      "luggage": "Gepäck / Koffer",
+      "bag": "Tasche / Handtasche",
+      "wallet": "Brieftasche / Geldbörse",
+      "phone": "Mobiltelefon",
+      "keys": "Schlüssel",
+      "documents": "Dokumente / Ausweis",
+      "clothing": "Kleidung",
+      "other": "Sonstige Gegenstände"
+    }
+  },
+  "report_card": {
+    "report_id": "Meldungsreferenz",
+    "item_type": "Gegenstandsart",
+    "description": "Beschreibung",
+    "color": "Farbe",
+    "brand": "Marke",
+    "lost_location": "Verlustort",
+    "contact_preference": "Bevorzugter Kontaktweg",
+    "status": "Status",
+    "trip_date": "Fahrtdatum",
+    "created_at": "Gemeldet am",
+    "updated_at": "Zuletzt aktualisiert",
+    "admin_notes": "Anmerkungen des Teams",
+    "found_at": "Gefunden am",
+    "returned_at": "Zurückgegeben am",
+    "view_trip": "Fahrtdetails anzeigen",
+    "show_details": "Details anzeigen",
+    "report_details": "Details zur Fundsachenmeldung",
+    "close": "Schließen",
+    "update_status": "Status aktualisieren",
+    "item_details": "Gegenstandsdetails",
+    "reporter_info": "Angaben zur meldenden Person",
+    "trip_info": "Fahrtinformationen",
+    "trip_id": "Fahrtreferenz",
+    "trip_time": "Fahrtzeit",
+    "distance": "Entfernung",
+    "duration": "Voraussichtliche Dauer",
+    "passenger_info": "Fahrgastinformationen",
+    "driver_info": "Fahrerinformationen",
+    "name": "Name",
+    "phone_number": "Telefonnummer",
+    "email": "E-Mail",
+    "full_name": "Vollständiger Name",
+    "photo": "Foto",
+    "report_info": "Meldungsinformationen",
+    "downloadPdf": "PDF herunterladen",
+    "updateReportTitle": "Fundsachenmeldung aktualisieren"
+  },
+  "submit_form": {
+    "title": "Verlorenen Gegenstand melden",
+    "subtitle": "Bitte beschreiben Sie Ihren verlorenen Gegenstand",
+    "fields": {
+      "trip": "Fahrt auswählen",
+      "trip_placeholder": "Wählen Sie die Fahrt, bei der Sie den Gegenstand verloren haben",
+      "item_type": "Gegenstandsart",
+      "item_description": "Beschreibung des Gegenstands",
+      "item_description_placeholder": "Beschreiben Sie den Gegenstand ausführlich",
+      "item_color": "Farbe des Gegenstands",
+      "item_color_placeholder": "z. B. Schwarz, Blau, Rot",
+      "item_brand": "Marke (optional)",
+      "item_brand_placeholder": "z. B. Samsonite, Apple, Nike",
+      "lost_location": "Wo haben Sie ihn verloren?",
+      "lost_location_placeholder": "z. B. im Fahrzeug, am Abholort",
+      "contact_preference": "Bevorzugter Kontaktweg",
+      "contact_options": {
+        "phone": "Telefonanruf",
+        "email": "E-Mail",
+        "sms": "SMS"
+      },
+      "photo": "Foto (optional)",
+      "photo_description": "Laden Sie nach Möglichkeit ein Foto des verlorenen Gegenstands hoch",
+      "selected_photo": "Ausgewählt"
+    },
+    "button": "Meldung hinzufügen",
+    "button_loading": "Wird hinzugefügt…",
+    "success_message": "Fundsachenmeldung erfolgreich eingereicht!",
+    "error_message": "Meldung konnte nicht eingereicht werden. Bitte versuchen Sie es erneut.",
+    "validation": {
+      "trip_required": "Bitte wählen Sie eine Fahrt",
+      "item_type_required": "Bitte wählen Sie eine Gegenstandsart",
+      "item_type_invalid": "Bitte wählen Sie eine gültige Gegenstandsart aus der Liste",
+      "description_required": "Bitte geben Sie eine Beschreibung ein",
+      "description_min": "Die Beschreibung muss mindestens 10 Zeichen lang sein",
+      "color_required": "Bitte geben Sie die Farbe des Gegenstands an",
+      "lost_location_required": "Bitte geben Sie an, wo Sie den Gegenstand verloren haben",
+      "contact_preference_required": "Bitte wählen Sie einen Kontaktweg",
+      "contact_preference_invalid": "Bitte wählen Sie einen gültigen Kontaktweg"
+    }
+  },
+  "statuses": {
+    "reported": "Gemeldet",
+    "under_investigation": "Wird untersucht",
+    "found": "Gefunden",
+    "returned": "Zurückgegeben",
+    "not_found": "Nicht gefunden",
+    "closed": "Geschlossen"
+  },
+  "contact_preferences": {
+    "phone": "Telefonanruf",
+    "email": "E-Mail",
+    "sms": "SMS"
+  },
+  "lost_locations": {
+    "in_vehicle": "Im Fahrzeug",
+    "at_pickup": "Am Abholort",
+    "at_dropoff": "Am Zielort",
+    "unsure": "Nicht sicher"
+  },
+  "download": "Herunterladen",
+  "choose_file": "Datei auswählen",
+  "no_file_chosen": "Keine Datei ausgewählt",
+  "click_to_view": "Zum Anzeigen klicken",
+  "image_downloaded": "Bild erfolgreich heruntergeladen",
+  "image_download_failed": "Bild konnte nicht heruntergeladen werden",
+  "file_read_failed": "Bilddatei konnte nicht gelesen werden",
+  "select_item_type": "Gegenstandsart auswählen",
+  "select_contact_method": "Kontaktweg auswählen"
+}

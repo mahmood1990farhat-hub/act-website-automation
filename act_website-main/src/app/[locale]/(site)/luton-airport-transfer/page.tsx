@@ -20,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (locale === "fr") return frenchAirportMetadata("luton-airport-transfer");
+  if (locale !== "en" && locale !== "ar") return frenchAirportMetadata("luton-airport-transfer", locale);
   if (locale === "ar") return getPublicPageSeo(locale, "luton-airport-transfer", arabicMetadata);
   return getPublicPageSeo(locale, "luton-airport-transfer", pageMetadata);
 }
@@ -76,7 +76,7 @@ export default async function LutonAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  if (locale === "fr") return <FrenchAirportPage slug="luton-airport-transfer" />;
+  if (locale !== "en" && locale !== "ar") return <FrenchAirportPage locale={locale} slug="luton-airport-transfer" />;
   if (locale === "ar") return <ArabicLutonPage />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;

@@ -290,7 +290,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
                 disabled={isLoggingOut}
                 className="group flex items-center justify-center gap-3 px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg border border-red-500/30 hover:border-red-500/50 transition-all duration-200 font-medium disabled:opacity-50"
               >
-                {isLoggingOut ? "Logging out..." : navbar?.auth?.logout}
+                {isLoggingOut ? navbar?.auth?.loggingOut : navbar?.auth?.logout}
               </button>
             ) : (
               <Link
@@ -314,7 +314,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
           <div className="relative w-full h-[70px] md:me-auto">
             <Image
               src="/images/logo-witn-text.png"
-              alt="landing_image"
+              alt="Airport & City Transfer"
               fill
               className="object-contain"
               quality={100}

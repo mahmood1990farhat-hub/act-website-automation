@@ -1,4 +1,7 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
+import { runtimeText } from "@/lib/customer-runtime";
+
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,13 +35,14 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
   const queryClient = useQueryClient();
 
   // Fetch lost property reports
-  const { data: reportsData, isLoading: reportsLoading } = useQuery<any>({
-    queryKey: ["lost-property-reports", page, filterStatus, filterItemType],
+  const { data: reportsData, isLoading: reportsLoading, isError: listError, refetch: retryList } = useQuery<any>({
+    queryKey: ["lost-property-reports", locale, token, page, filterStatus, filterItemType],
     queryFn: () =>
       fetchData({
         endpoint: "/api/complaints/passenger/lost-property/",
         token: token,
         queryParams: {
+          locale,
           page: page.toString(),
           page_size: "10",
           ...(filterStatus && { status: filterStatus }),
@@ -49,8 +53,8 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
   });
 
   // Fetch user's completed trips for the dropdown (only completed trips can have lost property reports)
-  const { data: tripsData } = useQuery<any>({
-    queryKey: ["trips-for-lost-property"],
+  const { data: tripsData, isError: tripsError, refetch: retryTrips } = useQuery<any>({
+    queryKey: ["trips-for-lost-property", locale, token],
     queryFn: () =>
       fetchData({
         endpoint: "/api/trips/list-trips/",
@@ -126,7 +130,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
       });
     },
     onError: (error: any) => {
-      const errorMessage = locale === "fr" ? trans.submit_form.error_message : extract_error(error) || error?.message || trans.submit_form.error_message;
+      const errorMessage = trans.submit_form.error_message;
       toast.error(errorMessage);
     },
   });
@@ -303,7 +307,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
             <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-black/20 flex items-center justify-center min-h-[400px]">
               <img
                 src={selectedImage.url}
-                alt="Lost item photo preview"
+                alt={trans.report_card.photo}
                 className="w-full h-auto max-h-[75vh] object-contain mx-auto"
               />
             </div>
@@ -440,7 +444,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
           </div>
 
           {/* Reports List */}
-          {reportsLoading ? (
+          {listError ? (<div role="alert"><p>{accountText(locale, "requestFailed")}</p><button type="button" onClick={() => retryList()}>{accountText(locale, "retry")}</button></div>) : reportsLoading ? (
             <div className="flex items-center justify-center py-20">
               <IsLoading />
             </div>
@@ -524,7 +528,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                         >
                           <img
                             src={getPhotoUrl(report.photo)}
-                            alt="Lost item photo"
+                            alt={trans.report_card.photo}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               // Fallback if image fails to load
@@ -554,7 +558,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                         </span>
                         <span>
                           {new Date(report.created_at).toLocaleDateString(
-                            locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
+                            locale
                           )}
                         </span>
                       </div>
@@ -577,7 +581,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                       </span>
                       <span className="text-green-400">
                         {new Date(report.found_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
+                          locale
                         )}
                       </span>
                     </div>
@@ -590,7 +594,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                       </span>
                       <span className="text-emerald-400">
                         {new Date(report.returned_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : locale === "fr" ? "fr-FR" : "en-US"
+                          locale
                         )}
                       </span>
                     </div>
@@ -620,7 +624,8 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
           </h2>
           <p className="text-gray-400 mb-6">{trans.submit_form.subtitle}</p>
 
-          <form onSubmit={handleSubmit} noValidate={locale === "fr"} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {tripsError && <div role="alert"><p>{accountText(locale, "loadTripsFailed")}</p><button type="button" onClick={() => retryTrips()}>{accountText(locale, "retry")}</button></div>}
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Trip Selection */}
@@ -639,7 +644,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                   </option>
                   {trips.map((trip: any) => (
                     <option key={trip.id} value={trip.id} className="bg-foreground text-white">
-                      Trip #{trip.id} - {trip.trip_date} {trip.trip_time}
+                      {runtimeText(locale, "trip")} #{trip.id} - {trip.trip_date} {trip.trip_time}
                     </option>
                   ))}
                 </select>
@@ -825,7 +830,7 @@ export default function LostProperty({ trans, token, locale }: LostPropertyProps
                     <div className="relative w-full max-w-xs h-48 rounded-lg overflow-hidden border-2 border-muted">
                       <img
                         src={formData.photo_base64}
-                        alt="Preview"
+                        alt={trans.report_card.photo}
                         className="w-full h-full object-cover"
                       />
                     </div>

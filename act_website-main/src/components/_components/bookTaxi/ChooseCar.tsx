@@ -1,3 +1,4 @@
+import { runtimeText } from "@/lib/customer-runtime";
 import { customerText } from "@/lib/customer-text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,8 +66,8 @@ export default function ModernChooseCar({
     meetGreet: isRTL ? "استقبال ومرافقة" : customerText(locale, "Meet & Greet"),
     freeCancellation: isRTL
       ? "استرداد كامل عند الإلغاء قبل موعد الاستلام بـ24 ساعة على الأقل"
-      : "Full refund when cancelled at least 24 hours before pickup",
-    realTimeTracking: isRTL ? "تتبع فوري متضمن" : "Real-time tracking included",
+      : customerText(locale, "Full refund when cancelled at least 24 hours before your scheduled pickup"),
+    realTimeTracking: runtimeText(locale, "realTimeTracking"),
     continue: isRTL ? "متابعة" : customerText(locale, "Continue"),
     selectVehicle: isRTL
       ? "اختر مركبتك المفضلة من أسطولنا المميز"

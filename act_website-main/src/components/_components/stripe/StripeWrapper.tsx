@@ -5,13 +5,13 @@ import { ReactNode } from "react";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-export default function StripeWrapper({ clientSecret, children, locale = "en" }: { clientSecret: string; children: ReactNode; locale?: "en" | "ar" | "fr" }) {
+export default function StripeWrapper({ clientSecret, children, locale = "en" }: { clientSecret: string; children: ReactNode; locale?: "en" | "ar" | "fr" | "de" | "es" | "tr" | "zh-CN" }) {
   const appearance = {
     theme: "flat",
   };
   const options: StripeElementsOptions = {
     clientSecret,
-    locale,
+    locale: locale === "zh-CN" ? "zh" : locale,
   };
   if (!clientSecret) return null;
 

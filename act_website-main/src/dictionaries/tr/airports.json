@@ -1,0 +1,150 @@
+{
+  "shared": {
+    "bookNow": "Şimdi rezervasyon yap",
+    "contactUs": "Bize ulaşın",
+    "whyChoose": "Neden ACT?",
+    "vehicleTypes": "Araç türleri",
+    "faqTitle": "Sık sorulan sorular",
+    "benefits": [
+      "Uçuş takibi",
+      "Sabit fiyatlar",
+      "Profesyonel sürücüler",
+      "Üstün araçlar",
+      "İsim tabelasıyla karşılama",
+      "7/24 çevrim içi rezervasyon"
+    ],
+    "vehicles": [
+      "Standart şoförlü araç",
+      "Üst sınıf sedan",
+      "Lüks araç",
+      "7 kişilik araç",
+      "Lüks minibüs"
+    ],
+    "intro": "{airport} ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın.",
+    "popularRoutesTitle": "{airport} çıkışlı popüler güzergâhlar",
+    "serviceTitle": "Özel transfer hizmeti – {airport}",
+    "serviceParagraphs": [
+      "Airport & City Transfer, {airport} ile Londra arasında özel transfer sunar. İş seyahati, aile tatili veya otel konaklaması için ACT ile konforlu ve güvenilir transferinizi önceden ayırtabilirsiniz.",
+      "Yolculuğunuza, yolcu sayısına ve bagajınıza göre standart şoförlü araç, üst sınıf sedan, lüks araç, 7 kişilik araç veya lüks minibüs seçin.",
+      "ACT, havalimanındaki alınıştan varış noktanıza kadar açık iletişim, profesyonel hizmet, sabit fiyatlar ve kolay rezervasyona önem verir."
+    ],
+    "faqs": [
+      {
+        "q": "{airport} için alınış hizmeti sunuyor musunuz?",
+        "a": "Evet. Airport & City Transfer, {airport} ile Londra arasında çift yönlü özel transfer sunar."
+      },
+      {
+        "q": "Geciken uçuşları takip ediyor musunuz?",
+        "a": "Evet. Uçuş bilgilerinizi paylaştığınızda sürücünüzün gecikmeleri veya erken varışları öngörmesine yardımcı olmak için uçuş saatlerini takip ederiz."
+      },
+      {
+        "q": "{airport} çıkışlı 7 kişilik araç ayırtabilir miyim?",
+        "a": "Evet. Bagaj ihtiyaçlarınıza göre aile, grup veya iş seyahatleri için 7 kişilik araçla transfer ayırtabilirsiniz."
+      },
+      {
+        "q": "Fiyat sabit mi?",
+        "a": "ACT, yolculuğunuzu güvenle onaylayabilmeniz için rezervasyondan önce açık fiyat sunmaya önem verir."
+      }
+    ],
+    "finalTitle": "{airport} havalimanı transferinizi bugün ayırtın",
+    "finalDescription": "Airport & City Transfer ile {airport} havalimanı transferinizi önceden ayırtın ve Londra'da güvenle seyahat edin.",
+    "serviceType": "Havalimanı transferi",
+    "schemaDescription": "{airport} ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+  },
+  "pages": {
+    "heathrow-airport-transfer": {
+      "airport": "Heathrow",
+      "badge": "Heathrow havalimanı transferi",
+      "heading": "Heathrow havalimanı transferi – Londra",
+      "metadata": {
+        "title": "Heathrow havalimanı transferi | Airport & City Transfer",
+        "description": "Heathrow ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+      },
+      "routes": [
+        "Heathrow – Londra merkezi",
+        "Heathrow – Canary Wharf",
+        "Heathrow – Mayfair",
+        "Heathrow – Londra otelleri",
+        "Heathrow – Gatwick havalimanı",
+        "Heathrow – iş merkezleri"
+      ]
+    },
+    "gatwick-airport-transfer": {
+      "airport": "Gatwick",
+      "badge": "Gatwick havalimanı transferi",
+      "heading": "Gatwick havalimanı transferi – Londra",
+      "metadata": {
+        "title": "Gatwick havalimanı transferi | Airport & City Transfer",
+        "description": "Gatwick ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+      },
+      "routes": [
+        "Gatwick – Londra merkezi",
+        "Gatwick – Canary Wharf",
+        "Gatwick – Mayfair",
+        "Gatwick – Londra otelleri",
+        "Gatwick – Heathrow havalimanı",
+        "Gatwick – iş merkezleri"
+      ]
+    },
+    "stansted-airport-transfer": {
+      "airport": "Stansted",
+      "badge": "Stansted havalimanı transferi",
+      "heading": "Stansted havalimanı transferi – Londra",
+      "metadata": {
+        "title": "Stansted havalimanı transferi | Airport & City Transfer",
+        "description": "Stansted ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+      },
+      "routes": [
+        "Stansted – Londra merkezi",
+        "Stansted – Canary Wharf",
+        "Stansted – Mayfair",
+        "Stansted – Londra otelleri",
+        "Stansted – Heathrow havalimanı",
+        "Stansted – iş merkezleri"
+      ]
+    },
+    "luton-airport-transfer": {
+      "airport": "Luton",
+      "badge": "Luton havalimanı transferi",
+      "heading": "Luton havalimanı transferi – Londra",
+      "metadata": {
+        "title": "Luton havalimanı transferi | Airport & City Transfer",
+        "description": "Luton ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+      },
+      "routes": [
+        "Luton – Londra merkezi",
+        "Luton – Canary Wharf",
+        "Luton – Mayfair",
+        "Luton – Londra otelleri",
+        "Luton – Heathrow havalimanı",
+        "Luton – iş merkezleri"
+      ]
+    },
+    "london-city-airport-transfer": {
+      "airport": "London City Airport",
+      "badge": "London City Airport havalimanı transferi",
+      "heading": "London City Airport havalimanı transferi – Londra",
+      "metadata": {
+        "title": "London City Airport havalimanı transferi | Airport & City Transfer",
+        "description": "London City Airport ile Londra arasında sabit fiyat, profesyonel sürücü, üstün araçlar, uçuş takibi ve 7/24 çevrim içi rezervasyonla güvenilir özel transferinizi ayırtın."
+      },
+      "routes": [
+        "London City Airport – Londra merkezi",
+        "London City Airport – Canary Wharf",
+        "London City Airport – Mayfair",
+        "London City Airport – Londra otelleri",
+        "London City Airport – Heathrow havalimanı",
+        "London City Airport – iş merkezleri"
+      ],
+      "serviceParagraphs": [
+        "Airport & City Transfer, London City Airport ile Londra arasında özel transfer sunar. İş seyahati, otel konaklaması veya konferans için ACT ile konforlu ve güvenilir transferinizi önceden ayırtın.",
+        "Hizmetimiz, varış noktasına huzurla ulaşmak isteyen iş yolcuları, aileler, turistler ve profesyoneller içindir. Standart şoförlü araç, üst sınıf sedan, lüks araç, 7 kişilik araç veya lüks minibüs seçin.",
+        "ACT, havalimanındaki alınıştan varış noktanıza kadar açık iletişim, profesyonel hizmet, sabit fiyatlar ve kolay rezervasyona önem verir."
+      ],
+      "vehicleFaq": {
+        "q": "London City Airport çıkışlı üst sınıf sedan ayırtabilir miyim?",
+        "a": "Evet. London City Airport çıkışlı üst sınıf sedan, lüks araç, standart araç, 7 kişilik araç veya lüks minibüs ayırtabilirsiniz."
+      }
+    }
+  }
+}

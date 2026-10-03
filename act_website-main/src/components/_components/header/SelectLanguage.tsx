@@ -43,6 +43,7 @@ export default function SelectLanguage({ locale, language }: {
             return;
           }
           setOpen(false);
+          document.cookie = `act_locale=${code}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
           window.location.assign(localizedPath(pathname, code) + window.location.search + window.location.hash);
         }}>
         {label(code)}

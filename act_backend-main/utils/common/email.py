@@ -1,5 +1,5 @@
 from apps.accounts.customer_messages import account_message
-from apps.trips.services.customer_language import booking_language, use_booking_language
+from apps.trips.services.customer_language import booking_language, use_booking_language, use_internal_language
 from apps.trips.services.localized_documents import render_customer_document
 import threading
 import logging
@@ -482,6 +482,7 @@ def _format_booking_details_text(booking_details) -> str:
     )
 
 
+@use_internal_language
 def send_internal_notification(trip) -> None:
     """
     Send internal notification to admin when a new trip is booked
@@ -753,6 +754,7 @@ def send_trip_accepted_to_passenger(
     except Exception as e:
         logger.error(f"[EMAIL] send_trip_accepted_to_passenger failed for trip #{trip.id}: {e}")
 
+@use_internal_language
 def send_trip_accepted_to_admin(trip, driver_user) -> None:
     """
     Email to operations admin when a driver accepts a trip.
@@ -874,6 +876,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
         logger.error(f"[EMAIL] send_passenger_trip_cancellation_to_passenger failed trip #{trip.id}: {e}")
 
 
+@use_internal_language
 def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") -> None:
     """
     Email to admin when a passenger cancels a trip (pending cancel or policy-based cancel).
@@ -907,6 +910,7 @@ def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") ->
         logger.error(f"[EMAIL] send_passenger_trip_cancellation_to_admin failed trip #{trip.id}: {e}")
 
 
+@use_internal_language
 def send_admin_onboarding_notification(onboarding_request) -> None:
     """
     Send notification to admin when a new driver onboarding request is submitted
@@ -992,6 +996,7 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
 
 
+@use_internal_language
 def send_driver_cancellation_to_admin(trip) -> None:
     """
     Send email to admin when a driver cancels a trip

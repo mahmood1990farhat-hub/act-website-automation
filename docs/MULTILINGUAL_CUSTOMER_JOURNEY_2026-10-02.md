@@ -1,5 +1,7 @@
 # ACT customer-language completion workstream
 
+**Latest implementation:** [Seven-language implementation and evidence — 3 October](SEVEN_LANGUAGE_IMPLEMENTATION_2026-10-03.md) supersedes the source-code gaps listed below. All seven customer catalogues and matching bundled documents are implemented and tested in the draft; production/provider acceptance and coordinated publication are still unverified. Earlier sections remain historical records.
+
 Started 2 October 2026 after the owner's instruction to prioritise **all five additional languages, including emails and the complete booking journey**. This workstream comes before resuming Gemini/n8n operational handover. Those tasks remain pending; they have not been cancelled.
 
 **Status: second implementation checkpoint; incomplete and unpublished. Not a release candidate or a completed five-language launch.**

@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DownloadButton from "./DownloadButton";
 import { FaDownload } from "react-icons/fa";
-import { getInstructionFile } from "@/lib/api/fetchInstructionFile";
+import { getCustomerDocument } from "@/lib/api/fetchInstructionFile";
 import IsLoading from "../ISloading";
 
 type DownloadAppTabsProps = {
@@ -70,10 +70,10 @@ export default function DownloadAppTabs({ locale, downloadApp }: DownloadAppTabs
     setPassengerFile(null);
     setIsLoadingDriver(true);
     setIsLoadingPassenger(true);
-    getInstructionFile("DRIVER_GUIDELINES", locale)
+    getCustomerDocument("DRIVER_GUIDELINES", locale)
       .then(file => { if (active) setDriverFile(file); })
       .finally(() => { if (active) setIsLoadingDriver(false); });
-    getInstructionFile("PASSENGER_GUIDELINES", locale)
+    getCustomerDocument("PASSENGER_GUIDELINES", locale)
       .then(file => { if (active) setPassengerFile(file); })
       .finally(() => { if (active) setIsLoadingPassenger(false); });
     return () => { active = false; };

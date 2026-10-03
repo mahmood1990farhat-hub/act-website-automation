@@ -65,6 +65,7 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     if booking_language(trip) != "en":
         _, html, _ = render_customer_document(
             trip, "booking", payment_method=payment_method,
+            font_uri=(Path(settings.BASE_DIR) / "static/fonts/act-customer-cjk.otf").resolve().as_uri(),
             logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
         )
         buffer = BytesIO()
@@ -164,6 +165,7 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     if booking_language(trip) != "en":
         _, html, _ = render_customer_document(
             trip, "cancellation", payment_method=payment_method,
+            font_uri=(Path(settings.BASE_DIR) / "static/fonts/act-customer-cjk.otf").resolve().as_uri(),
             logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
         )
         buffer = BytesIO()

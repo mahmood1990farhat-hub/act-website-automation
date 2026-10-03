@@ -20,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (locale === "fr") return frenchAirportMetadata("heathrow-airport-transfer");
+  if (locale !== "en" && locale !== "ar") return frenchAirportMetadata("heathrow-airport-transfer", locale);
   if (locale === "ar") return getPublicPageSeo(locale, "heathrow-airport-transfer", arabicMetadata);
   return getPublicPageSeo(locale, "heathrow-airport-transfer", pageMetadata);
 }
@@ -76,7 +76,7 @@ export default async function HeathrowAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  if (locale === "fr") return <FrenchAirportPage slug="heathrow-airport-transfer" />;
+  if (locale !== "en" && locale !== "ar") return <FrenchAirportPage locale={locale} slug="heathrow-airport-transfer" />;
   if (locale === "ar") return <ArabicHeathrowPage />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;

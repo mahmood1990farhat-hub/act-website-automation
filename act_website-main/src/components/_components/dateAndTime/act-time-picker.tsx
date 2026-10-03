@@ -1,4 +1,6 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+import type { SupportedLocale } from "../../../../i18n.config";
 
 import { useEffect, useRef, useState } from "react";
 import { Clock } from "lucide-react";
@@ -6,27 +8,7 @@ import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const translations = {
-  fr: { selectTime: "Choisir une heure", cancel: "Annuler", ok: "Valider", hour: "Heure", minute: "Minute", period: "AM/PM" },
-  ar: {
-    selectTime: "اختر الوقت",
-    cancel: "إلغاء",
-    ok: "موافق",
-    hour: "الساعة",
-    minute: "الدقيقة",
-    period: "الفترة",
-  },
-  en: {
-    selectTime: "Select time",
-    cancel: "Cancel",
-    ok: "OK",
-    hour: "Hour",
-    minute: "Minute",
-    period: "AM/PM",
-  },
-};
-
-type Language = "ar" | "en" | "fr";
+type Language = SupportedLocale;
 type Period = "AM" | "PM";
 
 interface TimeValue {
@@ -192,7 +174,7 @@ export function ActTimePicker({
 
   if (!isOpen) return null;
 
-  const t = translations[language];
+  const t = { selectTime: runtimeText(language, "selectTime"), cancel: runtimeText(language, "cancel"), ok: runtimeText(language, "ok"), hour: runtimeText(language, "hour"), minute: runtimeText(language, "minute"), period: runtimeText(language, "period") };
   const isRTL = language === "ar";
   const hourOptions: WheelOption[] = Array.from({ length: 12 }, (_, index) => ({
     label: String(index + 1).padStart(2, "0"),
@@ -203,8 +185,8 @@ export function ActTimePicker({
     value: minute,
   }));
   const periodOptions: WheelOption[] = [
-    { label: isRTL ? "صباحًا" : "AM", value: "AM" },
-    { label: isRTL ? "مساءً" : "PM", value: "PM" },
+    { label: runtimeText(language, "am"), value: "AM" },
+    { label: runtimeText(language, "pm"), value: "PM" },
   ];
 
   const handleOK = () => {
@@ -218,7 +200,7 @@ export function ActTimePicker({
     onClose();
   };
 
-  const displayTime = `${tempTime.hour}:${String(tempTime.minute).padStart(2, "0")} ${isRTL ? (tempTime.period === "AM" ? "صباحًا" : "مساءً") : tempTime.period}`;
+  const displayTime = `${tempTime.hour}:${String(tempTime.minute).padStart(2, "0")} ${runtimeText(language, tempTime.period === "AM" ? "am" : "pm")}`;
 
   const pickerContent = (
     <div

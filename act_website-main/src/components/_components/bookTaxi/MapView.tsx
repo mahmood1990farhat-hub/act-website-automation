@@ -1,4 +1,6 @@
 "use client";
+import { useParams } from "next/navigation";
+import { bookingText } from "./booking-text";
 import ProviderMap from "@/providers/ProviderMap";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -128,6 +130,7 @@ const darkMapStyle = [
 	},
 ];
 const MapView = ({ routePolyline }: Props) => {
+  const {locale = "en"} = useParams<{locale: string}>();
 	const mapRef = useRef<google.maps.Map | null>(null);
 	const [path, setPath] = useState<google.maps.LatLngLiteral[]>([]);
 	const [center, setCenter] = useState<google.maps.LatLngLiteral>({
@@ -194,7 +197,7 @@ const MapView = ({ routePolyline }: Props) => {
 						anchor: new google.maps.Point(17, 17),
 					}}
 					label={{
-						text: "Start",
+						text: bookingText(locale, "Pickup"),
 						color: "white",
 						fontWeight: "bold",
 						fontSize: "6px",
@@ -212,7 +215,7 @@ const MapView = ({ routePolyline }: Props) => {
 						anchor: new google.maps.Point(17, 17),
 					}}
 					label={{
-						text: "End",
+						text: bookingText(locale, "Drop-off"),
 						color: "white",
 						fontWeight: "bold",
 						fontSize: "6px",

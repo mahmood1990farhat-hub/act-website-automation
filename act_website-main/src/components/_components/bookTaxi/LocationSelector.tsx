@@ -453,7 +453,7 @@ export default function LocationSelector({
 
       {/* Loading State */}
       {showLoadingState && (
-        <div className="absolute z-[100] w-full bg-white border border-muted rounded-md shadow-md mt-1 flex items-center p-4 gap-4">
+        <div className="absolute z-10 w-full bg-white border border-muted rounded-md shadow-md mt-1 flex items-center p-4 gap-4">
           <div className="flex animate-pulse flex-col space-y-3 w-full">
             <div className="h-4 bg-gray-300 rounded w-3/4" />
             <div className="h-4 bg-gray-300 rounded w-1/2" />
@@ -463,7 +463,7 @@ export default function LocationSelector({
 
       {/* Error State */}
       {showErrorState && (
-        <div className="absolute z-[100] w-full bg-white border border-red-200 rounded-md shadow-md mt-1 font-semibold text-slate-800 p-3 text-sm">
+        <div className="absolute z-10 w-full bg-white border border-red-200 rounded-md shadow-md mt-1 font-semibold text-slate-800 p-3 text-sm">
           {error}
         </div>
       )}
@@ -472,7 +472,7 @@ export default function LocationSelector({
       {showOptionsState && (
         <ul 
           ref={dropdownRef}
-          className="absolute z-[100] w-full border border-muted rounded-md shadow-lg mt-1 bg-white max-h-60 overflow-y-auto"
+          className="absolute z-10 w-full border border-muted rounded-md shadow-lg mt-1 bg-white max-h-60 overflow-y-auto"
           onMouseDown={(e) => e.preventDefault()} // Prevent input blur when clicking dropdown
         >
           {options.map((location, index) => (

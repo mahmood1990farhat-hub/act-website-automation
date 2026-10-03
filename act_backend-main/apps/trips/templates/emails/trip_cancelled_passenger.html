@@ -243,6 +243,9 @@
 
             <tr>
               <td align="center" style="padding: 25px">
+                {% if download_cancellation_url %}
+                <p><a href="{{ download_cancellation_url }}" style="display:inline-block;padding:14px 24px;background:#ffd100;color:#181818;border-radius:6px;text-decoration:none;font-weight:bold">Download Cancellation Confirmation</a></p>
+                {% endif %}
                 <a
                   href="{{ website_url }}"
                   class="btn"

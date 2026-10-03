@@ -1,5 +1,6 @@
+import { runtimeText, type RuntimeKey } from "./src/lib/customer-runtime";
 import { Languages } from "./src/constants/enums";
-export type Locale = Languages.ARABIC | Languages.ENGLISH | "fr";
+export type Locale = Languages.ARABIC | Languages.ENGLISH | "fr" | "de" | "es" | "tr" | "zh-CN";
 export type languageType = Locale;
 export type SupportedLocale = `${Locale}` | "zh-CN" | "tr" | "es" | "fr" | "de";
 export const localeRegistry: Record<SupportedLocale, { label: string; direction: "ltr" | "rtl"; enabled: boolean }> = {
@@ -33,7 +34,16 @@ export function localizedVehicleValue(
   vehicle: { name_en?: string; name_ar?: string; desc_en?: string; desc_ar?: string },
   field: "name" | "desc", locale: string,
 ): string {
-  return vehicle[`${field}_${dictionaryLocale(locale)}`] || vehicle[`${field}_en`] || vehicle[`${field}_ar`] || "";
+  const english = vehicle[`${field}_en`] || "";
+  const categories: Record<string, RuntimeKey> = {
+    "standard phv": "standardVehicle", "standard car": "standardVehicle", "saloon": "standardVehicle",
+    "7 seaters phv": "sevenSeater", "7 seater": "sevenSeater", "7 seaters": "sevenSeater",
+    "luxury": "luxuryVehicle", "luxury van": "luxuryVan", "vip business phv": "executiveVehicle", "executive": "executiveVehicle",
+  };
+  const key = categories[english.trim().toLowerCase()];
+  if (key) return runtimeText(locale, key);
+  // Preserve unrecognised supplier names/descriptions rather than inventing a translation.
+  return vehicle[`${field}_${dictionaryLocale(locale)}`] || english || vehicle[`${field}_ar`] || "";
 }
 export const publicRoutes = ["", "about-us", "download-app", "complaints", "lost-property",
   "heathrow-airport-transfer", "gatwick-airport-transfer", "stansted-airport-transfer",

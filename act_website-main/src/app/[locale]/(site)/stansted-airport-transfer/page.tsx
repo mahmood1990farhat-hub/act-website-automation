@@ -20,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (locale === "fr") return frenchAirportMetadata("stansted-airport-transfer");
+  if (locale !== "en" && locale !== "ar") return frenchAirportMetadata("stansted-airport-transfer", locale);
   if (locale === "ar") return getPublicPageSeo(locale, "stansted-airport-transfer", arabicMetadata);
   return getPublicPageSeo(locale, "stansted-airport-transfer", pageMetadata);
 }
@@ -76,7 +76,7 @@ export default async function StanstedAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  if (locale === "fr") return <FrenchAirportPage slug="stansted-airport-transfer" />;
+  if (locale !== "en" && locale !== "ar") return <FrenchAirportPage locale={locale} slug="stansted-airport-transfer" />;
   if (locale === "ar") return <ArabicStanstedPage />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;

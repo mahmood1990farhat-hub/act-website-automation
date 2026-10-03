@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { publishedLocalesFor, type Locale } from "../../i18n.config";
+import { publishedLocalesFor, isEnabledLocale, type SupportedLocale } from "../../i18n.config";
 import { Languages } from "@/constants/enums";
 
 const SITE_URL = "https://airportandcitytransfer.com";
 
-const buildLocalizedUrl = (locale: Locale, path = "") => {
+const buildLocalizedUrl = (locale: SupportedLocale, path = "") => {
   const normalizedPath = path.replace(/^\/+|\/+$/g, "");
   return normalizedPath
     ? `${SITE_URL}/${locale}/${normalizedPath}`
@@ -12,12 +12,12 @@ const buildLocalizedUrl = (locale: Locale, path = "") => {
 };
 
 export const getPublicPageSeo = (
-  locale: Locale,
+  locale: SupportedLocale,
   path = "",
   metadata: Metadata = {}
 ): Metadata => ({
   ...metadata,
-  ...(locale === "fr" ? { robots: { index: false, follow: false } } : {}),
+  ...(!isEnabledLocale(locale) ? { robots: { index: false, follow: false } } : {}),
   alternates: {
     ...metadata.alternates,
     canonical: buildLocalizedUrl(locale, path),

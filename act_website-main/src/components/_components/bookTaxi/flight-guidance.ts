@@ -1,4 +1,4 @@
-import french from "@/dictionaries/fr/bookingSupplement.json";
+import { runtimeText } from "@/lib/customer-runtime";
 export type AirportJourneyDirection = "arrival" | "departure" | "manual";
 
 type RoutePointLike = {
@@ -81,6 +81,7 @@ export const formatCustomerTime = (minutes: number, locale = "en") => {
   const normalized = normalizeMinutes(minutes);
   const hour24 = Math.floor(normalized / 60);
   const minute = normalized % 60;
+  if (locale !== "en" && locale !== "ar") return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(new Date(Date.UTC(2020, 0, 1, hour24, minute)));
   const hour12 = hour24 % 12 || 12;
   const period = locale === "ar" ? (hour24 >= 12 ? "مساءً" : "صباحًا") : (hour24 >= 12 ? "PM" : "AM");
 
@@ -98,10 +99,7 @@ export const getDepartureGuidance = (pickupTime: string, flightTime: string, loc
   const windowStart = formatCustomerTime(flightMinutes - 180, locale);
   const windowEnd = formatCustomerTime(flightMinutes - 120, locale);
 
-  if (locale === "ar") return `لرحلات المغادرة، نوصي بوقت استلام يسبق موعد إقلاع الطائرة بساعتين إلى ثلاث ساعات. قد يكون الوقت المحدد قريبًا جدًا أو مبكرًا جدًا. وقت الاستلام المقترح: بين ${windowStart} و${windowEnd}.`;
-
-  if (locale === "fr") return french.flight.departureGuidance.replace("{windowStart}", windowStart).replace("{windowEnd}", windowEnd);
-  return `For airport departures, we recommend choosing a pickup time around 2–3 hours before your flight departure. Your selected pickup time may be too close or too early. Suggested pickup time: between ${windowStart} and ${windowEnd}.`;
+  return runtimeText(locale, "departureGuidance").replace("{windowStart}", windowStart).replace("{windowEnd}", windowEnd);
 };
 
 export const getArrivalGuidance = (pickupTime: string, landingTime: string, locale = "en") => {
@@ -116,9 +114,6 @@ export const getArrivalGuidance = (pickupTime: string, landingTime: string, loca
 
   const suggestedPickup = formatCustomerTime(landingMinutes + 60, locale);
 
-  if (locale === "ar") return `لرحلات الوصول، نوصي بوقت استلام بعد هبوط الطائرة بساعة على الأقل لإتاحة وقت لإجراءات الجوازات واستلام الأمتعة ولقاء السائق. وقت الاستلام المقترح: ${suggestedPickup} أو بعد ذلك.`;
-
-  if (locale === "fr") return french.flight.arrivalGuidance.replace("{suggestedPickup}", suggestedPickup);
-  return `For airport arrivals, we recommend choosing a pickup time at least 1 hour after landing to allow time for immigration, baggage collection, and meeting your driver. Suggested pickup time: ${suggestedPickup} or later.`;
+  return runtimeText(locale, "arrivalGuidance").replace("{suggestedPickup}", suggestedPickup);
 };
 

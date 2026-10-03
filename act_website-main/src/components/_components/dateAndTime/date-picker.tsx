@@ -1,4 +1,6 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+import type { SupportedLocale } from "../../../../i18n.config";
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Edit3 } from "lucide-react";
@@ -13,58 +15,12 @@ import {
   isToday,
   startOfDay,
 } from "date-fns";
-import { ar, enUS, fr } from "date-fns/locale";
+import { ar, enUS, fr, de, es, tr, zhCN } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const translations = {
-  fr: { selectDate: "Choisir une date", close: "Fermer", cancel: "Annuler", ok: "Valider", months: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"], days: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."] },
-  ar: {
-    selectDate: "اختر التاريخ",
-    close: "إغلاق",
-    cancel: "إلغاء",
-    ok: "موافق",
-    months: [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
-    ],
-    days: ["ح", "ن", "ث", "ر", "خ", "ج", "س"],
-  },
-  en: {
-    selectDate: "Select date",
-    close: "Close",
-    cancel: "Cancel",
-    ok: "OK",
-    months: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
-    days: ["S", "M", "T", "W", "T", "F", "S"],
-  },
-};
-
-type Language = "ar" | "en" | "fr";
+type Language = SupportedLocale;
 
 interface MobileDatePickerProps {
   isOpen?: boolean;
@@ -92,8 +48,13 @@ export function DatePicker({
 
   if (!isOpen) return null;
 
-  const t = translations[language];
-  const locale = language === "ar" ? ar : language === "fr" ? fr : enUS;
+  const t = {
+    selectDate: runtimeText(language, "selectDate"), close: runtimeText(language, "close"),
+    cancel: runtimeText(language, "cancel"), ok: runtimeText(language, "ok"),
+    months: Array.from({length: 12}, (_, i) => new Intl.DateTimeFormat(language, {month: "long", timeZone: "UTC"}).format(new Date(Date.UTC(2020, i, 1)))),
+    days: Array.from({length: 7}, (_, i) => new Intl.DateTimeFormat(language, {weekday: "short", timeZone: "UTC"}).format(new Date(Date.UTC(2020, 0, 5+i)))),
+  };
+  const locale = ({ar, en: enUS, fr, de, es, tr, "zh-CN": zhCN})[language];
   const isRTL = language === "ar";
   const today = new Date();
 

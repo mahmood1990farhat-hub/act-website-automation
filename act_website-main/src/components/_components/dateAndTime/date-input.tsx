@@ -1,9 +1,10 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
 
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 // import { format } from "date-fns"
-import { ar, enUS, fr } from "date-fns/locale";
+import { ar, enUS, fr, de, es, tr, zhCN } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const placeholders = {
 };
 
 interface DateInputProps {
+  id?: string;
   placeholder?: string;
   value?: Date;
   onChange?: (date: Date) => void;
@@ -37,6 +39,7 @@ interface DateInputProps {
 }
 
 export function DateInput({
+  id,
   placeholder,
   value,
   onChange,
@@ -48,8 +51,8 @@ export function DateInput({
 }: DateInputProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const defaultPlaceholder = placeholder || placeholders[language === "fr" ? "fr" : dictionaryLocale(language)];
-  const locale = language === "ar" ? ar : language === "fr" ? fr : enUS;
+  const defaultPlaceholder = placeholder || runtimeText(language, "selectDate");
+  const locale = ({ar, en: enUS, fr, de, es, tr, "zh-CN": zhCN})[language];
   const isRTL = language === "ar";
 
   const handleDateSelect = (date: Date) => {
@@ -66,7 +69,7 @@ export function DateInput({
 
 
   const formatDate = (date: Date) => {
-    if (language === "fr") return format(date, "d MMMM yyyy", { locale });
+    if (language !== "en" && language !== "ar") return new Intl.DateTimeFormat(language, { day: "numeric", month: "long", year: "numeric" }).format(date);
     if (language === "ar") {
       return format(date, "d/M/yyyy", { locale });
     } else {
@@ -82,6 +85,7 @@ export function DateInput({
     <>
       {!inCreateCaptain && (
         <button
+          id={id}
 
     type="button"
           onClick={() => setIsPickerOpen(true)}
@@ -107,7 +111,7 @@ export function DateInput({
         onSelect={handleDateSelect}
         selectedDate={value}
         onCancel={() => setIsPickerOpen(false)}
-        language={language === "fr" ? "fr" : dictionaryLocale(language)}
+        language={language}
       />
     </>
   );

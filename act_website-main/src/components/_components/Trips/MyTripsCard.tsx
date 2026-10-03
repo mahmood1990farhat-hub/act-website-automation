@@ -184,7 +184,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-				
+
 						{data?.vehicle_info?.brand && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
@@ -233,7 +233,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-					
+
 								{data?.vehicle_info?.color && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
@@ -305,8 +305,8 @@ export default function MyTripsCard({
 								e.stopPropagation();
 								setOpenDetails(true);
 							}}
-							className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg 
-                       bg-primary/10 hover:bg-primary/20 border border-primary/30 
+							className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                       bg-primary/10 hover:bg-primary/20 border border-primary/30
                        text-primary font-semibold text-sm transition-all duration-200
                        hover:scale-102 active:scale-95"
 						>
@@ -343,8 +343,8 @@ export default function MyTripsCard({
 									e.stopPropagation();
 									setOpenModal(true);
 								}}
-								className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg 
-                         bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 
+								className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                         bg-red-500/10 hover:bg-red-500/20 border border-red-500/30
                          text-red-400 font-semibold text-sm transition-all duration-200
                          hover:scale-105 active:scale-95"
 								title="Cancel Trip"
@@ -405,7 +405,7 @@ export default function MyTripsCard({
 				>
 					<div
 						onClick={(e) => e.stopPropagation()}
-						className="bg-foreground/95 backdrop-blur-md border border-primary/20 rounded-2xl w-full max-w-5xl 
+						className="bg-foreground/95 backdrop-blur-md border border-primary/20 rounded-2xl w-full max-w-5xl
                      shadow-2xl shadow-primary/10 max-h-[90vh] overflow-hidden flex flex-col"
 					>
 						{/* Header */}
@@ -422,8 +422,8 @@ export default function MyTripsCard({
 									</>
 								) : (
 									<>
-										<span className="text-primary">Trip</span>{" "}
-										<span className="text-white">Details</span>
+										<span className="text-primary">{tripCardTrans?.tripDetails || "Trip Details"}</span>{" "}
+
 									</>
 								)}
 							</h2>
@@ -472,7 +472,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold">
-												{(data.distance_miles * 1.61).toFixed(2)} km
+												{new Intl.NumberFormat(locale, {style: "unit", unit: "kilometer", maximumFractionDigits: 2}).format(data.distance_miles * 1.61)}
 											</p>
 										</div>
 

@@ -3,7 +3,7 @@ import { documentText } from "@/lib/document-text";
 import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { IoAlertCircle } from "react-icons/io5";
-import { getInstructionFile } from "@/lib/api/fetchInstructionFile";
+import { getCustomerDocument } from "@/lib/api/fetchInstructionFile";
 import { languageType } from "../../../i18n.config";
 import IsLoading from "./ISloading";
 import { Languages } from "../../constants/enums";
@@ -20,7 +20,7 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
     setUseFallback(false);
     if (!isOpen) return;
     setIsLoading(true);
-    getInstructionFile("FAQ", locale)
+    getCustomerDocument("FAQ", locale)
       .then(file => {
         if (!active) return;
         setInstructionFile(file);

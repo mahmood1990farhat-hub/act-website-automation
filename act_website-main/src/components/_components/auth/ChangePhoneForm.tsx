@@ -1,4 +1,6 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+
 import { accountText } from "@/lib/customer-account-text";
 import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import { Button } from "@/components/ui/button";
@@ -279,7 +281,7 @@ export default function ChangePhoneForm({
       </div>
       {currentPhone && (
         <div className="text-sm text-center text-muted">
-          Current phone: {currentPhone}
+          {runtimeText(locale, "currentPhone")} {currentPhone}
         </div>
       )}
       <div className="space-y-5">

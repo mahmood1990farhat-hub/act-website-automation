@@ -1,3 +1,4 @@
+import { runtimeText } from "@/lib/customer-runtime";
 import { LANGUAGE_CHANGE_EVENT } from "@/lib/booking-language-draft";
 import { customerText } from "@/lib/customer-text";
 import React, { useEffect, useState } from "react";
@@ -88,6 +89,7 @@ export default function ModernConfirmFlightDetails({
 }: typeProps) {
 	const [token, setToken] = useState<string | undefined>();
 	const [isLoading, setIsLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
   useEffect(() => {
     if (!isLoading) return;
     const block = (event: Event) => {
@@ -132,8 +134,8 @@ export default function ModernConfirmFlightDetails({
 		pickup: isRTL ? "نقطة الانطلاق" : customerText(locale, "Pickup Location"),
 		dropoff: isRTL ? "نقطة الوصول" : customerText(locale, "Drop-off Location"),
 		stops: isRTL ? "نقاط التوقف" : customerText(locale, "Stop Points"),
-		distance: isRTL ? "المسافة" : "Distance",
-		date: isRTL ? "التاريخ" : "Date",
+		distance: isRTL ? "المسافة" : customerText(locale, "Distance"),
+		date: isRTL ? "التاريخ" : customerText(locale, "Date"),
 		time: isRTL ? "الوقت المتوقع للوصول" : customerText(locale, "ETA"),
 		timeTrip: isRTL ? "مدة الرحلة" : customerText(locale, "Trip Duration"),
 		passengers: isRTL ? "عدد الركاب" : customerText(locale, "Passengers"),
@@ -150,6 +152,7 @@ export default function ModernConfirmFlightDetails({
 	};
 
 	const onSubmit = async () => {
+    setPaymentError("");
 		setIsLoading(true);
 		const stop_points = data.routePoints
 			.filter((p) => p.type === "stop")
@@ -241,6 +244,7 @@ export default function ModernConfirmFlightDetails({
 			const res = await postData<any>({
 				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
 				queryParams: { locale },
+        noToast: true,
 				token: token || undefined,
 				body: {
 					...bodyData,
@@ -253,6 +257,7 @@ export default function ModernConfirmFlightDetails({
 			setStep(8);
 		} catch (error) {
 			console.error(error);
+      setPaymentError(runtimeText(locale, "paymentStartFailed"));
 			setIsLoading(false);
 		}
 	};
@@ -271,7 +276,8 @@ export default function ModernConfirmFlightDetails({
 				</p>
 			</div>
 
-			{/* Back Button */}
+			{paymentError && <p role="alert" className="mb-4 text-red-300">{paymentError}</p>}
+      {/* Back Button */}
 			<div className="mb-6">
 				<Button
 					onClick={() => setStep(6)}
@@ -623,7 +629,7 @@ export default function ModernConfirmFlightDetails({
 											<div className="relative h-16 w-16">
 												<Image
 													src={data.carImage}
-													alt="car"
+													alt={data.carName}
 													fill
 													className="object-contain"
 												/>

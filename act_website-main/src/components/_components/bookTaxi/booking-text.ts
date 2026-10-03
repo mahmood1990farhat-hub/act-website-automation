@@ -1,5 +1,7 @@
 import { customerText } from "@/lib/customer-text";
 const arabic: Record<string, string> = {
+  "Pickup": "الاستلام",
+  "Drop-off": "الوصول",
   "Back": "رجوع",
   "Continue": "متابعة",
   "Passenger Details": "بيانات الراكب",

@@ -4,6 +4,8 @@ import { match as matchLocale } from "@formatjs/intl-localematcher";
 import Negotiator from "negotiator";
 
 function getLocale(request: NextRequest): string | undefined {
+  const preference = request.cookies.get("act_locale")?.value;
+  if (preference && isEnabledLocale(preference)) return preference;
   const negotiatorHeaders: Record<string, string> = {};
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
 
@@ -35,9 +37,9 @@ export function middleware(request: NextRequest) {
     return new NextResponse("Not found", { status: 404, headers: { "X-Robots-Tag": "noindex" } });
   }
   // New customer language does not translate or bypass operational account routes.
-  if (localeSegment === "fr" && (/^\/fr\/(driver|dashboard|admin|upload-documents)(\/|$)/.test(pathname) || request.nextUrl.searchParams.has("captain"))) {
+  if (isSupportedLocale(localeSegment) && localeSegment !== "en" && localeSegment !== "ar" && (/^\/[^/]+\/(driver|dashboard|admin|upload-documents)(\/|$)/.test(pathname) || request.nextUrl.searchParams.has("captain"))) {
     const destination = request.nextUrl.clone();
-    destination.pathname = pathname.replace(/^\/fr(?=\/|$)/, "/en");
+    destination.pathname = pathname.replace(/^\/[^/]+(?=\/|$)/, "/en");
     return NextResponse.redirect(destination);
   }
   const hostname = request.nextUrl.hostname;
@@ -62,8 +64,8 @@ export function middleware(request: NextRequest) {
 
   if (pathname === "/") {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/en";
-    return NextResponse.redirect(redirectUrl, 308);
+    redirectUrl.pathname = `/${request.cookies.get("act_locale")?.value && isEnabledLocale(request.cookies.get("act_locale")!.value) ? request.cookies.get("act_locale")!.value : "en"}`;
+    return NextResponse.redirect(redirectUrl);
   }
 
   const token = request.cookies.get("userToken")?.value;

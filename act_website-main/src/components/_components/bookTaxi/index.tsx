@@ -355,10 +355,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     routePoints: routePoints,
                     time: formDetails.time,
                     date: formDetails.date,
-                    distance: `   ${rideOptions?.distance_miles} miles / ${rideOptions && rideOptions?.distance_meters > 1000
-                      ? rideOptions?.distance_meters / 1000 + " K.m"
-                      : rideOptions?.distance_meters + " m"
-                      }  `,
+                    distance: `${new Intl.NumberFormat(locale, {style: "unit", unit: "mile", unitDisplay: "short", maximumFractionDigits: 2}).format(rideOptions?.distance_miles ?? 0)} / ${new Intl.NumberFormat(locale, {style: "unit", unit: "kilometer", unitDisplay: "short", maximumFractionDigits: 2}).format((rideOptions?.distance_meters ?? 0) / 1000)}`,
                     largeSuitcase: formDetails.largeSuitcase,
                     smallSuitcase: formDetails.smallSuitcase,
                     adults: formDetails.adults,

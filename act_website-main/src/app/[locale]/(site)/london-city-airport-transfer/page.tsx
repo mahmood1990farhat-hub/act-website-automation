@@ -19,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (locale === "fr") return frenchAirportMetadata("london-city-airport-transfer");
+  if (locale !== "en" && locale !== "ar") return frenchAirportMetadata("london-city-airport-transfer", locale);
   return getPublicPageSeo(locale, "london-city-airport-transfer", pageMetadata);
 }
 
@@ -74,7 +74,7 @@ export default async function LondonCityAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  if (locale === "fr") return <FrenchAirportPage slug="london-city-airport-transfer" />;
+  if (locale !== "en" && locale !== "ar") return <FrenchAirportPage locale={locale} slug="london-city-airport-transfer" />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;
     const serviceSchema = {

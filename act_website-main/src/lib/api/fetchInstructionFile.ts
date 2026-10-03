@@ -1,3 +1,4 @@
+import bundledDocuments from "@/dictionaries/document-manifest.json";
 import { type SupportedLocale } from "../../../i18n.config";
 
 type InstructionFile = {
@@ -81,4 +82,15 @@ export async function getInstructionFile(
   );
 
   return sortedFiles[0] || null;
+}
+
+/** Prefer an explicitly labelled upload, otherwise use the versioned matching site document. */
+export async function getCustomerDocument(fileType: string, locale: SupportedLocale = "en"): Promise<InstructionFile | null> {
+  const uploaded = await getInstructionFile(fileType, locale);
+  if (uploaded) return uploaded;
+  const catalogue = bundledDocuments[locale];
+  const bundled = catalogue?.[fileType as keyof typeof catalogue];
+  if (!bundled) return null;
+  return { id: 0, file_type: fileType, file_type_display: bundled.title, title: bundled.title,
+    language: locale, file_url: bundled.file_url, description: "", version: 1, updated_at: "" };
 }
