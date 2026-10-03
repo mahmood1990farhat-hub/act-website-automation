@@ -1,4 +1,6 @@
 "use client";
+import { LANGUAGE_CHANGE_EVENT, saveLanguageDraft, takeLanguageDraft } from "@/lib/booking-language-draft";
+import { languageSwitchText } from "@/lib/language-switch-text";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -223,6 +225,43 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   const [clientSecret, setClientSecret] = useState<string>('')
   const [paymentTotal, setPaymentTotal] = useState<number | null>(null);
   const [step, setStep] = useState<number>(1);
+  const [restoredDraft, setRestoredDraft] = useState(false);
+  useEffect(() => {
+    try {
+      const draft = takeLanguageDraft(window.sessionStorage, locale);
+      if (!draft) return;
+      setRoutePoints(draft.routePoints);
+      setFormDetails(draft.formDetails);
+      setPassengerDetails(draft.passengerDetails);
+      setChildInfantTravel(draft.childInfantTravel);
+      setFlightDetails(draft.flightDetails);
+      setAdditionalRequirements(draft.additionalRequirements);
+      setRestoredDraft(true);
+      // Always recalculate the quote; payment/price/vehicle state is never restored.
+      setStep(1);
+    } catch { /* Storage unavailable: no handoff to restore. */ }
+  }, [locale]);
+
+  useEffect(() => {
+    const transfer = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      if (clientSecret && step !== 9) {
+        detail.reason = "payment";
+        event.preventDefault();
+        return;
+      }
+      if (step === 9) return;
+      try {
+        saveLanguageDraft(window.sessionStorage, { routePoints, formDetails, passengerDetails, childInfantTravel, flightDetails, additionalRequirements }, detail.locale);
+      } catch {
+        detail.reason = "failed";
+        event.preventDefault();
+      }
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, transfer);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, transfer);
+  }, [routePoints, formDetails, passengerDetails, childInfantTravel, flightDetails, additionalRequirements, clientSecret, step]);
+
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -238,6 +277,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
 
   return (
     <div className={`${heroImage} bg-cover bg-no-repeat bg-center ${step !== 10 && 'py-16 lg:py-36'}`} id="book-now">
+      {restoredDraft && <p role="status" className="mx-auto max-w-3xl p-4 text-white">{languageSwitchText(locale, "restored")}</p>}
       {step !== 10 && (
         <div>
           <div

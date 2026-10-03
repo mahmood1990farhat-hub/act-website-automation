@@ -1,4 +1,5 @@
 "use client";
+import { documentText } from "@/lib/document-text";
 import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { IoAlertCircle } from "react-icons/io5";
@@ -14,24 +15,21 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
   const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
-    if (isOpen && !instructionFile && !useFallback) {
-      setIsLoading(true);
-      getInstructionFile("FAQ", locale)
-        .then((file) => {
-          if (file) {
-            setInstructionFile(file);
-          } else {
-            setUseFallback(true);
-          }
-        })
-        .catch(() => {
-          setUseFallback(true);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, locale, instructionFile, useFallback]);
+    let active = true;
+    setInstructionFile(null);
+    setUseFallback(false);
+    if (!isOpen) return;
+    setIsLoading(true);
+    getInstructionFile("FAQ", locale)
+      .then(file => {
+        if (!active) return;
+        setInstructionFile(file);
+        setUseFallback(!file);
+      })
+      .catch(() => { if (active) setUseFallback(true); })
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
+  }, [isOpen, locale]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -42,7 +40,7 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
 
   return (
     <>
-      <button className="cursor-pointer hover:text-gray-400" onClick={() => setIsOpen(true)}> {trans.Open_button}</button>
+      <button type="button" className="cursor-pointer hover:text-gray-400" onClick={() => setIsOpen(true)}> {trans.Open_button}</button>
       {isOpen && (
         <div onClick={handleClose} className="fixed inset-0 bg-black/10 bg-opacity-50 flex items-center justify-center z-50">
           <div onClick={(e) => e.stopPropagation()} className="bg-white text-black p-6 md:px-15 rounded-lg md:w-5/12 overflow-auto h-screen on-scrollbar space-y-3 flex flex-col items-start">
@@ -50,7 +48,7 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
               <div className="w-full flex items-center justify-center py-20">
                 <IsLoading />
               </div>
-            ) : instructionFile && !useFallback ? (
+            ) : instructionFile && instructionFile.language === locale && !useFallback ? (
               <>
                 <h1 className="text-lg font-bold">{instructionFile.title || trans.title}</h1>
                 {instructionFile.description && (
@@ -70,21 +68,21 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
                     rel="noopener noreferrer"
                     className="text-primary hover:underline text-sm"
                   >
-                    Open in new tab
+                    {documentText(locale, "open")}
                   </a>
                   <a
                     href={instructionFile.file_url}
                     download
                     className="text-primary hover:underline text-sm"
                   >
-                    Download PDF
+                    {documentText(locale, "download")}
                   </a>
                 </div>
                 <h4 className="text-gray-500 text-xs flex items-center gap-2">
                   <IoAlertCircle className="text-[#ED1F4F] text-3xl" />
                   {trans.warning}
                 </h4>
-                <Button onClick={handleClose} className="w-full text-lg">{trans.button}</Button>
+                <Button type="button" onClick={handleClose} className="w-full text-lg">{trans.button}</Button>
               </>
             ) : (
               <>
@@ -104,7 +102,7 @@ export default function Faqs({ trans, locale = Languages.ENGLISH }: { trans: any
                   <IoAlertCircle className="text-[#ED1F4F] text-3xl" />
                   {trans.warning}
                 </h4>
-                <Button onClick={handleClose} className="w-full text-lg">{trans.button}</Button>
+                <Button type="button" onClick={handleClose} className="w-full text-lg">{trans.button}</Button>
               </>
             )}
           </div>

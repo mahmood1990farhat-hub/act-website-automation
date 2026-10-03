@@ -4,7 +4,11 @@ Requested by the owner: check privacy, terms and conditions, FAQs, and anything 
 
 **Verdict: not complete; the five additional languages must remain unpublished.** This is a source and offline-test audit of draft PR #70, remote implementation commit `a3bc6db5d69718dc924728043d37d6f42aeb33a0` (local equivalent tree `8489f6d89b9e838110bf38d4f8cb1070af92bae3`). It is not a fresh production crawl, a review of uploaded production files, a legal-content review, or provider-delivery acceptance.
 
-## Confirmed release blockers
+## Implementation update
+
+The subsequent document-language and booking-transfer implementation is recorded in [MULTILINGUAL_CUSTOMER_JOURNEY_2026-10-02.md](MULTILINGUAL_CUSTOMER_JOURNEY_2026-10-02.md), under “Findings implementation”. The findings below describe the audited baseline, not the updated code. Document-language infrastructure and one-time booking transfer are now implemented/tested in the draft; actual translated uploads, additional locale UI and full acceptance remain pending.
+
+## Confirmed release blockers at the audited baseline
 
 1. **The uploaded-document system cannot select a document by language.** `act_backend-main/apps/admin_panel/models/instruction_files.py` has a globally unique `file_type` and no language field. Its public views filter only by active state and document type; `activate(locale)` does not translate the stored title, description or file. Public serializers do not expose a document language. The frontend `src/lib/api/fetchInstructionFile.ts` chooses the newest returned file without checking language. This affects terms, privacy, FAQ and passenger/driver guides. A translated button is not evidence of a translated document.
 2. **Four languages still have only account and trip dictionaries.** `de`, `es`, `tr` and `zh-CN` lack `home`, `complaints`, `lostProperty`, airport and booking-interface catalogues. `src/lib/translation.ts` falls back to English for their missing sections. `src/lib/customer-text.ts` translates French only. Thus large areas of booking, navigation, content, policies and FAQs remain English if those locales were enabled now.

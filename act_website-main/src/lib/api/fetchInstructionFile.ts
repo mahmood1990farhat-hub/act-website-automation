@@ -1,9 +1,9 @@
-import { languageType, Locale } from "../../../i18n.config";
-import { Languages } from "../../constants/enums";
+import { type SupportedLocale } from "../../../i18n.config";
 
 type InstructionFile = {
   id: number;
   file_type: string;
+  language: string;
   file_type_display: string;
   title: string;
   file_url: string;
@@ -27,7 +27,7 @@ type InstructionFilesResponse = {
  */
 export async function fetchInstructionFile(
   fileType: string,
-  locale: languageType = "en" as languageType
+  locale: SupportedLocale = "en"
 ): Promise<InstructionFilesResponse | null> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -64,7 +64,7 @@ export async function fetchInstructionFile(
  */
 export async function getInstructionFile(
   fileType: string,
-  locale: languageType = "en" as languageType
+  locale: SupportedLocale = "en"
 ): Promise<InstructionFile | null> {
   const response = await fetchInstructionFile(fileType, locale);
   
@@ -73,7 +73,9 @@ export async function getInstructionFile(
   }
 
   // Get the most recent file (sorted by updated_at)
-  const files = response.data.instruction_files;
+  const files = response.data.instruction_files.filter(file =>
+    file.file_type === fileType && file.language === locale && file.file_url
+  );
   const sortedFiles = files.sort(
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );

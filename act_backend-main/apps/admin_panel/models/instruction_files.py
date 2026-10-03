@@ -19,9 +19,15 @@ class InstructionFile(models.Model):
     file_type = models.CharField(
         max_length=50,
         choices=FILE_TYPE_CHOICES,
-        unique=True,  # Only one active file per type
         help_text="Type of instruction file"
     )
+    LANGUAGE_CHOICES = [
+        ('en', 'English'), ('ar', 'العربية'), ('fr', 'Français'),
+        ('de', 'Deutsch'), ('es', 'Español'), ('tr', 'Türkçe'), ('zh-CN', '简体中文'),
+    ]
+    # Blank is reserved for migrated files whose actual language is unverified.
+    language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, blank=True, default='')
+
     title = models.CharField(
         max_length=255,
         help_text="Title of the file (e.g., 'Terms and Conditions', 'FAQ')"
@@ -69,6 +75,7 @@ class InstructionFile(models.Model):
             models.Index(fields=['is_active']),
         ]
         ordering = ['-updated_at']
+        constraints = [models.UniqueConstraint(fields=['file_type', 'language'], name='instruction_type_language_unique')]
     
     def __str__(self):
         return f"{self.get_file_type_display()} - {self.title} (v{self.version})"
@@ -78,7 +85,8 @@ class InstructionFile(models.Model):
         if self.pk:
             try:
                 old_instance = InstructionFile.objects.get(pk=self.pk)
-                if old_instance.file != self.file:
+                if any(getattr(old_instance, field) != getattr(self, field)
+                       for field in ("file", "language", "title", "description")):
                     self.version = old_instance.version + 1
             except InstructionFile.DoesNotExist:
                 pass

@@ -89,3 +89,27 @@ The owner-requested audit on 3 October is recorded in [TRANSLATION_COVERAGE_AUDI
 6. Prepare one concrete release with the locale guard, menus, dictionaries, SEO/hreflang/sitemap and backend support aligned. Publish only after the complete journey is verified and the concrete deployment is authorised. Record exactly which locales and release SHA are live.
 
 Completion means a verified customer journey and matching communications for each language; translated files, a preview or an HTTP 200 alone do not meet that definition.
+
+## Findings implementation — 3 October, documents and booking language switching
+
+Implemented in the draft; not deployed:
+
+- Instruction files now have an explicit language and a unique (document type, language) pair. Both public document endpoints select only the requested canonical language and active records; unsupported locales are rejected. Serializers expose the language and require it for creation or editing an unverified legacy record.
+- Migration `admin_panel.0002_instruction_file_language` preserves existing file paths and records with blank/unverified language. It deliberately does not guess that old documents are English. Before production publication, inspect and label existing content and supply the actual translated files. Unverified files are excluded from the public API, so translated inline terms/privacy/FAQ remain the fallback. Do not reverse this migration after adding multiple language versions without a data-preserving rollback plan: the old unique document-type constraint cannot accommodate them.
+- The admin upload/edit form offers all seven document languages independently of the admin UI language; duplicate checks are per language. Updating language/title/description/file increments the document version. Existing file type is included in full updates.
+- Frontend selection also verifies document type and exact language. Terms/privacy no longer force French users to an English file. Modal fetches clear stale state and ignore obsolete responses, and PDF controls have seven-language labels. Missing localized app guides no longer silently link to an unlabelled static/environment fallback; the interface explains the absence and retains inline instructions.
+- Before changing language, the booking UI hands off an allowlisted draft through same-tab session storage. It is consumed once in the destination locale, rejected after five minutes, and excludes vehicle quotes, prices, payment secrets and account credentials. Route/passenger/flight/seat/notes fields are restored without translating customer data; the journey returns to route review for a fresh quote. This is only a language-change handoff, not general draft autosave or session recovery.
+- A language switch is blocked while a payment is being initiated or an existing payment is unfinished. A failed draft write also blocks navigation and shows a translated message, keeping the current booking open. Completed-payment state is not restored into another locale. Ordinary routes retain their query string and fragment. Selector accessibility/feedback has all seven languages; publication flags remain unchanged.
+
+Validation:
+
+- Four isolated SQLite/Django tests pass: old-schema migration and legacy retention, all seven exact public language selections, inactive/missing/invalid language handling, DB pair uniqueness, admin validation, content-version increment and migration/model consistency. These exercise real models/serializers and extracted production public view bodies, not the complete production application middleware stack or PostGIS database.
+- `check-document-languages.cjs` passes exact locale/type filtering, wrong-language/unlabelled file rejection and translated viewer labels.
+- `check-booking-language-draft.cjs` passes all seven draft destinations, one-time consumption, expiry, destination isolation, preserved canonical/customer values and secret/price exclusion.
+- `check-language-switch-browser.cjs` passes against the local production build on desktop and mobile: EN→AR→EN route preservation, URL query/fragment retention, correct HTML language, consumed transfer and navigation blocked on storage failure. External services were blocked; quote responses were synthetic. Browser evidence is EN/AR only, since additional locales remain hidden. Payment-block behaviour and every later booking field still require full end-to-end browser acceptance.
+- TypeScript, existing EN/AR booking regression, registry/hidden-route checks, French dictionary checks and the Webpack production build pass. The final admin wording adjustment is dictionary-only.
+
+Commands (from frontend): `node tests/check-document-languages.cjs`; `node tests/check-booking-language-draft.cjs`; browser check needs Playwright and Chromium, optionally located by `ACT_PLAYWRIGHT_MODULE` and `PLAYWRIGHT_BROWSERS_PATH`.
+Backend: `PYTHONPATH=. python apps/admin_panel/tests/test_document_languages.py` with Django 4.2 and DRF installed.
+
+Remaining: translated document bodies/uploads and production migration preparation; remaining four website/booking/payment/support dictionaries; residual French/Arabic UI gaps; explicit preference persistence; full payment/provider/email/PDF/browser acceptance and coordinated publication. The coverage audit is a historical baseline; the fixes above address its document-selection and booking-transfer implementation findings but do not close the entire launch gate.

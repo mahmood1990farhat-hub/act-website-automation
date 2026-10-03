@@ -1,3 +1,4 @@
+import { LANGUAGE_CHANGE_EVENT } from "@/lib/booking-language-draft";
 import { customerText } from "@/lib/customer-text";
 import React, { useEffect, useState } from "react";
 import { bookingText } from "./booking-text";
@@ -87,6 +88,15 @@ export default function ModernConfirmFlightDetails({
 }: typeProps) {
 	const [token, setToken] = useState<string | undefined>();
 	const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    if (!isLoading) return;
+    const block = (event: Event) => {
+      (event as CustomEvent).detail.reason = "payment";
+      event.preventDefault();
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, block);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, block);
+  }, [isLoading]);
 	const isRTL = locale === "ar";
   const t = (text: string) => bookingText(locale, text);
 
