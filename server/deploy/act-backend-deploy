@@ -145,6 +145,10 @@ cat >release.json <<EOF
 EOF
 chown -R root:root "$ACT_ROOT/releases/$ID"
 chmod -R go-w "$ACT_ROOT/releases/$ID"
+# Preserve scheduler access after root ownership/umask hardening.
+chgrp www-data "$ACT_ROOT/releases/$ID" "$RELEASE"
+chgrp -hR www-data "$RELEASE/.venv"
+runuser -u www-data -- "$RELEASE/.venv/bin/python" -c "import celery, weasyprint"
 
 SWITCHED=0
 ROLLBACK_REASON=unspecified_post_switch_failure

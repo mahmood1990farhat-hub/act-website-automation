@@ -1,5 +1,5 @@
 from apps.trips.services.customer_language import booking_language
-from apps.trips.services.customer_documents import render_arabic_document
+from apps.trips.services.localized_documents import render_customer_document
 from io import BytesIO
 import os
 from pathlib import Path
@@ -62,9 +62,10 @@ def generate_booking_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate booking confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
-    if booking_language(trip) == "ar":
-        _, html, _ = render_arabic_document(
-            trip, "booking",
+    if booking_language(trip) != "en":
+        _, html, _ = render_customer_document(
+            trip, "booking", payment_method=payment_method,
+            font_uri=(Path(settings.BASE_DIR) / "static/fonts/act-customer-cjk.otf").resolve().as_uri(),
             logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
         )
         buffer = BytesIO()
@@ -161,9 +162,10 @@ def generate_cancellation_confirmation_pdf(trip, payment_method="Card Payment"):
     Generate cancellation confirmation PDF from HTML template.
     Returns a BytesIO buffer.
     """
-    if booking_language(trip) == "ar":
-        _, html, _ = render_arabic_document(
-            trip, "cancellation",
+    if booking_language(trip) != "en":
+        _, html, _ = render_customer_document(
+            trip, "cancellation", payment_method=payment_method,
+            font_uri=(Path(settings.BASE_DIR) / "static/fonts/act-customer-cjk.otf").resolve().as_uri(),
             logo_uri=(Path(settings.BASE_DIR) / "static/assets/act_logo.png").resolve().as_uri(),
         )
         buffer = BytesIO()

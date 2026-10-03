@@ -1,4 +1,5 @@
 "use client";
+import { customerPaymentError, runtimeText } from "@/lib/customer-runtime";
 
 import {
   CardNumberElement,
@@ -226,6 +227,7 @@ export default function CheckoutForm({
 
     const card = elements.getElement(CardNumberElement);
 
+    try {
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: card!,
@@ -233,13 +235,17 @@ export default function CheckoutForm({
     });
 
     if (result.error) {
-      setErrorMsg(locale === "ar" ? "تعذّر إتمام الدفع. يرجى التحقق من بيانات البطاقة والمحاولة مجددًا، أو التواصل معنا إذا استمرت المشكلة." : result.error.message || "Payment failed");
+      setErrorMsg(customerPaymentError(locale, result.error));
     } else if (result.paymentIntent.status === "succeeded") {
       await fireBookingCompletedEvents(result.paymentIntent.id);
       nextStep();
     }
 
-    setLoading(false);
+    } catch {
+      setErrorMsg(runtimeText(locale, "paymentUnknown"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isFormValid = cardComplete && expiryComplete && cvcComplete && agreed;
@@ -297,7 +303,7 @@ export default function CheckoutForm({
           </div>
           <div className="w-full">
             <label>
-              <p>{locale === "ar" ? "رمز الأمان (CVC)" : "CVC"}</p>
+              <p>{runtimeText(locale, "cvc")}</p>
             </label>
             <div className="w-full p-2.5 border-2 bg-white text-foreground border-muted rounded-lg">
               <CardCvcElement
@@ -357,3 +363,4 @@ export default function CheckoutForm({
     </div>
   );
 }
+

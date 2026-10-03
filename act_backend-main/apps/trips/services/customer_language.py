@@ -2,12 +2,17 @@
 from functools import wraps
 from django.utils.translation import override
 
-SUPPORTED_LANGUAGES = ("en", "ar")
+SUPPORTED_LANGUAGES = ("en", "ar", "fr", "de", "es", "tr", "zh-CN")
 
 
 def normalize_language(value):
-    value = str(value or "").strip().lower().replace("_", "-").split("-")[0]
-    return value if value in SUPPORTED_LANGUAGES else "en"
+    value = str(value or "").strip().lower().replace("_", "-")
+    # Keep the published Simplified Chinese identifier. Do not silently treat
+    # Traditional Chinese (zh-TW/zh-Hant) as a translation we do not provide.
+    if value in ("zh", "zh-cn", "zh-hans", "zh-hans-cn", "zh-sg"):
+        return "zh-CN"
+    base = value.split("-")[0]
+    return base if base in SUPPORTED_LANGUAGES else "en"
 
 
 def details_with_language(details, locale):
@@ -26,4 +31,13 @@ def use_booking_language(function):
     def wrapped(user, trip, *args, **kwargs):
         with override(booking_language(trip)):
             return function(user, trip, *args, **kwargs)
+    return wrapped
+
+
+def use_internal_language(function):
+    """Owner/operations messages always use English, never a customer's locale."""
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        with override("en"):
+            return function(*args, **kwargs)
     return wrapped

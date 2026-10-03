@@ -1,0 +1,94 @@
+{
+  "title": "Yolculuklarım",
+  "section_1": {
+    "title": "Tüm yolculuklar",
+    "tpes": [
+      {
+        "title": "Tümü",
+        "value": ""
+      },
+      {
+        "title": "Beklemede",
+        "value": "pending"
+      },
+      {
+        "title": "Kabul edildi",
+        "value": "accepted"
+      },
+      {
+        "title": "Devam ediyor",
+        "value": "active"
+      },
+      {
+        "title": "Yaklaşan",
+        "value": "driver_on_the_way"
+      },
+      {
+        "title": "Tamamlandı",
+        "value": "completed"
+      },
+      {
+        "title": "İptal edildi",
+        "value": "cancelled"
+      }
+    ]
+  },
+  "section_2": {
+    "title": "Son yolculuklar",
+    "desc": "Sorularınız veya şikâyetleriniz için son 24 saatteki yolculuklarınızın sürücüleriyle iletişime geçebilirsiniz."
+  },
+  "tripsCount": "Yolculuk sayısı:",
+  "noTrips": {
+    "title": "Yolculuk bulunamadı",
+    "tryDifferentFilter": "Başka bir filtre seçmeyi deneyin.",
+    "willAppearHere": "Yolculuklarınız burada görünecek."
+  },
+  "noRecentTrips": {
+    "title": "Yakın zamanda yolculuk yok",
+    "desc": "Son 24 saatteki yolculuklarınız burada görünecek."
+  },
+  "deleteTrip": {
+    "title": "Yolculuk iptal edilsin mi?",
+    "desc": "Bu yolculuğu iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "btuCancel": "İptal",
+    "btuConfirm": "Yolculuğu iptal et"
+  },
+  "tripCard": {
+    "name_of_driver": "Sürücünün adı",
+    "phone_of_driver": "Sürücünün telefonu",
+    "model_car": "Araç modeli",
+    "color_car": "Araç rengi",
+    "number_car": "Araç plakası",
+    "tripId": "Yolculuk referansı:",
+    "distance": "Mesafe",
+    "duration": "Süre",
+    "destination": "Varış noktası",
+    "carInfo": "Araç bilgileri",
+    "brand": "Marka",
+    "additional_notes": "Ek notlar",
+    "model": "Model",
+    "color": "Renk",
+    "registrationNumber": "Plaka",
+    "year": "Yıl",
+    "pickup": "Alış",
+    "dropoff": "Bırakış",
+    "gbp": "GBP",
+    "seeDetails": "Ayrıntıları gör",
+    "details": "Ayrıntılar",
+    "cancel": "İptal",
+    "tripDetails": "Yolculuk ayrıntıları",
+    "status": "Durum:",
+    "date": "Tarih",
+    "cost": "Ücret",
+    "contactDriver": "Sürücüyle iletişime geç",
+    "close": "Kapat",
+    "statusLabels": {
+      "pending": "Beklemede",
+      "accepted": "Kabul edildi",
+      "active": "Devam ediyor",
+      "driver_on_the_way": "Sürücü yolda",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal edildi"
+    }
+  }
+}

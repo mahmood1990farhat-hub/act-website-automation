@@ -1,8 +1,9 @@
 "use client";
+import { documentText } from "@/lib/document-text";
 import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { IoAlertCircle } from "react-icons/io5";
-import { getInstructionFile } from "@/lib/api/fetchInstructionFile";
+import { getCustomerDocument } from "@/lib/api/fetchInstructionFile";
 import { languageType } from "../../../i18n.config";
 import IsLoading from "./ISloading";
 
@@ -21,24 +22,21 @@ export default function Terms({
   const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
-    if (isOpen && !instructionFile && !useFallback) {
-      setIsLoading(true);
-      getInstructionFile("TERMS_AND_CONDITIONS", locale)
-        .then((file) => {
-          if (file) {
-            setInstructionFile(file);
-          } else {
-            setUseFallback(true);
-          }
-        })
-        .catch(() => {
-          setUseFallback(true);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, locale, instructionFile, useFallback]);
+    let active = true;
+    setInstructionFile(null);
+    setUseFallback(false);
+    if (!isOpen) return;
+    setIsLoading(true);
+    getCustomerDocument("TERMS_AND_CONDITIONS", locale)
+      .then(file => {
+        if (!active) return;
+        setInstructionFile(file);
+        setUseFallback(!file);
+      })
+      .catch(() => { if (active) setUseFallback(true); })
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
+  }, [isOpen, locale]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -61,7 +59,7 @@ export default function Terms({
               <div className="w-full flex items-center justify-center py-20">
                 <IsLoading />
               </div>
-            ) : instructionFile && !useFallback ? (
+            ) : instructionFile && instructionFile.language === locale && !useFallback ? (
               <>
                 <h1 className="text-lg font-bold">{instructionFile.title || trans.title}</h1>
                 {instructionFile.description && (
@@ -71,7 +69,7 @@ export default function Terms({
                   <iframe
                     src={instructionFile.file_url}
                     className="w-full h-full border rounded-lg"
-                    title={instructionFile.title || "Terms and Conditions"}
+                    title={instructionFile.title || trans.title}
                   />
                 </div>
                 <div className="flex items-center gap-4 w-full">
@@ -81,14 +79,14 @@ export default function Terms({
                     rel="noopener noreferrer"
                     className="text-primary hover:underline text-sm"
                   >
-                    Open in new tab
+                    {documentText(locale, "open")}
                   </a>
                   <a
                     href={instructionFile.file_url}
                     download
                     className="text-primary hover:underline text-sm"
                   >
-                    Download PDF
+                    {documentText(locale, "download")}
                   </a>
                 </div>
                 <h4 className="text-gray-500 text-xs flex items-center gap-2">
@@ -122,3 +120,4 @@ export default function Terms({
     </>
   );
 }
+

@@ -1,0 +1,94 @@
+{
+  "title": "Mis viajes",
+  "section_1": {
+    "title": "Todos los viajes",
+    "tpes": [
+      {
+        "title": "Todos",
+        "value": ""
+      },
+      {
+        "title": "Pendiente",
+        "value": "pending"
+      },
+      {
+        "title": "Aceptado",
+        "value": "accepted"
+      },
+      {
+        "title": "En curso",
+        "value": "active"
+      },
+      {
+        "title": "Próximos",
+        "value": "driver_on_the_way"
+      },
+      {
+        "title": "Completado",
+        "value": "completed"
+      },
+      {
+        "title": "Cancelado",
+        "value": "cancelled"
+      }
+    ]
+  },
+  "section_2": {
+    "title": "Recientes",
+    "desc": "Si tienes preguntas o quieres presentar una reclamación, puedes contactar con los conductores de tus viajes de las últimas 24 horas."
+  },
+  "tripsCount": "Número de viajes:",
+  "noTrips": {
+    "title": "No se han encontrado viajes",
+    "tryDifferentFilter": "Prueba a seleccionar otro filtro.",
+    "willAppearHere": "Tus viajes aparecerán aquí."
+  },
+  "noRecentTrips": {
+    "title": "No hay viajes recientes",
+    "desc": "Los viajes de las últimas 24 horas aparecerán aquí."
+  },
+  "deleteTrip": {
+    "title": "¿Cancelar viaje?",
+    "desc": "¿Seguro que quieres cancelar este viaje? Esta acción no se puede deshacer.",
+    "btuCancel": "Cancelar",
+    "btuConfirm": "Cancelar viaje"
+  },
+  "tripCard": {
+    "name_of_driver": "Nombre del conductor",
+    "phone_of_driver": "Teléfono del conductor",
+    "model_car": "Modelo del vehículo",
+    "color_car": "Color del vehículo",
+    "number_car": "Matrícula",
+    "tripId": "Referencia del viaje:",
+    "distance": "Distancia",
+    "duration": "Duración",
+    "destination": "Destino",
+    "carInfo": "Información del vehículo",
+    "brand": "Marca",
+    "additional_notes": "Notas adicionales",
+    "model": "Modelo",
+    "color": "Color",
+    "registrationNumber": "Matrícula",
+    "year": "Año",
+    "pickup": "Recogida",
+    "dropoff": "Destino",
+    "gbp": "GBP",
+    "seeDetails": "Ver detalles",
+    "details": "Detalles",
+    "cancel": "Cancelar",
+    "tripDetails": "Detalles del viaje",
+    "status": "Estado:",
+    "date": "Fecha",
+    "cost": "Precio",
+    "contactDriver": "Contactar con el conductor",
+    "close": "Cerrar",
+    "statusLabels": {
+      "pending": "Pendiente",
+      "accepted": "Aceptado",
+      "active": "En curso",
+      "driver_on_the_way": "Conductor en camino",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    }
+  }
+}

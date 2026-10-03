@@ -88,7 +88,7 @@ class ForgetPasswordView(EMADBaseView):
             otp = create_otp_for_user(user, purpose='password_reset')
             
             # Send OTP via email
-            email_sent = send_otp_email(user, otp.code, purpose='password_reset')
+            email_sent = send_otp_email(user, otp.code, purpose='password_reset', locale=locale)
             
             if not email_sent:
                 logger.warning(f"Failed to send OTP email to {user.email}, but OTP was created")
@@ -331,4 +331,3 @@ class ChangePasswordView(EMADBaseView):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=str(e)
             )
-

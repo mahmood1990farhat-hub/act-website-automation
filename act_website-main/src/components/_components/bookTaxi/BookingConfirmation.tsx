@@ -1,3 +1,4 @@
+import { customerText } from "@/lib/customer-text";
 import React from "react";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,7 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             {/* Divider */}
             <div className="flex items-center space-x-4">
               <div className="flex-1 h-px bg-gray-200"></div>
-              <div className="text-xs text-gray-400 font-medium">{isRTL ? "الخطوات التالية" : "NEXT STEPS"}</div>
+              <div className="text-xs text-gray-400 font-medium">{isRTL ? "الخطوات التالية" : customerText(locale, "NEXT STEPS")}</div>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -73,10 +74,10 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             {/* Additional Info */}
             {<div className="rounded-xl p-4 text-center">
               <p className="text-xs text-muted leading-none">
-                {isRTL ? "تم إرسال تفاصيل التأكيد إلى بريدك الإلكتروني" : "Confirmation details sent to your email"}
+                {isRTL ? "تم إرسال تفاصيل التأكيد إلى بريدك الإلكتروني" : customerText(locale, "Confirmation details sent to your email")}
               </p>
               <p className="text-xs text-muted mt-1">
-                {isRTL ? "هل تحتاج إلى مساعدة؟ تواصل مع فريق الدعم على مدار الساعة" : "Need help? Contact our support team 24/7"}
+                {isRTL ? "هل تحتاج إلى مساعدة؟ تواصل مع فريق الدعم على مدار الساعة" : customerText(locale, "Need help? Contact our support team 24/7")}
               </p>
             </div>}
           </div>

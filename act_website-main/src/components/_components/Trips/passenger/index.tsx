@@ -1,4 +1,5 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
 
 import React, { useEffect, useState } from "react";
 import MyTripsCard from "../MyTripsCard";
@@ -22,8 +23,8 @@ export default function TripsPassenger({ trans, token, locale }: typeProps) {
     window.scroll(0, 0);
   }, [page]);
 
-  const { data: AllTrips, isLoading: AllTripsLodaing } = useQuery<any>({
-    queryKey: ["myTrips", typeTrips, page],
+  const { data: AllTrips, isLoading: AllTripsLodaing, isError: allTripsError, refetch: reloadTrips } = useQuery<any>({
+    queryKey: ["myTrips", locale, token, typeTrips, page],
     queryFn: () =>
       fetchData({
         endpoint: "/api/trips/list-trips/",
@@ -37,13 +38,13 @@ export default function TripsPassenger({ trans, token, locale }: typeProps) {
       }),
   });
 
-  const { data: latest, isLoading: latestLodaing } = useQuery<[any]>({
-    queryKey: ["Latest"],
+  const { data: latest, isLoading: latestLodaing, isError: latestError, refetch: reloadLatest } = useQuery<[any]>({
+    queryKey: ["Latest", locale, token],
     queryFn: () =>
       fetchData({
         endpoint: "/api/trips/latest-trips/",
         token: token,
-        queryParams: {},
+        queryParams: { locale },
       }),
   });
 
@@ -91,7 +92,12 @@ export default function TripsPassenger({ trans, token, locale }: typeProps) {
           </div>
 
           {/* Content Area */}
-          {AllTripsLodaing ? (
+          {allTripsError ? (
+            <div role="alert" className="p-5 space-y-3">
+              <p>{accountText(locale, "loadTripsFailed")}</p>
+              <button onClick={() => void reloadTrips()}>{accountText(locale, "retry")}</button>
+            </div>
+          ) : AllTripsLodaing ? (
             <div className="flex items-center justify-center py-20">
               <IsLoading />
             </div>
@@ -172,7 +178,12 @@ export default function TripsPassenger({ trans, token, locale }: typeProps) {
           </div>
 
           {/* Latest Trips Content */}
-          {latestLodaing ? (
+          {latestError ? (
+            <div role="alert" className="p-5 space-y-3">
+              <p>{accountText(locale, "loadTripsFailed")}</p>
+              <button onClick={() => void reloadLatest()}>{accountText(locale, "retry")}</button>
+            </div>
+          ) : latestLodaing ? (
             <div className="flex items-center justify-center py-12">
               <IsLoading />
             </div>

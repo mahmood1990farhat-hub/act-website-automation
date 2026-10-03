@@ -1,3 +1,5 @@
+import { runtimeText } from "@/lib/customer-runtime";
+import { customerText } from "@/lib/customer-text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,7 +13,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { Locale } from "../../../../i18n.config";
+import { Locale, localizedVehicleValue } from "../../../../i18n.config";
 import { calculatTripCost, Choose_car, VehicleType } from ".";
 import { Button } from "@/components/ui/button";
 
@@ -56,20 +58,20 @@ export default function ModernChooseCar({
 
   // Arabic text alternatives
   const texts = {
-    back: isRTL ? "العودة" : "Back",
-    mostPopular: isRTL ? "الأكثر شعبية" : "Most Popular",
-    passengers: isRTL ? "راكب" : "passengers",
-    professionalDriver: isRTL ? "سائق محترف" : "Professional Driver",
-    premiumComfort: isRTL ? "راحة فائقة" : "Premium Comfort",
-    meetGreet: isRTL ? "استقبال ومرافقة" : "Meet & Greet",
+    back: isRTL ? "العودة" : customerText(locale, "Back"),
+    mostPopular: isRTL ? "الأكثر شعبية" : customerText(locale, "Most Popular"),
+    passengers: isRTL ? "راكب" : customerText(locale, "passengers"),
+    professionalDriver: isRTL ? "سائق محترف" : customerText(locale, "Professional Driver"),
+    premiumComfort: isRTL ? "راحة فائقة" : customerText(locale, "Premium Comfort"),
+    meetGreet: isRTL ? "استقبال ومرافقة" : customerText(locale, "Meet & Greet"),
     freeCancellation: isRTL
       ? "استرداد كامل عند الإلغاء قبل موعد الاستلام بـ24 ساعة على الأقل"
-      : "Full refund when cancelled at least 24 hours before pickup",
-    realTimeTracking: isRTL ? "تتبع فوري متضمن" : "Real-time tracking included",
-    continue: isRTL ? "متابعة" : "Continue",
+      : customerText(locale, "Full refund when cancelled at least 24 hours before your scheduled pickup"),
+    realTimeTracking: runtimeText(locale, "realTimeTracking"),
+    continue: isRTL ? "متابعة" : customerText(locale, "Continue"),
     selectVehicle: isRTL
       ? "اختر مركبتك المفضلة من أسطولنا المميز"
-      : "Select your preferred vehicle from our premium fleet",
+      : customerText(locale, "Select your preferred vehicle from our premium fleet"),
   };
 
   const SkeletonCard = () => (
@@ -129,7 +131,7 @@ export default function ModernChooseCar({
           ) : (
             <>
               <ChevronLeft className="w-5 h-5 mr-2" />
-              {texts.back}
+              {isRTL ? texts.back : customerText(locale, "Back")}
             </>
           )}
         </Button>
@@ -174,7 +176,7 @@ export default function ModernChooseCar({
                       <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 relative rounded-xl overflow-hidden bg-white p-1 sm:p-2">
                         <Image
                           src={car.icon_url}
-                          alt={car[`name_${locale}`]}
+                          alt={localizedVehicleValue(car, "name", locale)}
                           fill
                           className="object-contain drop-shadow-lg"
                           sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
@@ -190,7 +192,7 @@ export default function ModernChooseCar({
                       )}
                       {isDisabled && (
                         <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
-                          {isRTL ? "قريبًا" : "Coming Soon"}
+                          {isRTL ? "قريبًا" : customerText(locale, "Coming Soon")}
                         </div>
                       )}
                     </div>
@@ -210,7 +212,7 @@ export default function ModernChooseCar({
                                 : "text-white"
                             } group-hover:text-[#ffd100] transition-colors`}
                           >
-                            {car[`name_${locale}`]}
+                            {localizedVehicleValue(car, "name", locale)}
                           </h3>
 
                           <div
@@ -245,7 +247,7 @@ export default function ModernChooseCar({
                       </div>
 
                       <p className="text-white/80 text-xs sm:text-sm lg:text-base leading-relaxed mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-none">
-                        {car[`desc_${locale}`]}
+                        {localizedVehicleValue(car, "desc", locale)}
                       </p>
 
                       {/* Features */}
@@ -331,3 +333,5 @@ export default function ModernChooseCar({
     </div>
   );
 }
+
+

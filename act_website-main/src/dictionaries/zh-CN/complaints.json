@@ -1,0 +1,111 @@
+{
+  "title": "投诉",
+  "subtitle": "提交并跟踪投诉",
+  "tabs": {
+    "my_complaints": "我的投诉",
+    "submit_complaint": "提交投诉"
+  },
+  "stats": {
+    "total": "投诉总数",
+    "pending": "待处理",
+    "under_review": "审核中",
+    "resolved": "已解决",
+    "closed": "已关闭"
+  },
+  "complaint_list": {
+    "title": "我的投诉",
+    "empty": "未找到投诉",
+    "filter": {
+      "all": "全部",
+      "status_label": "按状态筛选",
+      "type_label": "按类型筛选"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "投诉编号",
+    "type": "类型",
+    "title": "标题",
+    "description": "描述",
+    "status": "状态",
+    "trip_date": "行程日期",
+    "created_at": "提交时间",
+    "admin_response": "管理员回复",
+    "resolved_at": "解决时间",
+    "view_trip": "查看行程详情",
+    "resolved": "已解决",
+    "not_resolved": "未解决",
+    "leave_review": "发表评价",
+    "show_details": "显示详情",
+    "close": "关闭",
+    "complaint_details": "投诉详情",
+    "complainant": "投诉人",
+    "passenger": "乘客",
+    "driver": "司机",
+    "complainant_info": "投诉人信息",
+    "trip_info": "行程信息",
+    "trip_id": "行程编号",
+    "trip_time": "行程时间",
+    "distance": "距离",
+    "duration": "预计时长",
+    "passenger_info": "乘客信息",
+    "driver_info": "司机信息",
+    "full_name": "姓名",
+    "phone_number": "电话号码",
+    "email": "电子邮箱",
+    "account_type": "账户类型",
+    "name": "姓名",
+    "respond": "回复",
+    "resolve": "解决",
+    "respond_to_complaint": "回复投诉",
+    "resolve_complaint": "解决投诉",
+    "response_required": "请填写回复",
+    "response_placeholder": "请输入回复…",
+    "sending": "正在发送…",
+    "send_response": "发送回复",
+    "resolving": "正在解决…",
+    "cancel": "取消",
+    "update_status": "更新状态",
+    "update": "更新",
+    "updating": "正在更新…",
+    "resolution_placeholder": "请输入解决详情…",
+    "complaint_info": "投诉信息",
+    "complaint_content": "投诉内容",
+    "downloadPdf": "下载PDF"
+  },
+  "submit_form": {
+    "title": "提交投诉",
+    "subtitle": "请填写投诉详情",
+    "fields": {
+      "trip": "选择行程",
+      "trip_placeholder": "选择与投诉相关的行程",
+      "complaint_type": "投诉类型",
+      "complaint_type_placeholder": "选择投诉类型",
+      "title": "标题",
+      "title_placeholder": "简要概述您的投诉",
+      "description": "描述",
+      "description_placeholder": "详细描述您的投诉"
+    },
+    "button": "添加投诉",
+    "button_loading": "正在添加…",
+    "success_message": "投诉已成功提交！",
+    "error_message": "无法提交投诉，请重试。",
+    "validation": {
+      "trip_required": "请选择行程",
+      "type_required": "请选择投诉类型",
+      "title_required": "请输入标题",
+      "title_min": "标题至少需要5个字符",
+      "description_required": "请输入描述",
+      "description_min": "描述至少需要20个字符"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "行程问题",
+    "driver_issue": "司机问题"
+  },
+  "statuses": {
+    "pending": "待处理",
+    "under_review": "审核中",
+    "resolved": "已解决",
+    "closed": "已关闭"
+  }
+}

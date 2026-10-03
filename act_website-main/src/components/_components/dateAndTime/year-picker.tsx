@@ -11,7 +11,7 @@ interface YearPickerProps {
   placeholder?: string;
   min?: number;
   max?: number;
-  language?: "en" | "ar";
+  language?: "en" | "ar" | "fr";
   error?: any;
   requiredMsg?: string;
   label?: string;
@@ -126,4 +126,5 @@ export default function YearPicker({
     </div>
   );
 }
+
 

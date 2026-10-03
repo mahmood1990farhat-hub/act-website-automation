@@ -79,7 +79,7 @@ def arabic_document_context(trip, kind, refund_message="", driver=None, download
     if kind in ("booking", "cancellation"):
         rows += [
             ("أجرة الرحلة", f'GBP {getattr(trip, "base_trip_cost", None) or trip.cost:.2f}'),
-            ("ضريبة القيمة المضافة 20%", f'GBP {(getattr(trip, "regular_vat", None) or 0) + (getattr(trip, "airport_vat", None) or 0):.2f}'),
+            ("الزيادة التجارية ورسوم المطار", f'GBP {(getattr(trip, "regular_vat", None) or 0) + (getattr(trip, "airport_vat", None) or 0):.2f}'),
             ("الإجمالي", f"GBP {trip.cost:.2f}"),
             ("وسيلة الدفع", "الدفع بالبطاقة"),
         ]

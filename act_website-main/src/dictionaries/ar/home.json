@@ -3,34 +3,38 @@
     "navLinks": [
       {
         "name": "الرئيسية",
-        "url": "/ar"
+        "url": "/ar",
+        "protected": false
       },
       {
         "name": "من نحن",
-        "url": "/ar/about-us"
+        "url": "/ar/about-us",
+        "protected": false
       },
       {
         "name": "تواصل معنا",
-        "url": "/ar/about-us#contact-us"
-      },
-      {
-        "name": "تحميل التطبيق",
-        "url": "/ar/download-app"
+        "url": "/ar/about-us#contact-us",
+        "protected": false
       },
       {
         "name": "رحلاتي",
         "url": "/ar/my-trips",
-        "protected": "true"
+        "protected": true
+      },
+      {
+        "name": "تحميل التطبيق",
+        "url": "/ar/download-app",
+        "protected": false
       },
       {
         "name": "المفقودات",
         "url": "/ar/lost-property",
-        "protected": "true"
+        "protected": true
       },
       {
         "name": "الشكاوى",
         "url": "/ar/complaints",
-        "protected": "true"
+        "protected": true
       }
     ],
     "languages": {
@@ -99,14 +103,14 @@
       "Car_type": "نوع السيارة",
       "Cost": "التكلفة",
       "airport_vat": "ضريبة القيمة المضافة المطار",
-      "VAT": "ضريبة القيمة المضافة",
+      "VAT": "الزيادة التجارية",
       "Edit": "تعديل",
       "details": "تفاصيل",
       "Total_Cost": "التكلفة الإجمالية",
       "button": "تأكيد",
       "cost_breakdown": "تفاصيل التكلفة",
       "transfer_fare": "أجرة النقل",
-      "vat_20": "ضريبة القيمة المضافة (20%)",
+      "vat_20": "الزيادة التجارية (20%)",
       "airport_access_fee": "رسوم دخول المطار",
       "meet_and_greet": "الاستقبال والمرافقة",
       "included": "مشمول",
@@ -129,10 +133,10 @@
     "Booking_Confirmation": {
       "title": "تم الحجز!",
       "desc": {
-        "span_1": "ستتلقى رسالة تأكيد عبر البريد الإلكتروني. ستصلك معلومات السائق قريبًا — قد يستغرق ذلك حتى ",
-        "hour": "ساعة",
+        "span_1": "ستتلقى رسالة تأكيد بالبريد الإلكتروني. من المقرر إرسال بيانات السائق قبل رحلتك بـ",
+        "hour": "ساعتين",
         "hour_5": " خمس ساعات ",
-        "span_2": "  كحد أقصى"
+        "span_2": " تقريبًا."
       },
       "button": "عرض رحلاتي",
       "button_Back_to_home": "العودة إلى الصفحة الرئيسية"

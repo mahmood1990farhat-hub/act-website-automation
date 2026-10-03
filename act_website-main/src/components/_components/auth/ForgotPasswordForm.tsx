@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { postData } from "@/lib/api/postData";
 import InputField from "./InputField";
 import { IoMail } from "react-icons/io5";
-import { toast } from "react-toastify";
+import { accountText } from "@/lib/customer-account-text";
 
 type FormData = {
   email: string;
@@ -20,6 +20,8 @@ export default function ForgotPasswordForm({
   setTap: (tep: number) => void;
   locale?: string;
 }) {
+  const t = (key: Parameters<typeof accountText>[1]) => accountText(locale, key);
+  const [requestError, setRequestError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState<string>("");
 
@@ -30,10 +32,12 @@ export default function ForgotPasswordForm({
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
+    setRequestError("");
     setIsLoading(true);
     try {
       await postData({
         endpoint: "/api/auth/forget-password/",
+        noToast: true,
         body: {
           email: data.email,
         },
@@ -49,7 +53,7 @@ export default function ForgotPasswordForm({
         setTap(5); // Reset password step
       }, 1000);
     } catch (error) {
-      console.error("Error:", error);
+      setRequestError(t("requestFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -66,20 +70,21 @@ export default function ForgotPasswordForm({
         </p>
       </div>
       
+      {requestError && <p role="alert" className="text-error text-sm">{requestError}</p>}
       {emailSent ? (
         <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
           <p className="text-sm text-green-400 text-center">
-            OTP code has been sent to {emailSent}. Please check your email.
+            {t("codeSent").replace("{email}", emailSent)}
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <InputField
-            label={trans.emailLabel || "Email"}
+            label={t("email")}
             placeholder={trans.emailPlaceholder || "your-email@example.com"}
             register={register}
             name="email"
-            requiredMsg={trans.emailRequired || "Email is required"}
+            requiredMsg={t("emailRequired")}
             error={errors.email}
             type="email"
             icon={<IoMail className="mx-2 text-lg" />}
@@ -90,7 +95,7 @@ export default function ForgotPasswordForm({
             disabled={isLoading}
             className="text-2xl w-full p-6"
           >
-            {isLoading ? "Sending..." : trans.sendOtpButton}
+            {isLoading ? t("sending") : trans.sendOtpButton}
           </Button>
         </form>
       )}

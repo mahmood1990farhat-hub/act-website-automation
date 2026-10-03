@@ -1,4 +1,5 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { postData } from "@/lib/api/postData";
@@ -37,6 +38,7 @@ export default function Login({
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [adminVerified, setAdminVerified] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [loading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState<"passenger" | "driver">(
     isCaptain ? "driver" : "passenger"
@@ -69,6 +71,7 @@ export default function Login({
 
   const onSubmit: SubmitHandler<LoginData> = async (data) => {
     setIsLoading(true);
+    setRequestError("");
     try {
       // Use different endpoints based on selected login type
       const endpoint = loginType === "driver" 
@@ -90,6 +93,7 @@ export default function Login({
 
       const res = await postData<any>({
         endpoint: endpoint,
+        noToast: true,
         body: body,
         queryParams: {
           locale,
@@ -120,7 +124,7 @@ export default function Login({
       
       // VALIDATION: For passenger login attempts, discard action if account type is not passenger
       if (loginType === "passenger" && accountType !== "passenger") {
-        toast.error("Please use the correct login form for your account type. This appears to be a driver account.");
+        toast.error(accountText(locale, "wrongAccount"));
         setIsLoading(false);
         return; // Discard any further action
       }
@@ -280,6 +284,7 @@ export default function Login({
       }
     } catch (error) {
       console.error("Login Error:", error);
+      setRequestError(accountText(locale, "loginFailed"));
       setIsLoading(false);
     }
   };
@@ -397,7 +402,7 @@ export default function Login({
           </button>
           <button
             type="button"
-            onClick={() => setLoginType("driver")}
+            onClick={() => locale !== "en" && locale !== "ar" ? router.push("/en/auth?captain=1") : setLoginType("driver")}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
               loginType === "driver"
                 ? "bg-primary text-foreground shadow-lg"
@@ -409,6 +414,7 @@ export default function Login({
         </div>
       )}
 
+      {requestError && <p role="alert" className="text-red-300 mb-3">{requestError}</p>}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-4 text-sm  w-full"
@@ -492,7 +498,7 @@ export default function Login({
             <p className="text-sm text-white/80">
               {loginType === "driver"
                 ? "Signing you in to your driver account..."
-                : "Signing you in to your account..."}
+                : accountText(locale, "signingIn")}
             </p>
           </div>
         </div>
@@ -500,3 +506,4 @@ export default function Login({
     </div>
   );
 }
+

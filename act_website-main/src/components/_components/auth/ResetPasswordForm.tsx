@@ -5,6 +5,7 @@ import PasswordField from "./PasswordField";
 import { useForm } from "react-hook-form";
 import { Locale } from "../../../../i18n.config";
 import { postData } from "@/lib/api/postData";
+import { accountText } from "@/lib/customer-account-text";
 import InputField from "./InputField";
 import { IoMail } from "react-icons/io5";
 
@@ -24,6 +25,9 @@ export default function ResetPasswordForm({
   setTap: (tep: number) => void;
   trans: any;
 }) {
+  const t = (key: Parameters<typeof accountText>[1]) => accountText(locale, key);
+  const [requestError, setRequestError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,10 +80,13 @@ export default function ResetPasswordForm({
   };
 
   const onSubmit = async (data: FormData) => {
+    setRequestError("");
+    setSuccess(false);
     setIsLoading(true);
     try {
       await postData({
         endpoint: "/api/auth/reset-password/",
+        noToast: true,
         body: {
           email: data.email,
           otp_code: data.otp_code,
@@ -88,12 +95,13 @@ export default function ResetPasswordForm({
         },
         queryParams: { locale },
       });
+      setSuccess(true);
       // Navigate back to login
       setTimeout(() => {
         setTap(1); // Login step
       }, 1500);
     } catch (error) {
-      console.error("Error:", error);
+      setRequestError(t("resetFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -105,13 +113,15 @@ export default function ResetPasswordForm({
         <h1 className="text-lg font-bold text-center py-1">{trans.title}</h1>
         <p className="text-sm text-center text-muted px-10">{trans.desc}</p>
       </div>
+      {requestError && <p role="alert" className="text-error text-sm">{requestError}</p>}
+      {success && <p role="status" className="text-green-400 text-sm">{t("resetSuccess")}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <InputField
-          label="Email"
+          label={t("email")}
           placeholder="your-email@example.com"
           register={register}
           name="email"
-          requiredMsg="Email is required"
+          requiredMsg={t("emailRequired")}
           error={errors.email}
           type="email"
           icon={<IoMail className="mx-2 text-lg" />}
@@ -119,13 +129,15 @@ export default function ResetPasswordForm({
 
         <div>
           <label className="block mb-1 text-[16px]">
-            OTP Code <span className="text-primary">*</span>
+            {t("otp")} <span className="text-primary">*</span>
           </label>
           <div className="flex justify-between gap-2 mb-4" dir="ltr">
             {Array.from({ length: 6 }).map((_, idx) => (
               <input
                 key={idx}
                 type="text"
+                aria-label={t("otpDigit").replace("{number}", String(idx + 1))}
+                inputMode="numeric"
                 maxLength={1}
                 className="w-12 h-12 text-center text-xl border-2 border-muted rounded-lg bg-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                 value={otp[idx] || ""}
@@ -143,39 +155,39 @@ export default function ResetPasswordForm({
           <input
             type="hidden"
             {...register("otp_code", {
-              required: "OTP code is required",
+              required: t("otpRequired"),
               validate: (value) =>
-                value.length === 6 || "Please enter 6-digit OTP code",
+                value.length === 6 || t("otpLength"),
             })}
           />
         </div>
 
         <PasswordField
-          label={trans.password || "New Password"}
+          label={t("newPassword")}
           name="new_password"
           register={register}
           show={showPassword}
           setShow={setShowPassword}
           validate={{
-            required: trans.passwordRequired || "Required",
+            required: t("passwordRequired"),
             minLength: {
               value: 6,
-              message: trans.passwordMinLength || "At least 6 characters",
+              message: t("passwordMinLength"),
             },
           }}
           error={errors.new_password}
         />
 
         <PasswordField
-          label={trans.confirmPassword || "Confirm New Password"}
+          label={t("confirmPassword")}
           name="confirm_new_password"
           register={register}
           show={showConfirmPassword}
           setShow={setShowConfirmPassword}
           validate={{
-            required: trans.passwordRequired || "Required",
+            required: t("passwordRequired"),
             validate: (value: string) =>
-              value === password || trans.passwordMismatch || "Passwords do not match",
+              value === password || t("passwordMismatch"),
           }}
           error={errors.confirm_new_password}
         />
@@ -184,7 +196,7 @@ export default function ResetPasswordForm({
           disabled={isLoading}
           className="text-2xl w-full p-6"
         >
-          {isLoading ? "Resetting..." : trans.confirmBtn || "Reset Password"}
+          {isLoading ? t("resetting") : t("resetPassword")}
         </Button>
       </form>
     </div>

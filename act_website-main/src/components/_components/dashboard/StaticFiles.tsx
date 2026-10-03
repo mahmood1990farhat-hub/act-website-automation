@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Locale } from "../../../../i18n.config";
+import { localeRegistry, Locale } from "../../../../i18n.config";
 import { fetchData } from "@/lib/api/fetchData";
 import { postFormData } from "@/lib/api/postFormData";
 import { putData } from "@/lib/api/putApi";
@@ -21,6 +21,7 @@ import { FILE_TYPES } from "@/lib/constants/fileTypes";
 type InstructionFile = {
   id: number;
   file_type: string;
+  language: string;
   file_type_display: string;
   title: string;
   file: string;
@@ -51,6 +52,7 @@ type InstructionFilesResponse = {
 
 type StaticFilesFormData = {
   file_type: string;
+  language: string;
   title: string;
   file: FileList;
   description: string;
@@ -151,6 +153,7 @@ export default function StaticFiles({
   } = useForm<StaticFilesFormData>({
     defaultValues: {
       file_type: "",
+      language: "",
       title: "",
       description: "",
       is_active: "true",
@@ -160,10 +163,12 @@ export default function StaticFiles({
 
   const selectedFileForForm = watch("file");
 
+  const documentLanguage = watch("language");
+
   // Get file types that are already used (for disabling in create form)
   const getUsedFileTypes = (): string[] => {
     const allFiles = allFilesData?.data?.instruction_files || [];
-    return allFiles.map((file: InstructionFile) => file.file_type);
+    return allFiles.filter((file: InstructionFile) => file.language === documentLanguage).map((file: InstructionFile) => file.file_type);
   };
 
   const usedFileTypes = getUsedFileTypes();
@@ -173,6 +178,7 @@ export default function StaticFiles({
     mutationFn: async (data: StaticFilesFormData) => {
       const formData = new FormData();
       formData.append("file_type", data.file_type);
+      formData.append("language", data.language);
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("is_active", data.is_active);
@@ -208,8 +214,10 @@ export default function StaticFiles({
       
       if (hasNewFile) {
         // If a new file is selected, use PUT with all fields including file
-        // Note: file_type is not included as it cannot be changed
+        // Send the existing file type; only the document language/content can be edited.
         const formData = new FormData();
+        formData.append("file_type", selectedFile!.file_type);
+        formData.append("language", data.language);
         formData.append("title", data.title || "");
         formData.append("description", data.description || "");
         formData.append("is_active", data.is_active);
@@ -223,8 +231,10 @@ export default function StaticFiles({
         });
       } else {
         // If no new file, use PATCH to update only non-file fields
-        // Note: file_type is not included as it cannot be changed
+        // Send the existing file type; only the document language/content can be edited.
         const formData = new FormData();
+        formData.append("file_type", selectedFile!.file_type);
+        formData.append("language", data.language);
         formData.append("title", data.title || "");
         formData.append("description", data.description || "");
         formData.append("is_active", data.is_active);
@@ -292,7 +302,7 @@ export default function StaticFiles({
           : data.file_type;
         toast.error(
           trans.staticFiles?.duplicateFileTypeError || 
-          `A file with type "${displayName}" already exists. Please choose a different file type.`
+          `A file with type "${displayName}" already exists in this language. Edit that version instead.`
         );
         return;
       }
@@ -305,7 +315,8 @@ export default function StaticFiles({
     setSelectedFile(file);
     setIsEditing(true);
     reset({
-      // Don't set file_type in edit mode since it can't be changed
+      language: file.language || "",
+      // File type stays unchanged during edits.
       title: file.title || "",
       description: file.description || "",
       is_active: file.is_active ? "true" : "false",
@@ -323,6 +334,7 @@ export default function StaticFiles({
     setIsEditing(false);
     reset({
       file_type: "",
+      language: "",
       title: "",
       description: "",
       is_active: "true",
@@ -442,7 +454,7 @@ export default function StaticFiles({
                       className="border-b border-border hover:bg-muted transition-colors"
                     >
                       <td className="py-3 px-4 font-bold text-foreground">
-                        {file.file_type_display || file.file_type}
+                        {file.file_type_display || file.file_type} — {localeRegistry[file.language as keyof typeof localeRegistry]?.label || (locale === "ar" ? "لغة غير مؤكدة" : "Language unverified")}
                       </td>
                       <td className="py-3 px-4 text-foreground">
                         {file.title || "-"}
@@ -541,7 +553,7 @@ export default function StaticFiles({
               <div className="flex items-start justify-between mb-3 pb-3 border-b-2 border-border">
                 <div className="flex-1">
                   <h3 className="font-bold text-base md:text-lg text-foreground mb-1">
-                    {file.file_type_display || file.file_type}
+                    {file.file_type_display || file.file_type} — {localeRegistry[file.language as keyof typeof localeRegistry]?.label || (locale === "ar" ? "لغة غير مؤكدة" : "Language unverified")}
                   </h3>
                   {file.title && (
                     <p className="text-xs text-muted-foreground">
@@ -670,6 +682,17 @@ export default function StaticFiles({
               : trans.staticFiles?.createTitle || "Add New File"}
           </h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <div>
+            <label htmlFor="document-language" className="block text-sm font-medium mb-2">
+              {locale === "ar" ? "لغة محتوى الملف" : "Document language"} *
+            </label>
+            <select id="document-language" {...register("language", { required: locale === "ar" ? "حدد لغة محتوى الملف" : "Select the language of the document content" })}
+              className="w-full p-3 border rounded-md bg-background">
+              <option value="">{locale === "ar" ? "حدد اللغة بعد مراجعة الملف" : "Select after reviewing the file"}</option>
+              {Object.entries(localeRegistry).map(([code, entry]) => <option key={code} value={code}>{entry.label}</option>)}
+            </select>
+            {errors.language && <p role="alert" className="text-red-500">{errors.language.message}</p>}
+          </div>
           {/* File Type - Only show when creating, not when editing */}
           {!isEditing && (
             <div>

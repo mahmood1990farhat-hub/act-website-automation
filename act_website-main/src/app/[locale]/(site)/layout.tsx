@@ -1,3 +1,5 @@
+import { runtimeText } from "@/lib/customer-runtime";
+import { isEnabledLocale } from "../../../../i18n.config";
 import Footer from "@/components/_components/footer/Footer";
 import getTrans from "@/lib/translation";
 import { Locale } from "../../../../i18n.config";
@@ -12,7 +14,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const locale = (await params).locale as Locale;
-  const { navbar, footer, policy_and_terms, faqs } = await getTrans(locale, 'home');
+  const { navbar, footer, policy_and_terms, faqs, home } = await getTrans(locale, 'home');
   const token = (await cookies()).get("userToken")?.value
 
   return (
@@ -27,7 +29,8 @@ export default async function RootLayout({
           url: "https://airportandcitytransfer.com",
           image: "https://airportandcitytransfer.com/images/logo.png",
           description:
-            "Airport & City Transfer provides private airport transfers, executive transfers, chauffeur services and city transport across London.",
+            home.Book_Taxi.subtitle,
+          inLanguage: locale,
           areaServed: [
             "London",
             "Heathrow Airport",
@@ -54,9 +57,11 @@ export default async function RootLayout({
       <main
         className="relative overflow-clip bg-cover bg-center text-white min-h-[700px]">
         <Header navbar={navbar} locale={locale} token={token} />
+        {!isEnabledLocale(locale) && <aside className="border-y border-yellow-500/30 bg-black px-5 py-3 text-sm text-yellow-300" data-testid="translation-preview-notice">{runtimeText(locale, "preview")}</aside>}
         {children}
       </main>
       <Footer footer={footer} privacyPolicy={policy_and_terms.policy} terms={policy_and_terms.terms} faqs={faqs} locale={locale} />
     </>
   );
 }
+

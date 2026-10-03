@@ -1,6 +1,10 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
+import { getCountries, getCountryCallingCode } from "react-phone-number-input";
+import enCountries from "react-phone-number-input/locale/en.json";
+import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, User } from "lucide-react";
@@ -22,6 +26,7 @@ export default function PassengerDetails({
   nextStep,
   prevStep,
 }: Props) {
+  const countryLabels = customerPhoneLabels(locale);
   const isRTL = locale === "ar";
   const t = (text: string) => bookingText(locale, text);
   const [isRequired, setIsRequired] = useState(false);
@@ -112,6 +117,12 @@ export default function PassengerDetails({
                 <option value="+965 Kuwait">{t("+965 Kuwait")}</option>
                 <option value="+973 Bahrain">{t("+973 Bahrain")}</option>
                 <option value="+968 Oman">{t("+968 Oman")}</option>
+                {getCountries()
+                  .filter(code => !["GB", "US", "AE", "SA", "QA", "KW", "BH", "OM"].includes(code))
+                  .sort((a, b) => countryLabels[a].localeCompare(countryLabels[b], locale))
+                  .map(code => <option key={code} value={`+${getCountryCallingCode(code)} ${enCountries[code]}`}>
+                    +{getCountryCallingCode(code)} {countryLabels[code]}
+                  </option>)}
               </select>
             </div>
             <div>
@@ -146,3 +157,4 @@ export default function PassengerDetails({
     </div>
   );
 }
+

@@ -231,3 +231,15 @@ html {
 
 
 
+
+/* Self-hosted glyphs keep Chinese UI readable without an OS Chinese font. */
+@font-face {
+  font-family: "ACT Customer CJK";
+  src: url("/fonts/act-customer-cjk.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+html[lang="zh-CN"] body {
+  font-family: "ACT Customer CJK", "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}

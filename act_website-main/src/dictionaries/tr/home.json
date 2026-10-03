@@ -1,0 +1,553 @@
+{
+  "navbar": {
+    "navLinks": [
+      {
+        "name": "Ana sayfa",
+        "url": "/tr",
+        "protected": false
+      },
+      {
+        "name": "Hakkımızda",
+        "url": "/tr/about-us",
+        "protected": false
+      },
+      {
+        "name": "İletişim",
+        "url": "/tr/about-us#contact-us",
+        "protected": false
+      },
+      {
+        "name": "Yolculuklarım",
+        "url": "/tr/my-trips",
+        "protected": true
+      },
+      {
+        "name": "uygulamayı indir",
+        "url": "/tr/download-app",
+        "protected": false
+      },
+      {
+        "name": "Kayıp eşya",
+        "url": "/tr/lost-property",
+        "protected": true
+      },
+      {
+        "name": "Şikâyetler",
+        "url": "/tr/complaints",
+        "protected": true
+      }
+    ],
+    "languages": {
+      "English": "İngilizce",
+      "Arabic": "Arapça"
+    },
+    "menuToggle": "Menüyü aç/kapat",
+    "auth": {
+      "login": "Giriş yap",
+      "logout": "Çıkış yap",
+      "profile": "Profil",
+      "deleteAccount": "Hesabı sil",
+      "changePassword": "Şifreyi değiştir",
+      "logoutConfirmTitle": "Çıkışı onayla",
+      "logoutConfirmMessage": "Çıkış yapmak istediğinizden emin misiniz?",
+      "profileDescription": "Hesabınızı yönetin",
+      "logoutDescription": "Hesabınızdan çıkış yapın",
+      "logoutSuccess": "Başarıyla çıkış yapıldı",
+      "logoutError": "Çıkış sırasında hata oluştu",
+      "loggingOut": "Çıkış yapılıyor…",
+      "deleteAccountConfirmTitle": "Hesabı sil",
+      "deleteAccountConfirmMessage": "Bu işlem geri alınamaz. Hesabınızı kalıcı olarak silmek için şifrenizi girin.",
+      "passwordLabel": "Şifre",
+      "passwordRequired": "Şifre gereklidir",
+      "confirm": "Onayla",
+      "cancel": "İptal"
+    }
+  },
+  "home": {
+    "Book_Taxi": {
+      "title": "Kolay havalimanı ve şehir transferi",
+      "subtitle": "Saniyeler içinde rezervasyon yapın; alınıştan varışa kadar konforlu, güvenilir ve huzurlu yolculuğun tadını çıkarın.",
+      "fromAirport": "Havalimanından",
+      "toAirport": "Havalimanına",
+      "form": {
+        "PickUp_location": "Alınış yeri",
+        "stop_ponit": "Ara durak",
+        "DropOff_location": "Varış yeri",
+        "error": "Konum geçersiz",
+        "date": "Tarih",
+        "time": "Saat",
+        "is_required": "Bu alan zorunludur.",
+        "button": "Hemen fiyat alın",
+        "smallSuitcase": "Küçük valiz",
+        "largeSuitcase": "Büyük valiz",
+        "NumberOfPassenger": "Yolcu sayısı",
+        "error_message": "Üzgünüz, güzergâh hesaplanamadı.",
+        "error_button": "Kapat"
+      }
+    },
+    "Choose_car": {
+      "title": "Araç seçin",
+      "button": "İleri"
+    },
+    "Additional_Information": {
+      "title": "Ek bilgiler",
+      "driverTitle": "Sürücünüz için ek bilgiler",
+      "description": "Uçuş bilgileri, terminal değişiklikleri, bagaj gereksinimleri, çocuk koltukları, hareket desteği, erişilebilirlik ihtiyaçları veya diğer özel talepler gibi yolculuğunuz için önemli bilgileri belirtin.",
+      "back": "Geri",
+      "continue": "Devam"
+    },
+    "Confir_flight_details": {
+      "title": "Rezervasyon bilgilerini onaylayın",
+      "Distance": "Mesafe",
+      "Trip": "Yolculuk",
+      "Car_type": "Araç türü",
+      "Cost": "Ücret",
+      "airport_vat": "Havalimanı ücretleri",
+      "VAT": "Ticari fiyat ilavesi (%20)",
+      "Edit": "Düzenle",
+      "details": "Ayrıntılar",
+      "Total_Cost": "Toplam ücret",
+      "button": "Onayla",
+      "cost_breakdown": "Ücret dökümü",
+      "transfer_fare": "Transfer ücreti",
+      "vat_20": "Ticari fiyat ilavesi (%20)",
+      "airport_access_fee": "Havalimanı giriş ücreti",
+      "meet_and_greet": "İsim tabelasıyla karşılama",
+      "included": "Dâhil",
+      "total_price": "Toplam fiyat"
+    },
+    "Payments_details": {
+      "title": "Ödeme bilgileri",
+      "subtitle": "Alınıştan en az 24 saat önce ulaşan iptal: tam geri ödeme. Son 24 saat içinde veya gelmeme durumunda, makul ve belgelenmiş kayıplar rezervasyon bedeliyle sınırlı olarak ve tasarruf edilen maliyetler veya yerine alınan işler dikkate alınarak kesilebilir. Ödemeden önce Şartlar ve Koşulları okuyun.",
+      "form": {
+        "Card_Number": "Kart numarası",
+        "Expired_date": "Son kullanma tarihi",
+        "check": {
+          "Agree": "Kabul ediyorum",
+          "privacy_policy": "gizlilik politikası",
+          "terms_of_use": "kullanım koşulları"
+        },
+        "button": "Şimdi rezervasyon yap"
+      }
+    },
+    "Booking_Confirmation": {
+      "title": "Rezervasyon onaylandı!",
+      "desc": {
+        "span_1": "E-posta ile onay alacaksınız. Sürücü bilgileri yolculuğunuzdan yaklaşık ",
+        "hour": " 2 ",
+        "hour_5": " 5 ",
+        "span_2": " saat önce gönderilecektir."
+      },
+      "button": "Yolculuklarımı göster",
+      "button_Back_to_home": "Ana sayfaya dön"
+    }
+  },
+  "about_us": {
+    "about_us_title": "Hakkımızda:",
+    "ourStory": "Hikâyemiz",
+    "customers": "Mutlu müşteriler",
+    "rating": "Puan",
+    "available": "Müsait",
+    "readyTitle": "Bir sonraki yolculuğunuzu ayırtmaya hazır mısınız?",
+    "readySubtitle": "Üstün ulaşım hizmetimizin rahatlığını ve konforunu yaşayın",
+    "company_description_1": {
+      "title": "Airport & City",
+      "titlespan": "Transfer",
+      "desc": "Londra merkezli, güvenilir havalimanı ve şehir transferlerinde uzmanlaşmış özel şoförlü ulaşım şirketidir. Profesyonellik, dakiklik ve kişiye özel hizmetle seyahati kolaylaştırmayı amaçlıyoruz. Havalimanına giderken, eve dönerken veya şehir içinde seyahat ederken baştan sona sorunsuz bir deneyim sunuyoruz."
+    },
+    "company_description_2": {
+      "desc1": "Tam lisansımızı veren kurum:",
+      "desc2": "Transport for London (TfL)",
+      "desc3": " Güvenlik, mevzuata uyum ve müşteri hizmetlerinde en yüksek standartlara bağlıyız. Ağımızdaki her sürücü DBS kontrolünden geçmiştir, tam sigortalıdır ve markamızın kalitesini temsil etmek üzere profesyonel eğitim almıştır."
+    },
+    "company_description_3": "Gelişmiş rezervasyon ve sevk sistemlerimiz yolcuların önceden rezervasyon yapmasını, yolculuklarını izlemesini ve kolayca iletişim kurmasını sağlar. Şeffaflığı ön planda tutarız; açık fiyatlandırmamız sürprizleri önler ve sade, güvenilir hizmet sunar.",
+    "company_description_4": "Airport & City Transfer olarak yalnızca yolculuk değil, gönül rahatlığı sunuyoruz.",
+    "get_in_touch": {
+      "title": "Bir ",
+      "titlespan": "mesaj gönderin",
+      "subtitle": "Üstün ulaşım hizmetini denemeye hazır mısınız? Bugün bizimle iletişime geçin.",
+      "form": {
+        "FullName": "Ad soyad",
+        "mail": "E-posta",
+        "Yourmessage": "Mesajınız",
+        "button": "Mesaj gönder"
+      }
+    },
+    "btns": {
+      "bookNow": "Şimdi rezervasyon yap",
+      "learnMore": "Daha fazla bilgi",
+      "callUs": "Bize ulaşın"
+    },
+    "whyUs": {
+      "title": "Neden bizi seçmelisiniz?",
+      "subtitle": "Üstün ulaşım hizmetimizle farkı yaşayın",
+      "steps": [
+        {
+          "title": "Önce güvenlik",
+          "desc": "Profesyonel sürücüler, tam sigortalı araçlar"
+        },
+        {
+          "title": "7/24 hizmet",
+          "desc": "Rahatınız için günün her saati hizmet"
+        },
+        {
+          "title": "Üstün deneyim",
+          "desc": "Lüks araçlar ve olağanüstü hizmet"
+        },
+        {
+          "title": "Londra genelinde hizmet",
+          "desc": "Büyük Londra'nın tamamında hizmet"
+        }
+      ]
+    },
+    "booking_title": {
+      "span": "Kolay rezervasyon",
+      "title": "Bir yolculuk ",
+      "titlespan": "ayırtın",
+      "subtitle": "Birkaç tıklamayla ulaşımınızı ayırtın. Lüks, güvenilirlik ve profesyonel hizmeti yaşayın."
+    },
+    "joinUs": {
+      "title": "Saniyeler içinde katılın",
+      "subtitle": "Yolcu olarak kaydolun veya PCO aracınızı kaydederek bugün kazanmaya başlayın.",
+      "passenger": "Yolcu",
+      "driver": "PCO sürücüsü"
+    },
+    "howToWork": [
+      {
+        "title": "Konum seçin",
+        "desc": "Alınış ve varış yerlerinizi seçin"
+      },
+      {
+        "title": "Tarih ve saat seçin",
+        "desc": "Yolculuğunuzu size uygun zamana planlayın"
+      },
+      {
+        "title": "Araç seçin",
+        "desc": "Üstün araç filomuzdan seçin"
+      },
+      {
+        "title": "Rezervasyonu onaylayın",
+        "desc": "Güvenli ödeme ve anında onay"
+      }
+    ],
+    "services": {
+      "title": "Hizmetlerimiz",
+      "subtitle": "Rahatınız ve konforunuz için tasarlanan kapsamlı ulaşım çözümlerimizi keşfedin"
+    },
+    "sections": [
+      {
+        "title": "Londra gibi yeni bir şehre mi geliyorsunuz?",
+        "text": "Yeni bir şehre varmak heyecan verici olabilir, ancak ulaşımı ayarlamak stres yaratabilir. Endişelenmeyin, yanınızdayız."
+      },
+      {
+        "title": "Özel şoförlü ulaşım: en iyi seçeneğiniz",
+        "text": "Uzun taksi kuyruklarını ve karmaşık toplu taşımayı unutun. Varış noktanıza sorunsuz ve konforlu yolculuk için özel havalimanı transferini seçin."
+      },
+      {
+        "title": "Önceden rezervasyonun avantajları",
+        "text": "Airport & City Transfer ile önceden rezervasyon yaptığınızda vardığınızda sizi bir sürücü bekler. Fiyat pazarlığı veya dil engeli olmadan doğrudan otelinize ya da konaklama yerinize gidin."
+      },
+      {
+        "title": "Nasıl çalışır?",
+        "text": "Seyahatten önce web sitemize girip özel şoförlü aracınızı ayırtın. Uçuş bilgilerinizi ve varış yerinizi belirtin; gerisini bize bırakın. Kampanyalar için kaydolmayı unutmayın."
+      },
+      {
+        "title": "Stressiz seyahat",
+        "text": "Güvenilir ve profesyonel hizmetimizle seyahatinize rahat başlayın. Havalimanı ulaşımını bize bırakın, siz yeni çevrenizi keşfetmeye odaklanın."
+      },
+      {
+        "title": "Yolculuğunuzu bugün ayırtın",
+        "text": "Özel havalimanı transferinizi ayırtmak için şimdi ATG web sitemizi ziyaret edin. Maceranıza iyi bir başlangıç yapın!"
+      }
+    ]
+  },
+  "footer": {
+    "Our_Company": {
+      "title": "Şirketimiz",
+      "Elements": [
+        {
+          "name": "Hakkımızda",
+          "href": "/tr/about-us"
+        },
+        {
+          "name": "Yolculuk rezervasyonu",
+          "href": "/tr"
+        },
+        {
+          "name": "Uygulamalar",
+          "href": "/tr/download-app"
+        }
+      ]
+    },
+    "Call_us": {
+      "title": "İletişim bilgileri",
+      "phone_numbers": {
+        "title": "Telefon: 📞",
+        "Elements": [
+          "+44 746 494 0000",
+          "+44 208 153 0303"
+        ]
+      },
+      "Email_us": {
+        "title": "E-posta:",
+        "Elements": [
+          "Info@airportandcitytransfer.com"
+        ]
+      }
+    },
+    "Policies": {
+      "title": "Politikalar",
+      "Elements": [
+        {
+          "name": "Uygulamalar",
+          "href": "/tr/download-app"
+        }
+      ]
+    },
+    "location": {
+      "title": "Konum:",
+      "Elements": [
+        "ACT - 450 Bath Road Heathrow",
+        "Farhat Trading Solutions Ltd",
+        "Office 218",
+        "London",
+        "West Drayton",
+        "UB7 0EB"
+      ]
+    },
+    "logoAlt": "Airport & City Transfer logosu",
+    "registeredCompany": "Kayıtlı şirket: Farhat Trading Solutions Ltd",
+    "copyright": "Tüm hakları saklıdır © {year} Airport taxi Transfer Company"
+  },
+  "policy_and_terms": {
+    "policy": {
+      "Open_button": "Gizlilik Politikası",
+      "title": "Gizlilik Politikası – Airport & City Transfer",
+      "desc": "Airport & City Transfer (“biz”, “bizim”) gizliliğinizi korumayı taahhüt eder. Bu politika, kişisel verilerinizi Birleşik Krallık Genel Veri Koruma Tüzüğü (UK GDPR) ve 2018 Veri Koruma Yasası uyarınca nasıl topladığımızı, kullandığımızı, sakladığımızı ve koruduğumuzu açıklar.",
+      "elements": [
+        {
+          "title": "Topladığımız bilgiler:",
+          "subDesc": [
+            "İletişim bilgileri: ad, telefon numarası, e-posta",
+            "Rezervasyon bilgileri: alınış ve varış yerleri, tarihler, saatler",
+            "Ödeme bilgileri: üçüncü taraf sağlayıcılar aracılığıyla güvenli biçimde işlenir",
+            "Sürücü ve araç bilgileri: düzenleyici gerekliliklere uyum için",
+            "Geri bildirim ve şikâyet bilgileri"
+          ]
+        },
+        {
+          "title": "Verilerinizi nasıl kullanırız:",
+          "subDesc": [
+            "Rezervasyonları işlemek ve ulaşım hizmeti sunmak için",
+            "Müşteriler ve sürücülerle iletişim kurmak için",
+            "Dahili kayıt tutmak ve yasal yükümlülüklere uymak için",
+            "Soruları, geri bildirimleri veya şikâyetleri yanıtlamak için",
+            "Transport for London (TfL) bildirim gerekliliklerini yerine getirmek için"
+          ]
+        },
+        {
+          "title": "İşlemenin hukuki dayanağı:",
+          "desc": "Kişisel verileri sözleşmenin ifası, yasal yükümlülük veya meşru menfaat hukuki dayanaklarıyla toplar ve işleriz. Gerektiğinde onay alınır."
+        },
+        {
+          "title": "Bilgilerinizin paylaşılması:",
+          "desc": "Verileri yalnızca gerektiğinde paylaşırız:",
+          "subDesc": [
+            "Yasaların gerektirdiği durumlarda TfL veya diğer düzenleyici kurumlarla",
+            "Sıkı gizlilik yükümlülükleri altında üçüncü taraf hizmet sağlayıcılarla (örneğin ödeme işleyicileri)"
+          ],
+          "descEnd": "Verilerinizi hiçbir zaman üçüncü taraflara satmayız."
+        },
+        {
+          "title": "Verilerin saklanması:",
+          "desc": "Kişisel veriler yalnızca yasal, operasyonel veya mali yükümlülükleri yerine getirmek için gerekli süre boyunca saklanır. Artık gerekli olmadığında güvenli biçimde silinir veya anonimleştirilir."
+        },
+        {
+          "title": "Haklarınız:",
+          "desc": "Kişisel verilerinize erişme, bunları düzeltme, silme veya işlenmesine itiraz etme hakkınız vardır. Taleplerinizi Veri Koruma Sorumlumuza yazılı olarak iletebilirsiniz."
+        },
+        {
+          "title": "Güvenlik önlemleri:",
+          "desc": "Verilerinizi korumak için şifreli sistemler, güvenli depolama ve erişim kontrolleri kullanırız. Personelimiz ve sürücülerimiz veri koruma prosedürleri konusunda eğitimlidir."
+        }
+      ],
+      "warning": "Devam etmeden önce Gizlilik Politikasını ve Kullanım Koşullarını dikkatle okuyun. Hizmetlerimizi kullanmanız bunları tamamen kabul ettiğiniz anlamına gelir.",
+      "button": "Tamam"
+    },
+    "terms": {
+      "Open_button": "Şartlar ve Koşullar",
+      "title": "Şartlar ve Koşullar – Airport & City Transfer",
+      "elements": [
+        {
+          "title": "Rezervasyonlar ve onaylar",
+          "desc": "Tüm rezervasyonlar uygulamamız, web sitemiz, telefon veya yetkili ortaklarımız aracılığıyla yapılmalıdır. Onay elektronik olarak iletilir. Tüm rezervasyon bilgilerinin doğruluğunu kontrol etmek müşterinin sorumluluğundadır."
+        },
+        {
+          "title": "Ödemeler ve ücretler",
+          "desc": "Tüm ücretler GBP (£) cinsinden belirtilir. Ek duraklar, bekleme süresi veya normal saatler dışındaki hizmetler için ek ücret uygulanabilir. Aksi kararlaştırılmadıkça ödeme rezervasyon sırasında yapılmalıdır."
+        },
+        {
+          "title": "Alınıştan en az 24 saat önce iptal",
+          "desc": "İptal bildiriminiz ACT'ye onaylanan alınış saatinden en az 24 saat önce, tam 24 saat öncesi de dâhil olmak üzere ulaşırsa tam geri ödeme alırsınız."
+        },
+        {
+          "title": "Son 24 saat içinde iptal",
+          "desc": "ACT, iptalinizin doğrudan neden olduğu makul ve belgelenmiş kayıpları rezervasyon bedeline kadar kesebilir. Bu kayıpları azaltmak için makul adımlar atar; tasarruf edilen maliyetleri veya yerine alınan işleri dikkate alırız. Kalan tutar iade edilir."
+        },
+        {
+          "title": "Yolcunun gelmemesi",
+          "desc": "Gelmeme durumu ancak kararlaştırılan bekleme süresi dolduktan ve yolcuyla iletişim kurma girişimleri belgelendikten sonra değerlendirilir. Herhangi bir kesinti, son 24 saat içindeki iptalle aynı kayıp esaslı kurala tabidir ve rezervasyon bedeliyle sınırlıdır."
+        },
+        {
+          "title": "Bekleme süreleri",
+          "desc": "Bekleme süresi, kararlaştırılan alınış saatinden itibaren normal alınışlarda 15 dakika, havalimanı alınışlarında 60 dakikadır. Ek bekleme ücretleri önceden bildirilmeli ve kabul edilmelidir."
+        },
+        {
+          "title": "ACT yolculuğu sağlayamazsa",
+          "desc": "Kabul edebileceğiniz bir alternatif veya sağlanamayan yolculuk için tam geri ödeme sunarız."
+        },
+        {
+          "title": "Uçuş gecikmeleri veya iptalleri",
+          "desc": "Uçuşunuzdaki değişiklikleri ACT'ye bildirin. Yeni alınış düzenlemelerini değerlendirir ve birlikte kararlaştırırız. Bilinen bir uçuş gecikmesi otomatik olarak yolcunun gelmemesi sayılmaz."
+        },
+        {
+          "title": "Rezervasyon değişiklikleri",
+          "desc": "Değişiklikler müsaitliğe bağlıdır. Değişikliği kabul etmeden önce güncellenen fiyat bildirilir."
+        },
+        {
+          "title": "Geri ödeme işlemleri",
+          "desc": "Geri ödeme tutarının onaylanmasından itibaren 5 iş günü içinde ilk ödeme yöntemine iadeyi başlatırız. Bankanızın veya ödeme sağlayıcınızın tutarı hesabınıza geçirmesi daha uzun sürebilir."
+        },
+        {
+          "title": "Rezervasyon nasıl iptal edilir veya değiştirilir?",
+          "desc": "Rezervasyon referansınızla birlikte info@airportandcitytransfer.com adresine e-posta gönderin. Acil değişiklikler için ayrıca +44 208 153 0303 numarasını arayın. İptal süresi personelin yanıt verdiği zamana göre değil, bildirimin ACT'ye ulaştığı an ile onaylanan alınış saati arasındaki süreye göre hesaplanır."
+        },
+        {
+          "title": "TfL lisanslı sürücü ve araçların kullanılması",
+          "desc": "Tüm yolculuklar yalnızca Transport for London lisanslı sürücüler ve araçlarla gerçekleştirilir. Uyumu sağlamak için düzenli kontroller yaparız."
+        },
+        {
+          "title": "Güvenlik ve davranış",
+          "desc": "Tüm sürücüler DBS kontrolünden geçmiştir ve davranış kurallarımıza uyar. Yolcuların saygılı davranması ve Birleşik Krallık güvenlik düzenlemelerine uyması beklenir."
+        },
+        {
+          "title": "Kayıp eşyalar",
+          "desc": "Araçlarda bırakılan eşyalar kaydedilir ve 6 haftaya kadar saklanır. Müşteriler eşyalarını almak için bizimle iletişime geçebilir. Alınmayan eşyalar güvenli biçimde imha edilir veya bağışlanır."
+        },
+        {
+          "title": "Şikâyet prosedürü",
+          "desc": "Şikâyetler web sitemiz, telefon veya e-posta yoluyla iletilebilir. Bir uyum sorumlusu inceleme yapar ve 5 iş günü içinde yanıt verir. İlgili konular gerektiğinde TfL'ye bildirilir."
+        },
+        {
+          "title": "Sorumluluk",
+          "desc": "Airport & City Transfer, trafik veya hava koşulları gibi öngörülemeyen durumlardan kaynaklanan gecikmelerden sorumlu değildir. Sorumluluğumuz ödenen yolculuk ücretiyle sınırlıdır."
+        },
+        {
+          "title": "Veri koruma",
+          "desc": "Tüm UK GDPR gerekliliklerine uyarız. Ayrıntılar için Gizlilik Politikamıza bakın."
+        },
+        {
+          "title": "Uygulanacak hukuk",
+          "desc": "Bu koşullar İngiltere ve Galler hukukuna tabidir."
+        }
+      ],
+      "warning": "Devam etmeden önce Gizlilik Politikasını ve Kullanım Koşullarını dikkatle okuyun. Hizmetlerimizi kullanmanız bunları tamamen kabul ettiğiniz anlamına gelir.",
+      "button": "Tamam"
+    }
+  },
+  "faqs": {
+    "Open_button": "Sık sorulan sorular",
+    "title": "Sık Sorulan Sorular – Airport & City Transfer",
+    "elements": [
+      {
+        "question": "Airport & City Transfer ile nasıl taksi rezervasyonu yaparım?",
+        "answer": "Web sitemizden, mobil uygulamamızdan veya rezervasyon hattımızı arayarak rezervasyon yapabilirsiniz. Tüm rezervasyonlar e-posta veya SMS ile onaylanır."
+      },
+      {
+        "question": "Önceden taksi rezervasyonu yapabilir miyim?",
+        "answer": "Evet. Transferinizin planlanması ve güvence altına alınması için birkaç hafta öncesine kadar rezervasyon kabul ediyoruz."
+      },
+      {
+        "question": "Sürücümün geldiğini nasıl bileceğim?",
+        "answer": "Sürücünüz yola çıktığında ve vardığında bildirim alırsınız. Bildirimde sürücü ve araç bilgileri bulunur."
+      },
+      {
+        "question": "Uçağım gecikirse ne olur?",
+        "answer": "Uçuş gecikmesi veya iptalinde ACT ile iletişime geçin; yeni alınış düzenlemelerini değerlendirip kararlaştıralım. Bilinen bir uçuş gecikmesi otomatik olarak yolcunun gelmemesi sayılmaz."
+      },
+      {
+        "question": "Sürücüleriniz lisanslı mı ve DBS kontrolünden geçti mi?",
+        "answer": "Evet. Tüm sürücülerimiz Transport for London (TfL) lisanslıdır ve güvenliğiniz için genişletilmiş DBS kontrollerinden geçmiştir."
+      },
+      {
+        "question": "Rezervasyonumu iptal edebilir veya değiştirebilir miyim?",
+        "answer": "Evet. İptaliniz ACT'ye onaylanan alınış saatinden en az 24 saat önce ulaşırsa tam geri ödeme alırsınız. Son 24 saat içinde, makul ve belgelenmiş iptal kayıpları kesilebilir; kesinti rezervasyon bedeliyle sınırlıdır ve tasarruf edilen maliyetler veya yerine alınan işler düşülür. Değişiklikler müsaitliğe bağlıdır; güncellenen fiyatı kabul etmeniz gerekir. Rezervasyon referansınızla info@airportandcitytransfer.com adresine e-posta gönderin; acil değişiklikler için +44 208 153 0303 numarasını arayın. Bekleme, gelmeme ve geri ödeme ayrıntıları için Şartlar ve Koşullarımıza bakın."
+      },
+      {
+        "question": "Araçta bir eşya unutursam ne yapmalıyım?",
+        "answer": "Ekibimizle mümkün olan en kısa sürede iletişime geçin. Kayıp eşyalar kaydedilir, 6 haftaya kadar güvenli biçimde saklanır ve anlaşmayla teslim alınabilir veya iade edilebilir."
+      },
+      {
+        "question": "Çocuk koltuğu veya erişilebilir araç sunuyor musunuz?",
+        "answer": "Evet. Lütfen rezervasyon sırasında talep edin; ihtiyaçlarınızı karşılamak için elimizden geleni yaparız."
+      },
+      {
+        "question": "Nasıl şikâyette bulunabilirim?",
+        "answer": "Web sitemiz veya e-posta yoluyla şikâyette bulunabilirsiniz. Tüm şikâyetler Uyum ve Müşteri Deneyimi Sorumlumuz tarafından ele alınır ve 5 iş günü içinde yanıtlanır."
+      },
+      {
+        "question": "Kişisel bilgilerim güvende mi?",
+        "answer": "Evet. GDPR'ye tam olarak uyuyor ve verilerinizi saklamak ve korumak için şifreli sistemler kullanıyoruz. Ayrıntılar için Gizlilik Politikamıza bakın."
+      }
+    ],
+    "warning": "Lütfen bu sık sorulan soruları dikkatle okuyun. Hizmetlerimizi kullanmanız, verilen bilgileri kabul ettiğiniz anlamına gelir.",
+    "button": "Tamam"
+  },
+  "download_app": {
+    "title": "Uygulamalarımızı indirin",
+    "subtitle": "Resmî Airport & City Transfer uygulamalarını edinin",
+    "downloading": "İndiriliyor…",
+    "driver": {
+      "title": "Sürücü uygulaması",
+      "subtitle": "Yolculuklarınızı ve kazançlarınızı yönetmek için resmî Airport & City Transfer sürücü uygulamasını edinin",
+      "description": "Yolculuk kabul etmek, kazançlarınızı takip etmek ve sürücü hesabınızı yönetmek için uygulamayı indirip yükleyin.",
+      "downloadButton": "Sürücü APK'sını indir",
+      "logoAlt": "Sürücü uygulaması",
+      "instructions": {
+        "title": "Kurulum talimatları",
+        "downloadButton": "Talimatları indir",
+        "downloadFileName": "driver-instructions.pdf",
+        "step1": "APK dosyasını Android cihazınıza indirin",
+        "step2": "Cihaz ayarlarında bilinmeyen kaynaklardan yüklemeyi etkinleştirin",
+        "step3": "İndirilen APK dosyasını açın ve kurulum adımlarını izleyin",
+        "step4": "Uygulamayı açın ve sürücü bilgilerinizle giriş yapın"
+      },
+      "note": "Not: Bu uygulama yalnızca Android cihazlar içindir. İndirmeden önce yeterli depolama alanınız olduğundan emin olun."
+    },
+    "passenger": {
+      "title": "Yolcu uygulaması",
+      "subtitle": "Yolculuk rezervasyonu yapmak ve yolculuklarınızı yönetmek için resmî Airport & City Transfer yolcu uygulamasını edinin",
+      "description": "Rezervasyon yapmak, yolculuklarınızı izlemek ve yolcu hesabınızı yönetmek için uygulamayı indirip yükleyin.",
+      "downloadButton": "Yolcu APK'sını indir",
+      "logoAlt": "Yolcu uygulaması",
+      "instructions": {
+        "title": "Kurulum talimatları",
+        "downloadButton": "Talimatları indir",
+        "downloadFileName": "passenger-instructions.pdf",
+        "step1": "APK dosyasını Android cihazınıza indirin",
+        "step2": "Cihaz ayarlarında bilinmeyen kaynaklardan yüklemeyi etkinleştirin",
+        "step3": "İndirilen APK dosyasını açın ve kurulum adımlarını izleyin",
+        "step4": "Uygulamayı açın ve yolcu bilgilerinizle giriş yapın"
+      },
+      "note": "Not: Bu uygulama yalnızca Android cihazlar içindir. İndirmeden önce yeterli depolama alanınız olduğundan emin olun."
+    }
+  },
+  "errorPage": {
+    "code": "404",
+    "title": "Sayfa bulunamadı",
+    "description": "Aradığınız sayfa bulunamadı. Taşınmış, silinmiş veya hiç oluşturulmamış olabilir.",
+    "goHome": "Ana sayfaya git",
+    "goBack": "Geri dön",
+    "helpText": "Bunun bir hata olduğunu düşünüyorsanız destek ekibimizle iletişime geçin."
+  }
+}

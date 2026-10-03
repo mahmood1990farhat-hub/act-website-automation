@@ -1,0 +1,111 @@
+{
+  "title": "Beschwerden",
+  "subtitle": "Beschwerden einreichen und verfolgen",
+  "tabs": {
+    "my_complaints": "Meine Beschwerden",
+    "submit_complaint": "Beschwerde einreichen"
+  },
+  "stats": {
+    "total": "Beschwerden insgesamt",
+    "pending": "Ausstehend",
+    "under_review": "In Prüfung",
+    "resolved": "Gelöst",
+    "closed": "Geschlossen"
+  },
+  "complaint_list": {
+    "title": "Meine Beschwerden",
+    "empty": "Keine Beschwerden gefunden",
+    "filter": {
+      "all": "Alle",
+      "status_label": "Nach Status filtern",
+      "type_label": "Nach Typ filtern"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "Beschwerdereferenz",
+    "type": "Typ",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "status": "Status",
+    "trip_date": "Fahrtdatum",
+    "created_at": "Eingereicht am",
+    "admin_response": "Antwort des Teams",
+    "resolved_at": "Gelöst am",
+    "view_trip": "Fahrtdetails anzeigen",
+    "resolved": "Gelöst",
+    "not_resolved": "Nicht gelöst",
+    "leave_review": "Bewertung abgeben",
+    "show_details": "Details anzeigen",
+    "close": "Schließen",
+    "complaint_details": "Beschwerdedetails",
+    "complainant": "Beschwerdeführer",
+    "passenger": "Fahrgast",
+    "driver": "Fahrer",
+    "complainant_info": "Angaben zum Beschwerdeführer",
+    "trip_info": "Fahrtinformationen",
+    "trip_id": "Fahrtreferenz",
+    "trip_time": "Fahrtzeit",
+    "distance": "Entfernung",
+    "duration": "Voraussichtliche Dauer",
+    "passenger_info": "Fahrgastinformationen",
+    "driver_info": "Fahrerinformationen",
+    "full_name": "Vollständiger Name",
+    "phone_number": "Telefonnummer",
+    "email": "E-Mail",
+    "account_type": "Kontotyp",
+    "name": "Name",
+    "respond": "Antworten",
+    "resolve": "Lösen",
+    "respond_to_complaint": "Auf Beschwerde antworten",
+    "resolve_complaint": "Beschwerde lösen",
+    "response_required": "Antwort erforderlich",
+    "response_placeholder": "Antwort eingeben…",
+    "sending": "Wird gesendet…",
+    "send_response": "Antwort senden",
+    "resolving": "Wird gelöst…",
+    "cancel": "Abbrechen",
+    "update_status": "Status aktualisieren",
+    "update": "Aktualisieren",
+    "updating": "Wird aktualisiert…",
+    "resolution_placeholder": "Lösungsdetails eingeben…",
+    "complaint_info": "Beschwerdeinformationen",
+    "complaint_content": "Inhalt der Beschwerde",
+    "downloadPdf": "PDF herunterladen"
+  },
+  "submit_form": {
+    "title": "Beschwerde einreichen",
+    "subtitle": "Bitte beschreiben Sie Ihre Beschwerde",
+    "fields": {
+      "trip": "Fahrt auswählen",
+      "trip_placeholder": "Wählen Sie die Fahrt, auf die sich Ihre Beschwerde bezieht",
+      "complaint_type": "Beschwerdetyp",
+      "complaint_type_placeholder": "Beschwerdetyp auswählen",
+      "title": "Titel",
+      "title_placeholder": "Kurze Zusammenfassung Ihrer Beschwerde",
+      "description": "Beschreibung",
+      "description_placeholder": "Beschreiben Sie Ihre Beschwerde ausführlich"
+    },
+    "button": "Beschwerde hinzufügen",
+    "button_loading": "Wird hinzugefügt…",
+    "success_message": "Beschwerde erfolgreich eingereicht!",
+    "error_message": "Beschwerde konnte nicht eingereicht werden. Bitte versuchen Sie es erneut.",
+    "validation": {
+      "trip_required": "Bitte wählen Sie eine Fahrt",
+      "type_required": "Bitte wählen Sie einen Beschwerdetyp",
+      "title_required": "Bitte geben Sie einen Titel ein",
+      "title_min": "Der Titel muss mindestens 5 Zeichen lang sein",
+      "description_required": "Bitte geben Sie eine Beschreibung ein",
+      "description_min": "Die Beschreibung muss mindestens 20 Zeichen lang sein"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "Problem mit der Fahrt",
+    "driver_issue": "Problem mit dem Fahrer"
+  },
+  "statuses": {
+    "pending": "Ausstehend",
+    "under_review": "In Prüfung",
+    "resolved": "Gelöst",
+    "closed": "Geschlossen"
+  }
+}

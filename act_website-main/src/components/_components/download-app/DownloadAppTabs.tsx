@@ -1,4 +1,5 @@
 "use client";
+import { documentText } from "@/lib/document-text";
 
 import React, { useState, useEffect } from "react";
 import { Locale } from "../../../../i18n.config";
@@ -10,7 +11,7 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DownloadButton from "./DownloadButton";
 import { FaDownload } from "react-icons/fa";
-import { getInstructionFile } from "@/lib/api/fetchInstructionFile";
+import { getCustomerDocument } from "@/lib/api/fetchInstructionFile";
 import IsLoading from "../ISloading";
 
 type DownloadAppTabsProps = {
@@ -64,35 +65,18 @@ export default function DownloadAppTabs({ locale, downloadApp }: DownloadAppTabs
   const [isLoadingPassenger, setIsLoadingPassenger] = useState(false);
 
   useEffect(() => {
-    // Fetch driver guidelines
+    let active = true;
+    setDriverFile(null);
+    setPassengerFile(null);
     setIsLoadingDriver(true);
-    getInstructionFile("DRIVER_GUIDELINES", locale as any)
-      .then((file) => {
-        if (file) {
-          setDriverFile(file);
-        }
-      })
-      .catch(() => {
-        // Silently fail, will use fallback
-      })
-      .finally(() => {
-        setIsLoadingDriver(false);
-      });
-
-    // Fetch passenger guidelines
     setIsLoadingPassenger(true);
-    getInstructionFile("PASSENGER_GUIDELINES", locale as any)
-      .then((file) => {
-        if (file) {
-          setPassengerFile(file);
-        }
-      })
-      .catch(() => {
-        // Silently fail, will use fallback
-      })
-      .finally(() => {
-        setIsLoadingPassenger(false);
-      });
+    getCustomerDocument("DRIVER_GUIDELINES", locale)
+      .then(file => { if (active) setDriverFile(file); })
+      .finally(() => { if (active) setIsLoadingDriver(false); });
+    getCustomerDocument("PASSENGER_GUIDELINES", locale)
+      .then(file => { if (active) setPassengerFile(file); })
+      .finally(() => { if (active) setIsLoadingPassenger(false); });
+    return () => { active = false; };
   }, [locale]);
 
   return (
@@ -149,10 +133,13 @@ export default function DownloadAppTabs({ locale, downloadApp }: DownloadAppTabs
                 <div className="flex items-center gap-2 px-4 py-2">
                   <IsLoading />
                 </div>
+              ) : driverFile?.language !== locale ? (
+                <p className="text-sm">{documentText(locale, "unavailable")}</p>
               ) : (
                 <button
                   onClick={() => {
-                    const fileUrl = driverFile?.file_url || process.env.NEXT_PUBLIC_INSTRUCTIONS_FILE_URL || "/files/driver-instructions.pdf";
+                    const fileUrl = driverFile?.language === locale ? driverFile.file_url : null;
+                    if (!fileUrl) return;
                     const fileName = driverFile?.title 
                       ? `${driverFile.title}.pdf` 
                       : downloadApp.driver.instructions.downloadFileName || "driver-instructions.pdf";
@@ -246,10 +233,13 @@ export default function DownloadAppTabs({ locale, downloadApp }: DownloadAppTabs
                 <div className="flex items-center gap-2 px-4 py-2">
                   <IsLoading />
                 </div>
+              ) : passengerFile?.language !== locale ? (
+                <p className="text-sm">{documentText(locale, "unavailable")}</p>
               ) : (
                 <button
                   onClick={() => {
-                    const fileUrl = passengerFile?.file_url || process.env.NEXT_PUBLIC_INSTRUCTIONS_FILE_URL || "/files/passenger-instructions.pdf";
+                    const fileUrl = passengerFile?.language === locale ? passengerFile.file_url : null;
+                    if (!fileUrl) return;
                     const fileName = passengerFile?.title 
                       ? `${passengerFile.title}.pdf` 
                       : downloadApp.passenger.instructions.downloadFileName || "passenger-instructions.pdf";

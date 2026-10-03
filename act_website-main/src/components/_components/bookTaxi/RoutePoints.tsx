@@ -1,4 +1,6 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
 import LocationSelector, { PlaceSuggestion } from "./LocationSelector";
@@ -77,13 +79,15 @@ export default function RoutePoints({
   const t = (text: string) => bookingText(locale, text);
   const [isRequired, setIsRequired] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState<any>();
+  const parts = formDetails.date.split("-").map(Number);
+  const selectedDate = parts.length === 3 && parts.every(Number.isFinite) ? new Date(parts[0], parts[1] - 1, parts[2]) : undefined;
+  const timeParts = formDetails.time.split(":").map(Number);
+  const selectedTime = timeParts.length === 2 && timeParts.every(Number.isFinite) ? { hour: timeParts[0], minute: timeParts[1] } : undefined;
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
   const tripCalculationErrorMessage =
-    "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.";
+    customerText(locale, "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.");
 
   const addStopPoint = () => {
     const dropoff = routePoints.find((p) => p.type === "dropoff");
@@ -127,29 +131,7 @@ export default function RoutePoints({
     return (hasAirportId || hasPlaceId) && hasValidCoordinates(point);
   };
 
-  const getBackendErrorMessage = (errorBody: any) => {
-    if (!errorBody) return tripCalculationErrorMessage;
-
-    const fieldErrors =
-      errorBody?.data?.errors ||
-      errorBody?.errors ||
-      (typeof errorBody === "object" ? errorBody : null);
-    const firstFieldError =
-      fieldErrors && !Array.isArray(fieldErrors)
-        ? Object.values(fieldErrors)[0]
-        : undefined;
-
-    return (
-      errorBody?.data?.detail ||
-      errorBody?.detail ||
-      errorBody?.details ||
-      errorBody?.message ||
-      errorBody?.error ||
-      (firstFieldError ? extract_error(firstFieldError) : "") ||
-      extract_error(errorBody) ||
-      tripCalculationErrorMessage
-    );
-  };
+  const getBackendErrorMessage = (_errorBody: unknown) => tripCalculationErrorMessage;
 
   const validateForm = () => {
     const hasInvalidPoints = routePoints.some((point) => !isValidRoutePoint(point));
@@ -185,7 +167,7 @@ export default function RoutePoints({
 
     if (!validateForm()) {
       setIsRequired(true);
-      setSubmitError(locationValidationMessage);
+      setSubmitError(runtimeText(locale, "routeRequired"));
       return;
     }
 
@@ -231,7 +213,7 @@ export default function RoutePoints({
       nextStep();
     } catch (error: any) {
       console.error("Trip calculation error:", error);
-      setSubmitError(error?.message || tripCalculationErrorMessage);
+      setSubmitError(tripCalculationErrorMessage);
       setOpenModal(true);
     } finally {
       setIsLoading(false);
@@ -375,8 +357,8 @@ export default function RoutePoints({
                   <p>{book_Taxi.form.date}</p>
                 </label>
                 <DateInput
+                  id="ride-date"
                   value={selectedDate}
-                  onChange={setSelectedDate}
                   setFormattedDate={(d) =>
                     setValue({ ...formDetails, date: d })
                   }
@@ -391,7 +373,6 @@ export default function RoutePoints({
                 <TimeInput
                   id="ride-time"
                   value={selectedTime}
-                  onChange={(t) => setSelectedTime(t)}
                   language={locale}
                   required={isRequired}
                   setFormattedTime={(time) =>
@@ -412,7 +393,8 @@ export default function RoutePoints({
                     <input
                       id="adult-count"
                       type="number"
-                      defaultValue={formDetails.adults}
+                      value={formDetails.adults}
+                      onChange={event => setValue({ ...formDetails, adults: Number(event.target.value) })}
                       max={7}
                       min={1}
                       className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
@@ -425,7 +407,8 @@ export default function RoutePoints({
                     <input
                       id="child-count"
                       type="number"
-                      defaultValue={formDetails.children}
+                      value={formDetails.children}
+                      onChange={event => setValue({ ...formDetails, children: Number(event.target.value) })}
                       max={7}
                       min={0}
                       className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
@@ -438,7 +421,8 @@ export default function RoutePoints({
                     <input
                       id="infant-count"
                       type="number"
-                      defaultValue={formDetails.infants}
+                      value={formDetails.infants}
+                      onChange={event => setValue({ ...formDetails, infants: Number(event.target.value) })}
                       max={7}
                       min={0}
                       className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
@@ -461,7 +445,8 @@ export default function RoutePoints({
                   <input
                     id="large_suitcase"
                     type="number"
-                    defaultValue={0}
+                    value={formDetails.largeSuitcase}
+                    onChange={event => setValue({ ...formDetails, largeSuitcase: Number(event.target.value) })}
                     min="0"
                     className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
                   />
@@ -472,7 +457,8 @@ export default function RoutePoints({
                   </label>
                   <input
                     id="small_suitcase"
-                    defaultValue={0}
+                    value={formDetails.smallSuitcase}
+                    onChange={event => setValue({ ...formDetails, smallSuitcase: Number(event.target.value) })}
                     type="number"
                     min="0"
                     className="w-full p-2.5 mb-2 border-2 bg-white text-foreground font-semibold border-muted rounded-lg"
@@ -515,3 +501,4 @@ export default function RoutePoints({
     </div>
   );
 }
+

@@ -1,0 +1,150 @@
+{
+  "shared": {
+    "bookNow": "Jetzt buchen",
+    "contactUs": "Kontakt",
+    "whyChoose": "Warum ACT wählen?",
+    "vehicleTypes": "Fahrzeugtypen",
+    "faqTitle": "Häufige Fragen",
+    "benefits": [
+      "Flugüberwachung",
+      "Festpreise",
+      "Professionelle Fahrer",
+      "Erstklassige Fahrzeuge",
+      "Empfang mit Namensschild",
+      "Onlinebuchung rund um die Uhr"
+    ],
+    "vehicles": [
+      "Standardfahrzeug mit Fahrer",
+      "Business-Limousine",
+      "Luxusfahrzeug",
+      "7-Sitzer",
+      "Luxusvan"
+    ],
+    "intro": "Buchen Sie einen zuverlässigen privaten Transfer zwischen {airport} und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr.",
+    "popularRoutesTitle": "Beliebte Strecken ab {airport}",
+    "serviceTitle": "Privater Transferservice – {airport}",
+    "serviceParagraphs": [
+      "Airport & City Transfer bietet private Transfers zwischen {airport} und London. Ob Geschäftsreise, Familienurlaub oder Hotelaufenthalt: Mit ACT buchen Sie Ihren komfortablen, zuverlässigen Transfer im Voraus.",
+      "Wählen Sie je nach Fahrt, Fahrgastzahl und Gepäck ein Standardfahrzeug mit Fahrer, eine Business-Limousine, ein Luxusfahrzeug, einen 7-Sitzer oder einen Luxusvan.",
+      "ACT setzt auf klare Kommunikation, professionellen Service, Festpreise und einfache Buchung – von der Flughafenabholung bis zu Ihrem Ziel."
+    ],
+    "faqs": [
+      {
+        "q": "Bieten Sie Abholungen am Flughafen {airport} an?",
+        "a": "Ja. Airport & City Transfer bietet private Transfers von und nach {airport} mit Verbindungen nach London."
+      },
+      {
+        "q": "Verfolgen Sie verspätete Flüge?",
+        "a": "Ja. Wenn Sie uns Ihre Flugdetails mitteilen, verfolgen wir die Flugzeiten, damit Ihr Fahrer Verspätungen oder frühere Ankünfte einplanen kann."
+      },
+      {
+        "q": "Kann ich einen 7-Sitzer ab {airport} buchen?",
+        "a": "Ja. Für Familien-, Gruppen- oder Geschäftsreisen können Sie je nach Gepäckbedarf einen Transfer im 7-Sitzer buchen."
+      },
+      {
+        "q": "Ist der Preis fest?",
+        "a": "ACT legt Wert auf klare Preise vor der Buchung, damit Sie Ihre Fahrt sicher bestätigen können."
+      }
+    ],
+    "finalTitle": "Buchen Sie Ihren Flughafentransfer {airport} noch heute",
+    "finalDescription": "Buchen Sie Ihren Transfer am Flughafen {airport} mit Airport & City Transfer im Voraus und reisen Sie entspannt in London.",
+    "serviceType": "Flughafentransfer",
+    "schemaDescription": "Buchen Sie einen zuverlässigen privaten Transfer zwischen {airport} und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+  },
+  "pages": {
+    "heathrow-airport-transfer": {
+      "airport": "Heathrow",
+      "badge": "Flughafentransfer Heathrow",
+      "heading": "Flughafentransfer Heathrow – London",
+      "metadata": {
+        "title": "Flughafentransfer Heathrow | Airport & City Transfer",
+        "description": "Buchen Sie einen zuverlässigen privaten Transfer zwischen Heathrow und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+      },
+      "routes": [
+        "Heathrow ins Zentrum von London",
+        "Heathrow nach Canary Wharf",
+        "Heathrow nach Mayfair",
+        "Heathrow zu Hotels in London",
+        "Heathrow zum Flughafen Gatwick",
+        "Heathrow in Geschäftsviertel"
+      ]
+    },
+    "gatwick-airport-transfer": {
+      "airport": "Gatwick",
+      "badge": "Flughafentransfer Gatwick",
+      "heading": "Flughafentransfer Gatwick – London",
+      "metadata": {
+        "title": "Flughafentransfer Gatwick | Airport & City Transfer",
+        "description": "Buchen Sie einen zuverlässigen privaten Transfer zwischen Gatwick und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+      },
+      "routes": [
+        "Gatwick ins Zentrum von London",
+        "Gatwick nach Canary Wharf",
+        "Gatwick nach Mayfair",
+        "Gatwick zu Hotels in London",
+        "Gatwick zum Flughafen Heathrow",
+        "Gatwick in Geschäftsviertel"
+      ]
+    },
+    "stansted-airport-transfer": {
+      "airport": "Stansted",
+      "badge": "Flughafentransfer Stansted",
+      "heading": "Flughafentransfer Stansted – London",
+      "metadata": {
+        "title": "Flughafentransfer Stansted | Airport & City Transfer",
+        "description": "Buchen Sie einen zuverlässigen privaten Transfer zwischen Stansted und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+      },
+      "routes": [
+        "Stansted ins Zentrum von London",
+        "Stansted nach Canary Wharf",
+        "Stansted nach Mayfair",
+        "Stansted zu Hotels in London",
+        "Stansted zum Flughafen Heathrow",
+        "Stansted in Geschäftsviertel"
+      ]
+    },
+    "luton-airport-transfer": {
+      "airport": "Luton",
+      "badge": "Flughafentransfer Luton",
+      "heading": "Flughafentransfer Luton – London",
+      "metadata": {
+        "title": "Flughafentransfer Luton | Airport & City Transfer",
+        "description": "Buchen Sie einen zuverlässigen privaten Transfer zwischen Luton und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+      },
+      "routes": [
+        "Luton ins Zentrum von London",
+        "Luton nach Canary Wharf",
+        "Luton nach Mayfair",
+        "Luton zu Hotels in London",
+        "Luton zum Flughafen Heathrow",
+        "Luton in Geschäftsviertel"
+      ]
+    },
+    "london-city-airport-transfer": {
+      "airport": "London City Airport",
+      "badge": "Flughafentransfer London City Airport",
+      "heading": "Flughafentransfer London City Airport – London",
+      "metadata": {
+        "title": "Flughafentransfer London City Airport | Airport & City Transfer",
+        "description": "Buchen Sie einen zuverlässigen privaten Transfer zwischen London City Airport und London: Festpreise, professionelle Fahrer, erstklassige Fahrzeuge, Flugüberwachung und Onlinebuchung rund um die Uhr."
+      },
+      "routes": [
+        "London City Airport ins Zentrum von London",
+        "London City Airport nach Canary Wharf",
+        "London City Airport nach Mayfair",
+        "London City Airport zu Hotels in London",
+        "London City Airport zum Flughafen Heathrow",
+        "London City Airport in Geschäftsviertel"
+      ],
+      "serviceParagraphs": [
+        "Airport & City Transfer bietet private Transfers zwischen London City Airport und London. Ob Geschäftsreise, Hotelaufenthalt oder Konferenz: Mit ACT buchen Sie einen komfortablen, zuverlässigen Transfer im Voraus.",
+        "Unser Service richtet sich an Geschäftsreisende, Familien, Touristen und Berufstätige, die entspannt ankommen möchten. Wählen Sie ein Standardfahrzeug mit Fahrer, eine Business-Limousine, ein Luxusfahrzeug, einen 7-Sitzer oder einen Luxusvan.",
+        "ACT setzt auf klare Kommunikation, professionellen Service, Festpreise und einfache Buchung – von der Flughafenabholung bis zu Ihrem Ziel."
+      ],
+      "vehicleFaq": {
+        "q": "Kann ich eine Business-Limousine ab London City Airport buchen?",
+        "a": "Ja. Ab London City Airport können Sie eine Business-Limousine, ein Luxusfahrzeug, ein Standardfahrzeug, einen 7-Sitzer oder einen Luxusvan buchen."
+      }
+    }
+  }
+}

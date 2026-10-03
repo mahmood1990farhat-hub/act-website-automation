@@ -1,0 +1,13 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const ts = require('typescript');
+const code = ts.transpileModule(fs.readFileSync('src/lib/french-payment-error.ts','utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+const mod = {exports:{}};
+new Function('exports','module',code)(mod.exports,mod);
+const error = mod.exports.frenchPaymentError;
+assert.match(error({code:'card_declined'}),/refusée/);
+assert.match(error({code:'expired_card'}),/expiré/);
+assert.match(error({code:'incorrect_cvc'}),/incorrect/);
+assert.match(error({code:'future_unknown_code'}),/Vérifiez son état auprès d’ACT avant de réessayer/);
+assert.equal(error({}),error({code:'future_unknown_code'}));
+console.log('PASS French payment error display mapping; no payment calls');

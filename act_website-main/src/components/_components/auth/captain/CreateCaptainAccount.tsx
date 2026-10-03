@@ -360,7 +360,7 @@ export default function CreateCaptainAccount({
                     placeholder={trans.VehicleDocuments.RegisterDescription || "Select year"}
                     min={1950}
                     max={new Date().getFullYear()}
-                    language={locale}
+                    language={locale === "ar" ? "ar" : "en"}
                     error={errors.year_of_manufacture}
                     requiredMsg={transInfo.locationRequired}
                   />
@@ -491,7 +491,7 @@ export default function CreateCaptainAccount({
                   }
                   value={selectedDate}
                   onChange={setSelectedDate}
-                  language={locale}
+                  language={locale === "ar" ? "ar" : "en"}
                 />
                 {dateTimeError && !selectedDate && (
                   <p className="text-red-500">{transInfo.locationRequired}</p>
@@ -504,7 +504,7 @@ export default function CreateCaptainAccount({
                   }
                   value={selectedTime}
                   onChange={(time) => setSelectedTime(time)}
-                  language={locale}
+                  language={locale === "ar" ? "ar" : "en"}
                 />
                 {dateTimeError && !selectedTime && (
                   <p className="text-red-500">{transInfo.locationRequired}</p>
@@ -589,7 +589,7 @@ export default function CreateCaptainAccount({
                     <DateInput
                       value={selectedDate}
                       onChange={setSelectedDate}
-                      language={locale}
+                      language={locale === "ar" ? "ar" : "en"}
                       inCreateCaptain={true}
                     />
                   </div>
@@ -597,7 +597,7 @@ export default function CreateCaptainAccount({
                     <TimeInput
                       value={selectedTime}
                       onChange={setSelectedTime}
-                      language={locale}
+                      language={locale === "ar" ? "ar" : "en"}
                       inCreateCaptain={true}
                     />
                   </div>

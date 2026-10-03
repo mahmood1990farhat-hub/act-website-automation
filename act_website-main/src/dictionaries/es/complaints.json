@@ -1,0 +1,111 @@
+{
+  "title": "Reclamaciones",
+  "subtitle": "Envíe y siga sus reclamaciones",
+  "tabs": {
+    "my_complaints": "Mis reclamaciones",
+    "submit_complaint": "Presentar reclamación"
+  },
+  "stats": {
+    "total": "Total de reclamaciones",
+    "pending": "Pendiente",
+    "under_review": "En revisión",
+    "resolved": "Resuelta",
+    "closed": "Cerrada"
+  },
+  "complaint_list": {
+    "title": "Mis reclamaciones",
+    "empty": "No se encontraron reclamaciones",
+    "filter": {
+      "all": "Todas",
+      "status_label": "Filtrar por estado",
+      "type_label": "Filtrar por tipo"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "Referencia de reclamación",
+    "type": "Tipo",
+    "title": "Título",
+    "description": "Descripción",
+    "status": "Estado",
+    "trip_date": "Fecha del viaje",
+    "created_at": "Enviada el",
+    "admin_response": "Respuesta del equipo",
+    "resolved_at": "Resuelta el",
+    "view_trip": "Ver detalles del viaje",
+    "resolved": "Resuelta",
+    "not_resolved": "Sin resolver",
+    "leave_review": "Dejar una valoración",
+    "show_details": "Mostrar detalles",
+    "close": "Cerrar",
+    "complaint_details": "Detalles de la reclamación",
+    "complainant": "Reclamante",
+    "passenger": "Pasajero",
+    "driver": "Conductor",
+    "complainant_info": "Datos del reclamante",
+    "trip_info": "Información del viaje",
+    "trip_id": "Referencia del viaje",
+    "trip_time": "Hora del viaje",
+    "distance": "Distancia",
+    "duration": "Duración estimada",
+    "passenger_info": "Información del pasajero",
+    "driver_info": "Información del conductor",
+    "full_name": "Nombre completo",
+    "phone_number": "Número de teléfono",
+    "email": "Correo electrónico",
+    "account_type": "Tipo de cuenta",
+    "name": "Nombre",
+    "respond": "Responder",
+    "resolve": "Resolver",
+    "respond_to_complaint": "Responder a la reclamación",
+    "resolve_complaint": "Resolver reclamación",
+    "response_required": "La respuesta es obligatoria",
+    "response_placeholder": "Escriba su respuesta…",
+    "sending": "Enviando…",
+    "send_response": "Enviar respuesta",
+    "resolving": "Resolviendo…",
+    "cancel": "Cancelar",
+    "update_status": "Actualizar estado",
+    "update": "Actualizar",
+    "updating": "Actualizando…",
+    "resolution_placeholder": "Indique los detalles de la resolución…",
+    "complaint_info": "Información de la reclamación",
+    "complaint_content": "Contenido de la reclamación",
+    "downloadPdf": "Descargar PDF"
+  },
+  "submit_form": {
+    "title": "Presentar una reclamación",
+    "subtitle": "Indique los detalles de su reclamación",
+    "fields": {
+      "trip": "Seleccionar viaje",
+      "trip_placeholder": "Elija el viaje relacionado con su reclamación",
+      "complaint_type": "Tipo de reclamación",
+      "complaint_type_placeholder": "Seleccione el tipo de reclamación",
+      "title": "Título",
+      "title_placeholder": "Resumen breve de su reclamación",
+      "description": "Descripción",
+      "description_placeholder": "Describa detalladamente su reclamación"
+    },
+    "button": "Añadir reclamación",
+    "button_loading": "Añadiendo…",
+    "success_message": "¡Reclamación enviada correctamente!",
+    "error_message": "No se pudo enviar la reclamación. Inténtelo de nuevo.",
+    "validation": {
+      "trip_required": "Seleccione un viaje",
+      "type_required": "Seleccione un tipo de reclamación",
+      "title_required": "Introduzca un título",
+      "title_min": "El título debe tener al menos 5 caracteres",
+      "description_required": "Introduzca una descripción",
+      "description_min": "La descripción debe tener al menos 20 caracteres"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "Problema con el viaje",
+    "driver_issue": "Problema con el conductor"
+  },
+  "statuses": {
+    "pending": "Pendiente",
+    "under_review": "En revisión",
+    "resolved": "Resuelta",
+    "closed": "Cerrada"
+  }
+}

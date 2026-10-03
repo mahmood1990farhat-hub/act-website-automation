@@ -1,9 +1,10 @@
-import { languageType, Locale } from "../../../i18n.config";
-import { Languages } from "../../constants/enums";
+import bundledDocuments from "@/dictionaries/document-manifest.json";
+import { type SupportedLocale } from "../../../i18n.config";
 
 type InstructionFile = {
   id: number;
   file_type: string;
+  language: string;
   file_type_display: string;
   title: string;
   file_url: string;
@@ -27,7 +28,7 @@ type InstructionFilesResponse = {
  */
 export async function fetchInstructionFile(
   fileType: string,
-  locale: languageType = "en" as languageType
+  locale: SupportedLocale = "en"
 ): Promise<InstructionFilesResponse | null> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -64,7 +65,7 @@ export async function fetchInstructionFile(
  */
 export async function getInstructionFile(
   fileType: string,
-  locale: languageType = "en" as languageType
+  locale: SupportedLocale = "en"
 ): Promise<InstructionFile | null> {
   const response = await fetchInstructionFile(fileType, locale);
   
@@ -73,10 +74,23 @@ export async function getInstructionFile(
   }
 
   // Get the most recent file (sorted by updated_at)
-  const files = response.data.instruction_files;
+  const files = response.data.instruction_files.filter(file =>
+    file.file_type === fileType && file.language === locale && file.file_url
+  );
   const sortedFiles = files.sort(
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
 
   return sortedFiles[0] || null;
+}
+
+/** Prefer an explicitly labelled upload, otherwise use the versioned matching site document. */
+export async function getCustomerDocument(fileType: string, locale: SupportedLocale = "en"): Promise<InstructionFile | null> {
+  const uploaded = await getInstructionFile(fileType, locale);
+  if (uploaded) return uploaded;
+  const catalogue = bundledDocuments[locale];
+  const bundled = catalogue?.[fileType as keyof typeof catalogue];
+  if (!bundled) return null;
+  return { id: 0, file_type: fileType, file_type_display: bundled.title, title: bundled.title,
+    language: locale, file_url: bundled.file_url, description: "", version: 1, updated_at: "" };
 }

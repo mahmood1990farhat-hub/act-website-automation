@@ -1,0 +1,94 @@
+{
+  "title": "Meine Fahrten",
+  "section_1": {
+    "title": "Alle Fahrten",
+    "tpes": [
+      {
+        "title": "Alle",
+        "value": ""
+      },
+      {
+        "title": "Ausstehend",
+        "value": "pending"
+      },
+      {
+        "title": "Angenommen",
+        "value": "accepted"
+      },
+      {
+        "title": "Läuft",
+        "value": "active"
+      },
+      {
+        "title": "Bevorstehend",
+        "value": "driver_on_the_way"
+      },
+      {
+        "title": "Abgeschlossen",
+        "value": "completed"
+      },
+      {
+        "title": "Storniert",
+        "value": "cancelled"
+      }
+    ]
+  },
+  "section_2": {
+    "title": "Letzte Fahrten",
+    "desc": "Bei Fragen oder Beschwerden können Sie die Fahrer Ihrer Fahrten aus den letzten 24 Stunden kontaktieren."
+  },
+  "tripsCount": "Anzahl der Fahrten:",
+  "noTrips": {
+    "title": "Keine Fahrten gefunden",
+    "tryDifferentFilter": "Wählen Sie einen anderen Filter.",
+    "willAppearHere": "Ihre Fahrten werden hier angezeigt."
+  },
+  "noRecentTrips": {
+    "title": "Keine kürzlich erfolgten Fahrten",
+    "desc": "Fahrten aus den letzten 24 Stunden werden hier angezeigt."
+  },
+  "deleteTrip": {
+    "title": "Fahrt stornieren?",
+    "desc": "Möchten Sie diese Fahrt wirklich stornieren? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "btuCancel": "Abbrechen",
+    "btuConfirm": "Fahrt stornieren"
+  },
+  "tripCard": {
+    "name_of_driver": "Name des Fahrers",
+    "phone_of_driver": "Telefonnummer des Fahrers",
+    "model_car": "Fahrzeugmodell",
+    "color_car": "Fahrzeugfarbe",
+    "number_car": "Kennzeichen",
+    "tripId": "Fahrtreferenz:",
+    "distance": "Entfernung",
+    "duration": "Dauer",
+    "destination": "Ziel",
+    "carInfo": "Fahrzeuginformationen",
+    "brand": "Marke",
+    "additional_notes": "Zusätzliche Hinweise",
+    "model": "Modell",
+    "color": "Farbe",
+    "registrationNumber": "Kennzeichen",
+    "year": "Jahr",
+    "pickup": "Abholung",
+    "dropoff": "Zielort",
+    "gbp": "GBP",
+    "seeDetails": "Details ansehen",
+    "details": "Details",
+    "cancel": "Abbrechen",
+    "tripDetails": "Fahrtdetails",
+    "status": "Status:",
+    "date": "Datum",
+    "cost": "Preis",
+    "contactDriver": "Fahrer kontaktieren",
+    "close": "Schließen",
+    "statusLabels": {
+      "pending": "Ausstehend",
+      "accepted": "Angenommen",
+      "active": "Läuft",
+      "driver_on_the_way": "Fahrer ist unterwegs",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    }
+  }
+}
