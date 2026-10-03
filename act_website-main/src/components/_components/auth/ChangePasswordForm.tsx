@@ -1,4 +1,5 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import PasswordField from "./PasswordField";
@@ -41,13 +42,14 @@ export default function ChangePasswordForm({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      toast.error("Please login to change your password");
+      toast.error(accountText(locale, "loginRequired"));
       return;
     }
 
     setIsLoading(true);
     try {
       await postData({
+        noToast: true,
         endpoint: "/api/auth/change-password/",
         body: {
           old_password: data.old_password,
@@ -62,7 +64,7 @@ export default function ChangePasswordForm({
         onSuccess();
       }
     } catch (error) {
-      console.error("Error:", error);
+      toast.error(accountText(locale, "changeFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +128,7 @@ export default function ChangePasswordForm({
           className="text-2xl w-full p-6"
         >
           {isLoading
-            ? "Changing..."
+            ? accountText(locale, "changing")
             : trans.confirmBtn || trans.changePasswordButton || "Change Password"}
         </Button>
       </form>

@@ -29,12 +29,36 @@ const frenchLoaders = {
   lostProperty: () => import("@/dictionaries/fr/lostProperty.json").then(m => m.default),
   tripsPassenger: () => import("@/dictionaries/fr/tripsPassenger.json").then(m => m.default),
 };
+const customerLoaders = {
+  "de": {
+    auth: () => import("@/dictionaries/de/auth.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/de/tripsPassenger.json").then(m => m.default),
+  },
+  "es": {
+    auth: () => import("@/dictionaries/es/auth.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/es/tripsPassenger.json").then(m => m.default),
+  },
+  "tr": {
+    auth: () => import("@/dictionaries/tr/auth.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/tr/tripsPassenger.json").then(m => m.default),
+  },
+  "zh-CN": {
+    auth: () => import("@/dictionaries/zh-CN/auth.json").then(m => m.default),
+    tripsPassenger: () => import("@/dictionaries/zh-CN/tripsPassenger.json").then(m => m.default),
+  },
+};
 export default async function getTrans(locale: SupportedLocale, section: string): Promise<any> {
   if (!Object.prototype.hasOwnProperty.call(loaders.en, section)) throw new Error(`Unknown translation section: ${section}`);
   const key = section as keyof typeof loaders.en;
   const english = await loaders.en[key]();
   if (locale === "fr" && Object.prototype.hasOwnProperty.call(frenchLoaders, section)) {
     return mergeDictionary(english, await frenchLoaders[section as keyof typeof frenchLoaders]());
+  }
+  if (Object.prototype.hasOwnProperty.call(customerLoaders, locale)) {
+    const customer = customerLoaders[locale as keyof typeof customerLoaders];
+    if (section === "auth" || section === "tripsPassenger") {
+      return mergeDictionary(english, await customer[section]());
+    }
   }
   const language = dictionaryLocale(locale);
   return language === "en" ? english : mergeDictionary(english, await loaders[language][key]());

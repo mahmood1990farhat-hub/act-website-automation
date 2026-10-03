@@ -1,5 +1,6 @@
 "use client";
-import frCountries from "react-phone-number-input/locale/fr.json";
+import { accountText } from "@/lib/customer-account-text";
+import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -86,7 +87,7 @@ export default function SignUpT({
 
         const res = await postData<any>({
           endpoint: endpointURL,
-          noToast: locale === "fr",
+          noToast: true,
           body: body,
           queryParams: {
             locale: locale,
@@ -102,7 +103,7 @@ export default function SignUpT({
         setTap(1);
       } catch (err) {
         console.error(err);
-        if (locale === "fr") setRequestError("La création du compte n’a pas pu être confirmée. Vérifiez vos informations ou contactez ACT.");
+        setRequestError(accountText(locale, "signupFailed"));
       }
       finally{
         setLoading(false);
@@ -160,7 +161,7 @@ export default function SignUpT({
           >
             <PhoneInputWithCountrySelect
               defaultCountry="GB"
-              labels={locale === "fr" ? frCountries : undefined}
+              labels={customerPhoneLabels(locale)}
               value={phone}
               onChange={(val) => setPhone(val || "")}
               international

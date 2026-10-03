@@ -2,7 +2,7 @@
 
 Started 2 October 2026 after the owner's instruction to prioritise **all five additional languages, including emails and the complete booking journey**. This workstream comes before resuming Gemini/n8n operational handover. Those tasks remain pending; they have not been cancelled.
 
-**Status: first implementation checkpoint; incomplete and unpublished. Not a release candidate or a completed five-language launch.**
+**Status: second implementation checkpoint; incomplete and unpublished. Not a release candidate or a completed five-language launch.**
 
 ## Scope and current position
 
@@ -11,10 +11,10 @@ Started 2 October 2026 after the owner's instruction to prioritise **all five ad
 | English | Existing live language | Existing interface; regression checked | Existing templates retained | Explicit request language implemented |
 | Arabic | Existing live language | Existing interface; regression checked | Existing RTL documents retained | Explicit request language implemented |
 | French | Hidden | Existing private preview reconciled with current production source | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
-| German | Hidden | Full customer dictionary and interface work outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
-| Spanish | Hidden | Full customer dictionary and interface work outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
-| Turkish | Hidden | Full customer dictionary and interface work outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
-| Simplified Chinese (`zh-CN`) | Hidden | Full customer dictionary and interface work outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
+| German | Hidden | Account and trip dictionaries implemented; remaining website/booking interfaces outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
+| Spanish | Hidden | Account and trip dictionaries implemented; remaining website/booking interfaces outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
+| Turkish | Hidden | Account and trip dictionaries implemented; remaining website/booking interfaces outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
+| Simplified Chinese (`zh-CN`) | Hidden | Account and trip dictionaries implemented; remaining website/booking interfaces outstanding | Five event types and two PDF types implemented/offline tested | Implemented/offline tested |
 
 The language registry's enabled flags and publication guard still permit only English and Arabic. Merely supporting a backend locale does not publish a website locale. Previous French checkpoint instructions to stop at French are superseded by the owner's new five-language scope, but historical verification limits still apply.
 
@@ -59,6 +59,21 @@ node tests/check-language-foundation.cjs
 node tests/check-french-drafts.cjs
 node tests/check-french-payment-errors.cjs
 ```
+
+## Account and trip-management checkpoint (continued 3 October)
+
+- Added complete customer account and trip dictionaries for German, Spanish, Turkish and Simplified Chinese: 142 account and 62 trip string values per locale, including protected status values. The server dictionary loader now resolves these draft sections. Publication gates remain unchanged.
+- Filled the two existing Arabic fallback gaps (invalid phone and vehicle model) and localized the auth/trip route loading screen.
+- Seven-language account feedback covers sign-in/registration failure, missing authentication, change-request/code failure, password update progress, account deletion and code resend. Country-name menus use the phone library's corresponding locale without altering E.164 values.
+- Corrected email-change verification instructions in all seven languages: the existing backend sends the code to the current phone, not the new email address. No delivery channel or authentication policy changed.
+- Corrected English/Arabic account-deletion notices to avoid promising that every record is removed, matching the existing French retention wording.
+- Trip cancellation now sends `locale` (previously misspelled `loacle`), suppresses backend-language toasts, shows translated success/failure, disables repeated pending submissions and refreshes trip lists after success. Confirmation says cancellation rather than deletion; it does not promise a refund.
+- Trip lists now key requests by locale and session, pass locale to recent-trip retrieval, and show a translated fetch failure instead of presenting a failed fetch as an empty history. Distance/duration units and pagination labels support seven languages.
+- Account-change resend retains the entered code and cooldown state on failed requests, shows translated feedback and disables resend while pending or during the existing cooldown. No real OTP was requested.
+
+Checks: seven-language production component SSR (login, registration, password/email/phone change, reset, trip cards and pagination), exact draft dictionary keys/placeholders and canonical trip statuses, escaped provider names, and production cancellation/email/phone confirmation handlers with external effects replaced all pass. Handlers cover both success and failure, canonical payloads, correct request locale, cache refresh only after success, and no cookie/profile success on failure. This is offline evidence, not browser/provider acceptance. TypeScript and the existing French dictionary checks pass. A full Webpack production build also passes. Subsequent dictionary/loading-only edits pass TypeScript and the targeted checks.
+
+New action checks: `node tests/check-customer-account-actions.cjs` from `act_website-main`.
 
 ## Remaining work, in order
 

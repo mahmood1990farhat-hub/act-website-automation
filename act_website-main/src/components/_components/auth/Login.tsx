@@ -1,4 +1,5 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { postData } from "@/lib/api/postData";
@@ -92,7 +93,7 @@ export default function Login({
 
       const res = await postData<any>({
         endpoint: endpoint,
-        noToast: locale === "fr",
+        noToast: true,
         body: body,
         queryParams: {
           locale,
@@ -123,7 +124,7 @@ export default function Login({
       
       // VALIDATION: For passenger login attempts, discard action if account type is not passenger
       if (loginType === "passenger" && accountType !== "passenger") {
-        toast.error("Please use the correct login form for your account type. This appears to be a driver account.");
+        toast.error(accountText(locale, "wrongAccount"));
         setIsLoading(false);
         return; // Discard any further action
       }
@@ -283,7 +284,7 @@ export default function Login({
       }
     } catch (error) {
       console.error("Login Error:", error);
-      if (locale === "fr") setRequestError("Connexion impossible. Vérifiez vos identifiants ou réessayez plus tard.");
+      setRequestError(accountText(locale, "loginFailed"));
       setIsLoading(false);
     }
   };
@@ -401,7 +402,7 @@ export default function Login({
           </button>
           <button
             type="button"
-            onClick={() => locale === "fr" ? router.push("/en/auth?captain=1") : setLoginType("driver")}
+            onClick={() => locale !== "en" && locale !== "ar" ? router.push("/en/auth?captain=1") : setLoginType("driver")}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
               loginType === "driver"
                 ? "bg-primary text-foreground shadow-lg"
@@ -497,7 +498,7 @@ export default function Login({
             <p className="text-sm text-white/80">
               {loginType === "driver"
                 ? "Signing you in to your driver account..."
-                : locale === "fr" ? "Connexion à votre compte…" : "Signing you in to your account..."}
+                : accountText(locale, "signingIn")}
             </p>
           </div>
         </div>

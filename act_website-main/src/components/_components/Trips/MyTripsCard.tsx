@@ -1,3 +1,7 @@
+import { accountText } from "@/lib/customer-account-text";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+import { localizedVehicleValue } from "../../../../i18n.config";
 import React, { useState } from "react";
 import { FaCarSide, FaRoute, FaCalendarAlt } from "react-icons/fa";
 import { TiLocation } from "react-icons/ti";
@@ -49,21 +53,33 @@ export default function MyTripsCard({
 	tripCardTrans,
 }: typeProps) {
 	const [openModal, setOpenModal] = useState(false);
+	const [cancelling, setCancelling] = useState(false);
+	const queryClient = useQueryClient();
 	const [openDetails, setOpenDetails] = useState(false);
 
 	const CancelTrip = async () => {
+		if (cancelling) return;
+		setCancelling(true);
 		try {
 			const res = await postData({
 				endpoint: `/api/trips/${data.id}/cancel/`,
+				noToast: true,
 				token: token,
 				queryParams: {
-					loacle: locale,
+					locale: locale,
 				},
 			});
 			setOpenModal(false);
-		} catch (error) {}
+			toast.success(accountText(locale, "cancelTripSuccess"));
+			void queryClient.invalidateQueries({ queryKey: ["myTrips"] });
+			void queryClient.invalidateQueries({ queryKey: ["Latest"] });
+		} catch (error) {
+			toast.error(accountText(locale, "cancelTripFailed"));
+		} finally {
+			setCancelling(false);
+		}
 	};
-	console.log(data);
+
 
 	return (
 		<>
@@ -108,7 +124,7 @@ export default function MyTripsCard({
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
 							{data.distance_miles.toFixed(2)}{" "}
-							{locale === "ar" ? "ميل" : "Mile"}
+							{accountText(locale, "miles")}
 						</p>
 					</div>
 
@@ -121,7 +137,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data.expected_trip_duration_minutes || "0"}
+							{data.expected_trip_duration_minutes || "0"} {accountText(locale, "minutes")}
 						</p>
 					</div>
 				</div>
@@ -201,7 +217,7 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.vehicle_type?.[`name_${locale}`] || "-"}
+									{localizedVehicleValue(data.vehicle_info.vehicle_type, "name", locale) || "-"}
 								</p>
 							</div>
 						)}
@@ -353,7 +369,7 @@ export default function MyTripsCard({
 
 					{/* Title */}
 					<h1 className="text-white text-xl md:text-2xl font-bold">
-						{trans.title}
+						{accountText(locale, "cancelTripTitle")}
 					</h1>
 
 					{/* Description */}
@@ -372,9 +388,10 @@ export default function MyTripsCard({
 						</Button>
 						<Button
 							onClick={CancelTrip}
+							disabled={cancelling}
 							className="w-full sm:w-1/2 text-base md:text-lg py-6 bg-red-600 hover:bg-red-700"
 						>
-							{trans.btuConfirm}
+							{cancelling ? accountText(locale, "cancelling") : accountText(locale, "cancelTrip")}
 						</Button>
 					</div>
 				</div>
@@ -468,7 +485,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold">
-												{data.expected_trip_duration_minutes || "0"} m
+												{data.expected_trip_duration_minutes || "0"} {accountText(locale, "minutes")}
 											</p>
 										</div>
 
