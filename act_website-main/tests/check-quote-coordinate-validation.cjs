@@ -20,6 +20,7 @@ loaded.filename = sourcePath;
 loaded.paths = module.paths;
 loaded._compile(compiled.outputText, sourcePath);
 const { buildTripQuoteRequest, hasValidCoordinates, locationValidationMessage } = loaded.exports;
+const countValidationMessage = 'Please check the passenger and luggage counts before requesting a price.';
 const point = (lat, lng) => ({ coordinates: { lat, lng } });
 const input = () => ({
   routePoints: [
@@ -120,7 +121,7 @@ for (const [name, counts] of [
   test(`quote builder rejects ${name}`, () => {
     const value = input();
     Object.assign(value.formDetails, counts);
-    reject(value);
+    assert.throws(() => buildTripQuoteRequest(value), { message: countValidationMessage });
   });
 }
 test('quote builder accepts seven passengers and eight total suitcases', () => {
