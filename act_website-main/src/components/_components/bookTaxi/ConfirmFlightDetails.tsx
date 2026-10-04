@@ -145,8 +145,6 @@ export default function ModernConfirmFlightDetails({
 		baseCost: trans.Confir_flight_details.transfer_fare,
 		airportVAT: trans.Confir_flight_details.airport_access_fee,
 		regularVAT: trans.Confir_flight_details.vat_20,
-		meetAndGreet: trans.Confir_flight_details.meet_and_greet,
-		included: trans.Confir_flight_details.included,
 		totalCost: trans.Confir_flight_details.total_price,
 		routeMap: isRTL ? "خريطة المسار" : customerText(locale, "Route Map"),
 	};
