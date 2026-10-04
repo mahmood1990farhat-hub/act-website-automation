@@ -2,6 +2,8 @@
 import { LANGUAGE_CHANGE_EVENT, saveLanguageDraft, takeLanguageDraft } from "@/lib/booking-language-draft";
 import { languageSwitchText } from "@/lib/language-switch-text";
 import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
+import { customerText } from "@/lib/customer-text";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { PlaceSuggestion } from "./LocationSelector";
@@ -174,6 +176,7 @@ export type calculatTripCost = {
   distance_meters: number;
   distance_miles: number;
   route_polyline: string;
+  expected_trip_duration_minutes?: number;
 };
 
 type typeProps = {
@@ -289,22 +292,59 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
               dir={directionFor(locale)}
             >
               {step === 1 ? (
-                <RoutePoints
-                  locale={locale}
-                  routePoints={routePoints}
-                  setRoutePoints={setRoutePoints}
-                  book_Taxi={home.Book_Taxi}
-                  setValue={(d) => setFormDetails(d)}
-                  formDetails={formDetails}
-                  setTripData={(res) => setRideOptions(res)}
-                  resetQuoteState={() => {
-                    setRideOptions(null);
-                    setSelectedCar(undefined);
-                    setClientSecret("");
-                    setPaymentTotal(null);
-                  }}
-                  nextStep={() => setStep(2)}
-                />
+                <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)] gap-8 xl:items-start">
+                  <RoutePoints
+                    locale={locale}
+                    routePoints={routePoints}
+                    setRoutePoints={setRoutePoints}
+                    book_Taxi={home.Book_Taxi}
+                    setValue={(d) => setFormDetails(d)}
+                    formDetails={formDetails}
+                    setTripData={(res) => setRideOptions(res)}
+                    resetQuoteState={() => {
+                      setRideOptions(null);
+                      setSelectedCar(undefined);
+                      setClientSecret("");
+                      setPaymentTotal(null);
+                    }}
+                    nextStep={() => setStep(2)}
+                  />
+                  <aside className="hidden xl:block sticky top-24">
+                    <div className="rounded-2xl border border-white/15 bg-black/35 p-5 text-white shadow-2xl backdrop-blur-md">
+                      <div className="mb-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd100]">
+                          {customerText(locale, "Journey summary")}
+                        </p>
+                        <h2 className="mt-1 text-2xl font-bold">{customerText(locale, "Your journey")}</h2>
+                      </div>
+                      {rideOptions?.route_polyline ? (
+                        <>
+                          <div className="h-[320px] overflow-hidden rounded-xl border border-white/10">
+                            <MapView routePolyline={rideOptions.route_polyline} />
+                          </div>
+                          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                            <div className="rounded-xl bg-white/5 p-3">
+                              <p className="text-white/55">{customerText(locale, "Distance")}</p>
+                              <p className="mt-1 font-semibold">{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(rideOptions.distance_miles)} mi</p>
+                            </div>
+                            <div className="rounded-xl bg-white/5 p-3">
+                              <p className="text-white/55">{customerText(locale, "Passengers")}</p>
+                              <p className="mt-1 font-semibold">{formDetails.numberOfPassengers}</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-8 text-center">
+                          <MapPin className="mb-4 h-9 w-9 text-[#ffd100]" />
+                          <p className="text-lg font-semibold">{customerText(locale, "Your route will appear here")}</p>
+                          <p className="mt-2 text-sm leading-6 text-white/60">
+                            {customerText(locale, "Enter your pickup, destination, date and passenger details to view your journey summary.")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </aside>
+                </div>
               ) : step === 2 ? (
                 <ChooseCar
                   selectedCar={SelectedCar}
