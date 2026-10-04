@@ -2,7 +2,7 @@
 import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
-import { getCountries, getCountryCallingCode } from "react-phone-number-input";
+import { getCountries, getCountryCallingCode, isValidPhoneNumber } from "react-phone-number-input";
 import enCountries from "react-phone-number-input/locale/en.json";
 import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import { Button } from "@/components/ui/button";
@@ -29,24 +29,47 @@ export default function PassengerDetails({
   const countryLabels = customerPhoneLabels(locale);
   const isRTL = locale === "ar";
   const t = (text: string) => bookingText(locale, text);
-  const [isRequired, setIsRequired] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const updateField = (key: keyof PassengerDetailsForm, value: string) => {
     setPassengerDetails({ ...passengerDetails, [key]: value });
   };
 
   const onSubmit = () => {
-    const hasRequiredDetails =
-      passengerDetails.fullName.trim() &&
-      passengerDetails.email.trim() &&
-      passengerDetails.countryCode.trim() &&
-      passengerDetails.mobileNumber.trim();
+    const fullName = passengerDetails.fullName.trim();
+    const email = passengerDetails.email.trim();
+    const countryCode = passengerDetails.countryCode.trim();
+    const mobileNumber = passengerDetails.mobileNumber.trim();
 
-    if (!hasRequiredDetails) {
-      setIsRequired(true);
+    if (!fullName || !email || !countryCode || !mobileNumber) {
+      setValidationError(t("Passenger name, email, country code, and mobile number are required."));
       return;
     }
 
+    const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    if (!emailLooksValid) {
+      setValidationError(t("Enter a valid email address."));
+      return;
+    }
+
+    const dialCode = countryCode.match(/^\\+\\d+/)?.[0] ?? "";
+    const enteredDigits = mobileNumber.replace(/[^\\d+]/g, "");
+    const internationalPhone = enteredDigits.startsWith("+")
+      ? enteredDigits
+      : `${dialCode}${enteredDigits.replace(/^0+/, "")}`;
+
+    if (!dialCode || !isValidPhoneNumber(internationalPhone)) {
+      setValidationError(t("Enter a valid mobile number for the selected country code."));
+      return;
+    }
+
+    setPassengerDetails({
+      ...passengerDetails,
+      fullName,
+      email,
+      mobileNumber,
+    });
+    setValidationError("");
     nextStep();
   };
 
@@ -139,9 +162,9 @@ export default function PassengerDetails({
             </div>
           </div>
 
-          {isRequired && (
-            <p className="text-red-300 text-sm font-semibold">
-              {t("Passenger name, email, country code, and mobile number are required.")}
+          {validationError && (
+            <p role="alert" className="text-red-300 text-sm font-semibold">
+              {validationError}
             </p>
           )}
 
