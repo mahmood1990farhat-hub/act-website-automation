@@ -1,33 +1,14 @@
 export type VehicleType = {
   id: number;
+  code: string;
   name_en: string;
   name_ar: string;
 };
 
 export const VEHICLE_TYPES: VehicleType[] = [
-  {
-    id: 1,
-    name_en: "Standard PHV",
-    name_ar: "Standard PHV",
-  },
-  {
-    id: 2,
-    name_en: "7 Seaters PHV",
-    name_ar: "سيارة 7 ركاب",
-  },
-  {
-    id: 3,
-    name_en: "Luxury",
-    name_ar: "فاخرة",
-  },
-  {
-    id: 4,
-    name_en: "Luxury Van",
-    name_ar: "فان فاخر",
-  },
-  {
-    id: 5,
-    name_en: "VIP Business PHV",
-    name_ar: "VIP أعمال",
-  },
+  { id: 1, code: "comfort", name_en: "Comfort Class", name_ar: "فئة الراحة" },
+  { id: 2, code: "comfort_xl", name_en: "Comfort XL", name_ar: "فئة الراحة XL" },
+  { id: 3, code: "executive", name_en: "Executive Class", name_ar: "الفئة التنفيذية" },
+  { id: 4, code: "executive_xl", name_en: "Executive XL", name_ar: "الفئة التنفيذية XL" },
+  { id: 5, code: "first_class", name_en: "First Class", name_ar: "الدرجة الأولى" },
 ] as const;
