@@ -53,7 +53,8 @@ class PricingEngineTestCase(TestCase):
         
         # Create vehicle type
         self.vehicle_type = VehicleType.objects.create(
-            name_en="Standard PHV",
+            code="comfort",
+            name_en="Comfort Class",
             name_ar="سيارة خاصة قياسية",
             max_passengers_count=4,
             order=1
@@ -198,6 +199,7 @@ class PricingEngineTestCase(TestCase):
         """Test that missing tier raises error"""
         # Create vehicle type with no tiers
         vehicle_type2 = VehicleType.objects.create(
+            code="test_vehicle",
             name_en="Test Vehicle",
             name_ar="مركبة تجريبية",
             max_passengers_count=2,
