@@ -9,3 +9,15 @@ assert.ok(car.includes("disabledCarIndices.includes(index)"),"disabled vehicle c
 assert.ok(car.includes('style: "currency"') && car.includes('currency: "GBP"'),"backend total must be formatted as GBP");
 assert.ok(car.includes('customerText(locale, "No suitable vehicle is available for this journey online.")'),"defensive empty state missing");
 console.log("PASS vehicle-selection safety/presentation regression guard");
+
+for (const expected of [
+  'role="radiogroup"',
+  'role="radio"',
+  'aria-checked={isSelected}',
+  'runtimeText(locale, "representativeVehicle")',
+  'runtimeText(locale, "vehicleMayVary")',
+  'runtimeText(locale, "oneWayTotal")',
+  'vehicleExample(locale, car.code)',
+  'passengerCapacityLabel(locale, car.max_passengers_count)',
+  'event.key === "Enter" || event.key === " "',
+]) assert.ok(car.includes(expected), "missing professional/accessibility vehicle-card behavior: "+expected);
