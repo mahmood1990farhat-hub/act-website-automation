@@ -776,12 +776,13 @@ export default function ModernConfirmFlightDetails({
 							</CardHeader>
 							<CardContent className="p-0">
 								<div className="w-full h-64 sm:h-80 lg:h-[500px] relative">
-									<MapView
-										routePolyline={
-											rideOptions?.route_polyline ||
-											"vcyHjlwA?kC@ED@xCAPVHP@fAAvACz@Kl@Un@W`@QLULsAPkDb@a@Bc@A]K]Qy@u@aBwBWOc@OcCOsCQyE@aPDiMBK@SHSNONMb@U~@Gd@Cb@@`@d@tD@`C@pDCfAF`@HRLPNLLAPXT\\FF?R?n@?tEAvB?nEAtA?vFD~XCdNBbQ@|@PxACD?F@NELCBAxDEp@B|N@f@BD@L?PEHC@@lF@~DBhDJdARlAx@pDV|AJfAB`A?bBAtAA|@DT?p@?fC?jBBT?TFtCD|B@x@DhAL|BjA`S^jEPjAHZXx@R^j@r@|@f@^LnBn@rA\\z@LbAD~@CjCg@fDcAlAm@h@g@`AeAfAyAn@y@bAqAr@s@hA}@|@k@dAg@hAa@hA_@t@M~@ETChBHfCJfCLN@NGl@@t@Dt@LlBr@vAd@nCt@b@DZ@d@G\\M`@W\\a@f@cAVaAF_@Dc@NoDF}@F]Ne@NYNKNG\\EZ@~@ANKf@o@Ja@N{@f@{DPcCJgCDiCA{XAaPBwBLqBFe@b@cBXs@Zk@f@k@hAu@r@m@h@w@z@yAr@kAf@cAp@yBTcAVgBRoD^sITsHHuATmDPmDd@oKf@uKFkD\\kGZgFJwAXcCl@yETmBF{@BsAI_BGKEa@Ba@DOLIJAJBPVDN?H?DTLPJRHt@Z\\DZ?RGFETO@G@IBGFMJIJCVDPRH\\@f@Ml@KJUBMCWSAKw@CK?OtA"
-										}
-									/>
+									{rideOptions?.route_polyline ? (
+										<MapView routePolyline={rideOptions.route_polyline} />
+									) : (
+										<div role="status" className="flex h-full items-center justify-center px-6 text-center text-sm text-white/70">
+											{runtimeText(locale, "mapUnavailable")}
+										</div>
+									)}
 								</div>
 							</CardContent>
 						</Card>
