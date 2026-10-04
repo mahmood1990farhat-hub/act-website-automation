@@ -74,9 +74,9 @@
   "unavailable_child": "Entiendo que ACT podría no disponer de sillas infantiles y deseo continuar",
   "airport_fee": "Tasas del aeropuerto",
   "minimum_adjustment": "Ajuste a la tarifa mínima",
-  "standardVehicle": "Vehículo estándar con conductor",
-  "executiveVehicle": "Vehículo ejecutivo",
-  "luxuryVehicle": "Vehículo de lujo",
-  "sevenSeater": "Vehículo de 7 plazas",
-  "luxuryVan": "Furgoneta de lujo"
+  "standardVehicle": "Clase Comfort",
+  "executiveVehicle": "Primera Clase",
+  "luxuryVehicle": "Clase Executive",
+  "sevenSeater": "Comfort XL",
+  "luxuryVan": "Executive XL"
 }
