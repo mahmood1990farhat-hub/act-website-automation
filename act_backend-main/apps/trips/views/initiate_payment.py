@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _, activate
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from utils.common import get_locale, remove_empty_values, get_route_with_distance
 from utils.utils_trip import prepare_trip_data
 from utils.calculate_cost import calculate_total_cost
@@ -128,7 +129,11 @@ class InitiatePaymentView(EMADBaseView):
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
 
-        amount_in_cents = int(float(total_cost) * 100)
+        amount_in_cents = int(
+            (Decimal(str(total_cost)) * Decimal('100')).quantize(
+                Decimal('1'), rounding=ROUND_HALF_UP
+            )
+        )
         if amount_in_cents <= 0:
             raise ValidationError({'amount': _('Payment amount is invalid or zero')})
 
@@ -318,7 +323,11 @@ class InitiateGuestPaymentView(EMADBaseView):
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
 
-        amount_in_cents = int(float(total_cost) * 100)
+        amount_in_cents = int(
+            (Decimal(str(total_cost)) * Decimal('100')).quantize(
+                Decimal('1'), rounding=ROUND_HALF_UP
+            )
+        )
         if amount_in_cents <= 0:
             raise ValidationError({'amount': _('Payment amount is invalid or zero')})
 
