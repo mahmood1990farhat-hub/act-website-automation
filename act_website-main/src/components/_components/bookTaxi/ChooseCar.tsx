@@ -1,20 +1,23 @@
 import { runtimeText } from "@/lib/customer-runtime";
 import { customerText } from "@/lib/customer-text";
+import { passengerCapacityLabel, vehicleExample } from "@/lib/vehicle-presentation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Calendar,
+  Check,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
   Users,
-  CheckCircle,
-  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 import { Locale, localizedVehicleValue } from "../../../../i18n.config";
 import { calculatTripCost, Choose_car, VehicleType } from ".";
 import { Button } from "@/components/ui/button";
 
-const disabledCarEnv = process.env.NEXT_PUBLIC_DISABLED_CAR_TYPES ?? ""; 
+const disabledCarEnv = process.env.NEXT_PUBLIC_DISABLED_CAR_TYPES ?? "";
 const disabledCarIndices = disabledCarEnv
   .split(",")
   .map((index) => {
@@ -45,12 +48,8 @@ export default function ModernChooseCar({
   prevStep,
 }: typeProps) {
   const isRTL = locale === "ar";
-  const isLoading = false; // Replace with your actual loading state
 
-  const handleCarSelect = (car: VehicleType) => {
-    // Selection is deliberate; the passenger reviews the card and presses Continue.
-    setSelectedCar(car);
-  };
+  const selectCar = (car: VehicleType) => setSelectedCar({ ...car, ...rideOptions });
 
   const formatJourneyDate = () => {
     const [year, month, day] = tripDate.split("-").map(Number);
@@ -70,267 +69,191 @@ export default function ModernChooseCar({
       maximumFractionDigits: 2,
     }).format(amount);
 
-  // Arabic text alternatives
-  const texts = {
-    back: isRTL ? "العودة" : customerText(locale, "Back"),
-    mostPopular: isRTL ? "الأكثر شعبية" : customerText(locale, "Most Popular"),
-    passengers: isRTL ? "راكب" : customerText(locale, "passengers"),
-    professionalDriver: isRTL ? "سائق محترف" : customerText(locale, "Professional Driver"),
-    premiumComfort: isRTL ? "راحة فائقة" : customerText(locale, "Premium Comfort"),
-    meetGreet: isRTL ? "استقبال ومرافقة" : customerText(locale, "Meet & Greet"),
-    freeCancellation: isRTL
-      ? "استرداد كامل عند الإلغاء قبل موعد الاستلام بـ24 ساعة على الأقل"
-      : customerText(locale, "Full refund when cancelled at least 24 hours before your scheduled pickup"),
-    realTimeTracking: runtimeText(locale, "realTimeTracking"),
-    continue: isRTL ? "متابعة" : customerText(locale, "Continue"),
-    selectVehicle: isRTL
-      ? "اختر مركبتك المفضلة من أسطولنا المميز"
-      : customerText(locale, "Select your preferred vehicle from our premium fleet"),
-  };
-
-  const SkeletonCard = () => (
-    <Card className="bg-white/10 backdrop-blur-xl border border-white/20 animate-pulse">
-      <CardContent className="p-4 sm:p-6">
-        <div
-          className={`flex items-center gap-3 sm:gap-6 ${
-            isRTL ? "flex-row-reverse" : ""
-          }`}
-        >
-          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/20 rounded-xl flex-shrink-0" />
-          <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
-            <div className="h-4 sm:h-6 bg-white/20 rounded w-1/3" />
-            <div className="h-3 sm:h-4 bg-white/20 rounded w-3/4" />
-            <div className="h-4 sm:h-5 bg-white/20 rounded w-1/4" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
-    <div className={`w-full mx-auto`} dir={isRTL ? "rtl" : "ltr"}>
-      {/* Header Section */}
+    <div className="w-full mx-auto" dir={isRTL ? "rtl" : "ltr"}>
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/25 px-4 py-2 mb-4 backdrop-blur-sm">
           <Calendar className="w-4 h-4 text-[#ffd100]" />
-          <span className="text-white text-sm font-medium">
-            {formatJourneyDate()}
-          </span>
+          <span className="text-white text-sm font-medium">{formatJourneyDate()}</span>
         </div>
         <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
           {Choose_car.title}
         </h1>
-        <p className="text-white/80 text-base sm:text-lg lg:text-xl   max-w-2xl mx-auto px-4">
-          {texts.selectVehicle}
+        <p className="text-white/75 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto px-4">
+          {customerText(locale, "Select your preferred vehicle from our premium fleet")}
         </p>
       </div>
 
-      {/* Back Button */}
       <div className="mb-8">
         <Button
           onClick={prevStep}
           variant="outline"
           size="lg"
-          className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 cursor-pointer"
+          className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30"
         >
           {isRTL ? (
             <>
-              <ChevronRight className="w-5 h-5 mr-2" />
-              العودة
+              <ChevronRight className="w-5 h-5 me-2" />
+              {customerText(locale, "Back")}
             </>
           ) : (
             <>
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              {isRTL ? texts.back : customerText(locale, "Back")}
+              <ChevronLeft className="w-5 h-5 me-2" />
+              {customerText(locale, "Back")}
             </>
           )}
         </Button>
       </div>
 
-      {/* Car Selection Grid */}
       {(!rideOptions?.car_type || rideOptions.car_type.length === 0) && (
-        <div role="status" className="mb-6 rounded-xl border border-white/20 bg-white/10 p-6 text-center text-white">
-          <p className="text-lg font-semibold">{customerText(locale, "No suitable vehicle is available for this journey online.")}</p>
-          <p className="mt-2 text-sm text-white/70">{customerText(locale, "Please go back and check your passenger details or contact ACT for assistance.")}</p>
+        <div
+          role="status"
+          className="mb-6 rounded-2xl border border-white/20 bg-white/10 p-7 text-center text-white"
+        >
+          <p className="text-lg font-semibold">
+            {customerText(locale, "No suitable vehicle is available for this journey online.")}
+          </p>
+          <p className="mt-2 text-sm text-white/70">
+            {customerText(locale, "Please go back and check your passenger details or contact ACT for assistance.")}
+          </p>
         </div>
       )}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {isLoading ? (
-          <>
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </>
-        ) : (
-          rideOptions?.car_type?.map((car, index) => {
-            const isDisabled = disabledCarIndices.includes(index);
 
-            return (
-              <Card
-                key={car.id}
-                className={`group transition-all duration-300 transform ${
-                  isDisabled
-                    ? "cursor-not-allowed opacity-60 grayscale"
-                    : "cursor-pointer hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-2xl"
-                } ${
-                  selectedCar?.id === car.id && !isDisabled
-                    ? "bg-[#ffd100]/20 backdrop-blur-xl border-2 border-[#ffd100] shadow-2xl scale-[1.01] sm:scale-[1.02]"
-                    : "bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/15 hover:border-white/30"
-                }`}
-                onClick={() => {
-                  if (!isDisabled) {
-                    handleCarSelect({...car, ...rideOptions});
-                  }
-                }}
-                aria-disabled={isDisabled}
-              >
-                <CardContent className="p-4 sm:p-6">
-                  <div className={`flex items-center gap-3 sm:gap-6`}>
-                    {/* Car Image */}
-                    <div className="relative self-start flex-shrink-0">
-                      <div className="w-28 h-20 sm:w-40 sm:h-28 lg:w-48 lg:h-32 relative rounded-xl overflow-hidden bg-white p-2 sm:p-3">
-                        <Image
-                          src={car.icon_url}
-                          alt={localizedVehicleValue(car, "name", locale)}
-                          fill
-                          className="object-contain drop-shadow-lg"
-                          sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 192px"
-                          quality={100}
-                        />
-                      </div>
+      <div role="radiogroup" className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        {rideOptions?.car_type?.map((car, index) => {
+          const isDisabled = disabledCarIndices.includes(index);
+          const isSelected = selectedCar?.id === car.id && !isDisabled;
+          const example = vehicleExample(locale, car.code);
 
-                      {/* Selected Indicator */}
-                      {selectedCar?.id === car.id && (
-                        <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-[#ffd100] rounded-full flex items-center justify-center shadow-lg">
-                          <CheckCircle className="w-3 h-3 sm:w-5 sm:h-5 text-[#2D2E2E]" />
-                        </div>
-                      )}
-                      {isDisabled && (
-                        <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
-                          {isRTL ? "قريبًا" : customerText(locale, "Coming Soon")}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Car Details */}
-                    <div
-                      className={`flex-1 min-w-0 ${
-                        isRTL ? "text-right" : "text-left"
-                      }`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 sm:mb-3 gap-2">
-                        <div className="min-w-0 flex-1">
-                          <h3
-                            className={`text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2 truncate ${
-                              selectedCar?.id === car.id && !isDisabled
-                                ? "text-[#ffd100]"
-                                : "text-white"
-                            } group-hover:text-[#ffd100] transition-colors`}
-                          >
-                            {localizedVehicleValue(car, "name", locale)}
-                          </h3>
-
-                          <div
-                            className={`flex items-center gap-2 sm:gap-4 mb-2 sm:mb-3 text-xs sm:text-sm`}
-                          >
-                            <div className="flex items-center gap-1 text-white/60">
-                              <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                              <span>
-                                {car?.max_passengers_count} {texts.passengers}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Price Badge */}
-                        <div className="flex-shrink-0">
-                          <Badge
-                            variant="secondary"
-                            className={`text-sm sm:text-lg font-bold px-2 sm:px-4 py-1 sm:py-2 ${
-                              selectedCar?.id === car.id && !isDisabled
-                                ? "bg-[#ffd100] text-[#2D2E2E]"
-                                : "bg-white/20 text-white"
-                            }`}
-                          >
-                            {formatPrice(car.total_cost)}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <p className="text-white/80 text-xs sm:text-sm lg:text-base leading-relaxed mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-none">
-                        {localizedVehicleValue(car, "desc", locale)}
-                      </p>
-
-                      {/* Features */}
-                      <div className="flex flex-wrap gap-1 sm:gap-2">
-                        <Badge
-                          variant="outline"
-                          className="bg-white/5 border-white/20 text-white/80 text-xs px-2 py-1"
-                        >
-                          {texts.professionalDriver}
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className="bg-white/5 border-white/20 text-white/80 text-xs px-2 py-1"
-                        >
-                          {texts.premiumComfort}
-                        </Badge>
-                        {/* <Badge variant="outline" className="bg-white/5 border-white/20 text-white/80 text-xs px-2 py-1 hidden sm:inline-flex">
-                        {texts.meetGreet}
-                      </Badge> */}
-                      </div>
-                    </div>
-
-                    {/* Selection Arrow */}
-                    <div
-                      className={`flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity ${
-                        isRTL ? "mr-2 sm:mr-4" : "ml-2 sm:ml-4"
-                      }`}
-                    >
-                      {isRTL ? (
-                        <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                      )}
-                    </div>
+          return (
+            <Card
+              key={car.id}
+              role="radio"
+              aria-checked={isSelected}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : 0}
+              onClick={() => !isDisabled && selectCar(car)}
+              onKeyDown={(event) => {
+                if (isDisabled) return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  selectCar(car);
+                }
+              }}
+              className={`group relative overflow-hidden transition-all duration-300 ${
+                isDisabled
+                  ? "cursor-not-allowed opacity-55 grayscale"
+                  : "cursor-pointer hover:-translate-y-0.5 hover:border-white/35 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd100]"
+              } ${
+                isSelected
+                  ? "border-2 border-[#ffd100] bg-[#ffd100]/10 shadow-2xl"
+                  : "border border-white/15 bg-black/35 backdrop-blur-xl"
+              }`}
+            >
+              <div className="relative h-48 sm:h-56 overflow-hidden border-b border-white/10 bg-gradient-to-b from-white to-zinc-100">
+                <Image
+                  src={car.icon_url}
+                  alt={localizedVehicleValue(car, "name", locale)}
+                  fill
+                  className="object-contain p-4 sm:p-6 drop-shadow-2xl transition-transform duration-300 group-hover:scale-[1.03]"
+                  sizes="(max-width: 1280px) 100vw, 50vw"
+                  quality={100}
+                />
+                <div className="absolute start-4 top-4">
+                  <Badge className="border border-black/10 bg-black/75 text-white backdrop-blur-sm">
+                    {runtimeText(locale, "representativeVehicle")}
+                  </Badge>
+                </div>
+                {isSelected && (
+                  <div className="absolute end-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#ffd100] shadow-lg">
+                    <CheckCircle className="h-5 w-5 text-[#2D2E2E]" />
                   </div>
+                )}
+                {isDisabled && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-sm font-semibold text-white">
+                    {customerText(locale, "Coming Soon")}
+                  </div>
+                )}
+              </div>
 
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <h3 className={`text-2xl font-bold transition-colors ${
+                      isSelected ? "text-[#ffd100]" : "text-white group-hover:text-[#ffd100]"
+                    }`}>
+                      {localizedVehicleValue(car, "name", locale)}
+                    </h3>
+                    {example && (
+                      <p className="mt-1 text-sm font-medium text-white/65">{example}</p>
+                    )}
+                  </div>
+                  <div className="shrink-0 text-end">
+                    <p className="text-xs uppercase tracking-wider text-white/50">
+                      {runtimeText(locale, "oneWayTotal")}
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-white">
+                      {formatPrice(car.total_cost)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5 px-3 py-1.5 text-white/80">
+                    <Users className="h-4 w-4" />
+                    {passengerCapacityLabel(locale, car.max_passengers_count)}
+                  </Badge>
+                  <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5 px-3 py-1.5 text-white/80">
+                    <ShieldCheck className="h-4 w-4" />
+                    {runtimeText(locale, "privateTransfer")}
+                  </Badge>
+                </div>
+
+                {localizedVehicleValue(car, "desc", locale) && (
+                  <p className="mt-4 text-sm leading-6 text-white/70">
+                    {localizedVehicleValue(car, "desc", locale)}
+                  </p>
+                )}
+
+                <div className={`mt-5 flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
+                  isSelected
+                    ? "border-[#ffd100]/60 bg-[#ffd100]/10 text-[#ffd100]"
+                    : "border-white/10 bg-white/[0.04] text-white/75"
+                }`}>
+                  <span className="text-sm font-semibold">
+                    {isSelected
+                      ? runtimeText(locale, "selectedVehicle")
+                      : runtimeText(locale, "selectThisClass")}
+                  </span>
+                  {isSelected ? (
+                    <Check className="h-5 w-5" />
+                  ) : isRTL ? (
+                    <ChevronLeft className="h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Bottom Info */}
-      {/* <div className="mt-6 sm:mt-8 text-center px-4">
-        <div className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-4 bg-white/10 backdrop-blur-sm rounded-full px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-2 text-white/80">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm text-center">{texts.freeCancellation}</span>
-          </div>
-          <div className="w-px h-4 bg-white/20 hidden sm:block"></div>
-          <div className="flex items-center gap-2 text-white/80">
-            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm text-center">{texts.realTimeTracking}</span>
-          </div>
-        </div>
-      </div> */}
+      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-white/50">
+        {runtimeText(locale, "vehicleMayVary")}
+      </p>
 
-      {/* Continue Button (if you want manual progression) */}
       {selectedCar && (
-        <div className="mt-6 sm:mt-8 text-center px-4">
+        <div className="mt-7 text-center px-4">
           <Button
             onClick={nextStep}
             size="lg"
-            className="bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg shadow-xl w-full sm:w-auto"
+            className="w-full sm:w-auto bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold px-10 py-4 text-base sm:text-lg shadow-xl"
           >
-            {Choose_car.button || texts.continue}
+            {Choose_car.button || customerText(locale, "Continue")}
           </Button>
         </div>
       )}
     </div>
   );
 }
-
-
