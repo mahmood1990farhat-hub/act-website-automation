@@ -49,7 +49,8 @@ export default function ModernChooseCar({
 }: typeProps) {
   const isRTL = locale === "ar";
 
-  const selectCar = (car: VehicleType) => setSelectedCar({ ...car, ...rideOptions });
+  const selectCar = (car: VehicleType) =>
+    setSelectedCar(rideOptions ? { ...car, ...rideOptions } : car);
 
   const formatJourneyDate = () => {
     const [year, month, day] = tripDate.split("-").map(Number);
