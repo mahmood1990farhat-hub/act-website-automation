@@ -23,8 +23,9 @@ class MeetAndGreetResolverTests(TestCase):
         )
 
     def create_vehicle(self, name):
+        code = "comfort" if name == "Standard PHV" else "test_" + name.lower().replace(" ", "_")
         return VehicleType.objects.create(
-            name_en=name, name_ar=name,
+            code=code, name_en=name, name_ar=name,
             icon='vehicle_types/icons/test.png', max_passengers_count=4,
         )
 
