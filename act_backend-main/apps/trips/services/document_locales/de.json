@@ -74,9 +74,9 @@
   "unavailable_child": "Ich verstehe, dass ACT möglicherweise keine Kindersitze bereitstellen kann, und möchte fortfahren",
   "airport_fee": "Flughafengebühren",
   "minimum_adjustment": "Anpassung an den Mindestpreis",
-  "standardVehicle": "Standardfahrzeug mit Fahrer",
-  "executiveVehicle": "Businessfahrzeug",
-  "luxuryVehicle": "Luxusfahrzeug",
-  "sevenSeater": "7-Sitzer",
-  "luxuryVan": "Luxusvan"
+  "standardVehicle": "Komfortklasse",
+  "executiveVehicle": "Erste Klasse",
+  "luxuryVehicle": "Executive-Klasse",
+  "sevenSeater": "Komfort XL",
+  "luxuryVan": "Executive XL"
 }
