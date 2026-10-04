@@ -141,11 +141,24 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
     if existing_trip:
         logger.info(f"[WEBHOOK] Trip already exists: {existing_trip.id}")
-        return existing_trip
+        return existing_trip, False
 
-    pending_payment = get_pending_payment(payment_intent_id, pending_payment_id)
+    pending_payment = get_pending_payment(
+        payment_intent_id,
+        pending_payment_id,
+        for_update=True,
+    )
     if not pending_payment:
+        # A concurrent delivery may have consumed the pending row while this
+        # request waited. Re-check the unique persisted booking before failing.
+        existing_trip = Trip.objects.filter(
+            stripe_payment_intent=payment_intent_id
+        ).first()
+        if existing_trip:
+            return existing_trip, False
         raise Exception(f"PendingPayment not found for PI={payment_intent_id}")
+
+    verify_payment_matches_pending(payment_intent, pending_payment)
 
     if pending_payment.passenger_id:
         passenger = Passenger.objects.get(id=pending_payment.passenger_id)
@@ -215,7 +228,32 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
     pending_payment.delete()
     logger.info(f"[WEBHOOK] Trip created: {trip.id}")
 
-    return trip
+    return trip, True
+
+
+def verify_payment_matches_pending(payment_intent, pending_payment):
+    """Verify Stripe settled the exact authoritative ACT amount and currency."""
+    expected_total = Decimal(str(pending_payment.price_breakdown.get('total_cost', '0')))
+    expected_cents = int(
+        (expected_total * Decimal('100')).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    )
+    received_cents = payment_intent.get('amount_received')
+    if received_cents is None:
+        received_cents = payment_intent.get('amount')
+
+    received_currency = str(payment_intent.get('currency') or '').upper()
+    expected_currency = str(pending_payment.currency or 'GBP').upper()
+
+    if received_cents != expected_cents:
+        raise Exception(
+            f"Payment amount mismatch for PI={payment_intent.get('id')}: "
+            f"received={received_cents}, expected={expected_cents}"
+        )
+    if received_currency != expected_currency:
+        raise Exception(
+            f"Payment currency mismatch for PI={payment_intent.get('id')}: "
+            f"received={received_currency}, expected={expected_currency}"
+        )
 
 
 def extract_card_details(payment_intent):
