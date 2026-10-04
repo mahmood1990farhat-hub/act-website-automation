@@ -149,6 +149,13 @@ const MapView = ({ routePolyline }: Props) => {
 			}
 		}
 	}, [routePolyline]);
+
+	useEffect(() => {
+		if (!mapRef.current || path.length === 0) return;
+		const bounds = new window.google.maps.LatLngBounds();
+		path.forEach((point) => bounds.extend(point));
+		mapRef.current.fitBounds(bounds);
+	}, [path]);
 	const containerStyle = {
 		width: "100%",
 		height: "100%",
