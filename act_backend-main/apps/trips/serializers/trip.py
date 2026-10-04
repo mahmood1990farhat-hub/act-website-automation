@@ -196,7 +196,8 @@ class TripSerializer(serializers.ModelSerializer):
                 # Only validate if we have valid date and time objects
                 if trip_date and trip_time and isinstance(trip_date, date) and isinstance(trip_time, time):
                     departure = timezone.make_aware(
-                        datetime.combine(trip_date, trip_time)
+                        datetime.combine(trip_date, trip_time),
+                        timezone.get_current_timezone(),
                     )
                     now = timezone.now()
                     gap = departure - now
