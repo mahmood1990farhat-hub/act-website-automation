@@ -74,9 +74,9 @@
   "unavailable_child": "Je comprends qu’ACT pourrait ne pas disposer de sièges enfants et je souhaite continuer",
   "airport_fee": "Frais d’aéroport",
   "minimum_adjustment": "Ajustement au tarif minimum",
-  "standardVehicle": "Véhicule standard avec chauffeur",
-  "executiveVehicle": "Berline affaires",
-  "luxuryVehicle": "Véhicule de luxe",
-  "sevenSeater": "Véhicule 7 places",
-  "luxuryVan": "Van de luxe"
+  "standardVehicle": "Classe Confort",
+  "executiveVehicle": "Première Classe",
+  "luxuryVehicle": "Classe Exécutive",
+  "sevenSeater": "Confort XL",
+  "luxuryVan": "Exécutive XL"
 }
