@@ -80,6 +80,10 @@ All unchecked rows remain open. A feature existing in source is not sufficient t
 | WEB-022 | Release and recovery | Exact frontend/backend versions, migrations, scheduler/services, monitoring, backups/restore/rollback and smoke checks | Deployment trigger inspected; runtime checks open |
 | WEB-023 | Final sign-off | Successful complete synthetic/test-provider journey plus failure journeys, desktop/mobile evidence, owner review, no unresolved release blockers | Not achieved |
 
+## Historical owner-reported journey evidence
+
+The owner reports that, before this audit, ACT completed several test trips successfully through the booking flow and reached customer email delivery without interruption. This is useful prior operational evidence and means the current audit should preserve that working path rather than assume it never functioned. It is recorded as **owner-reported historical test evidence** because this review does not yet have the exact commit SHA, environment, scenarios, payment/provider mode, timestamps or captured outputs for those earlier trips. It therefore does not replace current regression/acceptance testing of the release candidate after changes.
+
 ## Required complete-journey evidence
 
 Public visit -> route/date/passengers/luggage -> quote/eligible vehicle -> passenger/flight/extra details -> review -> test payment -> verified webhook/persisted booking -> passenger/owner confirmation -> admin assignment -> approved driver acceptance -> scheduled passenger details -> journey-state progression -> completed trip -> matching history/receipt/earnings.
