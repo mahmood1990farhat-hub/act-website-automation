@@ -176,12 +176,23 @@ def send_passenger_registration_confirmation(user, locale="en") -> None:
 
 
 
+def _booking_confirmation_download_url(trip) -> str:
+    token = getattr(trip, "booking_confirmation_token", None)
+    if not token:
+        return ""
+    return _absolute_app_url(f"/api/trips/booking-confirmation/{token}/")
+
+
 def _send_localized_customer_email(user, trip, kind, refund_message="", driver=None, send_now=False):
     recipient = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
     if not recipient:
         return False
     file_field = getattr(trip, "cancellation_confirmation_pdf" if kind == "cancellation" else "booking_confirmation_pdf", None)
-    download_url = _absolute_app_url(file_field.url) if file_field else ""
+    download_url = (
+        _absolute_app_url(file_field.url)
+        if kind == "cancellation" and file_field
+        else _booking_confirmation_download_url(trip) if kind == "booking" and file_field else ""
+    )
     subject, html, text = render_customer_document(
         trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
         logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
@@ -258,9 +269,9 @@ def send_passenger_confirmation(user, trip, send_now=False) -> bool:
             "booking_details": booking_details,
             "website_url": "https://airportandcitytransfer.com/en",
             "download_confirmation_url": (
-                _absolute_app_url(trip.booking_confirmation_pdf.url)
+                _booking_confirmation_download_url(trip)
                 if trip.booking_confirmation_pdf
-                else "https://airportandcitytransfer.com"
+                else ""
             ),
             "support_phone_primary": "+44 7464 940000",
             "support_phone_secondary": "+44 20 8153 0303",
