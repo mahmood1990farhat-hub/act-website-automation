@@ -1,13 +1,13 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.utils import timezone
 
 from apps.payments.tasks import deliver_paid_booking_confirmations
 
 
-class PaidBookingConfirmationTaskTests(SimpleTestCase):
+class PaidBookingConfirmationTaskTests(TestCase):
     def _trip(self):
         trip = MagicMock()
         trip.id = 42
