@@ -133,7 +133,13 @@ export default function RoutePoints({
     return (hasAirportId || hasPlaceId) && hasValidCoordinates(point);
   };
 
-  const getBackendErrorMessage = (_errorBody: unknown) => tripCalculationErrorMessage;
+  const getBackendErrorMessage = (errorBody: any, statusCode: number) => {
+    // Validation responses contain customer-safe detail; never surface raw 5xx/debug details.
+    const detail = errorBody?.data?.detail;
+    return statusCode >= 400 && statusCode < 500 && typeof detail === "string" && detail.trim()
+      ? detail
+      : tripCalculationErrorMessage;
+  };
 
   const validateForm = () => {
     const hasInvalidPoints = routePoints.some((point) => !isValidRoutePoint(point));
@@ -216,14 +222,15 @@ export default function RoutePoints({
       const responseBody = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(getBackendErrorMessage(responseBody));
+        throw new Error(getBackendErrorMessage(responseBody, response.status));
       }
 
       setTripData(responseBody as calculatTripCost);
       nextStep();
     } catch (error: any) {
       console.error("Trip calculation error:", error);
-      setSubmitError(tripCalculationErrorMessage);
+      const message = error instanceof Error && error.message ? error.message : tripCalculationErrorMessage;
+      setSubmitError(message);
       setOpenModal(true);
     } finally {
       setIsLoading(false);
