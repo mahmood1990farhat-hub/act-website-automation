@@ -68,8 +68,13 @@ class AdminCancelTripTests(TestCase):
         
         # Create vehicle type
         self.vehicle_type = VehicleType.objects.create(
-            name='Standard Car',
-            max_passengers_count=4
+            code='comfort',
+            name_en='Comfort Class',
+            name_ar='فئة الراحة',
+            desc_en='Comfort Class',
+            desc_ar='فئة الراحة',
+            icon='vehicle_types/icons/test.png',
+            max_passengers_count=4,
         )
         
         # Create base drivers
