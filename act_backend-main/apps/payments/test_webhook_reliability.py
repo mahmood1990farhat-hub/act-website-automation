@@ -41,11 +41,10 @@ class StripeWebhookReliabilityTests(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch("apps.payments.views.views.post_trip_creation")
-    @patch("apps.payments.views.views.ensure_booking_confirmation_pdf")
-    @patch("apps.payments.views.views.enrich_addresses")
+    @patch("apps.payments.views.views._queue_booking_confirmations")
     @patch("apps.payments.views.views.create_trip_from_payment")
-    def test_duplicate_success_skips_customer_and_driver_side_effects(
-        self, create_trip, enrich, ensure_pdf, post_creation
+    def test_duplicate_success_skips_operational_side_effects_but_requeues_idempotent_confirmations(
+        self, create_trip, queue_confirmations, post_creation
     ):
         trip = SimpleNamespace(
             id=77,
@@ -64,8 +63,7 @@ class StripeWebhookReliabilityTests(TestCase):
         })
 
         self.assertIs(result, trip)
-        enrich.assert_not_called()
-        ensure_pdf.assert_not_called()
+        queue_confirmations.assert_called_once_with(trip)
         post_creation.assert_not_called()
 
     def test_settled_amount_and_currency_must_match_authoritative_pending_price(self):
