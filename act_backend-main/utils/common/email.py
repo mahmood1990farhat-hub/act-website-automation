@@ -36,6 +36,25 @@ def _format_passenger_phone(country_code: str, phone: str) -> str:
 
 
 # ---------- low-level helper ----------
+def _send_mail_now(
+    subject: str,
+    message: str,
+    recipient_list: List[str],
+    html_message: Optional[str] = None,
+) -> bool:
+    """Send synchronously and report SMTP acceptance to the caller."""
+    if not recipient_list:
+        return False
+    result = send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=recipient_list,
+        fail_silently=False,
+        html_message=html_message,
+    )
+    return bool(result)
+
 def _send_mail_async(
     subject: str,
     message: str,
@@ -157,7 +176,7 @@ def send_passenger_registration_confirmation(user, locale="en") -> None:
 
 
 
-def _send_localized_customer_email(user, trip, kind, refund_message="", driver=None):
+def _send_localized_customer_email(user, trip, kind, refund_message="", driver=None, send_now=False):
     recipient = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
     if not recipient:
         return False
@@ -167,11 +186,13 @@ def _send_localized_customer_email(user, trip, kind, refund_message="", driver=N
         trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
         logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
     )
+    if send_now:
+        return _send_mail_now(subject, text, [recipient], html_message=html)
     _send_mail_async(subject, text, [recipient], html_message=html, fail_silently=True)
     return True
 
 @use_booking_language
-def send_passenger_confirmation(user, trip) -> bool:
+def send_passenger_confirmation(user, trip, send_now=False) -> bool:
     """
     Send trip confirmation email to passenger
     """
@@ -179,7 +200,7 @@ def send_passenger_confirmation(user, trip) -> bool:
     logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
         if booking_language(trip) != "en":
-            return _send_localized_customer_email(user, trip, "booking")
+            return _send_localized_customer_email(user, trip, "booking", send_now=send_now)
         recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
         if not recipient_email:
             logger.warning(
@@ -262,6 +283,13 @@ def send_passenger_confirmation(user, trip) -> bool:
         }
         html_message = render_to_string("emails/trip_accepted_passenger.html", context)
         message = strip_tags(html_message)
+        if send_now:
+            return _send_mail_now(
+                subject,
+                message,
+                [recipient_email],
+                html_message=html_message,
+            )
         _send_mail_async(
             subject,
             message,
@@ -483,7 +511,7 @@ def _format_booking_details_text(booking_details) -> str:
 
 
 @use_internal_language
-def send_internal_notification(trip) -> None:
+def send_internal_notification(trip, send_now=False) -> bool:
     """
     Send internal notification to admin when a new trip is booked
     """
@@ -603,6 +631,13 @@ def send_internal_notification(trip) -> None:
 
         logger.info(f"[EMAIL] Preparing admin notification email for trip #{trip.id} to {admin_email}")
         logger.info(f"[EMAIL] Calling _send_mail_async for admin notification")
+        if send_now:
+            return _send_mail_now(
+                subject,
+                message,
+                [admin_email],
+                html_message=html_message,
+            )
         _send_mail_async(
             subject,
             message,
@@ -611,10 +646,12 @@ def send_internal_notification(trip) -> None:
             fail_silently=True,
         )
         logger.info(f"[EMAIL] _send_mail_async called (running in background thread)")
+        return True
     except Exception as e:
         logger.error(f"[EMAIL] Failed to prepare admin notification email for trip #{trip.id}: {str(e)}")
         import traceback
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
+        return False
 
 
 def _trip_locations_for_email(trip):
