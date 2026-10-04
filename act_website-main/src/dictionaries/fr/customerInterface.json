@@ -624,5 +624,7 @@
   "I would like ACT to provide child seats": "Je souhaite qu’ACT fournisse les sièges enfants",
   "I understand ACT may not have child seats available and wish to continue": "Je comprends qu’ACT pourrait ne pas disposer de sièges enfants et je souhaite continuer",
   "Enter a valid email address.": "Saisissez une adresse e-mail valide.",
-  "Enter a valid mobile number for the selected country code.": "Saisissez un numéro de mobile valide pour l’indicatif pays sélectionné."
+  "Enter a valid mobile number for the selected country code.": "Saisissez un numéro de mobile valide pour l’indicatif pays sélectionné.",
+  "Confirmation details will be sent to your email": "Les détails de confirmation seront envoyés à votre adresse e-mail",
+  "Need help? Contact ACT support": "Besoin d’aide ? Contactez l’assistance ACT"
 }
