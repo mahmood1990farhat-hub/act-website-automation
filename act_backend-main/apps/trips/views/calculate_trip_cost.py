@@ -93,7 +93,7 @@ class CalculateTripCostView(EMADBaseView):
             try:
                 total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
                     trip_time_obj,
-                    car_type_obj.name_en,
+                    car_type_obj.code,
                     distance_miles,
                     pickup_lat=data.get('pickup_lat'),
                     pickup_lng=data.get('pickup_lng'),
@@ -117,6 +117,7 @@ class CalculateTripCostView(EMADBaseView):
                 # regular_vat = round(regular_vat + min_adjustment, 2)
                 car_type_list.append({
                     "id": car_type_obj.id,
+                    "code": car_type_obj.code,
                     "name_en": car_type_obj.name_en,
                     "name_ar": car_type_obj.name_ar,
                     "desc_en": car_type_obj.desc_en,
