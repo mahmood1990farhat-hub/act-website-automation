@@ -64,6 +64,16 @@ export default function FlightDetails({
     setFlightDetails({ ...flightDetails, [key]: value });
   };
 
+  const selectFlightType = (flightType: "arrival" | "departure") => {
+    setFlightDetails({
+      ...flightDetails,
+      flightType,
+      landingTime: flightType === "arrival" ? flightDetails.landingTime : "",
+      departureTime: flightType === "departure" ? flightDetails.departureTime : "",
+    });
+    setIsRequired(false);
+  };
+
   const journeyDirection = getAirportJourneyDirection(routePoints);
   const isDirectionDetected = journeyDirection !== "manual";
   const timingWarning =
@@ -145,7 +155,7 @@ export default function FlightDetails({
                   type="radio"
                   name="flight-type"
                   checked={flightDetails.flightType === "arrival"}
-                  onChange={() => updateField("flightType", "arrival")}
+                  onChange={() => selectFlightType("arrival")}
                 />
                 <span>{t("Arrival")}</span>
               </label>
@@ -156,7 +166,7 @@ export default function FlightDetails({
                   type="radio"
                   name="flight-type"
                   checked={flightDetails.flightType === "departure"}
-                  onChange={() => updateField("flightType", "departure")}
+                  onChange={() => selectFlightType("departure")}
                 />
                 <span>{t("Departure")}</span>
               </label>
