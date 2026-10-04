@@ -15,10 +15,8 @@ from utils.common.notifications import (
     NOTIFICATION_TYPE_NEW_TRIP_REQUEST
 )
 from utils.common import notify_user
-from utils.common.email import send_passenger_confirmation, send_internal_notification
 from utils.common.google_map import reverse_geocode
 from utils.common import get_route_with_distance
-from apps.trips.services.booking_confirmation import ensure_booking_confirmation_pdf
 import logging
 from datetime import datetime
 
@@ -95,6 +93,12 @@ def stripe_webhook_view(request):
     return HttpResponse(status=200)
 
 
+def _queue_booking_confirmations(trip):
+    # Lazy import avoids importing Celery task modules during URL/module setup.
+    from apps.payments.tasks import deliver_paid_booking_confirmations
+    deliver_paid_booking_confirmations.delay(trip.id)
+
+
 def handle_payment_succeeded(event):
     payment_intent = event['data']['object']
     payment_intent_id = payment_intent['id']
@@ -102,48 +106,25 @@ def handle_payment_succeeded(event):
     pending_payment_id = metadata.get('pending_payment_id')
 
     logger.info(f"[WEBHOOK] Processing success for PI={payment_intent_id}")
-    logger.info(
-        f"[WEBHOOK] Creating trip for PI={payment_intent_id}, pending_payment_id={pending_payment_id}"
-    )
     with transaction.atomic():
         trip, created = create_trip_from_payment(payment_intent, pending_payment_id)
 
-    logger.info(
-        f"[WEBHOOK] Trip create/lookup complete for PI={payment_intent_id}: "
-        f"trip_id={trip.id}, created={created}, passenger_email={trip.passenger_email}, "
-        f"is_guest_checkout={trip.is_guest_checkout}"
-    )
+    # Queue PDF + passenger/internal email delivery for both new and duplicate
+    # events. The task has durable per-trip delivery markers and is retryable.
+    _queue_booking_confirmations(trip)
 
     if not created:
         logger.info(
             f"[WEBHOOK] Duplicate success event for PI={payment_intent_id}; "
-            f"trip {trip.id} already exists, skipping duplicate side effects"
+            f"trip {trip.id} already exists, confirmation task safely re-queued"
         )
         return trip
 
-    try:
-        logger.info(f"[WEBHOOK] Enriching addresses before PDF generation for trip {trip.id}")
-        enrich_addresses(trip)
-        logger.info(f"[WEBHOOK] Address enrichment complete before PDF generation for trip {trip.id}")
-    except Exception as address_error:
-        logger.warning(
-            f"[WEBHOOK] Failed to enrich addresses before PDF generation for trip {trip.id}: {str(address_error)}",
-            exc_info=True,
-        )
-
-    try:
-        logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
-        ensure_booking_confirmation_pdf(trip)
-        logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
-    except Exception as pdf_error:
-        logger.warning(
-            f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}",
-            exc_info=True,
-        )
-
-    logger.info(f"[WEBHOOK] Starting post_trip_creation for trip {trip.id}")
+    logger.info(
+        f"[WEBHOOK] New paid trip {trip.id} persisted for PI={payment_intent_id}; "
+        "starting non-email operational notifications"
+    )
     post_trip_creation(trip)
-    logger.info(f"[WEBHOOK] Finished post_trip_creation for trip {trip.id}")
     return trip
 
 def handle_payment_failed(event):
