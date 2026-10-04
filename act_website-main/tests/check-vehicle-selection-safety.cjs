@@ -1,0 +1,11 @@
+const assert=require("node:assert/strict"),fs=require("node:fs");
+const car=fs.readFileSync("src/components/_components/bookTaxi/ChooseCar.tsx","utf8");
+const index=fs.readFileSync("src/components/_components/bookTaxi/index.tsx","utf8");
+assert.ok(car.includes("tripDate: string;"),"vehicle screen must receive journey date");
+assert.ok(index.includes("tripDate={formDetails.date}"),"booking flow must pass journey date");
+assert.ok(!car.includes("<span>4.9</span>"),"unsupported hardcoded rating must not render");
+assert.ok(!car.includes("setTimeout(() =>"),"vehicle selection must not auto-advance");
+assert.ok(car.includes("disabledCarIndices.includes(index)"),"disabled vehicle configuration must be respected");
+assert.ok(car.includes('style: "currency"') && car.includes('currency: "GBP"'),"backend total must be formatted as GBP");
+assert.ok(car.includes('customerText(locale, "No suitable vehicle is available for this journey online.")'),"defensive empty state missing");
+console.log("PASS vehicle-selection safety/presentation regression guard");
