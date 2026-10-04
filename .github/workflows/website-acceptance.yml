@@ -117,6 +117,13 @@ jobs:
           apps.trips.tests.test_google_maps_initialization
           apps.vehicle.tests.test_vehicle_class_codes
           --verbosity 2
+      - name: Real Stripe sandbox successful payment and ACT webhook fulfillment
+        env:
+          STRIPE_SANDBOX_SECRET_KEY: ${{ secrets.STRIPE_SANDBOX_SECRET_KEY }}
+        run: >
+          python manage.py test
+          apps.payments.test_stripe_sandbox_acceptance
+          --verbosity 2
 
 
   stripe-sandbox:
