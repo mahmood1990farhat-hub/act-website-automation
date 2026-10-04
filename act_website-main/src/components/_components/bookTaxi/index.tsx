@@ -297,6 +297,12 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   setValue={(d) => setFormDetails(d)}
                   formDetails={formDetails}
                   setTripData={(res) => setRideOptions(res)}
+                  resetQuoteState={() => {
+                    setRideOptions(null);
+                    setSelectedCar(undefined);
+                    setClientSecret("");
+                    setPaymentTotal(null);
+                  }}
                   nextStep={() => setStep(2)}
                 />
               ) : step === 2 ? (
