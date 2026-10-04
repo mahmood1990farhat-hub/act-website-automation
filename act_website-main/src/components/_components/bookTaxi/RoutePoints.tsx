@@ -180,19 +180,18 @@ export default function RoutePoints({
       return;
     }
 
-    // A new quote request invalidates all previous quote/vehicle/payment state.
+    const inputValues = getFormInputValues();
+    if (!hasValidCounts(inputValues)) {
+        setIsRequired(true);
+        setSubmitError(t("Please enter whole, non-negative passenger and luggage counts. Online bookings support 1-7 passengers and up to 8 suitcases in total."));
+      return;
+    }
+
+    // Only a valid fresh quote request invalidates previous downstream state.
     resetQuoteState();
     setIsLoading(true);
 
     try {
-      const inputValues = getFormInputValues();
-
-      if (!hasValidCounts(inputValues)) {
-        setIsRequired(true);
-        setSubmitError(t("Please enter whole, non-negative passenger and luggage counts. Online bookings support 1-7 passengers and up to 8 suitcases in total."));
-        return;
-      }
-
       setValue({
         ...formDetails,
         ...inputValues,
