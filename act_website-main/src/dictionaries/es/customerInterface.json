@@ -647,5 +647,7 @@
   "I understand ACT may not have infant seats available and wish to continue": "Entiendo que ACT podría no disponer de sillas para bebés y deseo continuar",
   "I will provide my own child seats": "Llevaré mis propias sillas infantiles",
   "I would like ACT to provide child seats": "Quiero que ACT proporcione sillas infantiles",
-  "I understand ACT may not have child seats available and wish to continue": "Entiendo que ACT podría no disponer de sillas infantiles y deseo continuar"
+  "I understand ACT may not have child seats available and wish to continue": "Entiendo que ACT podría no disponer de sillas infantiles y deseo continuar",
+  "Enter a valid email address.": "Introduzca una dirección de correo electrónico válida.",
+  "Enter a valid mobile number for the selected country code.": "Introduzca un número de móvil válido para el prefijo de país seleccionado."
 }
