@@ -19,7 +19,7 @@ from apps.vehicle.models import VehicleType
 class MeetAndGreetQuoteAndPaymentTests(TestCase):
     def setUp(self):
         self.vehicle = VehicleType.objects.create(
-            name_en='Standard PHV', name_ar='Standard PHV',
+            code='comfort', name_en='Comfort Class', name_ar='فئة الراحة',
             icon='vehicle_types/icons/test.png', max_passengers_count=4,
         )
         ExtraServiceFee.objects.create(
