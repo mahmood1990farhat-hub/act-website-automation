@@ -1,3 +1,4 @@
+import uuid
 from django.db import models 
 from django.utils import timezone
 from apps.vehicle.models import VehicleType
@@ -100,6 +101,7 @@ class Trip(models.Model):
     last4 = models.CharField(max_length=4, null=True, blank=True)
     card_brand = models.CharField(max_length=20, null=True, blank=True)
     is_paid = models.BooleanField(default= False)
+    booking_confirmation_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     passenger_confirmation_sent_at = models.DateTimeField(null=True, blank=True)
     internal_booking_notification_sent_at = models.DateTimeField(null=True, blank=True)
     booking_confirmation_pdf = models.FileField(
