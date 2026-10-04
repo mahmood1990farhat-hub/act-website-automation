@@ -164,6 +164,13 @@ export default function RoutePoints({
     return { largeSuitcase, smallSuitcase, adults, children, infants, numberOfPassengers };
   };
 
+  const hasValidCounts = ({ largeSuitcase, smallSuitcase, adults, children, infants, numberOfPassengers }: ReturnType<typeof getFormInputValues>) => {
+    const values = [largeSuitcase, smallSuitcase, adults, children, infants, numberOfPassengers];
+    return values.every(Number.isInteger) && adults >= 1 && children >= 0 && infants >= 0 &&
+      numberOfPassengers <= 7 && largeSuitcase >= 0 && smallSuitcase >= 0 &&
+      largeSuitcase + smallSuitcase <= 8;
+  };
+
   const onSubmit = async () => {
     setSubmitError("");
 
@@ -180,9 +187,9 @@ export default function RoutePoints({
     try {
       const inputValues = getFormInputValues();
 
-      if (inputValues.adults < 1 || inputValues.numberOfPassengers < 1) {
+      if (!hasValidCounts(inputValues)) {
         setIsRequired(true);
-        setSubmitError(t("Adults must be at least 1."));
+        setSubmitError(t("Please enter whole, non-negative passenger and luggage counts. Online bookings support 1-7 passengers and up to 8 suitcases in total."));
         return;
       }
 
