@@ -375,6 +375,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   locale={locale}
                   Choose_car={home.Choose_car}
                   rideOptions={rideOptions}
+                  tripDate={formDetails.date}
                   nextStep={() => setStep(3)}
                   prevStep={() => setStep(1)}
                 />
