@@ -33,11 +33,11 @@ const benefits = [
 ];
 
 const vehicles = [
-  "Standard PHV",
-  "Executive",
-  "Luxury",
-  "7 Seater",
-  "Luxury Van",
+  "Comfort Class",
+  "Comfort XL",
+  "Executive Class",
+  "Executive XL",
+  "First Class",
 ];
 
 const routes = [
