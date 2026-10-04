@@ -26,6 +26,16 @@ export const hasValidCoordinates = (point: any) => {
   );
 };
 
+const isNonNegativeInteger = (value: number) => Number.isInteger(value) && value >= 0;
+
+export const hasValidQuoteCounts = (formDetails: QuoteFormDetails) =>
+  Number.isInteger(formDetails.numberOfPassengers) &&
+  formDetails.numberOfPassengers >= 1 &&
+  formDetails.numberOfPassengers <= 7 &&
+  isNonNegativeInteger(formDetails.largeSuitcase) &&
+  isNonNegativeInteger(formDetails.smallSuitcase) &&
+  formDetails.largeSuitcase + formDetails.smallSuitcase <= 8;
+
 const normalizeTripDate = (date: string) => {
   const [year, month, day] = date.split("-");
   if (!year || !month || !day) return date;
@@ -48,6 +58,9 @@ export function buildTripQuoteRequest({
   );
   if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff) || hasInvalidStop) {
     throw new Error(locationValidationMessage);
+  }
+  if (!hasValidQuoteCounts(formDetails)) {
+    throw new Error("Please check the passenger and luggage counts before requesting a price.");
   }
 
   const request: Record<string, unknown> = {
