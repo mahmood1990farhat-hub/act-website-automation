@@ -397,15 +397,11 @@ def enrich_addresses(trip):
 
 
 def send_notifications(trip):
+    """Queue in-app/driver operational notifications; booking emails use Celery task."""
     try:
         passenger = trip.passenger
         passenger_user = passenger.user if passenger and passenger.user else None
 
-        passenger_confirmation_sent = send_passenger_confirmation(passenger_user, trip)
-        logger.info(
-            f"[WEBHOOK] send_passenger_confirmation returned {passenger_confirmation_sent} "
-            f"for trip {trip.id}"
-        )
         if passenger_user:
             notify_user(
                 user=passenger_user.id,
@@ -418,12 +414,6 @@ def send_notifications(trip):
                 trip_id=trip.id
             )
 
-        internal_notification_sent = send_internal_notification(trip)
-        logger.info(
-            f"[WEBHOOK] send_internal_notification returned {internal_notification_sent} "
-            f"for trip {trip.id}"
-        )
-
         notify_all_drivers(
             title_en='New Trip Available',
             title_ar='رحلة جديدة متاحة',
@@ -435,5 +425,4 @@ def send_notifications(trip):
         )
 
     except Exception as e:
-        logger.exception(f"[WEBHOOK] Notification failed: {str(e)}")
-
+        logger.exception(f"[WEBHOOK] Operational notification failed: {str(e)}")
