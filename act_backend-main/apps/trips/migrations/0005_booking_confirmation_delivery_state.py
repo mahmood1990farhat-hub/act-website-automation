@@ -1,3 +1,4 @@
+import uuid
 from django.db import migrations, models
 
 
@@ -7,6 +8,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name="trip",
+            name="booking_confirmation_token",
+            field=models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+        ),
         migrations.AddField(
             model_name="trip",
             name="passenger_confirmation_sent_at",
