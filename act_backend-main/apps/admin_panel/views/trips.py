@@ -226,6 +226,7 @@ class TripDetailView(EMADBaseView):
         if trip.car_type:
             trip_data['vehicle_type_details'] = {
                 'id': trip.car_type.id,
+                'code': trip.car_type.code,
                 'name_en': trip.car_type.name_en,
                 'name_ar': trip.car_type.name_ar,
                 'max_passengers': trip.car_type.max_passengers_count,
