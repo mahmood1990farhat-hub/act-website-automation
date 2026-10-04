@@ -53,7 +53,18 @@
     "downloadError": "The app download failed. Please try again.",
     "signupBadge": "Sign up!",
     "premiumTransport": "Premium transport service",
-    "professionalChauffeur": "Professional chauffeur service"
+    "professionalChauffeur": "Professional chauffeur service",
+    "vehicleExampleComfort": "Comfortable saloon or equivalent",
+    "vehicleExampleComfortXl": "Spacious 7-seat MPV or equivalent",
+    "vehicleExampleExecutive": "Mercedes-Benz E-Class / EQE or equivalent",
+    "vehicleExampleExecutiveXl": "Mercedes-Benz V-Class or equivalent",
+    "vehicleExampleFirst": "Mercedes-Benz S-Class / BMW i7 or equivalent",
+    "representativeVehicle": "Representative vehicle",
+    "vehicleMayVary": "Vehicle images and model examples are representative. The exact vehicle may vary.",
+    "oneWayTotal": "One-way total",
+    "upToPassengers": "Up to {count} passengers",
+    "selectThisClass": "Select this class",
+    "selectedVehicle": "Selected"
   },
   "ar": {
     "selectDate": "اختر التاريخ",
@@ -109,7 +120,18 @@
     "downloadError": "تعذّر تنزيل التطبيق. يرجى المحاولة مرة أخرى.",
     "signupBadge": "سجّل الآن!",
     "premiumTransport": "خدمة نقل مميزة",
-    "professionalChauffeur": "خدمة سائق محترف"
+    "professionalChauffeur": "خدمة سائق محترف",
+    "vehicleExampleComfort": "سيارة صالون مريحة أو ما يعادلها",
+    "vehicleExampleComfortXl": "مركبة MPV واسعة تتسع حتى 7 ركاب أو ما يعادلها",
+    "vehicleExampleExecutive": "مرسيدس-بنز E-Class / EQE أو ما يعادلها",
+    "vehicleExampleExecutiveXl": "مرسيدس-بنز V-Class أو ما يعادلها",
+    "vehicleExampleFirst": "مرسيدس-بنز S-Class / BMW i7 أو ما يعادلها",
+    "representativeVehicle": "مركبة تمثيلية",
+    "vehicleMayVary": "صور المركبات وأمثلة الطرازات توضيحية، وقد تختلف المركبة الفعلية.",
+    "oneWayTotal": "الإجمالي لرحلة باتجاه واحد",
+    "upToPassengers": "حتى {count} ركاب",
+    "selectThisClass": "اختر هذه الفئة",
+    "selectedVehicle": "تم الاختيار"
   },
   "fr": {
     "selectDate": "Choisir une date",
@@ -165,7 +187,18 @@
     "downloadError": "Le téléchargement de l’application a échoué. Veuillez réessayer.",
     "signupBadge": "Inscrivez-vous !",
     "premiumTransport": "Service de transport haut de gamme",
-    "professionalChauffeur": "Service de chauffeur professionnel"
+    "professionalChauffeur": "Service de chauffeur professionnel",
+    "vehicleExampleComfort": "Berline confortable ou équivalent",
+    "vehicleExampleComfortXl": "Monospace 7 places spacieux ou équivalent",
+    "vehicleExampleExecutive": "Mercedes-Benz Classe E / EQE ou équivalent",
+    "vehicleExampleExecutiveXl": "Mercedes-Benz Classe V ou équivalent",
+    "vehicleExampleFirst": "Mercedes-Benz Classe S / BMW i7 ou équivalent",
+    "representativeVehicle": "Véhicule représentatif",
+    "vehicleMayVary": "Les images et exemples de modèles sont représentatifs. Le véhicule exact peut varier.",
+    "oneWayTotal": "Total aller simple",
+    "upToPassengers": "Jusqu’à {count} passagers",
+    "selectThisClass": "Choisir cette classe",
+    "selectedVehicle": "Sélectionné"
   },
   "de": {
     "selectDate": "Datum auswählen",
@@ -221,7 +254,18 @@
     "downloadError": "Die App konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
     "signupBadge": "Jetzt registrieren!",
     "premiumTransport": "Premium-Transportservice",
-    "professionalChauffeur": "Professioneller Chauffeurservice"
+    "professionalChauffeur": "Professioneller Chauffeurservice",
+    "vehicleExampleComfort": "Komfortable Limousine oder vergleichbar",
+    "vehicleExampleComfortXl": "Geräumiger 7-Sitzer-MPV oder vergleichbar",
+    "vehicleExampleExecutive": "Mercedes-Benz E-Klasse / EQE oder vergleichbar",
+    "vehicleExampleExecutiveXl": "Mercedes-Benz V-Klasse oder vergleichbar",
+    "vehicleExampleFirst": "Mercedes-Benz S-Klasse / BMW i7 oder vergleichbar",
+    "representativeVehicle": "Beispielfahrzeug",
+    "vehicleMayVary": "Fahrzeugbilder und Modellbeispiele sind repräsentativ. Das tatsächliche Fahrzeug kann abweichen.",
+    "oneWayTotal": "Gesamtpreis einfache Fahrt",
+    "upToPassengers": "Bis zu {count} Fahrgäste",
+    "selectThisClass": "Diese Klasse wählen",
+    "selectedVehicle": "Ausgewählt"
   },
   "es": {
     "selectDate": "Seleccionar fecha",
@@ -277,7 +321,18 @@
     "downloadError": "No se ha podido descargar la aplicación. Inténtalo de nuevo.",
     "signupBadge": "¡Regístrate!",
     "premiumTransport": "Servicio de transporte premium",
-    "professionalChauffeur": "Servicio de chófer profesional"
+    "professionalChauffeur": "Servicio de chófer profesional",
+    "vehicleExampleComfort": "Berlina cómoda o equivalente",
+    "vehicleExampleComfortXl": "Monovolumen espacioso de 7 plazas o equivalente",
+    "vehicleExampleExecutive": "Mercedes-Benz Clase E / EQE o equivalente",
+    "vehicleExampleExecutiveXl": "Mercedes-Benz Clase V o equivalente",
+    "vehicleExampleFirst": "Mercedes-Benz Clase S / BMW i7 o equivalente",
+    "representativeVehicle": "Vehículo representativo",
+    "vehicleMayVary": "Las imágenes y ejemplos de modelos son representativos. El vehículo exacto puede variar.",
+    "oneWayTotal": "Total solo ida",
+    "upToPassengers": "Hasta {count} pasajeros",
+    "selectThisClass": "Elegir esta clase",
+    "selectedVehicle": "Seleccionado"
   },
   "tr": {
     "selectDate": "Tarih seçin",
@@ -333,7 +388,18 @@
     "downloadError": "Uygulama indirilemedi. Lütfen tekrar deneyin.",
     "signupBadge": "Kaydolun!",
     "premiumTransport": "Üst düzey ulaşım hizmeti",
-    "professionalChauffeur": "Profesyonel şoför hizmeti"
+    "professionalChauffeur": "Profesyonel şoför hizmeti",
+    "vehicleExampleComfort": "Konforlu sedan veya dengi",
+    "vehicleExampleComfortXl": "Geniş 7 koltuklu MPV veya dengi",
+    "vehicleExampleExecutive": "Mercedes-Benz E-Serisi / EQE veya dengi",
+    "vehicleExampleExecutiveXl": "Mercedes-Benz V-Serisi veya dengi",
+    "vehicleExampleFirst": "Mercedes-Benz S-Serisi / BMW i7 veya dengi",
+    "representativeVehicle": "Temsili araç",
+    "vehicleMayVary": "Araç görselleri ve model örnekleri temsilidir. Gerçek araç farklılık gösterebilir.",
+    "oneWayTotal": "Tek yön toplam",
+    "upToPassengers": "En fazla {count} yolcu",
+    "selectThisClass": "Bu sınıfı seç",
+    "selectedVehicle": "Seçildi"
   },
   "zh-CN": {
     "selectDate": "选择日期",
@@ -389,6 +455,17 @@
     "downloadError": "应用下载失败。请重试。",
     "signupBadge": "立即注册！",
     "premiumTransport": "优质交通服务",
-    "professionalChauffeur": "专业司机服务"
+    "professionalChauffeur": "专业司机服务",
+    "vehicleExampleComfort": "舒适型轿车或同等级车型",
+    "vehicleExampleComfortXl": "宽敞的7座MPV或同等级车型",
+    "vehicleExampleExecutive": "梅赛德斯-奔驰 E级 / EQE 或同等级车型",
+    "vehicleExampleExecutiveXl": "梅赛德斯-奔驰 V级或同等级车型",
+    "vehicleExampleFirst": "梅赛德斯-奔驰 S级 / BMW i7 或同等级车型",
+    "representativeVehicle": "示例车辆",
+    "vehicleMayVary": "车辆图片和车型示例仅供参考，实际车辆可能有所不同。",
+    "oneWayTotal": "单程总价",
+    "upToPassengers": "最多 {count} 位乘客",
+    "selectThisClass": "选择此级别",
+    "selectedVehicle": "已选择"
   }
 }
