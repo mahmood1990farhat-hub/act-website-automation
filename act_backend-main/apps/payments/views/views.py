@@ -1,5 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_GET
 from django.db import transaction
 from decimal import Decimal, ROUND_HALF_UP
 import stripe
@@ -35,6 +36,25 @@ def stripe_to_plain(value):
         return [stripe_to_plain(v) for v in value]
     return value
 
+
+
+@require_GET
+def booking_status_view(request):
+    """Return fulfillment state only; never expose booking/customer details."""
+    payment_intent_id = str(request.GET.get('payment_intent_id') or '').strip()
+    if not payment_intent_id.startswith('pi_') or len(payment_intent_id) > 255:
+        return JsonResponse({'status': 'invalid'}, status=400)
+
+    if Trip.objects.filter(
+        stripe_payment_intent=payment_intent_id,
+        is_paid=True,
+    ).exists():
+        return JsonResponse({'status': 'confirmed'})
+
+    if PendingPayment.objects.filter(payment_intent_id=payment_intent_id).exists():
+        return JsonResponse({'status': 'processing'})
+
+    return JsonResponse({'status': 'unknown'}, status=404)
 
 
 @csrf_exempt
