@@ -179,7 +179,7 @@ class TripSerializer(serializers.ModelSerializer):
                 ) % {"large": large, "small": small, "total": suitcases},
             })
 
-        # Validate 24-hour advance booking requirement
+        # Validate 3-hour advance online-booking requirement
         trip_date = attrs.get('trip_date')
         trip_time = attrs.get('trip_time')
         
@@ -202,13 +202,13 @@ class TripSerializer(serializers.ModelSerializer):
                     now = timezone.now()
                     gap = departure - now
 
-                    if gap < timedelta(hours=24):
+                    if gap < timedelta(hours=3):
                         hours, remainder = divmod(int(gap.total_seconds()), 3600)
                         minutes = remainder // 60
                         raise serializers.ValidationError({
                             "details": _(
-                                "We're sorry, but online bookings must be made at least 24 hours in advance. "
-                                "To arrange a trip within 24 hours, please contact us directly at 07464 940 000."
+                                "We're sorry, but online bookings must be made at least 3 hours in advance. "
+                                "To arrange a trip within 3 hours, please contact us directly at 07464 940 000."
                             ),
                         })
             except (ValueError, TypeError, AttributeError) as e:
