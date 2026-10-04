@@ -67,14 +67,14 @@ class Command(BaseCommand):
             tiers_created = 0
             tiers_updated = 0
 
-            for vehicle_type_name, pricing_data in PRICING.items():
+            for vehicle_type_code, pricing_data in PRICING.items():
                 # Find or create VehicleType
                 try:
-                    vehicle_type = VehicleType.objects.get(name_en=vehicle_type_name)
+                    vehicle_type = VehicleType.objects.get(code=vehicle_type_code)
                 except VehicleType.DoesNotExist:
                     self.stdout.write(
                         self.style.WARNING(
-                            f'⚠ VehicleType "{vehicle_type_name}" not found. Skipping...'
+                            f'⚠ VehicleType code "{vehicle_type_code}" not found. Skipping...'
                         )
                     )
                     continue
@@ -103,7 +103,7 @@ class Command(BaseCommand):
                         tiers_created += 1
                     
                     self.stdout.write(
-                        f'  {vehicle_type_name} (normal): {min_distance}-{max_distance}mi @ £{rate}/mi'
+                        f'  {vehicle_type.code} / {vehicle_type.name_en} (normal): {min_distance}-{max_distance}mi @ £{rate}/mi'
                     )
 
                 # Process peak rates
@@ -142,7 +142,7 @@ class Command(BaseCommand):
             # Calculate average peak multiplier from the pricing data
             # This is a rough approximation - we'll use the ratio of peak to normal rates
             peak_multipliers = []
-            for vehicle_type_name, pricing_data in PRICING.items():
+            for vehicle_type_code, pricing_data in PRICING.items():
                 normal_rates = pricing_data.get('normal', [])
                 peak_rates = pricing_data.get('peak', [])
                 if len(normal_rates) == len(peak_rates):
