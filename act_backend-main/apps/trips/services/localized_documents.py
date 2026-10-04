@@ -66,8 +66,10 @@ def localized_document_context(trip, kind, refund_message="", driver=None, downl
     add("reference", f"ACT-{int(trip.id):06d}")
     add("passenger", name)
     vehicle_name = getattr(car, "name_en", None) or ""
-    vehicle_keys = {"standard phv": "standardVehicle", "standard car": "standardVehicle", "saloon": "standardVehicle", "7 seaters phv": "sevenSeater", "7 seater": "sevenSeater", "7 seaters": "sevenSeater", "luxury": "luxuryVehicle", "luxury van": "luxuryVan", "vip business phv": "executiveVehicle", "executive": "executiveVehicle"}
-    vehicle_key = vehicle_keys.get(vehicle_name.strip().lower())
+    vehicle_code = getattr(car, "code", None) or ""
+    vehicle_code_keys = {"comfort": "standardVehicle", "comfort_xl": "sevenSeater", "executive": "luxuryVehicle", "executive_xl": "luxuryVan", "first_class": "executiveVehicle"}
+    vehicle_keys = {"standard phv": "standardVehicle", "standard car": "standardVehicle", "saloon": "standardVehicle", "7 seaters phv": "sevenSeater", "7 seater": "sevenSeater", "7 seaters": "sevenSeater", "luxury": "luxuryVehicle", "luxury van": "luxuryVan", "vip business phv": "executiveVehicle", "executive": "executiveVehicle", "comfort class": "standardVehicle", "comfort xl": "sevenSeater", "executive class": "luxuryVehicle", "executive xl": "luxuryVan", "first class": "executiveVehicle"}
+    vehicle_key = vehicle_code_keys.get(vehicle_code) or vehicle_keys.get(vehicle_name.strip().lower())
     add("vehicle", labels[vehicle_key] if vehicle_key else vehicle_name or labels["private_transfer"])
     add("pickup", location("pickup")); add("dropoff", location("dropoff"))
     # ISO date and 24-hour pickup time are unambiguous for international guests.
