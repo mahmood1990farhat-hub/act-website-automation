@@ -699,11 +699,6 @@ export default function ModernConfirmFlightDetails({
 									</div>
 								)}
 
-								<div className={`flex justify-between items-center`}>
-									<span className="text-white/80">{texts.meetAndGreet}</span>
-									<span className="text-[#ffd100] font-semibold">{texts.included}</span>
-								</div>
-
 							</div>
 
 							<Separator className="bg-white/20" />
