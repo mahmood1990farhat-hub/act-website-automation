@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.db import transaction
+from decimal import Decimal, ROUND_HALF_UP
 import stripe
 from django.conf import settings
 from apps.trips.models import Trip, StopPoint, Airport
@@ -57,11 +58,19 @@ def stripe_webhook_view(request):
         f"payment_intent_id={payment_intent_id}, pending_payment_id={pending_payment_id}"
     )
 
-    if event_type == 'payment_intent.succeeded':
-        handle_payment_succeeded(event)
+    try:
+        if event_type == 'payment_intent.succeeded':
+            handle_payment_succeeded(event)
 
-    elif event_type == 'payment_intent.payment_failed':
-        handle_payment_failed(event)
+        elif event_type == 'payment_intent.payment_failed':
+            handle_payment_failed(event)
+    except Exception as processing_error:
+        # Return non-2xx so Stripe retries a verified event ACT could not persist/process.
+        logger.exception(
+            f"[STRIPE WEBHOOK] Processing failed for event_type={event_type}, "
+            f"payment_intent_id={payment_intent_id}: {str(processing_error)}"
+        )
+        return HttpResponse(status=500)
 
     return HttpResponse(status=200)
 
