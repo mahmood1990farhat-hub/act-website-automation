@@ -64,7 +64,9 @@
     "oneWayTotal": "One-way total",
     "upToPassengers": "Up to {count} passengers",
     "selectThisClass": "Select this class",
-    "selectedVehicle": "Selected"
+    "selectedVehicle": "Selected",
+    "bookingFinalising": "Payment received. We’re finalising your ACT booking now. Please don’t pay again.",
+    "bookingFinalisingDelayed": "Your payment was successful, but booking confirmation is taking longer than expected. Please don’t pay again; ACT will continue processing the paid booking and send confirmation when it is ready."
   },
   "ar": {
     "selectDate": "اختر التاريخ",
@@ -131,7 +133,9 @@
     "oneWayTotal": "الإجمالي لرحلة باتجاه واحد",
     "upToPassengers": "حتى {count} ركاب",
     "selectThisClass": "اختر هذه الفئة",
-    "selectedVehicle": "تم الاختيار"
+    "selectedVehicle": "تم الاختيار",
+    "bookingFinalising": "تم استلام الدفع. نقوم الآن بإتمام حجز ACT. يرجى عدم الدفع مرة أخرى.",
+    "bookingFinalisingDelayed": "تم الدفع بنجاح، لكن تأكيد الحجز يستغرق وقتًا أطول من المتوقع. يرجى عدم الدفع مرة أخرى؛ ستواصل ACT معالجة الحجز المدفوع وإرسال التأكيد عند اكتماله."
   },
   "fr": {
     "selectDate": "Choisir une date",
@@ -198,7 +202,9 @@
     "oneWayTotal": "Total aller simple",
     "upToPassengers": "Jusqu’à {count} passagers",
     "selectThisClass": "Choisir cette classe",
-    "selectedVehicle": "Sélectionné"
+    "selectedVehicle": "Sélectionné",
+    "bookingFinalising": "Paiement reçu. Nous finalisons maintenant votre réservation ACT. Ne payez pas une seconde fois.",
+    "bookingFinalisingDelayed": "Votre paiement a réussi, mais la confirmation de la réservation prend plus de temps que prévu. Ne payez pas à nouveau ; ACT poursuivra le traitement de la réservation payée et enverra la confirmation lorsqu’elle sera prête."
   },
   "de": {
     "selectDate": "Datum auswählen",
@@ -265,7 +271,9 @@
     "oneWayTotal": "Gesamtpreis einfache Fahrt",
     "upToPassengers": "Bis zu {count} Fahrgäste",
     "selectThisClass": "Diese Klasse wählen",
-    "selectedVehicle": "Ausgewählt"
+    "selectedVehicle": "Ausgewählt",
+    "bookingFinalising": "Zahlung erhalten. Wir schließen Ihre ACT-Buchung jetzt ab. Bitte zahlen Sie nicht erneut.",
+    "bookingFinalisingDelayed": "Ihre Zahlung war erfolgreich, aber die Buchungsbestätigung dauert länger als erwartet. Bitte zahlen Sie nicht erneut; ACT verarbeitet die bezahlte Buchung weiter und sendet die Bestätigung, sobald sie bereit ist."
   },
   "es": {
     "selectDate": "Seleccionar fecha",
@@ -332,7 +340,9 @@
     "oneWayTotal": "Total solo ida",
     "upToPassengers": "Hasta {count} pasajeros",
     "selectThisClass": "Elegir esta clase",
-    "selectedVehicle": "Seleccionado"
+    "selectedVehicle": "Seleccionado",
+    "bookingFinalising": "Pago recibido. Estamos finalizando su reserva con ACT. No vuelva a pagar.",
+    "bookingFinalisingDelayed": "El pago se realizó correctamente, pero la confirmación de la reserva está tardando más de lo previsto. No vuelva a pagar; ACT seguirá procesando la reserva pagada y enviará la confirmación cuando esté lista."
   },
   "tr": {
     "selectDate": "Tarih seçin",
@@ -399,7 +409,9 @@
     "oneWayTotal": "Tek yön toplam",
     "upToPassengers": "En fazla {count} yolcu",
     "selectThisClass": "Bu sınıfı seç",
-    "selectedVehicle": "Seçildi"
+    "selectedVehicle": "Seçildi",
+    "bookingFinalising": "Ödeme alındı. ACT rezervasyonunuz şimdi tamamlanıyor. Lütfen tekrar ödeme yapmayın.",
+    "bookingFinalisingDelayed": "Ödemeniz başarılı oldu ancak rezervasyon onayı beklenenden uzun sürüyor. Lütfen tekrar ödeme yapmayın; ACT ücretli rezervasyonu işlemeye devam edecek ve hazır olduğunda onayı gönderecektir."
   },
   "zh-CN": {
     "selectDate": "选择日期",
@@ -466,6 +478,8 @@
     "oneWayTotal": "单程总价",
     "upToPassengers": "最多 {count} 位乘客",
     "selectThisClass": "选择此级别",
-    "selectedVehicle": "已选择"
+    "selectedVehicle": "已选择",
+    "bookingFinalising": "付款已收到。我们正在完成您的 ACT 预订，请勿重复付款。",
+    "bookingFinalisingDelayed": "付款已成功，但预订确认所需时间比预期更长。请勿重复付款；ACT 将继续处理已付款的预订，并在确认完成后发送通知。"
   }
 }
