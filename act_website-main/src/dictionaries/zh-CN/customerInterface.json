@@ -648,5 +648,7 @@
   "I would like ACT to provide child seats": "我希望ACT提供儿童座椅",
   "I understand ACT may not have child seats available and wish to continue": "我理解ACT可能没有可用的儿童座椅，并希望继续",
   "Enter a valid email address.": "请输入有效的电子邮箱地址。",
-  "Enter a valid mobile number for the selected country code.": "请输入与所选国家/地区代码匹配的有效手机号码。"
+  "Enter a valid mobile number for the selected country code.": "请输入与所选国家/地区代码匹配的有效手机号码。",
+  "Confirmation details will be sent to your email": "确认详情将发送至您的电子邮箱",
+  "Need help? Contact ACT support": "需要帮助？请联系 ACT 客服"
 }
