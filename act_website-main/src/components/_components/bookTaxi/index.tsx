@@ -317,9 +317,32 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                         </p>
                         <h2 className="mt-1 text-2xl font-bold">{customerText(locale, "Your journey")}</h2>
                       </div>
+                      <div className="space-y-3 text-sm">
+                        {routePoints.find((point) => point.type === "pickup")?.point?.description && (
+                          <div className="rounded-xl bg-white/5 p-3">
+                            <p className="text-white/55">{customerText(locale, "Pickup")}</p>
+                            <p className="mt-1 font-semibold">{routePoints.find((point) => point.type === "pickup")?.point?.description}</p>
+                          </div>
+                        )}
+                        {routePoints.find((point) => point.type === "dropoff")?.point?.description && (
+                          <div className="rounded-xl bg-white/5 p-3">
+                            <p className="text-white/55">{customerText(locale, "Drop-off")}</p>
+                            <p className="mt-1 font-semibold">{routePoints.find((point) => point.type === "dropoff")?.point?.description}</p>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-3">
+                          {formDetails.date && <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Date")}</p><p className="mt-1 font-semibold">{formDetails.date}</p></div>}
+                          {formDetails.time && <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Time")}</p><p className="mt-1 font-semibold">{formDetails.time}</p></div>}
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Passengers")}</p><p className="mt-1 font-semibold">{formDetails.adults + formDetails.children + formDetails.infants}</p></div>
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Large luggage")}</p><p className="mt-1 font-semibold">{formDetails.largeSuitcase}</p></div>
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Small luggage")}</p><p className="mt-1 font-semibold">{formDetails.smallSuitcase}</p></div>
+                        </div>
+                      </div>
                       {rideOptions?.route_polyline ? (
                         <>
-                          <div className="h-[320px] overflow-hidden rounded-xl border border-white/10">
+                          <div className="mt-4 h-[320px] overflow-hidden rounded-xl border border-white/10">
                             <MapView routePolyline={rideOptions.route_polyline} />
                           </div>
                           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -328,17 +351,17 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                               <p className="mt-1 font-semibold">{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(rideOptions.distance_miles)} mi</p>
                             </div>
                             <div className="rounded-xl bg-white/5 p-3">
-                              <p className="text-white/55">{customerText(locale, "Passengers")}</p>
-                              <p className="mt-1 font-semibold">{formDetails.numberOfPassengers}</p>
+                              <p className="text-white/55">{customerText(locale, "Estimated journey time")}</p>
+                              <p className="mt-1 font-semibold">{rideOptions.expected_trip_duration_minutes ? `${Math.round(rideOptions.expected_trip_duration_minutes)} min` : "—"}</p>
                             </div>
                           </div>
                         </>
                       ) : (
-                        <div className="flex min-h-[360px] flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-8 text-center">
+                        <div className="mt-4 flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-8 text-center">
                           <MapPin className="mb-4 h-9 w-9 text-[#ffd100]" />
-                          <p className="text-lg font-semibold">{customerText(locale, "Your route will appear here")}</p>
+                          <p className="text-lg font-semibold">{customerText(locale, "Your route map will appear after the price is calculated")}</p>
                           <p className="mt-2 text-sm leading-6 text-white/60">
-                            {customerText(locale, "Enter your pickup, destination, date and passenger details to view your journey summary.")}
+                            {customerText(locale, "Your journey details update here as you complete the booking form.")}
                           </p>
                         </div>
                       )}
