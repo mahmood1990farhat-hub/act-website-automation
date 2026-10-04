@@ -34,6 +34,11 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+      mailhog:
+        image: mailhog/mailhog:v1.0.1
+        ports:
+          - 1025:1025
+          - 8025:8025
     env:
       SECRET_KEY: ci-not-production
       DEBUG: "False"
@@ -77,6 +82,28 @@ jobs:
         run: |
           python manage.py makemigrations --check --dry-run
           python manage.py migrate --plan
+      - name: Celery worker discovers paid-booking confirmation task
+        run: |
+          celery -A myProject worker --pool=solo --loglevel=INFO --hostname=ci-worker@%h > /tmp/act-celery.log 2>&1 &
+          echo $! > /tmp/act-celery.pid
+          for i in {1..20}; do
+            if celery -A myProject inspect registered 2>/dev/null | grep -q "apps.payments.tasks.deliver_paid_booking_confirmations"; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/act-celery.log
+          exit 1
+      - name: SMTP server accepts an ACT test message
+        run: |
+          python manage.py shell -c "from django.core.mail import send_mail; result=send_mail('ACT CI SMTP acceptance','Isolated acceptance only','ci@example.invalid',['passenger@example.invalid'],fail_silently=False); assert result == 1"
+          python - <<'PY'
+          import json, urllib.request
+          data = json.load(urllib.request.urlopen("http://127.0.0.1:8025/api/v2/messages"))
+          assert data["total"] >= 1, data
+          subjects = [item.get("Content", {}).get("Headers", {}).get("Subject", []) for item in data["items"]]
+          assert any("ACT CI SMTP acceptance" in values for values in subjects), subjects
+          PY
       - name: Payment, confirmation, PDF and vehicle-code regression tests
         run: >
           python manage.py test
