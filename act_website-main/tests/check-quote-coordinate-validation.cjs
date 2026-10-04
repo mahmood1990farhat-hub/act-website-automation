@@ -107,3 +107,24 @@ for (const endpoint of ['pickup', 'dropoff']) {
     reject(value);
   });
 }
+
+for (const [name, counts] of [
+  ['zero passengers', { numberOfPassengers: 0 }],
+  ['more than seven passengers', { numberOfPassengers: 8 }],
+  ['fractional passengers', { numberOfPassengers: 1.5 }],
+  ['negative large luggage', { largeSuitcase: -1 }],
+  ['negative small luggage', { smallSuitcase: -1 }],
+  ['fractional luggage', { largeSuitcase: 1.5 }],
+  ['more than eight total suitcases', { largeSuitcase: 5, smallSuitcase: 4 }],
+]) {
+  test(`quote builder rejects ${name}`, () => {
+    const value = input();
+    Object.assign(value.formDetails, counts);
+    reject(value);
+  });
+}
+test('quote builder accepts seven passengers and eight total suitcases', () => {
+  const value = input();
+  Object.assign(value.formDetails, { numberOfPassengers: 7, largeSuitcase: 4, smallSuitcase: 4 });
+  assert.equal(buildTripQuoteRequest(value).passengers_count, 7);
+});
