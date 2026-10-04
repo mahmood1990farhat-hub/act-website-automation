@@ -92,7 +92,6 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
             amount=100,
             currency="gbp",
             payment_method="pm_card_visa",
-            payment_method_types=["card"],
             confirm=True,
             metadata={
                 "pending_payment_id": str(pending.id),
