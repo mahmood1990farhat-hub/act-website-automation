@@ -287,12 +287,19 @@ def extract_card_details(payment_intent):
     }
 
 
-def get_pending_payment(payment_intent_id, pending_payment_id):
+def get_pending_payment(payment_intent_id, pending_payment_id, for_update=False):
+    queryset = PendingPayment.objects
+    if for_update:
+        queryset = queryset.select_for_update()
+
     if pending_payment_id:
-        pending_payment = PendingPayment.objects.filter(id=pending_payment_id).first()
+        pending_payment = queryset.filter(
+            id=pending_payment_id,
+            payment_intent_id=payment_intent_id,
+        ).first()
         if pending_payment:
             logger.info(
-                f"[WEBHOOK] PendingPayment lookup by id succeeded: "
+                f"[WEBHOOK] PendingPayment lookup by id + payment_intent_id succeeded: "
                 f"pending_payment_id={pending_payment_id}, payment_intent_id={payment_intent_id}"
             )
             return pending_payment
@@ -303,7 +310,7 @@ def get_pending_payment(payment_intent_id, pending_payment_id):
             "falling back to payment_intent_id lookup"
         )
 
-    pending_payment = PendingPayment.objects.filter(
+    pending_payment = queryset.filter(
         payment_intent_id=payment_intent_id
     ).first()
     if pending_payment:
