@@ -7,6 +7,12 @@ CLASS_MIGRATION = {
     "Luxury": ("executive", "Executive Class", "الفئة التنفيذية"),
     "Luxury Van": ("executive_xl", "Executive XL", "الفئة التنفيذية XL"),
     "VIP Business PHV": ("first_class", "First Class", "الدرجة الأولى"),
+    # Idempotent support if a database was manually renamed before this migration.
+    "Comfort Class": ("comfort", "Comfort Class", "فئة الراحة"),
+    "Comfort XL": ("comfort_xl", "Comfort XL", "فئة الراحة XL"),
+    "Executive Class": ("executive", "Executive Class", "الفئة التنفيذية"),
+    "Executive XL": ("executive_xl", "Executive XL", "الفئة التنفيذية XL"),
+    "First Class": ("first_class", "First Class", "الدرجة الأولى"),
 }
 
 REVERSE_NAMES = {
