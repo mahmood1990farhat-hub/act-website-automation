@@ -82,47 +82,49 @@ def handle_payment_succeeded(event):
     pending_payment_id = metadata.get('pending_payment_id')
 
     logger.info(f"[WEBHOOK] Processing success for PI={payment_intent_id}")
+    logger.info(
+        f"[WEBHOOK] Creating trip for PI={payment_intent_id}, pending_payment_id={pending_payment_id}"
+    )
+    with transaction.atomic():
+        trip, created = create_trip_from_payment(payment_intent, pending_payment_id)
+
+    logger.info(
+        f"[WEBHOOK] Trip create/lookup complete for PI={payment_intent_id}: "
+        f"trip_id={trip.id}, created={created}, passenger_email={trip.passenger_email}, "
+        f"is_guest_checkout={trip.is_guest_checkout}"
+    )
+
+    if not created:
+        logger.info(
+            f"[WEBHOOK] Duplicate success event for PI={payment_intent_id}; "
+            f"trip {trip.id} already exists, skipping duplicate side effects"
+        )
+        return trip
 
     try:
-        logger.info(
-            f"[WEBHOOK] Creating trip for PI={payment_intent_id}, pending_payment_id={pending_payment_id}"
-        )
-        with transaction.atomic():
-            trip = create_trip_from_payment(payment_intent, pending_payment_id)
-
-        logger.info(
-            f"[WEBHOOK] Trip create/lookup complete for PI={payment_intent_id}: "
-            f"trip_id={trip.id}, passenger_email={trip.passenger_email}, "
-            f"is_guest_checkout={trip.is_guest_checkout}"
+        logger.info(f"[WEBHOOK] Enriching addresses before PDF generation for trip {trip.id}")
+        enrich_addresses(trip)
+        logger.info(f"[WEBHOOK] Address enrichment complete before PDF generation for trip {trip.id}")
+    except Exception as address_error:
+        logger.warning(
+            f"[WEBHOOK] Failed to enrich addresses before PDF generation for trip {trip.id}: {str(address_error)}",
+            exc_info=True,
         )
 
-        try:
-            logger.info(f"[WEBHOOK] Enriching addresses before PDF generation for trip {trip.id}")
-            enrich_addresses(trip)
-            logger.info(f"[WEBHOOK] Address enrichment complete before PDF generation for trip {trip.id}")
-        except Exception as address_error:
-            logger.warning(
-                f"[WEBHOOK] Failed to enrich addresses before PDF generation for trip {trip.id}: {str(address_error)}",
-                exc_info=True,
-            )
+    try:
+        logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
+        ensure_booking_confirmation_pdf(trip)
+        logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
+    except Exception as pdf_error:
+        logger.warning(
+            f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}",
+            exc_info=True,
+        )
 
-        try:
-            logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
-            ensure_booking_confirmation_pdf(trip)
-            logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
-        except Exception as pdf_error:
-            logger.warning(
-                f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}",
-                exc_info=True,
-            )
-
-        logger.info(f"[WEBHOOK] Starting post_trip_creation for trip {trip.id}")
-        post_trip_creation(trip)
-        logger.info(f"[WEBHOOK] Finished post_trip_creation for trip {trip.id}")
-
-    except Exception as e:
-        logger.exception(f"[WEBHOOK] Failed for PI={payment_intent_id}: {str(e)}")
-
+    logger.info(f"[WEBHOOK] Starting post_trip_creation for trip {trip.id}")
+    post_trip_creation(trip)
+    logger.info(f"[WEBHOOK] Finished post_trip_creation for trip {trip.id}")
+    return trip
 
 def handle_payment_failed(event):
     payment_intent = event['data']['object']
