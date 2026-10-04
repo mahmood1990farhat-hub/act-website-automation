@@ -648,5 +648,7 @@
   "I would like ACT to provide child seats": "ACT'nin çocuk koltuğu sağlamasını istiyorum",
   "I understand ACT may not have child seats available and wish to continue": "ACT'de çocuk koltuğu bulunmayabileceğini anlıyorum ve devam etmek istiyorum",
   "Enter a valid email address.": "Geçerli bir e-posta adresi girin.",
-  "Enter a valid mobile number for the selected country code.": "Seçilen ülke kodu için geçerli bir cep telefonu numarası girin."
+  "Enter a valid mobile number for the selected country code.": "Seçilen ülke kodu için geçerli bir cep telefonu numarası girin.",
+  "Confirmation details will be sent to your email": "Onay ayrıntıları e-posta adresinize gönderilecektir",
+  "Need help? Contact ACT support": "Yardıma mı ihtiyacınız var? ACT destek ekibiyle iletişime geçin"
 }
