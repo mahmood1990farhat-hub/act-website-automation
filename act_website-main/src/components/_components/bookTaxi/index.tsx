@@ -151,6 +151,7 @@ export type home = {
 };
 export type VehicleType = {
   id: number;
+  code: string;
   name_en: string;
   name_ar: string;
   desc_en: string;
