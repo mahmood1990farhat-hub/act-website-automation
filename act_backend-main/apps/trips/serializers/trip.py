@@ -118,7 +118,7 @@ class TripSerializer(serializers.ModelSerializer):
         if car_type:
             total_cost, *_ = calculate_total_cost(
                 trip_time,
-                car_type.name_en,
+                car_type.code,
                 result['distance_miles'],
                 pickup_lat=data['pickup_lat'],
                 pickup_lng=data['pickup_lng'],
