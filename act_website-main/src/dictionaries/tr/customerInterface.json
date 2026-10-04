@@ -646,5 +646,7 @@
   "I understand ACT may not have infant seats available and wish to continue": "ACT'de bebek koltuğu bulunmayabileceğini anlıyorum ve devam etmek istiyorum",
   "I will provide my own child seats": "Kendi çocuk koltuklarımı getireceğim",
   "I would like ACT to provide child seats": "ACT'nin çocuk koltuğu sağlamasını istiyorum",
-  "I understand ACT may not have child seats available and wish to continue": "ACT'de çocuk koltuğu bulunmayabileceğini anlıyorum ve devam etmek istiyorum"
+  "I understand ACT may not have child seats available and wish to continue": "ACT'de çocuk koltuğu bulunmayabileceğini anlıyorum ve devam etmek istiyorum",
+  "Enter a valid email address.": "Geçerli bir e-posta adresi girin.",
+  "Enter a valid mobile number for the selected country code.": "Seçilen ülke kodu için geçerli bir cep telefonu numarası girin."
 }
