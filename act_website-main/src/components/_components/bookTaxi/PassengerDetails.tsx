@@ -105,6 +105,8 @@ export default function PassengerDetails({
             <input
               id="passenger-full-name"
               value={passengerDetails.fullName}
+              maxLength={255}
+              autoComplete="name"
               onChange={(event) => updateField("fullName", event.target.value)}
               className={inputClass}
             />
@@ -117,6 +119,8 @@ export default function PassengerDetails({
               id="passenger-email"
               type="email"
               value={passengerDetails.email}
+              maxLength={254}
+              autoComplete="email"
               onChange={(event) => updateField("email", event.target.value)}
               className={inputClass}
             />
@@ -156,6 +160,9 @@ export default function PassengerDetails({
               id="passenger-mobile"
               type="tel"
               value={passengerDetails.mobileNumber}
+              maxLength={32}
+              autoComplete="tel"
+              inputMode="tel"
               onChange={(event) => updateField("mobileNumber", event.target.value)}
               className={inputClass}
             />
