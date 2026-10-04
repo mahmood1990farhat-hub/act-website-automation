@@ -74,9 +74,9 @@
   "unavailable_child": "ACT’nin çocuk koltuğu sağlayamayabileceğini anlıyor ve devam etmek istiyorum",
   "airport_fee": "Havalimanı ücreti",
   "minimum_adjustment": "Asgari ücret düzeltmesi",
-  "standardVehicle": "Standart şoförlü araç",
-  "executiveVehicle": "Üst sınıf araç",
-  "luxuryVehicle": "Lüks araç",
-  "sevenSeater": "7 kişilik araç",
-  "luxuryVan": "Lüks minibüs"
+  "standardVehicle": "Konfor Sınıfı",
+  "executiveVehicle": "Birinci Sınıf",
+  "luxuryVehicle": "Executive Sınıfı",
+  "sevenSeater": "Konfor XL",
+  "luxuryVan": "Executive XL"
 }
