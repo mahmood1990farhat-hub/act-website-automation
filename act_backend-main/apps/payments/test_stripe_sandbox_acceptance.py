@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import stripe
 from django.test import TestCase, override_settings
-from django.urls import reverse
 from django.utils import timezone
 
 from apps.payments.models import PendingPayment
@@ -125,7 +124,7 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         signature_header = f"t={timestamp},v1={signature}"
 
         response = self.client.post(
-            reverse("stripe-webhook"),
+            "/api/payments/webhook/stripe/",
             data=payload,
             content_type="application/json",
             HTTP_STRIPE_SIGNATURE=signature_header,
@@ -143,7 +142,7 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         # Replay the exact same verified event: still one Trip and no repeated
         # operational post-processing. Confirmation task may be safely requeued.
         replay = self.client.post(
-            reverse("stripe-webhook"),
+            "/api/payments/webhook/stripe/",
             data=payload,
             content_type="application/json",
             HTTP_STRIPE_SIGNATURE=signature_header,
