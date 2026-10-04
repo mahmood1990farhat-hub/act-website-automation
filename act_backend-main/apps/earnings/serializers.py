@@ -39,6 +39,7 @@ class TripBasicForEarningsSerializer(serializers.ModelSerializer):
             return None
         return {
             'id': obj.car_type.id,
+            'code': obj.car_type.code,
             'name_en': obj.car_type.name_en,
             'name_ar': obj.car_type.name_ar,
         }
