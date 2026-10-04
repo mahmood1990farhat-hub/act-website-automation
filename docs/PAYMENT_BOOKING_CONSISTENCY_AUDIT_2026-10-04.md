@@ -14,7 +14,7 @@
 
 **Fix:** fulfillment returns `(trip, created)`. Duplicate/retried success events return the existing Trip and skip duplicate post-creation side effects.
 
-Residual: notification/PDF delivery does not yet have durable per-side-effect delivery markers. A process crash after Trip creation but before notifications is a separate communications-reliability concern for the confirmation/email phase. Do not claim exactly-once email delivery yet.
+Follow-up confirmation work adds durable per-trip passenger/internal email acceptance timestamps and a retryable Celery confirmation task. SMTP delivery remains at-least-once under the rare crash window after SMTP acceptance but before the database timestamp is committed; exactly-once external email delivery is not claimed.
 
 ### 3. Pending-payment metadata lookup was not bound to the PaymentIntent
 When metadata supplied `pending_payment_id`, the code accepted that database row by ID without also checking its `payment_intent_id`.
@@ -69,5 +69,5 @@ Frontend source regression guard `tests/check-payment-fulfillment-safety.cjs` ch
 
 - Execute backend tests/full suite and frontend build.
 - Run Stripe test-mode webhook delivery/replay evidence against an isolated environment.
-- Add durable delivery/retry state for customer confirmation/PDF/internal notification if the email phase requires stronger than current best-effort post-processing.
+- Paid booking confirmation/PDF/internal email delivery now has retryable Celery processing and durable per-trip acceptance markers; execute this path with the real test SMTP/Celery environment before acceptance.
 - Review abandoned PendingPayment cleanup/expiry and repeated pre-payment initiation behaviour.
