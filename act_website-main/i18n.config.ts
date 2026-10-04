@@ -31,16 +31,22 @@ export function localizedPath(path: string, locale: Locale): string {
   return match && isSupportedLocale(match[1]) ? `/${locale}${match[2]}` : `/${locale}${path === "/" ? "" : path}`;
 }
 export function localizedVehicleValue(
-  vehicle: { name_en?: string; name_ar?: string; desc_en?: string; desc_ar?: string },
+  vehicle: { code?: string; name_en?: string; name_ar?: string; desc_en?: string; desc_ar?: string },
   field: "name" | "desc", locale: string,
 ): string {
   const english = vehicle[`${field}_en`] || "";
+  const codeCategories: Record<string, RuntimeKey> = {
+    comfort: "standardVehicle", comfort_xl: "sevenSeater", executive: "luxuryVehicle",
+    executive_xl: "luxuryVan", first_class: "executiveVehicle",
+  };
   const categories: Record<string, RuntimeKey> = {
     "standard phv": "standardVehicle", "standard car": "standardVehicle", "saloon": "standardVehicle",
     "7 seaters phv": "sevenSeater", "7 seater": "sevenSeater", "7 seaters": "sevenSeater",
     "luxury": "luxuryVehicle", "luxury van": "luxuryVan", "vip business phv": "executiveVehicle", "executive": "executiveVehicle",
+    "comfort class": "standardVehicle", "comfort xl": "sevenSeater", "executive class": "luxuryVehicle",
+    "executive xl": "luxuryVan", "first class": "executiveVehicle",
   };
-  const key = categories[english.trim().toLowerCase()];
+  const key = (vehicle.code && codeCategories[vehicle.code]) || categories[english.trim().toLowerCase()];
   if (key) return runtimeText(locale, key);
   // Preserve unrecognised supplier names/descriptions rather than inventing a translation.
   return vehicle[`${field}_${dictionaryLocale(locale)}`] || english || vehicle[`${field}_ar`] || "";
