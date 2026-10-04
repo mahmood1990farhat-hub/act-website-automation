@@ -74,10 +74,10 @@ export default function BookingConfirmation({ trans, locale }: typeProps) {
             {/* Additional Info */}
             {<div className="rounded-xl p-4 text-center">
               <p className="text-xs text-muted leading-none">
-                {isRTL ? "تم إرسال تفاصيل التأكيد إلى بريدك الإلكتروني" : customerText(locale, "Confirmation details sent to your email")}
+                {isRTL ? "سيتم إرسال تفاصيل التأكيد إلى بريدك الإلكتروني" : customerText(locale, "Confirmation details will be sent to your email")}
               </p>
               <p className="text-xs text-muted mt-1">
-                {isRTL ? "هل تحتاج إلى مساعدة؟ تواصل مع فريق الدعم على مدار الساعة" : customerText(locale, "Need help? Contact our support team 24/7")}
+                {isRTL ? "هل تحتاج إلى مساعدة؟ تواصل مع دعم ACT" : customerText(locale, "Need help? Contact ACT support")}
               </p>
             </div>}
           </div>
