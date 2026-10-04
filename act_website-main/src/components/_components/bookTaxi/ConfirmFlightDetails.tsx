@@ -136,7 +136,7 @@ export default function ModernConfirmFlightDetails({
 		stops: isRTL ? "نقاط التوقف" : customerText(locale, "Stop Points"),
 		distance: isRTL ? "المسافة" : customerText(locale, "Distance"),
 		date: isRTL ? "التاريخ" : customerText(locale, "Date"),
-		time: isRTL ? "الوقت المتوقع للوصول" : customerText(locale, "ETA"),
+		time: isRTL ? "وقت الاستلام" : customerText(locale, "Pickup Time"),
 		timeTrip: isRTL ? "مدة الرحلة" : customerText(locale, "Trip Duration"),
 		passengers: isRTL ? "عدد الركاب" : customerText(locale, "Passengers"),
 		smallLuggage: isRTL ? "حقائب صغيرة" : customerText(locale, "Small Luggage"),
@@ -234,11 +234,12 @@ export default function ModernConfirmFlightDetails({
 			},
 		};
 
-		// Note: stop_points might not be needed for initiate-payment
-		// If the API requires it, uncomment the following:
-		// if (stop_points.length > 0) {
-		//   bodyData.stop_points = stop_points;
-		// }
+		// Payment recalculates the authoritative route price. Preserve the same
+		// ordered stops used by the quote so a multi-stop journey cannot be
+		// repriced as a direct pickup-to-drop-off journey.
+		if (stop_points.length > 0) {
+			bodyData.stop_points = stop_points;
+		}
 
 		try {
 			const res = await postData<any>({
