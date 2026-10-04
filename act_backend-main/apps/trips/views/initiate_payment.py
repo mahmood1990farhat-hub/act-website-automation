@@ -39,7 +39,7 @@ def calculate_authoritative_payment_price(data, car_type, distance_miles, bookin
 
     total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
         trip_time,
-        car_type.name_en,
+        car_type.code,
         distance_miles,
         pickup_lat=data.get('pickup_lat'),
         pickup_lng=data.get('pickup_lng'),
@@ -178,6 +178,7 @@ class InitiatePaymentView(EMADBaseView):
             "passenger_email": stripe_metadata_value(request.user.email),
             "passenger_name": stripe_metadata_value(passenger_name),
             "car_type_id": stripe_metadata_value(car_type.id),
+            "car_type_code": stripe_metadata_value(car_type.code),
             "car_type": stripe_metadata_value(car_type.name_en),
             "trip_date": stripe_metadata_value(trip_date),
             "trip_time": stripe_metadata_value(trip_time_obj),
@@ -359,6 +360,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             "passenger_email": self._stripe_metadata_value(guest_contact['passenger_email']),
             "passenger_name": self._stripe_metadata_value(guest_contact['passenger_name']),
             "car_type_id": self._stripe_metadata_value(car_type.id),
+            "car_type_code": self._stripe_metadata_value(car_type.code),
             "car_type": self._stripe_metadata_value(car_type.name_en),
             "trip_date": self._stripe_metadata_value(trip_date),
             "trip_time": self._stripe_metadata_value(trip_time_obj),
