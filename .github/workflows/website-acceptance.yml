@@ -1,6 +1,8 @@
 name: ACT website acceptance checks
 
 "on":
+  push:
+    branches: [act/website-booking-audit-20261004]
   pull_request:
     branches: [codex/complete-customer-languages-20261002]
 
