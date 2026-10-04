@@ -299,7 +299,13 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     routePoints={routePoints}
                     setRoutePoints={setRoutePoints}
                     book_Taxi={home.Book_Taxi}
-                    setValue={(d) => setFormDetails(d)}
+                    setValue={(d) => {
+                      setFormDetails(d);
+                      setChildInfantTravel((current) => ({
+                        infantSeatOption: d.infants > 0 ? current.infantSeatOption : "",
+                        childSeatOption: d.children > 0 ? current.childSeatOption : "",
+                      }));
+                    }}
                     formDetails={formDetails}
                     setTripData={(res) => setRideOptions(res)}
                     resetQuoteState={() => {
