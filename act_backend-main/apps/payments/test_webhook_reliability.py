@@ -1,3 +1,4 @@
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -108,7 +109,7 @@ class StripeWebhookReliabilityTests(TestCase):
             trip_data={},
             booking_details={},
             currency="GBP",
-            expires_at=timezone.now() + timezone.timedelta(minutes=15),
+            expires_at=timezone.now() + timedelta(minutes=15),
         )
 
         self.assertIsNone(
