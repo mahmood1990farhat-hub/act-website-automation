@@ -6,11 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  Clock,
-  Star,
   CheckCircle,
   Calendar,
-  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import { Locale, localizedVehicleValue } from "../../../../i18n.config";
@@ -32,6 +29,7 @@ type typeProps = {
   locale: Locale;
   Choose_car: Choose_car;
   rideOptions: calculatTripCost | null;
+  tripDate: string;
   nextStep: () => void;
   prevStep: () => void;
 };
@@ -42,6 +40,7 @@ export default function ModernChooseCar({
   locale,
   Choose_car,
   rideOptions,
+  tripDate,
   nextStep,
   prevStep,
 }: typeProps) {
@@ -49,12 +48,27 @@ export default function ModernChooseCar({
   const isLoading = false; // Replace with your actual loading state
 
   const handleCarSelect = (car: VehicleType) => {
+    // Selection is deliberate; the passenger reviews the card and presses Continue.
     setSelectedCar(car);
-    // Auto advance after selection with slight delay for visual feedback
-    setTimeout(() => {
-      nextStep();
-    }, 300);
   };
+
+  const formatJourneyDate = () => {
+    const [year, month, day] = tripDate.split("-").map(Number);
+    if (!year || !month || !day) return tripDate;
+    return new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(year, month - 1, day));
+  };
+
+  const formatPrice = (amount: number) =>
+    new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "GBP",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
 
   // Arabic text alternatives
   const texts = {
@@ -100,11 +114,7 @@ export default function ModernChooseCar({
         <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
           <Calendar className="w-4 h-4 text-[#ffd100]" />
           <span className="text-white text-sm font-medium">
-            {`${new Date().toLocaleDateString(locale, {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}`}
+            {formatJourneyDate()}
           </span>
         </div>
         <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
@@ -138,6 +148,12 @@ export default function ModernChooseCar({
       </div>
 
       {/* Car Selection Grid */}
+      {(!rideOptions?.car_type || rideOptions.car_type.length === 0) && (
+        <div role="status" className="mb-6 rounded-xl border border-white/20 bg-white/10 p-6 text-center text-white">
+          <p className="text-lg font-semibold">{customerText(locale, "No suitable vehicle is available for this journey online.")}</p>
+          <p className="mt-2 text-sm text-white/70">{customerText(locale, "Please go back and check your passenger details or contact ACT for assistance.")}</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {isLoading ? (
           <>
@@ -147,8 +163,7 @@ export default function ModernChooseCar({
           </>
         ) : (
           rideOptions?.car_type?.map((car, index) => {
-            // const isDisabled = disabledCarIndices.includes(index);
-            const isDisabled = false
+            const isDisabled = disabledCarIndices.includes(index);
 
             return (
               <Card
@@ -173,13 +188,13 @@ export default function ModernChooseCar({
                   <div className={`flex items-center gap-3 sm:gap-6`}>
                     {/* Car Image */}
                     <div className="relative self-start flex-shrink-0">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 relative rounded-xl overflow-hidden bg-white p-1 sm:p-2">
+                      <div className="w-28 h-20 sm:w-40 sm:h-28 lg:w-48 lg:h-32 relative rounded-xl overflow-hidden bg-white p-2 sm:p-3">
                         <Image
                           src={car.icon_url}
                           alt={localizedVehicleValue(car, "name", locale)}
                           fill
                           className="object-contain drop-shadow-lg"
-                          sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
+                          sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 192px"
                           quality={100}
                         />
                       </div>
@@ -224,10 +239,6 @@ export default function ModernChooseCar({
                                 {car?.max_passengers_count} {texts.passengers}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 text-white/60">
-                              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                              <span>4.9</span>
-                            </div>
                           </div>
                         </div>
 
@@ -241,7 +252,7 @@ export default function ModernChooseCar({
                                 : "bg-white/20 text-white"
                             }`}
                           >
-                            £{car.total_cost}
+                            {formatPrice(car.total_cost)}
                           </Badge>
                         </div>
                       </div>
@@ -284,18 +295,6 @@ export default function ModernChooseCar({
                     </div>
                   </div>
 
-                  {/* Popular/Recommended Badge */}
-                  {index === 0 && !isDisabled && (
-                    <div
-                      className={`absolute -top-2 sm:-top-3 ${
-                        isRTL ? "right-3 sm:right-6" : "left-3 sm:left-6"
-                      }`}
-                    >
-                      <Badge className="bg-[#4b1679] hover:bg-[#4b1679] text-white px-2 sm:px-3 py-1 shadow-lg text-xs sm:text-sm">
-                        {texts.mostPopular}
-                      </Badge>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             );
