@@ -74,9 +74,9 @@
   "unavailable_child": "我了解 ACT 可能无法提供儿童安全座椅，并希望继续",
   "airport_fee": "机场费用",
   "minimum_adjustment": "最低车费调整",
-  "standardVehicle": "标准专车",
-  "executiveVehicle": "商务车",
-  "luxuryVehicle": "豪华车",
-  "sevenSeater": "7座车",
-  "luxuryVan": "豪华商务车"
+  "standardVehicle": "舒适级",
+  "executiveVehicle": "头等舱级",
+  "luxuryVehicle": "行政级",
+  "sevenSeater": "舒适 XL",
+  "luxuryVan": "行政 XL"
 }
