@@ -1,9 +1,10 @@
 from datetime import time 
 from rest_framework.exceptions import ValidationError
+from apps.vehicle.catalog import canonical_vehicle_code
 
 
 PRICING = {
-    "Standard PHV": {
+    "comfort": {
         "normal": [
             (10, 4.60),
             (20, 3.68),
@@ -27,7 +28,7 @@ PRICING = {
             (90, 2.08),
         ]
     },
-    "7 Seaters PHV": {
+    "comfort_xl": {
         "normal": [
             (10, 5.50),
             (20, 4.40),
@@ -51,7 +52,7 @@ PRICING = {
             (90, 2.29),
         ]
     },
-    "Luxury": {
+    "executive": {
         "normal": [
             (10, 15.00),
             (20, 12.00),
@@ -75,7 +76,7 @@ PRICING = {
             (90, 6.42),
         ]
     },
-    "Luxury Van": {
+    "executive_xl": {
         "normal": [
             (10, 12.00),
             (20, 9.60),
@@ -99,7 +100,7 @@ PRICING = {
             (90, 4.57),
         ]
     },
-    'VIP Business PHV':{
+    'first_class':{
         "normal": [
             (10, 35.00),
             (20, 28.00),
@@ -147,6 +148,7 @@ def _apply_minimum_fare(subtotal, minimum_fare=None):
 
 
 def get_rate_per_mile(car_type, distance_miles, is_peak):
+    car_type = canonical_vehicle_code(car_type)
     if car_type not in PRICING:
         raise ValidationError({"details" : "Unsupported car type"})
 
@@ -233,7 +235,7 @@ def calculate_airport_vat(cost, pickup_airport=None, dropoff_airport=None):
 
 def _calculate_total_cost_legacy(
     trip_time_obj,
-    car_type_name_en,
+    car_type_code,
     distance_miles,
     pickup_lat=None,
     pickup_lng=None,
@@ -245,7 +247,7 @@ def _calculate_total_cost_legacy(
     Legacy hardcoded pricing calculation.
     Used when dynamic pricing is disabled.
     """
-    base_trip_cost = calculate_trip_cost(trip_time_obj, car_type_name_en, distance_miles)
+    base_trip_cost = calculate_trip_cost(trip_time_obj, canonical_vehicle_code(car_type_code), distance_miles)
     regular_vat, cost_with_vat = calculate_vat(base_trip_cost)
 
     # اكتشاف المطارات من الإحداثيات إن وُجدت
@@ -291,7 +293,7 @@ def _calculate_total_cost_legacy(
 
 def calculate_total_cost(
     trip_time_obj,
-    car_type_name_en,
+    car_type_code,
     distance_miles,
     pickup_lat=None,
     pickup_lng=None,
@@ -309,7 +311,7 @@ def calculate_total_cost(
     
     Args:
         trip_time_obj: datetime.time - Trip time
-        car_type_name_en: str - Vehicle type name (must match VehicleType.name_en)
+        car_type_code: str - Immutable VehicleType.code (legacy names accepted temporarily)
         distance_miles: float - Trip distance in miles
         pickup_lat / pickup_lng / dropoff_lat / dropoff_lng:
             إحداثيات البداية والنهاية لاكتشاف المطار تلقائياً (إن وُجد).
@@ -328,7 +330,7 @@ def calculate_total_cost(
         logger.warning(f"Pricing settings unavailable, falling back to legacy pricing: {str(e)}")
         return _calculate_total_cost_legacy(
             trip_time_obj,
-            car_type_name_en,
+            car_type_code,
             distance_miles,
             pickup_lat=pickup_lat,
             pickup_lng=pickup_lng,
@@ -344,7 +346,8 @@ def calculate_total_cost(
             from apps.pricing.services.pricing_engine import PricingEngine
             from apps.vehicle.models import VehicleType
 
-            vehicle_type = VehicleType.objects.get(name_en=car_type_name_en)
+            vehicle_code = canonical_vehicle_code(car_type_code)
+            vehicle_type = VehicleType.objects.get(code=vehicle_code)
 
             result = PricingEngine.calculate_trip_cost(
                 trip_time=trip_time_obj,
@@ -362,14 +365,14 @@ def calculate_total_cost(
         except Exception as e:
             logger.exception(
                 "Error in dynamic pricing for %s at %s miles",
-                car_type_name_en,
+                car_type_code,
                 distance_miles,
             )
             raise
 
     return _calculate_total_cost_legacy(
         trip_time_obj,
-        car_type_name_en,
+        car_type_code,
         distance_miles,
         pickup_lat=pickup_lat,
         pickup_lng=pickup_lng,
