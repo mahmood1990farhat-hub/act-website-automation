@@ -17,7 +17,13 @@ export const locationValidationMessage =
 export const hasValidCoordinates = (point: any) => {
   const lat = point?.coordinates?.lat;
   const lng = point?.coordinates?.lng;
-  return Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0);
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 && lat <= 90 &&
+    lng >= -180 && lng <= 180 &&
+    !(lat === 0 && lng === 0)
+  );
 };
 
 const normalizeTripDate = (date: string) => {
@@ -35,7 +41,12 @@ export function buildTripQuoteRequest({
 }) {
   const pickup = routePoints.find((point) => point.type === "pickup")?.point;
   const dropoff = routePoints.find((point) => point.type === "dropoff")?.point;
-  if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff)) {
+  // Validate every selected stop at the payload boundary as well as in the UI.
+  // Never submit missing or invalid coordinates for an added stop.
+  const hasInvalidStop = routePoints.some(
+    (point) => point.type === "stop" && !hasValidCoordinates(point.point)
+  );
+  if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff) || hasInvalidStop) {
     throw new Error(locationValidationMessage);
   }
 
