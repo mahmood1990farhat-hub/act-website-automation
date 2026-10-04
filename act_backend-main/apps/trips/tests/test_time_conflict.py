@@ -32,10 +32,11 @@ class TimeConflictValidationTests(TestCase):
         
         # Create vehicle type
         self.vehicle_type = VehicleType.objects.create(
-            name_en="Standard PHV",
-            name_ar="Standard PHV",
-            desc_en="Standard PHV",
-            desc_ar="Standard PHV",
+            code="comfort",
+            name_en="Comfort Class",
+            name_ar="فئة الراحة",
+            desc_en="Comfort Class",
+            desc_ar="فئة الراحة",
             icon=SimpleUploadedFile("test_icon.png", b"fake icon content"),
             max_passengers_count=4,
             order=0
