@@ -116,6 +116,60 @@ jobs:
           apps.vehicle.tests.test_vehicle_class_codes
           --verbosity 2
 
+
+  stripe-sandbox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      STRIPE_SANDBOX_SECRET_KEY: ${{ secrets.STRIPE_SANDBOX_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned Stripe SDK
+        run: pip install stripe==12.5.1
+      - name: Verify sandbox API and PaymentIntent lifecycle
+        run: |
+          python - <<'PY'
+          import os
+          import stripe
+
+          key = os.environ.get("STRIPE_SANDBOX_SECRET_KEY", "")
+          assert key.startswith("sk_"), "STRIPE_SANDBOX_SECRET_KEY is missing or invalid"
+          stripe.api_key = key
+
+          account = stripe.Account.retrieve()
+          assert account.id, "Stripe sandbox account could not be retrieved"
+
+          intent = stripe.PaymentIntent.create(
+              amount=100,
+              currency="gbp",
+              payment_method_types=["card"],
+              metadata={
+                  "act_acceptance": "website-payment-booking",
+                  "environment": "sandbox",
+              },
+              description="ACT Website Acceptance - sandbox only",
+          )
+          assert intent.id.startswith("pi_")
+          assert intent.amount == 100
+          assert intent.currency == "gbp"
+          assert intent.livemode is False, "Refusing to run acceptance against live Stripe mode"
+
+          retrieved = stripe.PaymentIntent.retrieve(intent.id)
+          assert retrieved.id == intent.id
+          assert retrieved.livemode is False
+
+          cancelled = stripe.PaymentIntent.cancel(intent.id)
+          assert cancelled.status == "canceled"
+          assert cancelled.livemode is False
+
+          print("PASS Stripe sandbox authentication and non-live PaymentIntent lifecycle")
+          PY
+
   frontend-booking:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
