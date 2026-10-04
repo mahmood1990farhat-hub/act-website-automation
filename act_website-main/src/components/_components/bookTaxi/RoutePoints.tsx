@@ -62,6 +62,7 @@ type TaxiFormProps = {
     numberOfPassengers: number;
   };
   setTripData: (rs: calculatTripCost) => void;
+  resetQuoteState: () => void;
   nextStep: () => void;
 };
 
@@ -72,6 +73,7 @@ export default function RoutePoints({
   book_Taxi,
   setValue,
   setTripData,
+  resetQuoteState,
   formDetails,
   nextStep,
 }: TaxiFormProps) {
@@ -171,6 +173,8 @@ export default function RoutePoints({
       return;
     }
 
+    // A new quote request invalidates all previous quote/vehicle/payment state.
+    resetQuoteState();
     setIsLoading(true);
 
     try {
