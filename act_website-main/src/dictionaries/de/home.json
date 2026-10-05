@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Zahlungsdetails",
-      "subtitle": "Stornierung mindestens 24 Stunden vor der Abholung eingegangen: vollständige Erstattung. Innerhalb von 24 Stunden oder bei Nichterscheinen können angemessene, nachgewiesene Verluste abgezogen werden, begrenzt auf den Buchungspreis und unter Berücksichtigung eingesparter Kosten oder Ersatzaufträge. Bitte lesen Sie vor der Zahlung die Geschäftsbedingungen.",
+      "subtitle": "Stornierung mindestens 3 Stunden vor der Abholung eingegangen: vollständige Erstattung. Innerhalb von 3 Stunden oder bei Nichterscheinen können angemessene, nachgewiesene Verluste abgezogen werden, begrenzt auf den Buchungspreis und unter Berücksichtigung eingesparter Kosten oder Ersatzaufträge. Bitte lesen Sie vor der Zahlung die Geschäftsbedingungen.",
       "form": {
         "Card_Number": "Kartennummer",
         "Expired_date": "Ablaufdatum",
@@ -387,16 +387,16 @@
           "desc": "Alle Fahrpreise werden in GBP (£) angegeben. Für zusätzliche Zwischenstopps, Wartezeiten oder Leistungen außerhalb der üblichen Zeiten können zusätzliche Gebühren anfallen. Sofern nicht anders vereinbart, ist die Zahlung bei der Buchung fällig."
         },
         {
-          "title": "Stornierung mindestens 24 Stunden vor der Abholung",
-          "desc": "Geht Ihre Stornierung bei ACT mindestens 24 Stunden vor der bestätigten Abholzeit ein, einschließlich genau 24 Stunden vorher, erhalten Sie eine vollständige Erstattung."
+          "title": "Stornierung mindestens 3 Stunden vor der Abholung",
+          "desc": "Geht Ihre Stornierung bei ACT mindestens 3 Stunden vor der bestätigten Abholzeit ein, einschließlich genau 3 Stunden vorher, erhalten Sie eine vollständige Erstattung."
         },
         {
-          "title": "Stornierung innerhalb von 24 Stunden",
+          "title": "Stornierung innerhalb von 3 Stunden",
           "desc": "ACT kann angemessene, nachgewiesene Verluste, die unmittelbar durch Ihre Stornierung entstehen, bis zur Höhe des Buchungspreises abziehen. Wir ergreifen angemessene Maßnahmen zur Verringerung dieser Verluste und berücksichtigen eingesparte Kosten oder Ersatzaufträge. Ein verbleibender Betrag wird erstattet."
         },
         {
           "title": "Nichterscheinen des Fahrgastes",
-          "desc": "Ein Nichterscheinen wird erst nach Ablauf der vereinbarten Wartezeit und dokumentierten Versuchen, den Fahrgast zu erreichen, festgestellt. Ein Abzug folgt derselben verlustbezogenen Regel wie bei einer Stornierung innerhalb von 24 Stunden und ist auf den Buchungspreis begrenzt."
+          "desc": "Ein Nichterscheinen wird erst nach Ablauf der vereinbarten Wartezeit und dokumentierten Versuchen, den Fahrgast zu erreichen, festgestellt. Ein Abzug folgt derselben verlustbezogenen Regel wie bei einer Stornierung innerhalb von 3 Stunden und ist auf den Buchungspreis begrenzt."
         },
         {
           "title": "Wartezeiten",
@@ -481,7 +481,7 @@
       },
       {
         "question": "Kann ich meine Buchung stornieren oder ändern?",
-        "answer": "Ja. Geht Ihre Stornierung bei ACT mindestens 24 Stunden vor der bestätigten Abholzeit ein, erhalten Sie eine vollständige Erstattung. Innerhalb von 24 Stunden können angemessene, nachgewiesene Stornierungsverluste abgezogen werden, begrenzt auf den Buchungspreis und vermindert um eingesparte Kosten oder Ersatzaufträge. Änderungen sind abhängig von der Verfügbarkeit; ein geänderter Preis bedarf Ihrer Zustimmung. Senden Sie Ihre Buchungsreferenz an info@airportandcitytransfer.com und rufen Sie bei dringenden Änderungen +44 208 153 0303 an. Einzelheiten zu Wartezeiten, Nichterscheinen und Erstattungsbearbeitung finden Sie in unseren Geschäftsbedingungen."
+        "answer": "Ja. Geht Ihre Stornierung bei ACT mindestens 3 Stunden vor der bestätigten Abholzeit ein, erhalten Sie eine vollständige Erstattung. Innerhalb von 3 Stunden können angemessene, nachgewiesene Stornierungsverluste abgezogen werden, begrenzt auf den Buchungspreis und vermindert um eingesparte Kosten oder Ersatzaufträge. Änderungen sind abhängig von der Verfügbarkeit; ein geänderter Preis bedarf Ihrer Zustimmung. Senden Sie Ihre Buchungsreferenz an info@airportandcitytransfer.com und rufen Sie bei dringenden Änderungen +44 208 153 0303 an. Einzelheiten zu Wartezeiten, Nichterscheinen und Erstattungsbearbeitung finden Sie in unseren Geschäftsbedingungen."
       },
       {
         "question": "Was mache ich, wenn ich etwas im Fahrzeug vergessen habe?",
