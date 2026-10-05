@@ -15,6 +15,7 @@ User = get_user_model()
 class DriverAssignmentLifecycleTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
+            username="assignment-admin",
             email="assignment-admin@example.invalid",
             password="testpass123",
             first_name="Admin",
@@ -67,6 +68,7 @@ class DriverAssignmentLifecycleTests(TestCase):
 
     def _driver(self, email, vehicle_type, number):
         user = User.objects.create_user(
+            username=email.split("@")[0],
             email=email,
             password="testpass123",
             first_name="Test",
