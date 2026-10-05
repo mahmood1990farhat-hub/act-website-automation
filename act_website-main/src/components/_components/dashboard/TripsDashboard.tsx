@@ -1304,30 +1304,40 @@ export default function TripsDashboard({
 								{(detailsTrips?.status === "pending" ||
 									detailsTrips?.cancelled_by_driver) &&
 									!detailsTrips?.is_guest_driver && (
-										<Button
-											type="button"
-											onClick={() => {
-												setGuestDriverForm({
-													name: "",
-													phone: "",
-													company: "",
-													car_info: {
-														brand: "",
-														model: "",
-														color: "",
-														registration_number: "",
-														year: "",
-														additional_notes: "",
-													},
-												});
-												setShowAssignGuestModal(true);
-											}}
-											className="w-full sm:flex-1 font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30"
-										>
-											{trans?.trips?.assignToNewDriver ||
-												trans?.trips?.assignGuestDriver ||
-												"Assign to new driver"}
-										</Button>
+										<>
+											<Button
+												type="button"
+												onClick={() => {
+													setSelectedActDriverId("");
+													setShowAssignActDriverModal(true);
+												}}
+												className="w-full sm:flex-1 font-semibold bg-yellow-500 hover:bg-yellow-600 text-black shadow-lg shadow-yellow-500/30"
+											>
+												{trans?.trips?.assignActDriver || "Assign ACT driver"}
+											</Button>
+											<Button
+												type="button"
+												onClick={() => {
+													setGuestDriverForm({
+														name: "",
+														phone: "",
+														company: "",
+														car_info: {
+															brand: "",
+															model: "",
+															color: "",
+															registration_number: "",
+															year: "",
+															additional_notes: "",
+														},
+													});
+													setShowAssignGuestModal(true);
+												}}
+												className="w-full sm:flex-1 font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30"
+											>
+												{trans?.trips?.assignGuestDriver || "Assign external driver"}
+											</Button>
+										</>
 									)}
 							</div>
 						</div>
