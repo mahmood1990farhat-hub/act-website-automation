@@ -21,12 +21,28 @@ from apps.pricing.services.extra_service_resolver import (
 )
 from apps.payments.models import PendingPayment
 from apps.vehicle.models import VehicleType
+from apps.vehicle.catalog import vehicle_accepts_luggage
 import stripe
 from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def validate_vehicle_capacity(data, car_type):
+    passengers = int(data.get('passengers_count') or 0)
+    large = int(data.get('large_suitcase') or 0)
+    small = int(data.get('small_suitcase') or 0)
+
+    if passengers > car_type.max_passengers_count:
+        raise ValidationError({
+            'car_type': _('The selected vehicle does not have enough passenger capacity.')
+        })
+    if not vehicle_accepts_luggage(car_type.code, large, small):
+        raise ValidationError({
+            'car_type': _('The selected vehicle does not have enough luggage capacity. Please choose another vehicle class.')
+        })
 
 
 def calculate_authoritative_payment_price(data, car_type, distance_miles, booking_details):
@@ -102,6 +118,8 @@ class InitiatePaymentView(EMADBaseView):
             car_type = VehicleType.objects.get(id=car_type_id)
         except VehicleType.DoesNotExist:
             raise ValidationError({'car_type': _('Invalid car type')})
+
+        validate_vehicle_capacity(data, car_type)
 
         res = get_route_with_distance(
             pickup_lat=data.get('pickup_lat'),
@@ -298,6 +316,8 @@ class InitiateGuestPaymentView(EMADBaseView):
             car_type = VehicleType.objects.get(id=car_type_id)
         except VehicleType.DoesNotExist:
             raise ValidationError({'car_type': _('Invalid car type')})
+
+        validate_vehicle_capacity(data, car_type)
 
         res = get_route_with_distance(
             pickup_lat=data.get('pickup_lat'),
