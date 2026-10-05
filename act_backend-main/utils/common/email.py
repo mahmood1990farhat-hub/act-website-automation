@@ -732,12 +732,11 @@ def send_trip_accepted_to_passenger(
             registration_number = guest_car.get("registration_number") or "N/A"
             vehicle_color = guest_car.get("color") or "N/A"
             driver_pco_url = ""
+            driver_licence_number = guest_driver_info.get("licence_number") or "N/A"
+            driver_photo_url = guest_driver_info.get("photo_url") or ""
         else:
-            driver_name = (
-                driver_user.get_full_name().strip()
-                if driver_user and driver_user.get_full_name().strip()
-                else (driver_user.first_name if driver_user else "")
-            ) or "N/A"
+            # TfL passenger disclosure uses the driver first name.
+            driver_name = (driver_user.first_name.strip() if driver_user and driver_user.first_name else "") or "N/A"
             driver_phone = getattr(driver_user, "phone_number", "") or "N/A"
 
             vehicle = (
@@ -748,13 +747,15 @@ def send_trip_accepted_to_passenger(
                 else None
             )
             vehicle_type = getattr(vehicle, "vehicle_type", None)
-            vehicle_label = (
+            vehicle_make = getattr(vehicle, "make", "") or ""
+            vehicle_model = getattr(vehicle, "model", "") or ""
+            vehicle_label = " ".join(part for part in (vehicle_make, vehicle_model) if part).strip() or (
                 getattr(vehicle_type, "name_en", None)
                 or getattr(vehicle_type, "name_ar", None)
                 or "Private Transfer"
             )
             registration_number = getattr(vehicle, "vehicle_number", "") or "N/A"
-            vehicle_color = "N/A"
+            vehicle_color = getattr(vehicle, "color", "") or "N/A"
 
             base_driver = getattr(trip, "base_driver", None)
             pco_file = getattr(base_driver, "pco", None) if base_driver else None
@@ -763,12 +764,21 @@ def send_trip_accepted_to_passenger(
                 if pco_file and getattr(pco_file, "name", None)
                 else ""
             )
+            driver_licence_number = getattr(base_driver, "pco_licence_number", "") or "N/A"
+            driver_photo_file = getattr(base_driver, "driver_photo", None)
+            driver_photo_url = (
+                _absolute_app_url(driver_photo_file.url)
+                if driver_photo_file and getattr(driver_photo_file, "name", None)
+                else ""
+            )
 
         context = {
             "first_name": first_name,
             "driver_name": driver_name,
             "driver_phone": driver_phone,
             "driver_pco_url": driver_pco_url,
+            "driver_licence_number": driver_licence_number,
+            "driver_photo_url": driver_photo_url,
             "vehicle_name": vehicle_label,
             "vehicle_registration": registration_number,
             "vehicle_color": vehicle_color,
@@ -788,6 +798,7 @@ def send_trip_accepted_to_passenger(
                 "name": driver_name, "phone": driver_phone,
                 "vehicle": (getattr(vehicle_type, "name_ar", None) or vehicle_label) if not (is_guest_driver and guest_driver_info) else vehicle_label,
                 "registration": registration_number, "color": vehicle_color, "pco_url": driver_pco_url,
+                "licence_number": driver_licence_number, "photo_url": driver_photo_url,
             })
         subject = _("Your Driver Details – Airport & City Transfer")
         html_message = render_to_string("emails/trip_driver_details_passenger.html", context)
