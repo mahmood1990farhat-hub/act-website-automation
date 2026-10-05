@@ -103,6 +103,8 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         )
         self.assertEqual(intent.status, "succeeded")
         self.assertFalse(intent.livemode)
+        # Always clean up the sandbox charge, even if a later webhook assertion fails.
+        self.addCleanup(stripe.Refund.create, payment_intent=intent.id)
 
         pending.payment_intent_id = intent.id
         pending.save(update_fields=["payment_intent_id"])
@@ -110,10 +112,9 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         event = self._find_success_event(intent.id)
         self.assertFalse(event.livemode)
 
-        payload = json.dumps(
-            event.to_dict_recursive(),
-            separators=(",", ":"),
-        )
+        # StripeObject is mapping-compatible across supported SDK versions;
+        # avoid version-specific to_dict_recursive helpers.
+        payload = json.dumps(event, separators=(",", ":"))
         timestamp = int(time.time())
         secret = "whsec_act_local_acceptance"
         signature = stripe.WebhookSignature._compute_signature(
@@ -154,7 +155,3 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         )
         self.assertEqual(post_trip_creation.call_count, 1)
         self.assertEqual(queue_confirmations.call_count, 2)
-
-        # Sandbox cleanup: refund the test charge; no real funds move.
-        refund = stripe.Refund.create(payment_intent=intent.id)
-        self.assertFalse(refund.livemode)
