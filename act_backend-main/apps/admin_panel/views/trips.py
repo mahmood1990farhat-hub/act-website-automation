@@ -121,6 +121,10 @@ class TripListView(EMADBaseView):
                 Q(passenger__user__last_name__icontains=search) |
                 Q(passenger__user__email__icontains=search) |
                 Q(passenger__user__phone_number__icontains=search) |
+                Q(passenger_name__icontains=search) |
+                Q(passenger_email__icontains=search) |
+                Q(passenger_phone__icontains=search) |
+                Q(stripe_payment_intent__icontains=search) |
                 Q(base_driver__user__first_name__icontains=search) |
                 Q(base_driver__user__last_name__icontains=search) |
                 Q(base_driver__user__email__icontains=search) |
