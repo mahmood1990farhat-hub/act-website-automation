@@ -3,6 +3,7 @@ from datetime import date, time, timedelta
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
+from unittest.mock import patch
 
 from apps.drivers.models import BaseDriver, NormalDriver
 from apps.trips.models import Trip
@@ -61,6 +62,9 @@ class DriverAssignmentLifecycleTests(TestCase):
             status="pending",
             is_paid=True,
             stripe_payment_intent="pi_assignment_acceptance",
+            passenger_name="Guest Passenger",
+            passenger_email="guest@example.invalid",
+            is_guest_checkout=True,
         )
 
         self.admin_client = APIClient()
@@ -124,9 +128,18 @@ class DriverAssignmentLifecycleTests(TestCase):
 
         assigned_client = APIClient()
         assigned_client.force_authenticate(user=self.driver1.user)
-        accepted = assigned_client.post(
-            f"/api/trips/{self.trip.id}/accept/", {}, format="json"
-        )
+        with patch(
+            "apps.trips.views.accept_trip.send_trip_accepted_to_passenger"
+        ) as send_driver_details:
+            accepted = assigned_client.post(
+                f"/api/trips/{self.trip.id}/accept/", {}, format="json"
+            )
+            send_driver_details.assert_called_once()
+            self.assertIsNone(send_driver_details.call_args.args[0])
+            self.assertEqual(
+                send_driver_details.call_args.args[1].passenger_email,
+                "guest@example.invalid",
+            )
         self.assertEqual(accepted.status_code, 200, accepted.data)
         self.trip.refresh_from_db()
         self.assertEqual(self.trip.status, "accepted")
