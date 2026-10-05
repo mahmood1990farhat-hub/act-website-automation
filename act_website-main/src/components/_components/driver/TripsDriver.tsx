@@ -348,7 +348,23 @@ console.log(statusTripe);
             <div className=" flex max-md:flex-col  gap-4 h-[630px]  max-h-[90vh] overflow-y-auto">
         
               <div className="md:w-1/2 overflow-y-auto on-scrollbar">
-                <TripDetails detailsTrips={detailsTrips} trans={trans} locale={locale}/>
+                <TripDetails
+                  detailsTrips={detailsTrips}
+                  trans={trans}
+                  locale={locale}
+                  token={token}
+                  tripState={
+                    detailsTrips?.status === "pending"
+                      ? "newRequests"
+                      : detailsTrips?.status === "accepted"
+                        ? "accpted"
+                        : detailsTrips?.status === "driver_on_the_way"
+                          ? "upcoming"
+                          : detailsTrips?.status === "active"
+                            ? "active"
+                            : undefined
+                  }
+                />
               </div>
 
               <div className="md:w-1/2 w-full min-h-[300px] max-md:max-h-[400px] rounded overflow-hidden">
