@@ -83,6 +83,8 @@ export default function TripsDashboard({
 		name: string;
 		phone: string;
 		company: string;
+		licence_number: string;
+		photo_url: string;
 		car_info: {
 			brand: string;
 			model: string;
@@ -95,6 +97,8 @@ export default function TripsDashboard({
 		name: "",
 		phone: "",
 		company: "",
+		licence_number: "",
+		photo_url: "",
 		car_info: {
 			brand: "",
 			model: "",
@@ -221,6 +225,8 @@ export default function TripsDashboard({
 			const body: any = {
 				guest_driver_name: guestDriverForm.name,
 				guest_driver_phone: guestDriverForm.phone,
+				guest_driver_licence_number: guestDriverForm.licence_number,
+				guest_driver_photo_url: guestDriverForm.photo_url,
 			};
 
 			if (guestDriverForm.company.trim()) {
@@ -1484,11 +1490,17 @@ export default function TripsDashboard({
 							e.preventDefault();
 							if (
 								!guestDriverForm.name.trim() ||
-								!guestDriverForm.phone.trim()
+								!guestDriverForm.phone.trim() ||
+								!guestDriverForm.licence_number.trim() ||
+								!guestDriverForm.photo_url.trim() ||
+								!guestDriverForm.car_info.brand.trim() ||
+								!guestDriverForm.car_info.model.trim() ||
+								!guestDriverForm.car_info.color.trim() ||
+								!guestDriverForm.car_info.registration_number.trim()
 							) {
 								toast.error(
 									trans?.trips?.assignGuestValidation ||
-										"Name and phone are required",
+										"Driver name, phone, TfL licence number, photo URL, vehicle make/model/colour and registration are required",
 								);
 								return;
 							}
@@ -1570,11 +1582,35 @@ export default function TripsDashboard({
 								}
 							/>
 						</div>
+						<div>
+							<label className="block text-sm font-medium text-foreground mb-1">
+								TfL PHV driver licence number <span className="text-red-500">*</span>
+							</label>
+							<input
+								type="text"
+								value={guestDriverForm.licence_number}
+								onChange={(e) => setGuestDriverForm((prev) => ({ ...prev, licence_number: e.target.value }))}
+								className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground"
+								placeholder="TfL PHV driver licence number"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-foreground mb-1">
+								Passenger-visible driver photo URL <span className="text-red-500">*</span>
+							</label>
+							<input
+								type="url"
+								value={guestDriverForm.photo_url}
+								onChange={(e) => setGuestDriverForm((prev) => ({ ...prev, photo_url: e.target.value }))}
+								className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground"
+								placeholder="https://..."
+							/>
+						</div>
 
 						{/* Car Information Section */}
 						<div className="pt-4 border-t border-border">
 							<h3 className="text-base font-semibold text-foreground mb-3">
-								{trans?.trips?.carInfoTitle || "Car Information (Optional)"}
+								{trans?.trips?.carInfoTitle || "Vehicle Information"}
 							</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
