@@ -121,6 +121,7 @@ jobs:
           apps.trips.tests.test_driver_assignment_lifecycle
           apps.trips.tests.test_passenger_driver_details
           apps.trips.tests.test_driver_details_reminder
+          apps.trips.tests.test_external_driver_passenger_details
           apps.admin_panel.tests
           apps.pricing.tests.test_monotonic_pricing
           apps.pricing.tests.test_pricing_engine
