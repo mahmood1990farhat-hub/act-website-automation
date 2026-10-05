@@ -115,6 +115,7 @@ jobs:
           apps.payments.test_urls
           apps.trips.tests.test_booking_confirmation_download
           apps.trips.tests.test_google_maps_initialization
+          apps.trips.tests.test_meet_and_greet_pricing
           apps.vehicle.tests.test_vehicle_class_codes
           --verbosity 2
       - name: Real Stripe sandbox successful payment and ACT webhook fulfillment
