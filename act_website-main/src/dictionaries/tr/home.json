@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Ödeme bilgileri",
-      "subtitle": "Alınıştan en az 24 saat önce ulaşan iptal: tam geri ödeme. Son 24 saat içinde veya gelmeme durumunda, makul ve belgelenmiş kayıplar rezervasyon bedeliyle sınırlı olarak ve tasarruf edilen maliyetler veya yerine alınan işler dikkate alınarak kesilebilir. Ödemeden önce Şartlar ve Koşulları okuyun.",
+      "subtitle": "Alınıştan en az 3 saat önce ulaşan iptal: tam geri ödeme. Son 3 saat içinde veya gelmeme durumunda, makul ve belgelenmiş kayıplar rezervasyon bedeliyle sınırlı olarak ve tasarruf edilen maliyetler veya yerine alınan işler dikkate alınarak kesilebilir. Ödemeden önce Şartlar ve Koşulları okuyun.",
       "form": {
         "Card_Number": "Kart numarası",
         "Expired_date": "Son kullanma tarihi",
@@ -387,16 +387,16 @@
           "desc": "Tüm ücretler GBP (£) cinsinden belirtilir. Ek duraklar, bekleme süresi veya normal saatler dışındaki hizmetler için ek ücret uygulanabilir. Aksi kararlaştırılmadıkça ödeme rezervasyon sırasında yapılmalıdır."
         },
         {
-          "title": "Alınıştan en az 24 saat önce iptal",
-          "desc": "İptal bildiriminiz ACT'ye onaylanan alınış saatinden en az 24 saat önce, tam 24 saat öncesi de dâhil olmak üzere ulaşırsa tam geri ödeme alırsınız."
+          "title": "Alınıştan en az 3 saat önce iptal",
+          "desc": "İptal bildiriminiz ACT'ye onaylanan alınış saatinden en az 3 saat önce, tam 3 saat öncesi de dâhil olmak üzere ulaşırsa tam geri ödeme alırsınız."
         },
         {
-          "title": "Son 24 saat içinde iptal",
+          "title": "Son 3 saat içinde iptal",
           "desc": "ACT, iptalinizin doğrudan neden olduğu makul ve belgelenmiş kayıpları rezervasyon bedeline kadar kesebilir. Bu kayıpları azaltmak için makul adımlar atar; tasarruf edilen maliyetleri veya yerine alınan işleri dikkate alırız. Kalan tutar iade edilir."
         },
         {
           "title": "Yolcunun gelmemesi",
-          "desc": "Gelmeme durumu ancak kararlaştırılan bekleme süresi dolduktan ve yolcuyla iletişim kurma girişimleri belgelendikten sonra değerlendirilir. Herhangi bir kesinti, son 24 saat içindeki iptalle aynı kayıp esaslı kurala tabidir ve rezervasyon bedeliyle sınırlıdır."
+          "desc": "Gelmeme durumu ancak kararlaştırılan bekleme süresi dolduktan ve yolcuyla iletişim kurma girişimleri belgelendikten sonra değerlendirilir. Herhangi bir kesinti, son 3 saat içindeki iptalle aynı kayıp esaslı kurala tabidir ve rezervasyon bedeliyle sınırlıdır."
         },
         {
           "title": "Bekleme süreleri",
@@ -481,7 +481,7 @@
       },
       {
         "question": "Rezervasyonumu iptal edebilir veya değiştirebilir miyim?",
-        "answer": "Evet. İptaliniz ACT'ye onaylanan alınış saatinden en az 24 saat önce ulaşırsa tam geri ödeme alırsınız. Son 24 saat içinde, makul ve belgelenmiş iptal kayıpları kesilebilir; kesinti rezervasyon bedeliyle sınırlıdır ve tasarruf edilen maliyetler veya yerine alınan işler düşülür. Değişiklikler müsaitliğe bağlıdır; güncellenen fiyatı kabul etmeniz gerekir. Rezervasyon referansınızla info@airportandcitytransfer.com adresine e-posta gönderin; acil değişiklikler için +44 208 153 0303 numarasını arayın. Bekleme, gelmeme ve geri ödeme ayrıntıları için Şartlar ve Koşullarımıza bakın."
+        "answer": "Evet. İptaliniz ACT'ye onaylanan alınış saatinden en az 3 saat önce ulaşırsa tam geri ödeme alırsınız. Son 3 saat içinde, makul ve belgelenmiş iptal kayıpları kesilebilir; kesinti rezervasyon bedeliyle sınırlıdır ve tasarruf edilen maliyetler veya yerine alınan işler düşülür. Değişiklikler müsaitliğe bağlıdır; güncellenen fiyatı kabul etmeniz gerekir. Rezervasyon referansınızla info@airportandcitytransfer.com adresine e-posta gönderin; acil değişiklikler için +44 208 153 0303 numarasını arayın. Bekleme, gelmeme ve geri ödeme ayrıntıları için Şartlar ve Koşullarımıza bakın."
       },
       {
         "question": "Araçta bir eşya unutursam ne yapmalıyım?",
