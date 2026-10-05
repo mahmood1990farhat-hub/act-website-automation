@@ -116,6 +116,19 @@ class ThreeHourCancellationPolicyTests(TestCase):
         self.assertEqual(trip.status, "cancelled")
         self.assertEqual(trip.refund_status, "manual_review")
 
+        support = self.client.post(
+            "/api/complaints/passenger/complaints/submit/",
+            {
+                "trip": trip.id,
+                "complaint_type": "payment_issue",
+                "title": "Refund review",
+                "description": "Please review the refund outcome for this cancelled booking.",
+            },
+            format="json",
+        )
+        self.assertEqual(support.status_code, 201, support.data)
+        self.assertTrue(support.data["data"]["ticket_number"].startswith("COMP-"))
+
     def test_active_journey_cannot_be_cancelled_online(self):
         trip = self._trip(2, status="active")
         response = self.client.post(f"/api/passenger/trips/{trip.id}/cancel/", {}, format="json")
