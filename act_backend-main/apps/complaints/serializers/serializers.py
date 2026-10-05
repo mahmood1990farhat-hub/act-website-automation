@@ -92,8 +92,10 @@ class TripComplaintSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Only passengers can submit trip complaints.")
             if trip.passenger.user_id != user.id:
                 raise serializers.ValidationError("This trip does not belong to you.")
-            if trip.status != 'completed':
-                raise serializers.ValidationError("You can only complain about completed trips.")
+            if trip.status not in ('completed', 'cancelled'):
+                raise serializers.ValidationError(
+                    "You can submit a complaint about completed or cancelled trips."
+                )
         
         return attrs
 
