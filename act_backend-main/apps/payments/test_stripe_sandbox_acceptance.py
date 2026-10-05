@@ -91,6 +91,7 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         intent = stripe.PaymentIntent.create(
             amount=100,
             currency="gbp",
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             payment_method="pm_card_visa",
             confirm=True,
             metadata={
