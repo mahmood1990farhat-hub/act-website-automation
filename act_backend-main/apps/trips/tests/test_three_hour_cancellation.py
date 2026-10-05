@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -91,7 +92,7 @@ class ThreeHourCancellationPolicyTests(TestCase):
 
         self.assertEqual(response.status_code, 200, response.data)
         self.assertTrue(response.data["data"]["refund_processed"])
-        self.assertEqual(response.data["data"]["refund_amount"], "80")
+        self.assertEqual(Decimal(response.data["data"]["refund_amount"]), Decimal("80.00"))
         create_refund.assert_called_once()
         trip.refresh_from_db()
         self.assertEqual(trip.status, "cancelled")
