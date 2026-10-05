@@ -52,24 +52,29 @@ class VehicleClassCodeTests(SimpleTestCase):
     def test_approved_luggage_patterns_are_stable(self):
         self.assertEqual(VEHICLE_LUGGAGE_PATTERNS, {
             "comfort": ((2, 2), (0, 4)),
-            "comfort_xl": ((3, 3), (4, 0)),
-            "executive": ((2, 2), (0, 4)),
+            "comfort_xl": ((4, 2),),
+            "executive": ((2, 0), (0, 3)),
             "executive_xl": ((5, 4), (6, 2)),
-            "first_class": ((2, 2), (0, 4)),
+            "first_class": ((2, 0), (0, 3)),
         })
 
-    def test_luggage_must_fit_one_complete_approved_pattern(self):
-        accepted = {
-            "comfort": ((2, 2), (0, 4)),
-            "comfort_xl": ((3, 3), (4, 0)),
-            "executive": ((2, 2), (0, 4)),
-            "executive_xl": ((5, 4), (6, 2)),
-            "first_class": ((2, 2), (0, 4)),
-        }
-        for code, patterns in accepted.items():
-            for large, small in patterns:
-                self.assertTrue(vehicle_accepts_luggage(code, large, small))
+    def test_comfort_xl_capacity_changes_when_third_row_is_in_use(self):
+        self.assertTrue(vehicle_accepts_luggage("comfort_xl", 4, 2, 5))
+        self.assertFalse(vehicle_accepts_luggage("comfort_xl", 4, 2, 6))
+        self.assertTrue(vehicle_accepts_luggage("comfort_xl", 1, 0, 7))
+        self.assertTrue(vehicle_accepts_luggage("comfort_xl", 0, 2, 7))
+        self.assertFalse(vehicle_accepts_luggage("comfort_xl", 1, 1, 7))
 
-        self.assertFalse(vehicle_accepts_luggage("comfort", 1, 3))
-        self.assertFalse(vehicle_accepts_luggage("comfort_xl", 4, 1))
-        self.assertFalse(vehicle_accepts_luggage("executive_xl", 6, 3))
+    def test_saloon_classes_use_conservative_cross_powertrain_capacity(self):
+        for code in ("executive", "first_class"):
+            self.assertTrue(vehicle_accepts_luggage(code, 2, 0, 4))
+            self.assertTrue(vehicle_accepts_luggage(code, 0, 3, 4))
+            self.assertFalse(vehicle_accepts_luggage(code, 2, 2, 4))
+
+    def test_luggage_must_fit_one_complete_approved_pattern(self):
+        self.assertTrue(vehicle_accepts_luggage("comfort", 2, 2, 4))
+        self.assertTrue(vehicle_accepts_luggage("comfort", 0, 4, 4))
+        self.assertFalse(vehicle_accepts_luggage("comfort", 1, 3, 4))
+        self.assertTrue(vehicle_accepts_luggage("executive_xl", 5, 4, 7))
+        self.assertTrue(vehicle_accepts_luggage("executive_xl", 6, 2, 7))
+        self.assertFalse(vehicle_accepts_luggage("executive_xl", 6, 3, 7))
