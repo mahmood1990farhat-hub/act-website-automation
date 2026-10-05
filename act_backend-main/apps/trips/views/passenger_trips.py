@@ -185,9 +185,10 @@ class PassengerCancelTripView(EMADBaseView):
     POST /api/passenger/trips/{id}/cancel/
     
     Refund Policy:
-    - Cancellations made more than 24 hours before trip time → Fully refundable
-    - Cancellations made within 24 hours of trip time → Non-refundable
-    - No-shows → Non-refundable
+    - Cancellation at least 3 hours before pickup → full automatic refund
+    - Within 3 hours → cancellation allowed before pickup, but no automatic refund;
+      support/admin review applies under ACT cancellation terms
+    - No-shows → no automatic refund
     """
     permission_classes = [IsVerifiedAndProfileCompleted, IsPassenger]
     http_method_names = ['post']
@@ -236,10 +237,10 @@ class PassengerCancelTripView(EMADBaseView):
             )
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
-        if trip.status == 'completed':
+        if trip.status not in ('pending', 'accepted'):
             message = get_bilingual_error_message(
-                'Cannot cancel a completed trip.',
-                'لا يمكن إلغاء رحلة مكتملة.',
+                'This journey can no longer be cancelled online. Please contact ACT support.',
+                'لم يعد من الممكن إلغاء هذه الرحلة عبر الإنترنت. يرجى التواصل مع دعم ACT.',
                 locale
             )
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
@@ -255,28 +256,28 @@ class PassengerCancelTripView(EMADBaseView):
         is_refundable = False
         refund_reason = None
 
-        if time_until_trip > timedelta(hours=24):
-            # More than 24 hours before trip → Fully refundable
+        if time_until_trip >= timedelta(hours=3):
+            # At least 3 hours before pickup → full automatic refund
             is_refundable = True
             refund_reason = get_bilingual_error_message(
-                'Cancellation made more than 24 hours before trip time.',
-                'تم الإلغاء قبل أكثر من 24 ساعة من وقت الرحلة.',
+                'Cancellation received at least 3 hours before pickup.',
+                'تم استلام الإلغاء قبل موعد الاستلام بثلاث ساعات على الأقل.',
                 locale
             )
         elif time_until_trip > timedelta(0):
-            # Within 24 hours → Non-refundable
+            # Within 3 hours → no automatic refund; support/admin review may apply.
             is_refundable = False
             refund_reason = get_bilingual_error_message(
-                'Cancellation made within 24 hours of trip time. No refund available.',
-                'تم الإلغاء خلال 24 ساعة من وقت الرحلة. لا يوجد استرداد.',
+                'Cancellation received within 3 hours of pickup. No automatic refund is issued; contact ACT support for any applicable review.',
+                'تم استلام الإلغاء خلال ثلاث ساعات من موعد الاستلام. لا يتم إصدار استرداد تلقائي؛ يرجى التواصل مع دعم ACT لأي مراجعة تنطبق.',
                 locale
             )
         else:
             # Trip time has passed (no-show) → Non-refundable
             is_refundable = False
             refund_reason = get_bilingual_error_message(
-                'Trip time has passed. No refund available for no-shows.',
-                'لقد انتهى وقت الرحلة. لا يوجد استرداد للغياب.',
+                'Pickup time has passed. No automatic refund is available for a no-show; contact ACT support if review is required.',
+                'لقد مضى موعد الاستلام. لا يتوفر استرداد تلقائي في حالة عدم الحضور؛ يرجى التواصل مع دعم ACT إذا كانت المراجعة مطلوبة.',
                 locale
             )
 
@@ -377,13 +378,13 @@ class PassengerCancelTripView(EMADBaseView):
             )
         elif is_refundable and trip.is_paid:
             refund_note_en = (
-                "Cancellation was more than 24 hours before the trip; no payment refund was processed "
+                "Cancellation was at least 3 hours before pickup; no payment refund was processed "
                 "(or no Stripe payment was on file)."
             )
         elif not is_refundable and trip.is_paid:
             refund_note_en = (
-                "Per policy, no refund applies for this cancellation (within 24 hours of pickup "
-                "or after scheduled time)."
+                "No automatic refund was issued for this cancellation (within 3 hours of pickup "
+                "or after scheduled time). Contact ACT support for any applicable review."
             )
         else:
             refund_note_en = "No payment refund applies (trip was unpaid or no card charge)."
