@@ -223,8 +223,25 @@ class PricingEngine:
         )
         
         rate_per_mile = Decimal(str(pricing_tier.rate_per_mile))
-        base_trip_cost = rate_per_mile * distance_decimal * peak_multiplier
-        base_trip_cost = round(base_trip_cost, 2)
+        raw_base_trip_cost = rate_per_mile * distance_decimal * peak_multiplier
+
+        # A lower per-mile rate in the next distance band must not make a
+        # longer trip cheaper than the fare reached at an earlier boundary.
+        prior_tiers = PricingTier.objects.filter(
+            vehicle_type=vehicle_type,
+            max_distance_miles__lte=distance_decimal,
+            is_active=True,
+        ).order_by('max_distance_miles')
+        boundary_floor = Decimal('0.00')
+        for prior_tier in prior_tiers:
+            boundary_cost = (
+                Decimal(str(prior_tier.max_distance_miles))
+                * Decimal(str(prior_tier.rate_per_mile))
+                * peak_multiplier
+            )
+            boundary_floor = max(boundary_floor, boundary_cost)
+
+        base_trip_cost = round(max(raw_base_trip_cost, boundary_floor), 2)
         
 
         vat_rate = settings.vat_rate
