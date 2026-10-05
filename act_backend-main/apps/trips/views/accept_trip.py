@@ -95,18 +95,19 @@ class AcceptTripAPIView(EMADBaseView):
                 user=passenger_user_id,
                 title_en='Trip Accepted',
                 title_ar='تم قبول رحلتك',
-                desc_en=f'Your trip #{trip.id} has been accepted by a driver.', 
+                desc_en=f'Your trip #{trip.id} has been accepted by a driver.',
                 desc_ar=f'تم قبول رحلتك #{trip.id} من قبل سائق.',
                 locale=locale,
-                notification_type=NOTIFICATION_TYPE_TRIP_ACCEPTED, 
+                notification_type=NOTIFICATION_TYPE_TRIP_ACCEPTED,
                 trip_id=trip.id
             )
-            try:
-                pu = trip.passenger.user if trip.passenger else None
-                if pu:
-                    send_trip_accepted_to_passenger(pu, trip, request.user)
-            except Exception as e:
-                logger.warning("Failed to send trip-accepted email to passenger for trip %s: %s", trip.id, e)
+        try:
+            # Registered and guest-checkout passengers both receive the
+            # confirmed driver/vehicle identity by email.
+            passenger_user = trip.passenger.user if trip.passenger else None
+            send_trip_accepted_to_passenger(passenger_user, trip, request.user)
+        except Exception as e:
+            logger.warning("Failed to send trip-accepted email to passenger for trip %s: %s", trip.id, e)
         try:
             try:
                 ensure_booking_confirmation_pdf(trip)
