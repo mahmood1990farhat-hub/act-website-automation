@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
+  CarFront,
   Check,
   CheckCircle,
   ChevronLeft,
@@ -152,14 +153,27 @@ export default function ModernChooseCar({
               }`}
             >
               <div className="relative h-48 sm:h-56 overflow-hidden border-b border-white/10 bg-gradient-to-b from-white to-zinc-100">
-                <Image
-                  src={car.icon_url}
-                  alt={localizedVehicleValue(car, "name", locale)}
-                  fill
-                  className="object-contain p-4 sm:p-6 drop-shadow-2xl transition-transform duration-300 group-hover:scale-[1.03]"
-                  sizes="(max-width: 1280px) 100vw, 50vw"
-                  quality={100}
-                />
+                {car.icon_url ? (
+                  <Image
+                    src={car.icon_url}
+                    alt={localizedVehicleValue(car, "name", locale)}
+                    fill
+                    className="object-contain p-4 sm:p-6 drop-shadow-2xl transition-transform duration-300 group-hover:scale-[1.03]"
+                    sizes="(max-width: 1280px) 100vw, 50vw"
+                    quality={100}
+                  />
+                ) : (
+                  <div
+                    className="flex h-full w-full flex-col items-center justify-center gap-3 text-zinc-600"
+                    role="img"
+                    aria-label={localizedVehicleValue(car, "name", locale)}
+                  >
+                    <CarFront className="h-16 w-16" aria-hidden="true" />
+                    <span className="text-sm font-semibold">
+                      {localizedVehicleValue(car, "name", locale)}
+                    </span>
+                  </div>
+                )}
                 <div className="absolute start-4 top-4">
                   <Badge className="border border-black/10 bg-black/75 text-white backdrop-blur-sm">
                     {runtimeText(locale, "representativeVehicle")}
