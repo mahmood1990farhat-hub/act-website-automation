@@ -42,6 +42,8 @@ class AcceptTripAPIView(EMADBaseView):
                 raise ValidationError(_("Trip not found"))
             if trip.status != "pending":
                 raise ValidationError(_("Trip is not pending"))
+            if trip.base_driver_id and trip.base_driver_id != base_driver.id:
+                raise ValidationError(_("Trip has already been assigned to another driver"))
             if trip.cancelled_by_driver and trip.cancelled_by_driver_id == base_driver:
                 raise ValidationError(_("You cannot accept a trip that you have previously cancelled"))
             
