@@ -64,6 +64,27 @@ class CompleteTripView(EMADBaseView):
         if trip.status != "active":
             # If already completed, return success
             if trip.status == "completed":
+                # Idempotent repair path for journeys completed by an older
+                # release before completion and ledger creation were atomic.
+                try:
+                    from apps.earnings.services.earnings_calculator import EarningsCalculator
+                    EarningsCalculator.calculate_and_record_earnings(trip)
+                except Exception as exc:
+                    logger.error(
+                        "Completed trip %s is missing/invalid financial ledger: %s",
+                        trip.id,
+                        exc,
+                        exc_info=True,
+                    )
+                    return create_error_response(
+                        get_bilingual_error_message(
+                            'Trip is completed but its financial record could not be verified.',
+                            'الرحلة مكتملة ولكن تعذر التحقق من سجلها المالي.',
+                            locale,
+                        ),
+                        locale=locale,
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
                 message = get_bilingual_error_message(
                     'Trip is already completed.',
                     'الرحلة مكتملة بالفعل.',
