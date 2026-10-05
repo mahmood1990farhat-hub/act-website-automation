@@ -925,6 +925,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
         guest_driver_name = request.data.get('guest_driver_name', '').strip()
         guest_driver_phone = request.data.get('guest_driver_phone', '').strip()
         guest_driver_company = request.data.get('guest_driver_company', '').strip()
+        guest_driver_licence_number = request.data.get('guest_driver_licence_number', '').strip()
+        guest_driver_photo_url = request.data.get('guest_driver_photo_url', '').strip()
         car_info = request.data.get('car_info', {})
         
         if not guest_driver_name:
@@ -942,6 +944,11 @@ class AdminAssignGuestDriverView(EMADBaseView):
                 locale
             )
             return create_error_response(message, errors=None, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
+        if not guest_driver_licence_number:
+            raise ValidationError({'guest_driver_licence_number': _('TfL PHV driver licence number is required.')})
+        if not guest_driver_photo_url:
+            raise ValidationError({'guest_driver_photo_url': _('A passenger-visible driver photo URL is required.')})
+
         
         # Handle car information if provided
         guest_driver_car = None
@@ -973,6 +980,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
             trip.guest_driver_name = guest_driver_name
             trip.guest_driver_phone = guest_driver_phone
             trip.guest_driver_company = guest_driver_company if guest_driver_company else None
+            trip.guest_driver_licence_number = guest_driver_licence_number
+            trip.guest_driver_photo_url = guest_driver_photo_url
             trip.guest_driver_car = guest_driver_car
             trip.base_driver = None  # Clear system driver if any
             trip.status = 'accepted'  # Set status to accepted
@@ -981,6 +990,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
                 'guest_driver_name',
                 'guest_driver_phone',
                 'guest_driver_company',
+                'guest_driver_licence_number',
+                'guest_driver_photo_url',
                 'guest_driver_car',
                 'base_driver',
                 'status'
@@ -993,8 +1004,10 @@ class AdminAssignGuestDriverView(EMADBaseView):
             
             logger.info(f"Admin {request.user.id} assigned guest driver to trip {trip_id}: {guest_driver_name} ({guest_driver_phone})")
             
-            # Send notification to passenger
-            if trip.passenger and trip.passenger.user:
+            # Send notification to registered passengers and email to both
+            # registered and guest-checkout passengers.
+            passenger_user = trip.passenger.user if trip.passenger else None
+            if passenger_user:
                 try:
                     from utils.common import notify_user
                     from utils.common.notifications import NOTIFICATION_TYPE_GUEST_DRIVER_ASSIGNED
@@ -1002,7 +1015,7 @@ class AdminAssignGuestDriverView(EMADBaseView):
                     
                     # Send notification
                     notify_user(
-                        user=trip.passenger.user_id,
+                        user=passenger_user.id,
                         title_en='External Driver Assigned',
                         title_ar='تم تعيين سائق خارجي',
                         desc_en=f'Your trip #{trip.id} has been assigned to {guest_driver_name}. Contact: {guest_driver_phone}',
@@ -1017,6 +1030,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
                         'name': guest_driver_name,
                         'phone': guest_driver_phone,
                         'company': guest_driver_company if guest_driver_company else None,
+                        'licence_number': guest_driver_licence_number,
+                        'photo_url': guest_driver_photo_url,
                         'car': None
                     }
                     
@@ -1026,7 +1041,7 @@ class AdminAssignGuestDriverView(EMADBaseView):
                         guest_driver_info['car'] = GuestDriverCarSerializer(guest_driver_car).data
                     
                     send_trip_accepted_to_passenger(
-                        trip.passenger.user,
+                        passenger_user,
                         trip,
                         driver_user=None,
                         is_guest_driver=True,
