@@ -1231,6 +1231,26 @@ class AdminAssignSystemDriverView(EMADBaseView):
                 raise ValidationError({
                     'driver_id': _('Selected driver vehicle class does not match this booking')
                 })
+
+            driver_vehicle = driver.normal_driver.vehicle
+            missing_passenger_details = []
+            if not (driver.pco_licence_number or '').strip():
+                missing_passenger_details.append('TfL PHV driver licence number')
+            if not driver.driver_photo:
+                missing_passenger_details.append('driver photo')
+            if not (driver_vehicle.make or '').strip():
+                missing_passenger_details.append('vehicle make')
+            if not (driver_vehicle.model or '').strip():
+                missing_passenger_details.append('vehicle model')
+            if not (driver_vehicle.color or '').strip():
+                missing_passenger_details.append('vehicle colour')
+            if missing_passenger_details:
+                raise ValidationError({
+                    'driver_id': _('Selected driver is missing passenger-facing details: {}').format(
+                        ', '.join(missing_passenger_details)
+                    )
+                })
+
             if trip.cancelled_by_driver_id_id == driver.id:
                 raise ValidationError({
                     'driver_id': _('A driver who cancelled this booking cannot be reassigned to it')
