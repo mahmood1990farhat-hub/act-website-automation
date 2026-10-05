@@ -27,10 +27,13 @@ class EarningsCalculator:
         if not trip.is_paid or trip.status != 'completed':
             raise ValueError("Trip must be completed and paid")
         
-        # Idempotency: already recorded
-        if hasattr(trip, 'company_revenue') and trip.company_revenue_id:
-            driver_earning = getattr(trip, 'driver_earning', None)
-            return driver_earning, trip.company_revenue
+        # Idempotency: reverse OneToOne relations do not expose a
+        # company_revenue_id attribute on Trip. Query the ledger directly so
+        # repeated completion requests return the existing records.
+        company_revenue = CompanyRevenueLedger.objects.filter(trip=trip).first()
+        if company_revenue is not None:
+            driver_earning = DriverEarningLedger.objects.filter(trip=trip).first()
+            return driver_earning, company_revenue
         
         currency = getattr(trip, 'currency', 'GBP')
         
