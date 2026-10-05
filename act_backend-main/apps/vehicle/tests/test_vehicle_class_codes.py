@@ -2,7 +2,11 @@ from datetime import time
 
 from django.test import SimpleTestCase
 
-from apps.vehicle.catalog import canonical_vehicle_code
+from apps.vehicle.catalog import (
+    VEHICLE_LUGGAGE_PATTERNS,
+    canonical_vehicle_code,
+    vehicle_accepts_luggage,
+)
 from utils.calculate_cost import PRICING, calculate_trip_cost
 
 
@@ -43,3 +47,29 @@ class VehicleClassCodeTests(SimpleTestCase):
                 calculate_trip_cost(time(14, 0), old_name, 15.0),
                 calculate_trip_cost(time(14, 0), code, 15.0),
             )
+
+
+    def test_approved_luggage_patterns_are_stable(self):
+        self.assertEqual(VEHICLE_LUGGAGE_PATTERNS, {
+            "comfort": ((2, 2), (0, 4)),
+            "comfort_xl": ((3, 3), (4, 0)),
+            "executive": ((2, 2), (0, 4)),
+            "executive_xl": ((5, 4), (6, 2)),
+            "first_class": ((2, 2), (0, 4)),
+        })
+
+    def test_luggage_must_fit_one_complete_approved_pattern(self):
+        accepted = {
+            "comfort": ((2, 2), (0, 4)),
+            "comfort_xl": ((3, 3), (4, 0)),
+            "executive": ((2, 2), (0, 4)),
+            "executive_xl": ((5, 4), (6, 2)),
+            "first_class": ((2, 2), (0, 4)),
+        }
+        for code, patterns in accepted.items():
+            for large, small in patterns:
+                self.assertTrue(vehicle_accepts_luggage(code, large, small))
+
+        self.assertFalse(vehicle_accepts_luggage("comfort", 1, 3))
+        self.assertFalse(vehicle_accepts_luggage("comfort_xl", 4, 1))
+        self.assertFalse(vehicle_accepts_luggage("executive_xl", 6, 3))
