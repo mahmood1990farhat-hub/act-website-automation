@@ -70,11 +70,13 @@ export default function TripDetails({
 
   const EndTrip = async () => {
     try {
-      const res = await postData({
+      await postData({
         endpoint: `/api/trips/${detailsTrips.id}/complete/`,
         token: token,
       });
-      router.push(`/${locale}/driver/upcoming-trips`);
+      // Completed journeys belong in My Trips, not the upcoming queue.
+      router.push(`/${locale}/driver`);
+      router.refresh();
     } catch (err) {
       console.log(err);
     }
