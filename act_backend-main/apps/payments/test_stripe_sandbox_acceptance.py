@@ -127,7 +127,7 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
                     "amount": intent.amount,
                     "amount_received": intent.amount_received,
                     "currency": intent.currency,
-                    "metadata": dict(intent.metadata),
+                    "metadata": intent.metadata.to_dict(),
                     "latest_charge": intent.latest_charge,
                 }
             },
