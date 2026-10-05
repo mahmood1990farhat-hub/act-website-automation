@@ -1389,6 +1389,66 @@ export default function TripsDashboard({
 				</div>
 			</GlobalModal>
 
+			{/* Assign registered ACT Driver Modal */}
+			<GlobalModal
+				isOpen={showAssignActDriverModal}
+				onClose={() => {
+					if (!assignActDriverMutation.isPending) {
+						setShowAssignActDriverModal(false);
+						setSelectedActDriverId("");
+					}
+				}}
+			>
+				<div className="p-4 sm:p-6 w-full max-w-lg">
+					<h2 className="text-xl font-bold text-foreground mb-2">
+						{trans?.trips?.assignActDriver || "Assign ACT driver"}
+					</h2>
+					<p className="text-sm text-muted-foreground mb-4">
+						The driver will receive this booking as pending and must accept it before passenger driver details are confirmed.
+					</p>
+					{actDriversLoading ? (
+						<p className="text-sm text-muted-foreground">Loading compatible drivers...</p>
+					) : compatibleActDrivers.length === 0 ? (
+						<p className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-foreground">
+							No active approved ACT driver with the required vehicle class is available.
+						</p>
+					) : (
+						<select
+							value={selectedActDriverId}
+							onChange={(event) => setSelectedActDriverId(event.target.value)}
+							className="w-full rounded-lg border-2 border-border bg-background p-3 text-foreground"
+						>
+							<option value="">Select a compatible driver</option>
+							{compatibleActDrivers.map((driver: any) => (
+								<option key={driver.driver.id} value={driver.driver.id}>
+									{[driver.driver.user.first_name, driver.driver.user.last_name].filter(Boolean).join(" ") || driver.driver.user.email}
+									{" — "}{driver.vehicle?.vehicle_number || "Vehicle"} ({driver.vehicle?.vehicle_type?.name_en || "Class"})
+								</option>
+							))}
+						</select>
+					)}
+					<div className="mt-5 flex gap-3">
+						<Button
+							type="button"
+							variant="secondary"
+							className="flex-1"
+							onClick={() => setShowAssignActDriverModal(false)}
+							disabled={assignActDriverMutation.isPending}
+						>
+							Cancel
+						</Button>
+						<Button
+							type="button"
+							className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+							onClick={() => assignActDriverMutation.mutate()}
+							disabled={!selectedActDriverId || assignActDriverMutation.isPending}
+						>
+							{assignActDriverMutation.isPending ? "Assigning..." : "Assign driver"}
+						</Button>
+					</div>
+				</div>
+			</GlobalModal>
+
 			{/* Assign Guest Driver Modal */}
 			<GlobalModal
 				isOpen={showAssignGuestModal}
