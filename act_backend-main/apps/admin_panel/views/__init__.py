@@ -1,4 +1,4 @@
-from .trips import TripListView, TripDetailView, AdminCreateTripView, AdminUpdateTripView, AdminDeleteTripView, AdminCancelTripView, AdminAssignGuestDriverView, AdminUpdateTripStatusView
+from .trips import TripListView, TripDetailView, AdminCreateTripView, AdminUpdateTripView, AdminDeleteTripView, AdminCancelTripView, AdminAssignGuestDriverView, AdminAssignSystemDriverView, AdminUpdateTripStatusView
 from .payouts import AdminBulkPayoutView
 from .complaints import (
     ListTripComplaintsView,
