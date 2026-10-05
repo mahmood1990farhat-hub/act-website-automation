@@ -45,7 +45,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
     enabled: activeTab === "list",
   });
 
-  // Fetch user's completed trips for the dropdown (only completed trips can be complained about)
+  // Fetch passenger trips for support; completed and cancelled bookings can be complained about.
   const { data: tripsData, isError: tripsError, refetch: retryTrips } = useQuery<any>({
     queryKey: ["trips-for-complaints", locale, token],
     queryFn: () =>
@@ -54,7 +54,6 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
         token: token,
         queryParams: {
           page_size: "100",
-          trip_status: "completed",
           locale: locale,
         },
       }),
@@ -64,7 +63,9 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
   const complaints = complaintsData?.data?.complaints || [];
   const stats = complaintsData?.data?.stats || {};
   const pagination = complaintsData?.data?.pagination || {};
-  const trips = tripsData?.trips || [];
+  const trips = (tripsData?.trips || []).filter((trip: any) =>
+    trip?.status === "completed" || trip?.status === "cancelled"
+  );
 
   // Submit complaint mutation
   const submitMutation = useMutation({
