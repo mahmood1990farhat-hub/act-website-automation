@@ -950,7 +950,17 @@ class AdminAssignGuestDriverView(EMADBaseView):
             raise ValidationError({'guest_driver_photo_url': _('A passenger-visible driver photo URL is required.')})
 
         
-        # Handle car information if provided
+        required_car_fields = ('brand', 'model', 'color', 'registration_number')
+        missing_car_fields = [
+            field for field in required_car_fields
+            if not str(car_info.get(field, '')).strip()
+        ]
+        if missing_car_fields:
+            raise ValidationError({
+                'car_info': _('Vehicle make/model/colour and registration are required for passenger disclosure.')
+            })
+
+        # Handle required passenger-facing car information.
         guest_driver_car = None
         if car_info:
             from apps.trips.models import GuestDriverCar
