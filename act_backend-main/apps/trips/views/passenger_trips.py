@@ -18,6 +18,8 @@ from ..serializers import TripWithStopPointSerializer
 from apps.passengers.models import Passenger
 import stripe
 from django.conf import settings
+from apps.trips.services.trip_tracking import stop_trip_tracking
+from apps.trips.services.booking_confirmation import ensure_cancellation_confirmation_pdf
 from utils.common.email import (
     send_passenger_trip_cancellation_to_passenger,
     send_passenger_trip_cancellation_to_admin,
@@ -285,6 +287,8 @@ class PassengerCancelTripView(EMADBaseView):
         refund_processed = False
         refund_amount = None
         refund_error = None
+        refund_id = None
+        ledger_error = None
 
         if is_refundable and trip.is_paid and trip.stripe_payment_intent:
             try:
@@ -302,6 +306,7 @@ class PassengerCancelTripView(EMADBaseView):
                 )
                 
                 refund_processed = True
+                refund_id = refund.id
                 refund_amount = Decimal(str(refund.amount / 100))  # Convert from cents to currency units
                 
                 # Process refund ledger entries
@@ -313,8 +318,8 @@ class PassengerCancelTripView(EMADBaseView):
                     )
                     logger.info(f"Refund processed for trip {trip.id}: refund_id={refund.id}, amount={refund_amount}, driver_refund={driver_refund}, company_refund={company_refund}")
                 except Exception as e:
+                    ledger_error = str(e)
                     logger.error(f"Error processing refund ledger for trip {trip.id}: {str(e)}", exc_info=True)
-                    # Continue with cancellation even if ledger entry fails
                 
             except stripe.error.StripeError as e:
                 refund_error = str(e)
@@ -325,9 +330,43 @@ class PassengerCancelTripView(EMADBaseView):
                 refund_error = str(e)
                 logger.error(f"Error processing refund for trip {trip.id}: {str(e)}", exc_info=True)
 
-        # Update trip status
+        # Persist the cancellation and refund outcome for admin/support.
         trip.status = 'cancelled'
-        trip.save(update_fields=['status'])
+        if refund_processed:
+            trip.refund_status = 'processed' if not ledger_error else 'processed_ledger_error'
+            trip.stripe_refund_id = refund_id
+            trip.refund_amount = refund_amount
+            trip.refund_error = ledger_error or ''
+        elif is_refundable and trip.is_paid:
+            trip.refund_status = 'failed' if refund_error else 'manual_review'
+            trip.refund_error = refund_error or 'Paid booking eligible for refund but no Stripe refund was processed.'
+        elif trip.is_paid:
+            trip.refund_status = 'manual_review'
+            trip.refund_error = ''
+        else:
+            trip.refund_status = 'not_applicable'
+            trip.refund_error = ''
+        trip.save(update_fields=[
+            'status',
+            'refund_status',
+            'stripe_refund_id',
+            'refund_amount',
+            'refund_error',
+        ])
+
+        try:
+            ensure_cancellation_confirmation_pdf(trip)
+        except Exception as exc:
+            logger.warning(
+                "Failed to generate cancellation confirmation PDF for trip %s: %s",
+                trip.id,
+                exc,
+            )
+
+        try:
+            stop_trip_tracking(trip.id, reason="cancelled")
+        except Exception as exc:
+            logger.warning("Failed to stop tracking for cancelled trip %s: %s", trip.id, exc)
 
         # Prepare response data
         response_data = {
@@ -336,6 +375,7 @@ class PassengerCancelTripView(EMADBaseView):
             'is_refundable': is_refundable,
             'refund_eligible': is_refundable,
             'refund_reason': refund_reason,
+            'refund_status': trip.refund_status,
         }
 
         if refund_processed:
