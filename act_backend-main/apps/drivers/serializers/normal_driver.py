@@ -15,6 +15,8 @@ class RegisterFullNormalDriverSerializer(serializers.Serializer):
     pco = serializers.FileField()
     dbs = serializers.FileField()
     dvla = serializers.FileField()
+    pco_licence_number = serializers.CharField(max_length=50)
+    driver_photo = serializers.ImageField()
     
     bank_details_data = serializers.DictField(write_only=True)
     vehicle_data = serializers.DictField(write_only=True)
@@ -67,6 +69,8 @@ class RegisterFullNormalDriverSerializer(serializers.Serializer):
                 pco=validated_data['pco'],
                 dbs=validated_data['dbs'],
                 dvla=validated_data['dvla'],
+                pco_licence_number=validated_data['pco_licence_number'].strip(),
+                driver_photo=validated_data['driver_photo'],
                 bank_details=bank_details_obj
             )
 
