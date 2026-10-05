@@ -127,6 +127,8 @@ class Trip(models.Model):
     guest_driver_name = models.CharField(max_length=255, blank=True, null=True, help_text="Name of guest driver")
     guest_driver_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Phone number of guest driver")
     guest_driver_company = models.CharField(max_length=255, blank=True, null=True, help_text="Company name (e.g., Uber, Bolt)")
+    guest_driver_licence_number = models.CharField(max_length=50, blank=True, null=True)
+    guest_driver_photo_url = models.URLField(max_length=500, blank=True, null=True)
     guest_driver_car = models.ForeignKey(
         'trips.GuestDriverCar',
         on_delete=models.SET_NULL,
