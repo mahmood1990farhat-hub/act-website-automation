@@ -61,7 +61,9 @@ class RefundRulesService:
             
             # Create driver refund ledger entry
             driver_refund = None
-            if trip.base_driver and refund_rule == 'FULL_REFUND':
+            # Do not create a negative driver refund when the journey never
+            # generated driver earnings (for example, a pre-pickup cancellation).
+            if trip.base_driver and driver_earning and refund_rule == 'FULL_REFUND':
                 idempotency_key = f"driver_refund_{trip.id}_{uuid.uuid4().hex}"
                 driver_refund = DriverRefundLedger.objects.create(
                     driver=trip.base_driver,

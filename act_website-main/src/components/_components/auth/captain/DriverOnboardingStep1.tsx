@@ -238,6 +238,16 @@ export default function DriverOnboardingStep1({
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   const formatEnumOption = (value: string) => {
+    const vehicleClassLabels: Record<string, string> = {
+      "5_seater_standard": "Comfort Class",
+      "standard_phv": "Comfort Class",
+      "7_seaters": "Comfort XL",
+      "seven_seaters_phv": "Comfort XL",
+      "luxury": "Executive Class",
+      "luxury_van": "Executive XL",
+      "vip_business_phv": "First Class",
+    };
+    if (vehicleClassLabels[value]) return vehicleClassLabels[value];
     return value
       .split("_")
       .map((word) => {

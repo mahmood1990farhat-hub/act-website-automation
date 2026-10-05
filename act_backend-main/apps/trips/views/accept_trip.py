@@ -42,10 +42,29 @@ class AcceptTripAPIView(EMADBaseView):
                 raise ValidationError(_("Trip not found"))
             if trip.status != "pending":
                 raise ValidationError(_("Trip is not pending"))
+            if trip.base_driver_id and trip.base_driver_id != base_driver.id:
+                raise ValidationError(_("Trip has already been assigned to another driver"))
             if trip.cancelled_by_driver and trip.cancelled_by_driver_id == base_driver:
                 raise ValidationError(_("You cannot accept a trip that you have previously cancelled"))
             
             vehicle = base_driver.normal_driver.vehicle
+            missing_passenger_details = []
+            if not (base_driver.pco_licence_number or "").strip():
+                missing_passenger_details.append("TfL PHV driver licence number")
+            if not base_driver.driver_photo:
+                missing_passenger_details.append("driver photo")
+            if not (vehicle.make or "").strip():
+                missing_passenger_details.append("vehicle make")
+            if not (vehicle.model or "").strip():
+                missing_passenger_details.append("vehicle model")
+            if not (vehicle.color or "").strip():
+                missing_passenger_details.append("vehicle colour")
+            if missing_passenger_details:
+                raise ValidationError(
+                    _("Complete the passenger-facing driver details before accepting trips: {}").format(
+                        ", ".join(missing_passenger_details)
+                    )
+                )
 
             new_trip_datetime = timezone.make_aware(
                 datetime.combine(trip.trip_date, trip.trip_time)
@@ -76,18 +95,19 @@ class AcceptTripAPIView(EMADBaseView):
                 user=passenger_user_id,
                 title_en='Trip Accepted',
                 title_ar='تم قبول رحلتك',
-                desc_en=f'Your trip #{trip.id} has been accepted by a driver.', 
+                desc_en=f'Your trip #{trip.id} has been accepted by a driver.',
                 desc_ar=f'تم قبول رحلتك #{trip.id} من قبل سائق.',
                 locale=locale,
-                notification_type=NOTIFICATION_TYPE_TRIP_ACCEPTED, 
+                notification_type=NOTIFICATION_TYPE_TRIP_ACCEPTED,
                 trip_id=trip.id
             )
-            try:
-                pu = trip.passenger.user if trip.passenger else None
-                if pu:
-                    send_trip_accepted_to_passenger(pu, trip, request.user)
-            except Exception as e:
-                logger.warning("Failed to send trip-accepted email to passenger for trip %s: %s", trip.id, e)
+        try:
+            # Registered and guest-checkout passengers both receive the
+            # confirmed driver/vehicle identity by email.
+            passenger_user = trip.passenger.user if trip.passenger else None
+            send_trip_accepted_to_passenger(passenger_user, trip, request.user)
+        except Exception as e:
+            logger.warning("Failed to send trip-accepted email to passenger for trip %s: %s", trip.id, e)
         try:
             try:
                 ensure_booking_confirmation_pdf(trip)

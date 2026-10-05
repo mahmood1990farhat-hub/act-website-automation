@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useParams } from "next/navigation";
+import { runtimeText } from "@/lib/customer-runtime";
 import { useState } from "react";
 
 type AppType = "driver" | "passenger";
@@ -15,6 +17,8 @@ export default function DownloadButton({
   downloadingText?: string;
   appType?: AppType;
 }) {
+  const locale = String(useParams()?.locale || "en");
+  const [error, setError] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -25,6 +29,7 @@ export default function DownloadButton({
       ? "driver-app.apk" 
       : "passenger-app.apk";
     
+    setError("");
     setIsDownloading(true);
     
     try {
@@ -58,20 +63,13 @@ export default function DownloadButton({
       }, 100);
     } catch (error) {
       console.error("Error downloading APK:", error);
-      // Fallback: try direct link
-      const link = document.createElement("a");
-      link.href = apkPath;
-      link.download = filename;
-      link.target = "_blank";
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      setError(runtimeText(locale, "downloadError"));
       setIsDownloading(false);
     }
   };
 
   return (
+    <>
     <Button
       onClick={handleDownload}
       size="lg"
@@ -79,8 +77,10 @@ export default function DownloadButton({
       className="px-8 py-6 text-lg font-semibold cursor-pointer disabled:opacity-60"
     >
       <Download className="w-5 h-5 mr-2" />
-      {isDownloading ? downloadingText || "Downloading..." : downloadText}
+      {isDownloading ? downloadingText || downloadText : downloadText}
     </Button>
+    {error && <p role="alert" className="mt-3 text-red-400">{error}</p>}
+    </>
   );
 }
 

@@ -1,4 +1,5 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,16 @@ export default function FlightDetails({
 
   const updateField = (key: keyof FlightDetailsForm, value: string) => {
     setFlightDetails({ ...flightDetails, [key]: value });
+  };
+
+  const selectFlightType = (flightType: "arrival" | "departure") => {
+    setFlightDetails({
+      ...flightDetails,
+      flightType,
+      landingTime: flightType === "arrival" ? flightDetails.landingTime : "",
+      departureTime: flightType === "departure" ? flightDetails.departureTime : "",
+    });
+    setIsRequired(false);
   };
 
   const journeyDirection = getAirportJourneyDirection(routePoints);
@@ -144,7 +155,7 @@ export default function FlightDetails({
                   type="radio"
                   name="flight-type"
                   checked={flightDetails.flightType === "arrival"}
-                  onChange={() => updateField("flightType", "arrival")}
+                  onChange={() => selectFlightType("arrival")}
                 />
                 <span>{t("Arrival")}</span>
               </label>
@@ -155,7 +166,7 @@ export default function FlightDetails({
                   type="radio"
                   name="flight-type"
                   checked={flightDetails.flightType === "departure"}
-                  onChange={() => updateField("flightType", "departure")}
+                  onChange={() => selectFlightType("departure")}
                 />
                 <span>{t("Departure")}</span>
               </label>
@@ -291,3 +302,4 @@ export default function FlightDetails({
     </div>
   );
 }
+

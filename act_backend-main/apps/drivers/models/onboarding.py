@@ -47,8 +47,8 @@ class DriverOnboardingRequest(models.Model):
         ('other', 'Other'),
     ])
     vehicle_type = models.CharField(max_length=50, choices=[
-        ('5_seater_standard', '5-seater (Standard)'),
-        ('7_seaters', '7 Seaters'),
+        ('5_seater_standard', 'Comfort Class'),
+        ('7_seaters', 'Comfort XL'),
         ('van_transporter', 'Van/Transporter'),
         ('other', 'Other'),
     ])

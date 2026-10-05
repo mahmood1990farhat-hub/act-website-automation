@@ -1,4 +1,5 @@
 "use client";
+import { customerPaymentError, runtimeText } from "@/lib/customer-runtime";
 
 import {
   CardNumberElement,
@@ -48,6 +49,9 @@ const EXPECTED_GOOGLE_ADS_BOOKING_CONVERSION_LABEL =
   "0LprCMbR8sQcEM7Ok9xB";
 const BOOKING_CONVERSION_STORAGE_PREFIX = "act_booking_conversion_tracked";
 const BOOKING_CONVERSION_EVENT_TIMEOUT = 2000;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BOOKING_STATUS_ATTEMPTS = 30;
+const BOOKING_STATUS_INTERVAL_MS = 1000;
 
 export default function CheckoutForm({
   nextStep,
@@ -76,6 +80,8 @@ export default function CheckoutForm({
   const [expiryComplete, setExpiryComplete] = useState(false);
   const [cvcComplete, setCvcComplete] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [paymentCaptured, setPaymentCaptured] = useState(false);
+  const [fulfillmentMsg, setFulfillmentMsg] = useState("");
   const trackedPaymentIntentIds = useRef<Set<string>>(new Set());
 
   const fireBookingCompletedEvents = (transactionId: string): Promise<void> => {
@@ -216,30 +222,84 @@ export default function CheckoutForm({
     });
   };
 
+
+  const waitForBookingConfirmation = async (paymentIntentId: string) => {
+    if (!API_BASE_URL) return false;
+
+    for (let attempt = 0; attempt < BOOKING_STATUS_ATTEMPTS; attempt += 1) {
+      try {
+        const query = new URLSearchParams({ payment_intent_id: paymentIntentId });
+        const response = await fetch(
+          API_BASE_URL + "/api/payments/booking-status/?" + query.toString(),
+          { method: "GET", cache: "no-store" },
+        );
+        if (response.ok) {
+          const body = await response.json();
+          if (body?.status === "confirmed") return true;
+        }
+      } catch {
+        // A transient status-check failure must never invite a second payment.
+      }
+
+      await new Promise((resolve) =>
+        window.setTimeout(resolve, BOOKING_STATUS_INTERVAL_MS),
+      );
+    }
+
+    return false;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || paymentCaptured) return;
 
     setLoading(true);
     setErrorMsg("");
+    setFulfillmentMsg("");
 
     const card = elements.getElement(CardNumberElement);
+    let stripePaymentSucceeded = false;
 
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: card!,
-      },
-    });
+    try {
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: card!,
+        },
+      });
 
-    if (result.error) {
-      setErrorMsg(locale === "ar" ? "تعذّر إتمام الدفع. يرجى التحقق من بيانات البطاقة والمحاولة مجددًا، أو التواصل معنا إذا استمرت المشكلة." : result.error.message || "Payment failed");
-    } else if (result.paymentIntent.status === "succeeded") {
-      await fireBookingCompletedEvents(result.paymentIntent.id);
-      nextStep();
+      if (result.error) {
+        setErrorMsg(customerPaymentError(locale, result.error));
+        return;
+      }
+
+      if (result.paymentIntent.status === "succeeded") {
+        stripePaymentSucceeded = true;
+        setPaymentCaptured(true);
+        setFulfillmentMsg(runtimeText(locale, "bookingFinalising"));
+
+        const bookingConfirmed = await waitForBookingConfirmation(
+          result.paymentIntent.id,
+        );
+
+        if (bookingConfirmed) {
+          await fireBookingCompletedEvents(result.paymentIntent.id);
+          nextStep();
+          return;
+        }
+
+        setFulfillmentMsg(runtimeText(locale, "bookingFinalisingDelayed"));
+      }
+    } catch {
+      if (stripePaymentSucceeded) {
+        setPaymentCaptured(true);
+        setFulfillmentMsg(runtimeText(locale, "bookingFinalisingDelayed"));
+      } else {
+        setErrorMsg(runtimeText(locale, "paymentUnknown"));
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const isFormValid = cardComplete && expiryComplete && cvcComplete && agreed;
@@ -297,7 +357,7 @@ export default function CheckoutForm({
           </div>
           <div className="w-full">
             <label>
-              <p>{locale === "ar" ? "رمز الأمان (CVC)" : "CVC"}</p>
+              <p>{runtimeText(locale, "cvc")}</p>
             </label>
             <div className="w-full p-2.5 border-2 bg-white text-foreground border-muted rounded-lg">
               <CardCvcElement
@@ -332,13 +392,15 @@ export default function CheckoutForm({
         </div>
 
         {/* Error Message */}
-        {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
+        {errorMsg && <p role="alert" className="text-red-500 text-sm">{errorMsg}</p>}
+        {fulfillmentMsg && <p role="status" className="rounded-lg border border-[#ffd100]/40 bg-[#ffd100]/10 p-3 text-sm text-white">{fulfillmentMsg}</p>}
 
         {/* Buttons */}
         <div className="flex items-center gap-2" dir="ltr">
           <Button
             onClick={prevStep}
             type="button"
+            disabled={loading || paymentCaptured}
             className="w-1/6 border border-primary bg-transparent hover:text-black hover:bg-primary text-primary p-6 cursor-pointer"
           >
             <FaArrowLeft className="text-3xl" />
@@ -346,7 +408,7 @@ export default function CheckoutForm({
           <div className="w-full">
             <Button
               type="submit"
-              disabled={!isFormValid || loading}
+              disabled={!isFormValid || loading || paymentCaptured}
               className="w-full text-lg p-6 cursor-pointer"
             >
               {loading ? <div><MoneyCountingHand/></div>: trans.form.button}
@@ -357,3 +419,4 @@ export default function CheckoutForm({
     </div>
   );
 }
+

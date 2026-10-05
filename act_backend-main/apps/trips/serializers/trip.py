@@ -118,7 +118,7 @@ class TripSerializer(serializers.ModelSerializer):
         if car_type:
             total_cost, *_ = calculate_total_cost(
                 trip_time,
-                car_type.name_en,
+                car_type.code,
                 result['distance_miles'],
                 pickup_lat=data['pickup_lat'],
                 pickup_lng=data['pickup_lng'],
@@ -170,16 +170,16 @@ class TripSerializer(serializers.ModelSerializer):
                 ) % {"count": passengers},
             })
 
-        if suitcases > 8:
+        if suitcases > 9:
             raise serializers.ValidationError({
                 "details": _(
-                    "We're sorry, but online bookings must be made at least 3 hours in advance. "
+                    "We're sorry, but online bookings support a maximum of 9 suitcases in total. "
                     "You selected %(large)s large + %(small)s small = %(total)s suitcases, "
                     "so please contact us directly at 07464 940 000 to complete your booking."
                 ) % {"large": large, "small": small, "total": suitcases},
             })
 
-        # Validate 24-hour advance booking requirement
+        # Validate 3-hour advance online-booking requirement
         trip_date = attrs.get('trip_date')
         trip_time = attrs.get('trip_time')
         
@@ -196,7 +196,8 @@ class TripSerializer(serializers.ModelSerializer):
                 # Only validate if we have valid date and time objects
                 if trip_date and trip_time and isinstance(trip_date, date) and isinstance(trip_time, time):
                     departure = timezone.make_aware(
-                        datetime.combine(trip_date, trip_time)
+                        datetime.combine(trip_date, trip_time),
+                        timezone.get_current_timezone(),
                     )
                     now = timezone.now()
                     gap = departure - now
@@ -207,7 +208,7 @@ class TripSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError({
                             "details": _(
                                 "We're sorry, but online bookings must be made at least 3 hours in advance. "
-                                "To arrange a last-minute trip, please contact us directly at 07464 940 000."
+                                "To arrange a trip within 3 hours, please contact us directly at 07464 940 000."
                             ),
                         })
             except (ValueError, TypeError, AttributeError) as e:

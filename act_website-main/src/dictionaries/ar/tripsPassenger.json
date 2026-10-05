@@ -33,6 +33,7 @@
 		"btuConfirm": "حذف الرحلة"
 	},
 	"tripCard": {
+		"model_car": "طراز السيارة",
 		"name_of_driver": "اسم السائق",
 		"phone_of_driver": "رقم السائق",
 		"modle_car": "نوع السيارة",

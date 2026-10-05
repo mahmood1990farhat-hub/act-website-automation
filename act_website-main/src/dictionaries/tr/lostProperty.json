@@ -1,0 +1,144 @@
+{
+  "title": "Kayıp eşya",
+  "subtitle": "Kayıp eşyaları bildirin ve bildirimlerinizi takip edin",
+  "tabs": {
+    "my_reports": "Bildirimlerim",
+    "submit_report": "Bildirim gönder"
+  },
+  "stats": {
+    "total": "Toplam bildirim",
+    "reported": "Bildirildi",
+    "under_investigation": "Araştırılıyor",
+    "found": "Bulundu",
+    "returned": "İade edildi",
+    "not_found": "Bulunamadı",
+    "closed": "Kapatıldı"
+  },
+  "report_list": {
+    "title": "Kayıp eşya bildirimleri",
+    "empty": "Kayıp eşya bildirimi bulunamadı",
+    "filter": {
+      "all": "Tümü",
+      "status_label": "Duruma göre filtrele",
+      "item_type_label": "Eşya türüne göre filtrele"
+    },
+    "item_types": {
+      "all": "Tüm eşyalar",
+      "luggage": "Bagaj / Valiz",
+      "bag": "Çanta / El çantası",
+      "wallet": "Cüzdan",
+      "phone": "Cep telefonu",
+      "keys": "Anahtarlar",
+      "documents": "Belgeler / Kimlik",
+      "clothing": "Giysi",
+      "other": "Diğer eşyalar"
+    }
+  },
+  "report_card": {
+    "report_id": "Bildirim numarası",
+    "item_type": "Eşya türü",
+    "description": "Açıklama",
+    "color": "Renk",
+    "brand": "Marka",
+    "lost_location": "Kaybedilen yer",
+    "contact_preference": "İletişim tercihi",
+    "status": "Durum",
+    "trip_date": "Yolculuk tarihi",
+    "created_at": "Bildirilme tarihi",
+    "updated_at": "Son güncelleme",
+    "admin_notes": "Yönetici notları",
+    "found_at": "Bulunma tarihi",
+    "returned_at": "İade tarihi",
+    "view_trip": "Yolculuk ayrıntılarını göster",
+    "show_details": "Ayrıntıları göster",
+    "report_details": "Kayıp eşya bildirimi ayrıntıları",
+    "close": "Kapat",
+    "update_status": "Durumu güncelle",
+    "item_details": "Eşya ayrıntıları",
+    "reporter_info": "Bildiren kişinin bilgileri",
+    "trip_info": "Yolculuk bilgileri",
+    "trip_id": "Yolculuk numarası",
+    "trip_time": "Yolculuk saati",
+    "distance": "Mesafe",
+    "duration": "Tahmini süre",
+    "passenger_info": "Yolcu bilgileri",
+    "driver_info": "Sürücü bilgileri",
+    "name": "Ad",
+    "phone_number": "Telefon numarası",
+    "email": "E-posta",
+    "full_name": "Ad soyad",
+    "photo": "Fotoğraf",
+    "report_info": "Bildirim bilgileri",
+    "downloadPdf": "PDF indir",
+    "updateReportTitle": "Kayıp eşya bildirimini güncelle"
+  },
+  "submit_form": {
+    "title": "Kayıp eşya bildir",
+    "subtitle": "Lütfen kayıp eşyanızın ayrıntılarını belirtin",
+    "fields": {
+      "trip": "Yolculuk seçin",
+      "trip_placeholder": "Eşyayı kaybettiğiniz yolculuğu seçin",
+      "item_type": "Eşya türü",
+      "item_description": "Eşya açıklaması",
+      "item_description_placeholder": "Eşyayı ayrıntılı olarak açıklayın",
+      "item_color": "Eşya rengi",
+      "item_color_placeholder": "ör. siyah, mavi, kırmızı",
+      "item_brand": "Marka (isteğe bağlı)",
+      "item_brand_placeholder": "ör. Samsonite, Apple, Nike",
+      "lost_location": "Nerede kaybettiniz?",
+      "lost_location_placeholder": "ör. araçta, alınış noktasında",
+      "contact_preference": "Tercih edilen iletişim yöntemi",
+      "contact_options": {
+        "phone": "Telefon araması",
+        "email": "E-posta",
+        "sms": "SMS"
+      },
+      "photo": "Fotoğraf (isteğe bağlı)",
+      "photo_description": "Varsa kayıp eşyanın fotoğrafını yükleyin",
+      "selected_photo": "Seçildi"
+    },
+    "button": "Bildirim ekle",
+    "button_loading": "Ekleniyor…",
+    "success_message": "Kayıp eşya bildirimi başarıyla gönderildi!",
+    "error_message": "Bildirim gönderilemedi. Lütfen tekrar deneyin.",
+    "validation": {
+      "trip_required": "Lütfen bir yolculuk seçin",
+      "item_type_required": "Lütfen bir eşya türü seçin",
+      "item_type_invalid": "Lütfen listeden geçerli bir eşya türü seçin",
+      "description_required": "Lütfen bir açıklama girin",
+      "description_min": "Açıklama en az 10 karakter olmalıdır",
+      "color_required": "Lütfen eşyanın rengini belirtin",
+      "lost_location_required": "Lütfen eşyayı nerede kaybettiğinizi belirtin",
+      "contact_preference_required": "Lütfen bir iletişim tercihi seçin",
+      "contact_preference_invalid": "Lütfen geçerli bir iletişim tercihi seçin"
+    }
+  },
+  "statuses": {
+    "reported": "Bildirildi",
+    "under_investigation": "Araştırılıyor",
+    "found": "Bulundu",
+    "returned": "İade edildi",
+    "not_found": "Bulunamadı",
+    "closed": "Kapatıldı"
+  },
+  "contact_preferences": {
+    "phone": "Telefon araması",
+    "email": "E-posta",
+    "sms": "SMS"
+  },
+  "lost_locations": {
+    "in_vehicle": "Araçta",
+    "at_pickup": "Alınış noktasında",
+    "at_dropoff": "Varış noktasında",
+    "unsure": "Emin değilim"
+  },
+  "download": "İndir",
+  "choose_file": "Dosya seç",
+  "no_file_chosen": "Dosya seçilmedi",
+  "click_to_view": "Görmek için tıklayın",
+  "image_downloaded": "Görsel başarıyla indirildi",
+  "image_download_failed": "Görsel indirilemedi",
+  "file_read_failed": "Görsel dosyası okunamadı",
+  "select_item_type": "Eşya türünü seçin",
+  "select_contact_method": "İletişim yöntemini seçin"
+}

@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _, activate
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from utils.common import get_locale, remove_empty_values, get_route_with_distance
 from utils.utils_trip import prepare_trip_data
 from utils.calculate_cost import calculate_total_cost
@@ -20,12 +21,28 @@ from apps.pricing.services.extra_service_resolver import (
 )
 from apps.payments.models import PendingPayment
 from apps.vehicle.models import VehicleType
+from apps.vehicle.catalog import vehicle_accepts_luggage
 import stripe
 from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def validate_vehicle_capacity(data, car_type):
+    passengers = int(data.get('passengers_count') or 0)
+    large = int(data.get('large_suitcase') or 0)
+    small = int(data.get('small_suitcase') or 0)
+
+    if passengers > car_type.max_passengers_count:
+        raise ValidationError({
+            'car_type': _('The selected vehicle does not have enough passenger capacity.')
+        })
+    if not vehicle_accepts_luggage(car_type.code, large, small, passengers):
+        raise ValidationError({
+            'car_type': _('The selected vehicle does not have enough luggage capacity. Please choose another vehicle class.')
+        })
 
 
 def calculate_authoritative_payment_price(data, car_type, distance_miles, booking_details):
@@ -39,7 +56,7 @@ def calculate_authoritative_payment_price(data, car_type, distance_miles, bookin
 
     total_cost, regular_vat, airport_vat, base_trip_cost, min_adjustment = calculate_total_cost(
         trip_time,
-        car_type.name_en,
+        car_type.code,
         distance_miles,
         pickup_lat=data.get('pickup_lat'),
         pickup_lng=data.get('pickup_lng'),
@@ -102,6 +119,8 @@ class InitiatePaymentView(EMADBaseView):
         except VehicleType.DoesNotExist:
             raise ValidationError({'car_type': _('Invalid car type')})
 
+        validate_vehicle_capacity(data, car_type)
+
         res = get_route_with_distance(
             pickup_lat=data.get('pickup_lat'),
             pickup_lng=data.get('pickup_lng'),
@@ -128,7 +147,11 @@ class InitiatePaymentView(EMADBaseView):
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
 
-        amount_in_cents = int(float(total_cost) * 100)
+        amount_in_cents = int(
+            (Decimal(str(total_cost)) * Decimal('100')).quantize(
+                Decimal('1'), rounding=ROUND_HALF_UP
+            )
+        )
         if amount_in_cents <= 0:
             raise ValidationError({'amount': _('Payment amount is invalid or zero')})
 
@@ -178,6 +201,7 @@ class InitiatePaymentView(EMADBaseView):
             "passenger_email": stripe_metadata_value(request.user.email),
             "passenger_name": stripe_metadata_value(passenger_name),
             "car_type_id": stripe_metadata_value(car_type.id),
+            "car_type_code": stripe_metadata_value(car_type.code),
             "car_type": stripe_metadata_value(car_type.name_en),
             "trip_date": stripe_metadata_value(trip_date),
             "trip_time": stripe_metadata_value(trip_time_obj),
@@ -188,6 +212,7 @@ class InitiatePaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             metadata=payment_metadata,
             idempotency_key=idempotency_key
         )
@@ -292,6 +317,8 @@ class InitiateGuestPaymentView(EMADBaseView):
         except VehicleType.DoesNotExist:
             raise ValidationError({'car_type': _('Invalid car type')})
 
+        validate_vehicle_capacity(data, car_type)
+
         res = get_route_with_distance(
             pickup_lat=data.get('pickup_lat'),
             pickup_lng=data.get('pickup_lng'),
@@ -317,7 +344,11 @@ class InitiateGuestPaymentView(EMADBaseView):
         if not total_cost or total_cost <= 0:
             raise ValidationError({'cost': _('Invalid trip cost. Please contact support.')})
 
-        amount_in_cents = int(float(total_cost) * 100)
+        amount_in_cents = int(
+            (Decimal(str(total_cost)) * Decimal('100')).quantize(
+                Decimal('1'), rounding=ROUND_HALF_UP
+            )
+        )
         if amount_in_cents <= 0:
             raise ValidationError({'amount': _('Payment amount is invalid or zero')})
 
@@ -359,6 +390,7 @@ class InitiateGuestPaymentView(EMADBaseView):
             "passenger_email": self._stripe_metadata_value(guest_contact['passenger_email']),
             "passenger_name": self._stripe_metadata_value(guest_contact['passenger_name']),
             "car_type_id": self._stripe_metadata_value(car_type.id),
+            "car_type_code": self._stripe_metadata_value(car_type.code),
             "car_type": self._stripe_metadata_value(car_type.name_en),
             "trip_date": self._stripe_metadata_value(trip_date),
             "trip_time": self._stripe_metadata_value(trip_time_obj),
@@ -369,6 +401,7 @@ class InitiateGuestPaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             metadata=payment_metadata,
             receipt_email=guest_contact['passenger_email'],
             idempotency_key=idempotency_key

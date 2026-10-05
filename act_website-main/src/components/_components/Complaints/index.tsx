@@ -1,4 +1,7 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
+import { runtimeText } from "@/lib/customer-runtime";
+
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,13 +28,14 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
   const queryClient = useQueryClient();
 
   // Fetch complaints
-  const { data: complaintsData, isLoading: complaintsLoading } = useQuery<any>({
-    queryKey: ["complaints", page, filterStatus, filterType],
+  const { data: complaintsData, isLoading: complaintsLoading, isError: listError, refetch: retryList } = useQuery<any>({
+    queryKey: ["complaints", locale, token, page, filterStatus, filterType],
     queryFn: () =>
       fetchData({
         endpoint: "/api/complaints/passenger/complaints/",
         token: token,
         queryParams: {
+          locale,
           page: page.toString(),
           page_size: "10",
           ...(filterStatus && { status: filterStatus }),
@@ -41,16 +45,15 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
     enabled: activeTab === "list",
   });
 
-  // Fetch user's completed trips for the dropdown (only completed trips can be complained about)
-  const { data: tripsData } = useQuery<any>({
-    queryKey: ["trips-for-complaints"],
+  // Fetch passenger trips for support; completed and cancelled bookings can be complained about.
+  const { data: tripsData, isError: tripsError, refetch: retryTrips } = useQuery<any>({
+    queryKey: ["trips-for-complaints", locale, token],
     queryFn: () =>
       fetchData({
         endpoint: "/api/trips/list-trips/",
         token: token,
         queryParams: {
           page_size: "100",
-          trip_status: "completed",
           locale: locale,
         },
       }),
@@ -60,7 +63,9 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
   const complaints = complaintsData?.data?.complaints || [];
   const stats = complaintsData?.data?.stats || {};
   const pagination = complaintsData?.data?.pagination || {};
-  const trips = tripsData?.trips || [];
+  const trips = (tripsData?.trips || []).filter((trip: any) =>
+    trip?.status === "completed" || trip?.status === "cancelled"
+  );
 
   // Submit complaint mutation
   const submitMutation = useMutation({
@@ -96,7 +101,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
       });
     },
     onError: (error: any) => {
-      const errorMessage = extract_error(error) || error?.message || trans.submit_form.error_message;
+      const errorMessage = trans.submit_form.error_message;
       toast.error(errorMessage);
     },
   });
@@ -271,7 +276,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
           </div>
 
           {/* Complaints List */}
-          {complaintsLoading ? (
+          {listError ? (<div role="alert"><p>{accountText(locale, "requestFailed")}</p><button type="button" onClick={() => retryList()}>{accountText(locale, "retry")}</button></div>) : complaintsLoading ? (
             <div className="flex items-center justify-center py-20">
               <IsLoading />
             </div>
@@ -352,7 +357,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
                         </span>
                         <span>
                           {new Date(complaint.created_at).toLocaleDateString(
-                            locale === "ar" ? "ar-EG" : "en-US"
+                            locale
                           )}
                         </span>
                       </div>
@@ -375,7 +380,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
                       </span>
                       <span className="text-green-400">
                         {new Date(complaint.resolved_at).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : "en-US"
+                          locale
                         )}
                       </span>
                     </div>
@@ -405,7 +410,8 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
           </h2>
           <p className="text-gray-400 mb-6">{trans.submit_form.subtitle}</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {tripsError && <div role="alert"><p>{accountText(locale, "loadTripsFailed")}</p><button type="button" onClick={() => retryTrips()}>{accountText(locale, "retry")}</button></div>}
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Trip Selection */}
@@ -424,7 +430,7 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
                   </option>
                   {trips.map((trip: any) => (
                     <option key={trip.id} value={trip.id} className="bg-foreground text-white">
-                      Trip #{trip.id} - {trip.trip_date} {trip.trip_time}
+                      {runtimeText(locale, "trip")} #{trip.id} - {trip.trip_date} {trip.trip_time}
                     </option>
                   ))}
                 </select>
@@ -504,4 +510,5 @@ export default function Complaints({ trans, token, locale }: ComplaintsProps) {
     </div>
   );
 }
+
 

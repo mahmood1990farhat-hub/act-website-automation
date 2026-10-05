@@ -9,7 +9,8 @@ type PageProps = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
-  return getPublicPageSeo(locale, "lost-property")
+  const copy = await getTrans(locale, "lostProperty");
+  return getPublicPageSeo(locale, "lost-property", {title: copy.title + " | Airport & City Transfer", description: copy.subtitle});
 }
 
 export default async function LostPropertyPage({params}: PageProps) {
@@ -27,4 +28,5 @@ export default async function LostPropertyPage({params}: PageProps) {
     </div>
   )
 }
+
 

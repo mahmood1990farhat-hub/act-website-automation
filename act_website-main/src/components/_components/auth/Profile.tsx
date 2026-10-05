@@ -1,4 +1,5 @@
 "use client";
+import { accountText } from "@/lib/customer-account-text";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -139,6 +140,7 @@ export default function Profile({ locale, trans, accountType = "passenger" }: Pr
         endpoint: "/api/auth/delete-account/",
         token: token,
         body: { password, action: "delete" },
+        queryParams: { locale },
         noToast: true,
       });
 
@@ -156,9 +158,9 @@ export default function Profile({ locale, trans, accountType = "passenger" }: Pr
       notifyAuthChange();
       router.push(`/${locale}`);
       router.refresh();
-      // Success toast is handled by postData
+      toast.success(trans.deleteSuccess);
     } catch (error) {
-      // Error toast is handled by postData
+      toast.error(accountText(locale, "deleteFailed"));
     } finally {
       setIsDeleting(false);
     }

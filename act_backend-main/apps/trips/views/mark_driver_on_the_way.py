@@ -71,18 +71,19 @@ class MarkDriverOnTheWayView(EMADBaseView):
 
             logger.info(f"Driver {user.id} marked as on the way for trip {trip.id}")
 
-            # Notify passenger
+            # Push notifications apply to registered passengers only.
             try:
-                notify_user(
-                    user=trip.passenger.user_id,
-                    title_en='Driver On The Way',
-                    title_ar='السائق في الطريق',
-                    desc_en=f'Your driver is on the way to pick you up for trip #{trip.id}.',
-                    desc_ar=f'سائقك في الطريق لاصطحابك لرحلة #{trip.id}.',
-                    locale=locale,
-                    notification_type=NOTIFICATION_TYPE_DRIVER_ON_THE_WAY,
-                    trip_id=trip.id
-                )
+                if trip.passenger:
+                    notify_user(
+                        user=trip.passenger.user_id,
+                        title_en='Driver On The Way',
+                        title_ar='السائق في الطريق',
+                        desc_en=f'Your driver is on the way to pick you up for trip #{trip.id}.',
+                        desc_ar=f'سائقك في الطريق لاصطحابك لرحلة #{trip.id}.',
+                        locale=locale,
+                        notification_type=NOTIFICATION_TYPE_DRIVER_ON_THE_WAY,
+                        trip_id=trip.id
+                    )
             except Exception as e:
                 logger.warning(f"Failed to send notification for trip {trip.id}: {str(e)}")
 

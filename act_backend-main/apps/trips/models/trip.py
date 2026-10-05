@@ -1,3 +1,4 @@
+import uuid
 from django.db import models 
 from django.utils import timezone
 from apps.vehicle.models import VehicleType
@@ -100,6 +101,14 @@ class Trip(models.Model):
     last4 = models.CharField(max_length=4, null=True, blank=True)
     card_brand = models.CharField(max_length=20, null=True, blank=True)
     is_paid = models.BooleanField(default= False)
+    refund_status = models.CharField(max_length=32, default="not_applicable")
+    stripe_refund_id = models.CharField(max_length=255, null=True, blank=True)
+    refund_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    refund_error = models.TextField(blank=True, default="")
+    booking_confirmation_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    passenger_confirmation_sent_at = models.DateTimeField(null=True, blank=True)
+    internal_booking_notification_sent_at = models.DateTimeField(null=True, blank=True)
+    driver_details_reminder_sent_at = models.DateTimeField(null=True, blank=True)
     booking_confirmation_pdf = models.FileField(
         upload_to="trips/booking_confirmations/",
         null=True,
@@ -122,6 +131,8 @@ class Trip(models.Model):
     guest_driver_name = models.CharField(max_length=255, blank=True, null=True, help_text="Name of guest driver")
     guest_driver_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Phone number of guest driver")
     guest_driver_company = models.CharField(max_length=255, blank=True, null=True, help_text="Company name (e.g., Uber, Bolt)")
+    guest_driver_licence_number = models.CharField(max_length=50, blank=True, null=True)
+    guest_driver_photo_url = models.URLField(max_length=500, blank=True, null=True)
     guest_driver_car = models.ForeignKey(
         'trips.GuestDriverCar',
         on_delete=models.SET_NULL,

@@ -1,0 +1,94 @@
+{
+  "title": "我的行程",
+  "section_1": {
+    "title": "全部行程",
+    "tpes": [
+      {
+        "title": "全部",
+        "value": ""
+      },
+      {
+        "title": "待处理",
+        "value": "pending"
+      },
+      {
+        "title": "已接受",
+        "value": "accepted"
+      },
+      {
+        "title": "进行中",
+        "value": "active"
+      },
+      {
+        "title": "即将开始",
+        "value": "driver_on_the_way"
+      },
+      {
+        "title": "已完成",
+        "value": "completed"
+      },
+      {
+        "title": "已取消",
+        "value": "cancelled"
+      }
+    ]
+  },
+  "section_2": {
+    "title": "最近行程",
+    "desc": "如有疑问或需要投诉，您可以联系过去24小时内行程的司机。"
+  },
+  "tripsCount": "行程数量：",
+  "noTrips": {
+    "title": "未找到行程",
+    "tryDifferentFilter": "请尝试选择其他筛选条件。",
+    "willAppearHere": "您的行程将显示在这里。"
+  },
+  "noRecentTrips": {
+    "title": "暂无最近行程",
+    "desc": "过去24小时内的行程将显示在这里。"
+  },
+  "deleteTrip": {
+    "title": "取消行程？",
+    "desc": "确定要取消此行程吗？此操作无法撤销。",
+    "btuCancel": "取消",
+    "btuConfirm": "取消行程"
+  },
+  "tripCard": {
+    "name_of_driver": "司机姓名",
+    "phone_of_driver": "司机电话",
+    "model_car": "车型",
+    "color_car": "车辆颜色",
+    "number_car": "车牌号",
+    "tripId": "行程编号：",
+    "distance": "距离",
+    "duration": "时长",
+    "destination": "目的地",
+    "carInfo": "车辆信息",
+    "brand": "品牌",
+    "additional_notes": "补充说明",
+    "model": "型号",
+    "color": "颜色",
+    "registrationNumber": "车牌号",
+    "year": "年份",
+    "pickup": "接乘地点",
+    "dropoff": "下车地点",
+    "gbp": "GBP",
+    "seeDetails": "查看详情",
+    "details": "详情",
+    "cancel": "取消",
+    "tripDetails": "行程详情",
+    "status": "状态：",
+    "date": "日期",
+    "cost": "费用",
+    "contactDriver": "联系司机",
+    "close": "关闭",
+    "statusLabels": {
+      "pending": "待处理",
+      "accepted": "已接受",
+      "active": "进行中",
+      "driver_on_the_way": "司机正在赶来",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    }
+  }
+}

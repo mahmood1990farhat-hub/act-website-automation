@@ -17,8 +17,24 @@ export const locationValidationMessage =
 export const hasValidCoordinates = (point: any) => {
   const lat = point?.coordinates?.lat;
   const lng = point?.coordinates?.lng;
-  return Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0);
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 && lat <= 90 &&
+    lng >= -180 && lng <= 180 &&
+    !(lat === 0 && lng === 0)
+  );
 };
+
+const isNonNegativeInteger = (value: number) => Number.isInteger(value) && value >= 0;
+
+export const hasValidQuoteCounts = (formDetails: QuoteFormDetails) =>
+  Number.isInteger(formDetails.numberOfPassengers) &&
+  formDetails.numberOfPassengers >= 1 &&
+  formDetails.numberOfPassengers <= 7 &&
+  isNonNegativeInteger(formDetails.largeSuitcase) &&
+  isNonNegativeInteger(formDetails.smallSuitcase) &&
+  formDetails.largeSuitcase + formDetails.smallSuitcase <= 8;
 
 const normalizeTripDate = (date: string) => {
   const [year, month, day] = date.split("-");
@@ -35,8 +51,16 @@ export function buildTripQuoteRequest({
 }) {
   const pickup = routePoints.find((point) => point.type === "pickup")?.point;
   const dropoff = routePoints.find((point) => point.type === "dropoff")?.point;
-  if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff)) {
+  // Validate every selected stop at the payload boundary as well as in the UI.
+  // Never submit missing or invalid coordinates for an added stop.
+  const hasInvalidStop = routePoints.some(
+    (point) => point.type === "stop" && !hasValidCoordinates(point.point)
+  );
+  if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff) || hasInvalidStop) {
     throw new Error(locationValidationMessage);
+  }
+  if (!hasValidQuoteCounts(formDetails)) {
+    throw new Error("Please check the passenger and luggage counts before requesting a price.");
   }
 
   const request: Record<string, unknown> = {

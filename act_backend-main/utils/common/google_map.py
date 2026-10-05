@@ -6,7 +6,13 @@ from googlemaps.convert import decode_polyline
 import requests
 
 GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
-gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
+
+
+def _google_maps_client():
+    """Create the Google Maps client only when a Maps operation is requested."""
+    if not GOOGLE_MAPS_API_KEY:
+        raise ValidationError({"details": _("Google Maps is not configured")})
+    return googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
 
 
 def get_route_with_distance(pickup_lat, pickup_lng,
@@ -18,7 +24,7 @@ def get_route_with_distance(pickup_lat, pickup_lng,
     waypoints   = [(p["point_lat"], p["point_lng"]) for p in stop_points]
 
     # 1)  Ask for alternatives
-    directions_result = gmaps.directions(
+    directions_result = _google_maps_client().directions(
         origin=origin,
         destination=destination,
         waypoints=waypoints,
@@ -91,7 +97,7 @@ def place_to_string(place_id: str | None, fallback: str | None = None) -> str:
         return fallback or ""
 
     try:
-        details = gmaps.place(place_id=place_id, fields=["name", "formatted_address"])
+        details = _google_maps_client().place(place_id=place_id, fields=["name", "formatted_address"])
         result = details.get("result", {})
         name = result.get("name", "")
         addr = result.get("formatted_address", "")

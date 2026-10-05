@@ -121,6 +121,10 @@ class TripListView(EMADBaseView):
                 Q(passenger__user__last_name__icontains=search) |
                 Q(passenger__user__email__icontains=search) |
                 Q(passenger__user__phone_number__icontains=search) |
+                Q(passenger_name__icontains=search) |
+                Q(passenger_email__icontains=search) |
+                Q(passenger_phone__icontains=search) |
+                Q(stripe_payment_intent__icontains=search) |
                 Q(base_driver__user__first_name__icontains=search) |
                 Q(base_driver__user__last_name__icontains=search) |
                 Q(base_driver__user__email__icontains=search) |
@@ -226,6 +230,7 @@ class TripDetailView(EMADBaseView):
         if trip.car_type:
             trip_data['vehicle_type_details'] = {
                 'id': trip.car_type.id,
+                'code': trip.car_type.code,
                 'name_en': trip.car_type.name_en,
                 'name_ar': trip.car_type.name_ar,
                 'max_passengers': trip.car_type.max_passengers_count,
@@ -414,6 +419,13 @@ class AdminUpdateTripView(EMADBaseView):
         try:
             # Prepare update data
             data = request.data.copy()
+
+            # Driver assignment has its own guarded lifecycle endpoint so a
+            # generic edit cannot bypass explicit driver acceptance.
+            if 'driver_id' in data:
+                raise ValidationError({
+                    'driver_id': _('Use the dedicated driver assignment action for this booking')
+                })
             
             # Handle passenger_id update
             if 'passenger_id' in data:
@@ -913,6 +925,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
         guest_driver_name = request.data.get('guest_driver_name', '').strip()
         guest_driver_phone = request.data.get('guest_driver_phone', '').strip()
         guest_driver_company = request.data.get('guest_driver_company', '').strip()
+        guest_driver_licence_number = request.data.get('guest_driver_licence_number', '').strip()
+        guest_driver_photo_url = request.data.get('guest_driver_photo_url', '').strip()
         car_info = request.data.get('car_info', {})
         
         if not guest_driver_name:
@@ -930,8 +944,23 @@ class AdminAssignGuestDriverView(EMADBaseView):
                 locale
             )
             return create_error_response(message, errors=None, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
+        if not guest_driver_licence_number:
+            raise ValidationError({'guest_driver_licence_number': _('TfL PHV driver licence number is required.')})
+        if not guest_driver_photo_url:
+            raise ValidationError({'guest_driver_photo_url': _('A passenger-visible driver photo URL is required.')})
+
         
-        # Handle car information if provided
+        required_car_fields = ('brand', 'model', 'color', 'registration_number')
+        missing_car_fields = [
+            field for field in required_car_fields
+            if not str(car_info.get(field, '')).strip()
+        ]
+        if missing_car_fields:
+            raise ValidationError({
+                'car_info': _('Vehicle make/model/colour and registration are required for passenger disclosure.')
+            })
+
+        # Handle required passenger-facing car information.
         guest_driver_car = None
         if car_info:
             from apps.trips.models import GuestDriverCar
@@ -961,6 +990,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
             trip.guest_driver_name = guest_driver_name
             trip.guest_driver_phone = guest_driver_phone
             trip.guest_driver_company = guest_driver_company if guest_driver_company else None
+            trip.guest_driver_licence_number = guest_driver_licence_number
+            trip.guest_driver_photo_url = guest_driver_photo_url
             trip.guest_driver_car = guest_driver_car
             trip.base_driver = None  # Clear system driver if any
             trip.status = 'accepted'  # Set status to accepted
@@ -969,6 +1000,8 @@ class AdminAssignGuestDriverView(EMADBaseView):
                 'guest_driver_name',
                 'guest_driver_phone',
                 'guest_driver_company',
+                'guest_driver_licence_number',
+                'guest_driver_photo_url',
                 'guest_driver_car',
                 'base_driver',
                 'status'
@@ -981,16 +1014,15 @@ class AdminAssignGuestDriverView(EMADBaseView):
             
             logger.info(f"Admin {request.user.id} assigned guest driver to trip {trip_id}: {guest_driver_name} ({guest_driver_phone})")
             
-            # Send notification to passenger
-            if trip.passenger and trip.passenger.user:
+            # Push notification is available for registered passengers; email
+            # also covers guest checkout using the booking email snapshot.
+            passenger_user = trip.passenger.user if trip.passenger else None
+            if passenger_user:
                 try:
                     from utils.common import notify_user
                     from utils.common.notifications import NOTIFICATION_TYPE_GUEST_DRIVER_ASSIGNED
-                    from utils.common.email import send_trip_accepted_to_passenger
-                    
-                    # Send notification
                     notify_user(
-                        user=trip.passenger.user_id,
+                        user=passenger_user.id,
                         title_en='External Driver Assigned',
                         title_ar='تم تعيين سائق خارجي',
                         desc_en=f'Your trip #{trip.id} has been assigned to {guest_driver_name}. Contact: {guest_driver_phone}',
@@ -999,30 +1031,32 @@ class AdminAssignGuestDriverView(EMADBaseView):
                         notification_type=NOTIFICATION_TYPE_GUEST_DRIVER_ASSIGNED,
                         trip_id=trip.id
                     )
-                    
-                    # Send emailhtml_message = render_to_string("emails/trip_driver_details_passenger.html", context)
-                    guest_driver_info = {
-                        'name': guest_driver_name,
-                        'phone': guest_driver_phone,
-                        'company': guest_driver_company if guest_driver_company else None,
-                        'car': None
-                    }
-                    
-                    # Include car info if available
-                    if guest_driver_car:
-                        from apps.trips.serializers.guest_driver_car import GuestDriverCarSerializer
-                        guest_driver_info['car'] = GuestDriverCarSerializer(guest_driver_car).data
-                    
-                    send_trip_accepted_to_passenger(
-                        trip.passenger.user,
-                        trip,
-                        driver_user=None,
-                        is_guest_driver=True,
-                        guest_driver_info=guest_driver_info
-                    )
                 except Exception as e:
-                    logger.warning(f"Failed to send notification/email for guest driver assignment to trip {trip.id}: {str(e)}")
-            
+                    logger.warning(f"Failed to send guest-driver push notification for trip {trip.id}: {str(e)}")
+
+            try:
+                from utils.common.email import send_trip_accepted_to_passenger
+                guest_driver_info = {
+                    'name': guest_driver_name,
+                    'phone': guest_driver_phone,
+                    'company': guest_driver_company if guest_driver_company else None,
+                    'licence_number': guest_driver_licence_number,
+                    'photo_url': guest_driver_photo_url,
+                    'car': None,
+                }
+                if guest_driver_car:
+                    from apps.trips.serializers.guest_driver_car import GuestDriverCarSerializer
+                    guest_driver_info['car'] = GuestDriverCarSerializer(guest_driver_car).data
+                send_trip_accepted_to_passenger(
+                    passenger_user,
+                    trip,
+                    driver_user=None,
+                    is_guest_driver=True,
+                    guest_driver_info=guest_driver_info,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send guest-driver email for trip {trip.id}: {str(e)}")
+
             message = get_bilingual_error_message(
                 'Guest driver assigned successfully. Passenger has been notified.',
                 'تم تعيين السائق الضيف بنجاح. تم إشعار الراكب.',
@@ -1125,20 +1159,47 @@ class AdminUpdateTripStatusView(EMADBaseView):
                 locale
             )
             return create_error_response(message, errors=None, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
-        trip.status = new_status
-        trip.save(update_fields=['status'])
-        logger.info(f"Admin {request.user.id} set trip {trip_id} status to {new_status} (was {current})")
         if new_status == 'completed':
-            if trip.is_paid:
-                try:
+            # Completion and ledger creation must succeed together; otherwise
+            # keep the journey active so operations can retry safely.
+            try:
+                with transaction.atomic():
+                    locked_trip = Trip.objects.select_for_update().get(id=trip.id)
+                    if locked_trip.status != 'active':
+                        raise ValidationError(
+                            {'status': _('Only an active trip can be completed.')}
+                        )
+                    locked_trip.status = 'completed'
+                    locked_trip.save(update_fields=['status'])
                     from apps.earnings.services.earnings_calculator import EarningsCalculator
-                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(trip)
+                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(locked_trip)
+                    trip = locked_trip
                     if earnings:
-                        logger.info(f"Earnings recorded for trip {trip.id}: driver={earnings.net_amount}, company={revenue.amount}")
+                        logger.info(
+                            f"Earnings recorded for trip {trip.id}: "
+                            f"driver={earnings.net_amount}, company={revenue.amount}"
+                        )
                     else:
-                        logger.info(f"Earnings recorded for trip {trip.id}: company={revenue.amount} (guest driver)")
-                except Exception as e:
-                    logger.error(f"Error recording earnings for trip {trip.id}: {str(e)}", exc_info=True)
+                        logger.info(
+                            f"Earnings recorded for trip {trip.id}: "
+                            f"company={revenue.amount} (guest driver)"
+                        )
+            except Exception as e:
+                logger.error(
+                    f"Could not complete trip {trip.id} with financial ledger: {str(e)}",
+                    exc_info=True,
+                )
+                return create_error_response(
+                    get_bilingual_error_message(
+                        'Trip could not be completed because its financial record could not be created.',
+                        'تعذر إكمال الرحلة لأنه تعذر إنشاء سجلها المالي.',
+                        locale,
+                    ),
+                    errors=None,
+                    locale=locale,
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            logger.info(f"Admin {request.user.id} set trip {trip_id} status to completed (was {current})")
             try:
                 notify_user(
                     user=trip.passenger.user_id,
@@ -1158,6 +1219,13 @@ class AdminUpdateTripStatusView(EMADBaseView):
                 stop_trip_tracking(trip.id, reason="completed")
             except Exception as e:
                 logger.warning(f"Failed to stop trip tracking for trip {trip.id}: {str(e)}")
+        else:
+            trip.status = new_status
+            trip.save(update_fields=['status'])
+            logger.info(
+                f"Admin {request.user.id} set trip {trip_id} status to {new_status} "
+                f"(was {current})"
+            )
         trip.refresh_from_db()
         trip_serializer = TripWithStopPointSerializer(trip, context={'request': request})
         return Response({
@@ -1166,3 +1234,128 @@ class AdminUpdateTripStatusView(EMADBaseView):
             'data': trip_serializer.data
         }, status=status.HTTP_200_OK)
 
+
+
+class AdminAssignSystemDriverView(EMADBaseView):
+    """Assign a paid booking to an ACT driver for explicit driver acceptance."""
+    http_method_names = ['post']
+    permission_classes = [IsAdminUser]
+
+    def handle_post(self, request, trip_id):
+        locale = get_locale(request=request)
+        activate(locale)
+        driver_id = request.data.get('driver_id')
+        if not driver_id:
+            raise ValidationError({'driver_id': _('Driver is required')})
+
+        from apps.trips.utils.time_conflict import driver_has_time_conflict
+        from datetime import datetime
+
+        with transaction.atomic():
+            # Lock only the Trip row. car_type is nullable, and PostgreSQL
+            # rejects SELECT FOR UPDATE across the nullable side of an outer join.
+            trip = get_object_or_404(
+                Trip.objects.select_for_update(),
+                id=trip_id,
+            )
+            if not trip.is_paid:
+                raise ValidationError({'trip': _('Only paid bookings can be assigned to a driver')})
+            if trip.status not in ('pending', 'accepted'):
+                raise ValidationError({
+                    'trip': _('Only pending or accepted bookings can be assigned or reassigned')
+                })
+
+            driver = get_object_or_404(
+                BaseDriver.objects.select_related(
+                    'user',
+                    'normal_driver__vehicle__vehicle_type',
+                ),
+                id=driver_id,
+            )
+            if not driver.user.is_active:
+                raise ValidationError({'driver_id': _('Selected driver is not active')})
+            if not driver.user.is_admin_verified or not driver.user.is_profile_completed:
+                raise ValidationError({'driver_id': _('Selected driver is not fully approved')})
+
+            try:
+                driver_vehicle_type_id = driver.normal_driver.vehicle.vehicle_type_id
+            except AttributeError:
+                driver_vehicle_type_id = None
+            if not driver_vehicle_type_id:
+                raise ValidationError({'driver_id': _('Selected driver does not have a configured vehicle type')})
+            if trip.car_type_id != driver_vehicle_type_id:
+                raise ValidationError({
+                    'driver_id': _('Selected driver vehicle class does not match this booking')
+                })
+
+            driver_vehicle = driver.normal_driver.vehicle
+            missing_passenger_details = []
+            if not (driver.pco_licence_number or '').strip():
+                missing_passenger_details.append('TfL PHV driver licence number')
+            if not driver.driver_photo:
+                missing_passenger_details.append('driver photo')
+            if not (driver_vehicle.make or '').strip():
+                missing_passenger_details.append('vehicle make')
+            if not (driver_vehicle.model or '').strip():
+                missing_passenger_details.append('vehicle model')
+            if not (driver_vehicle.color or '').strip():
+                missing_passenger_details.append('vehicle colour')
+            if missing_passenger_details:
+                raise ValidationError({
+                    'driver_id': _('Selected driver is missing passenger-facing details: {}').format(
+                        ', '.join(missing_passenger_details)
+                    )
+                })
+
+            if trip.cancelled_by_driver_id_id == driver.id:
+                raise ValidationError({
+                    'driver_id': _('A driver who cancelled this booking cannot be reassigned to it')
+                })
+
+            trip_datetime = timezone.make_aware(datetime.combine(trip.trip_date, trip.trip_time))
+            if driver_has_time_conflict(driver, trip_datetime, exclude_trip_id=trip.id):
+                raise ValidationError({
+                    'driver_id': _('Selected driver has a time conflict with another trip')
+                })
+
+            trip.base_driver = driver
+            # Assignment is not acceptance. The selected driver must accept explicitly.
+            trip.status = 'pending'
+            trip.is_guest_driver = False
+            trip.guest_driver_name = None
+            trip.guest_driver_phone = None
+            trip.guest_driver_company = None
+            trip.guest_driver_car = None
+            trip.save(update_fields=[
+                'base_driver',
+                'status',
+                'is_guest_driver',
+                'guest_driver_name',
+                'guest_driver_phone',
+                'guest_driver_company',
+                'guest_driver_car',
+            ])
+
+        try:
+            notify_user(
+                user=driver.user_id,
+                title_en='Trip Assigned',
+                title_ar='تم تعيين رحلة لك',
+                desc_en=f'Trip #{trip.id} has been assigned to you. Please review and accept it.',
+                desc_ar=f'تم تعيين الرحلة #{trip.id} لك. يرجى مراجعتها وقبولها.',
+                locale=locale,
+                notification_type='TRIP_ASSIGNED',
+                trip_id=trip.id,
+            )
+        except Exception as exc:
+            logger.warning('Failed to notify assigned driver for trip %s: %s', trip.id, exc)
+
+        return Response({
+            'success': True,
+            'message': get_bilingual_error_message(
+                'Driver assigned. Waiting for driver acceptance.',
+                'تم تعيين السائق. بانتظار قبول السائق.',
+                locale,
+            ),
+            'data': TripWithStopPointSerializer(trip, context={'request': request}).data,
+        }, status=status.HTTP_200_OK)

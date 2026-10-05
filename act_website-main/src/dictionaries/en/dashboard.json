@@ -846,8 +846,8 @@
         "isActive": "Active Status"
       },
       "alreadyUsed": "(Already used)",
-      "duplicateFileTypeError": "A file with this type already exists. Please choose a different file type.",
-      "disabledFileTypesNote": "Some file types are disabled because they already exist.",
+      "duplicateFileTypeError": "A file of this type already exists in the selected language. Edit that version instead.",
+      "disabledFileTypesNote": "Disabled types already have a document in the selected language.",
       "fileTypeNotEditable": "File type cannot be changed after creation."
     }
   }

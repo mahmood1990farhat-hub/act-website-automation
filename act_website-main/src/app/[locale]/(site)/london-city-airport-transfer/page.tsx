@@ -1,3 +1,4 @@
+import FrenchAirportPage, { frenchAirportMetadata } from "@/components/_components/FrenchAirportPage";
 import Link from "next/link";
 import { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  if (locale !== "en" && locale !== "ar") return frenchAirportMetadata("london-city-airport-transfer", locale);
   return getPublicPageSeo(locale, "london-city-airport-transfer", pageMetadata);
 }
 
@@ -31,11 +33,11 @@ const benefits = [
 ];
 
 const vehicles = [
-  "Standard PHV",
-  "Executive",
-  "Luxury",
-  "7 Seater",
-  "Luxury Van",
+  "Comfort Class",
+  "Comfort XL",
+  "Executive Class",
+  "Executive XL",
+  "First Class",
 ];
 
 const routes = [
@@ -72,6 +74,7 @@ export default async function LondonCityAirportTransferPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
+  if (locale !== "en" && locale !== "ar") return <FrenchAirportPage locale={locale} slug="london-city-airport-transfer" />;
   const bookingHref = `/${locale}#book-now`;
   const contactHref = `/${locale}/about-us#contact-us`;
     const serviceSchema = {
@@ -239,3 +242,4 @@ export default async function LondonCityAirportTransferPage({
     </main>
   );
 }
+

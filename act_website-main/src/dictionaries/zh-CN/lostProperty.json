@@ -1,0 +1,144 @@
+{
+  "title": "失物招领",
+  "subtitle": "报告失物并跟踪处理情况",
+  "tabs": {
+    "my_reports": "我的报告",
+    "submit_report": "提交报告"
+  },
+  "stats": {
+    "total": "报告总数",
+    "reported": "已报告",
+    "under_investigation": "调查中",
+    "found": "已找到",
+    "returned": "已归还",
+    "not_found": "未找到",
+    "closed": "已关闭"
+  },
+  "report_list": {
+    "title": "失物报告",
+    "empty": "未找到失物报告",
+    "filter": {
+      "all": "全部",
+      "status_label": "按状态筛选",
+      "item_type_label": "按物品类型筛选"
+    },
+    "item_types": {
+      "all": "所有物品",
+      "luggage": "行李／行李箱",
+      "bag": "包／手提包",
+      "wallet": "钱包／零钱包",
+      "phone": "手机",
+      "keys": "钥匙",
+      "documents": "文件／证件",
+      "clothing": "衣物",
+      "other": "其他物品"
+    }
+  },
+  "report_card": {
+    "report_id": "报告编号",
+    "item_type": "物品类型",
+    "description": "描述",
+    "color": "颜色",
+    "brand": "品牌",
+    "lost_location": "丢失地点",
+    "contact_preference": "联系偏好",
+    "status": "状态",
+    "trip_date": "行程日期",
+    "created_at": "报告时间",
+    "updated_at": "最后更新",
+    "admin_notes": "管理员备注",
+    "found_at": "找到时间",
+    "returned_at": "归还时间",
+    "view_trip": "查看行程详情",
+    "show_details": "显示详情",
+    "report_details": "失物报告详情",
+    "close": "关闭",
+    "update_status": "更新状态",
+    "item_details": "物品详情",
+    "reporter_info": "报告人信息",
+    "trip_info": "行程信息",
+    "trip_id": "行程编号",
+    "trip_time": "行程时间",
+    "distance": "距离",
+    "duration": "预计时长",
+    "passenger_info": "乘客信息",
+    "driver_info": "司机信息",
+    "name": "姓名",
+    "phone_number": "电话号码",
+    "email": "电子邮箱",
+    "full_name": "姓名",
+    "photo": "照片",
+    "report_info": "报告信息",
+    "downloadPdf": "下载PDF",
+    "updateReportTitle": "更新失物报告"
+  },
+  "submit_form": {
+    "title": "报告失物",
+    "subtitle": "请提供失物详情",
+    "fields": {
+      "trip": "选择行程",
+      "trip_placeholder": "选择丢失物品时的行程",
+      "item_type": "物品类型",
+      "item_description": "物品描述",
+      "item_description_placeholder": "详细描述物品",
+      "item_color": "物品颜色",
+      "item_color_placeholder": "例如：黑色、蓝色、红色",
+      "item_brand": "品牌（选填）",
+      "item_brand_placeholder": "例如：Samsonite、Apple、Nike",
+      "lost_location": "在哪里丢失的？",
+      "lost_location_placeholder": "例如：车内、上车地点",
+      "contact_preference": "首选联系方式",
+      "contact_options": {
+        "phone": "电话",
+        "email": "电子邮箱",
+        "sms": "短信"
+      },
+      "photo": "照片（选填）",
+      "photo_description": "如有照片，请上传失物照片",
+      "selected_photo": "已选择"
+    },
+    "button": "添加报告",
+    "button_loading": "正在添加…",
+    "success_message": "失物报告已成功提交！",
+    "error_message": "无法提交报告，请重试。",
+    "validation": {
+      "trip_required": "请选择行程",
+      "item_type_required": "请选择物品类型",
+      "item_type_invalid": "请从列表中选择有效的物品类型",
+      "description_required": "请输入描述",
+      "description_min": "描述至少需要10个字符",
+      "color_required": "请填写物品颜色",
+      "lost_location_required": "请说明物品丢失地点",
+      "contact_preference_required": "请选择联系偏好",
+      "contact_preference_invalid": "请选择有效的联系偏好"
+    }
+  },
+  "statuses": {
+    "reported": "已报告",
+    "under_investigation": "调查中",
+    "found": "已找到",
+    "returned": "已归还",
+    "not_found": "未找到",
+    "closed": "已关闭"
+  },
+  "contact_preferences": {
+    "phone": "电话",
+    "email": "电子邮箱",
+    "sms": "短信"
+  },
+  "lost_locations": {
+    "in_vehicle": "车内",
+    "at_pickup": "上车地点",
+    "at_dropoff": "下车地点",
+    "unsure": "不确定"
+  },
+  "download": "下载",
+  "choose_file": "选择文件",
+  "no_file_chosen": "未选择文件",
+  "click_to_view": "点击查看",
+  "image_downloaded": "图片已成功下载",
+  "image_download_failed": "无法下载图片",
+  "file_read_failed": "无法读取图片文件",
+  "select_item_type": "选择物品类型",
+  "select_contact_method": "选择联系方式"
+}

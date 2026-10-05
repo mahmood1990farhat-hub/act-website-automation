@@ -1,0 +1,111 @@
+{
+  "title": "Şikâyetler",
+  "subtitle": "Şikâyetlerinizi iletin ve takip edin",
+  "tabs": {
+    "my_complaints": "Şikâyetlerim",
+    "submit_complaint": "Şikâyet gönder"
+  },
+  "stats": {
+    "total": "Toplam şikâyet",
+    "pending": "Beklemede",
+    "under_review": "İnceleniyor",
+    "resolved": "Çözüldü",
+    "closed": "Kapatıldı"
+  },
+  "complaint_list": {
+    "title": "Şikâyetlerim",
+    "empty": "Şikâyet bulunamadı",
+    "filter": {
+      "all": "Tümü",
+      "status_label": "Duruma göre filtrele",
+      "type_label": "Türe göre filtrele"
+    }
+  },
+  "complaint_card": {
+    "complaint_id": "Şikâyet numarası",
+    "type": "Tür",
+    "title": "Başlık",
+    "description": "Açıklama",
+    "status": "Durum",
+    "trip_date": "Yolculuk tarihi",
+    "created_at": "Gönderilme tarihi",
+    "admin_response": "Yönetici yanıtı",
+    "resolved_at": "Çözülme tarihi",
+    "view_trip": "Yolculuk ayrıntılarını göster",
+    "resolved": "Çözüldü",
+    "not_resolved": "Çözülmedi",
+    "leave_review": "Değerlendirme yap",
+    "show_details": "Ayrıntıları göster",
+    "close": "Kapat",
+    "complaint_details": "Şikâyet ayrıntıları",
+    "complainant": "Şikâyet eden",
+    "passenger": "Yolcu",
+    "driver": "Sürücü",
+    "complainant_info": "Şikâyet edenin bilgileri",
+    "trip_info": "Yolculuk bilgileri",
+    "trip_id": "Yolculuk numarası",
+    "trip_time": "Yolculuk saati",
+    "distance": "Mesafe",
+    "duration": "Tahmini süre",
+    "passenger_info": "Yolcu bilgileri",
+    "driver_info": "Sürücü bilgileri",
+    "full_name": "Ad soyad",
+    "phone_number": "Telefon numarası",
+    "email": "E-posta",
+    "account_type": "Hesap türü",
+    "name": "Ad",
+    "respond": "Yanıtla",
+    "resolve": "Çöz",
+    "respond_to_complaint": "Şikâyeti yanıtla",
+    "resolve_complaint": "Şikâyeti çöz",
+    "response_required": "Yanıt gereklidir",
+    "response_placeholder": "Yanıtınızı yazın…",
+    "sending": "Gönderiliyor…",
+    "send_response": "Yanıt gönder",
+    "resolving": "Çözülüyor…",
+    "cancel": "İptal",
+    "update_status": "Durumu güncelle",
+    "update": "Güncelle",
+    "updating": "Güncelleniyor…",
+    "resolution_placeholder": "Çözüm ayrıntılarını girin…",
+    "complaint_info": "Şikâyet bilgileri",
+    "complaint_content": "Şikâyet içeriği",
+    "downloadPdf": "PDF indir"
+  },
+  "submit_form": {
+    "title": "Şikâyet gönderin",
+    "subtitle": "Lütfen şikâyetinizin ayrıntılarını belirtin",
+    "fields": {
+      "trip": "Yolculuk seçin",
+      "trip_placeholder": "Şikâyetinizle ilgili yolculuğu seçin",
+      "complaint_type": "Şikâyet türü",
+      "complaint_type_placeholder": "Şikâyet türünü seçin",
+      "title": "Başlık",
+      "title_placeholder": "Şikâyetinizin kısa özeti",
+      "description": "Açıklama",
+      "description_placeholder": "Şikâyetinizi ayrıntılı olarak açıklayın"
+    },
+    "button": "Şikâyet ekle",
+    "button_loading": "Ekleniyor…",
+    "success_message": "Şikâyet başarıyla gönderildi!",
+    "error_message": "Şikâyet gönderilemedi. Lütfen tekrar deneyin.",
+    "validation": {
+      "trip_required": "Lütfen bir yolculuk seçin",
+      "type_required": "Lütfen bir şikâyet türü seçin",
+      "title_required": "Lütfen bir başlık girin",
+      "title_min": "Başlık en az 5 karakter olmalıdır",
+      "description_required": "Lütfen bir açıklama girin",
+      "description_min": "Açıklama en az 20 karakter olmalıdır"
+    }
+  },
+  "complaint_types": {
+    "trip_issue": "Yolculuk sorunu",
+    "driver_issue": "Sürücü sorunu"
+  },
+  "statuses": {
+    "pending": "Beklemede",
+    "under_review": "İnceleniyor",
+    "resolved": "Çözüldü",
+    "closed": "Kapatıldı"
+  }
+}

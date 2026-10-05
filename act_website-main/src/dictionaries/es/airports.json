@@ -1,0 +1,150 @@
+{
+  "shared": {
+    "bookNow": "Reservar ahora",
+    "contactUs": "Contacte con nosotros",
+    "whyChoose": "¿Por qué elegir ACT?",
+    "vehicleTypes": "Tipos de vehículos",
+    "faqTitle": "Preguntas frecuentes",
+    "benefits": [
+      "Seguimiento de vuelos",
+      "Precios fijos",
+      "Conductores profesionales",
+      "Vehículos de alta calidad",
+      "Recepción con cartel",
+      "Reserva en línea 24/7"
+    ],
+    "vehicles": [
+      "Vehículo estándar con conductor",
+      "Berlina ejecutiva",
+      "Vehículo de lujo",
+      "Vehículo de 7 plazas",
+      "Furgoneta de lujo"
+    ],
+    "intro": "Reserve un traslado privado fiable entre {airport} y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7.",
+    "popularRoutesTitle": "Rutas populares desde {airport}",
+    "serviceTitle": "Servicio de traslado privado – {airport}",
+    "serviceParagraphs": [
+      "Airport & City Transfer ofrece traslados privados entre {airport} y Londres. Para negocios, vacaciones en familia o estancias en hoteles, ACT permite reservar con antelación un traslado cómodo y fiable.",
+      "Elija un vehículo estándar con conductor, una berlina ejecutiva, un vehículo de lujo, uno de 7 plazas o una furgoneta de lujo según el trayecto, los pasajeros y el equipaje.",
+      "ACT prioriza la comunicación clara, el servicio profesional, los precios fijos y la reserva sencilla, desde la recogida en el aeropuerto hasta su destino."
+    ],
+    "faqs": [
+      {
+        "q": "¿Ofrecen recogidas en {airport}?",
+        "a": "Sí. Airport & City Transfer ofrece traslados privados desde y hacia {airport}, con servicio en Londres."
+      },
+      {
+        "q": "¿Realizan seguimiento de vuelos retrasados?",
+        "a": "Sí. Si facilita los datos de su vuelo, seguimos los horarios para ayudar al conductor a prever retrasos o llegadas anticipadas."
+      },
+      {
+        "q": "¿Puedo reservar un vehículo de 7 plazas desde {airport}?",
+        "a": "Sí. Puede reservar un traslado en vehículo de 7 plazas para viajes familiares, de grupo o de negocios, según sus necesidades de equipaje."
+      },
+      {
+        "q": "¿El precio es fijo?",
+        "a": "ACT procura comunicar una tarifa clara antes de reservar para que confirme su viaje con confianza."
+      }
+    ],
+    "finalTitle": "Reserve hoy su traslado al aeropuerto {airport}",
+    "finalDescription": "Reserve con antelación su traslado al aeropuerto {airport} con Airport & City Transfer y viaje por Londres con confianza.",
+    "serviceType": "Traslado al aeropuerto",
+    "schemaDescription": "Reserve un traslado privado fiable entre {airport} y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+  },
+  "pages": {
+    "heathrow-airport-transfer": {
+      "airport": "Heathrow",
+      "badge": "Traslado al aeropuerto de Heathrow",
+      "heading": "Traslado al aeropuerto de Heathrow – Londres",
+      "metadata": {
+        "title": "Traslado al aeropuerto de Heathrow | Airport & City Transfer",
+        "description": "Reserve un traslado privado fiable entre Heathrow y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+      },
+      "routes": [
+        "Heathrow al centro de Londres",
+        "Heathrow a Canary Wharf",
+        "Heathrow a Mayfair",
+        "Heathrow a hoteles de Londres",
+        "Heathrow al aeropuerto de Gatwick",
+        "Heathrow a distritos empresariales"
+      ]
+    },
+    "gatwick-airport-transfer": {
+      "airport": "Gatwick",
+      "badge": "Traslado al aeropuerto de Gatwick",
+      "heading": "Traslado al aeropuerto de Gatwick – Londres",
+      "metadata": {
+        "title": "Traslado al aeropuerto de Gatwick | Airport & City Transfer",
+        "description": "Reserve un traslado privado fiable entre Gatwick y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+      },
+      "routes": [
+        "Gatwick al centro de Londres",
+        "Gatwick a Canary Wharf",
+        "Gatwick a Mayfair",
+        "Gatwick a hoteles de Londres",
+        "Gatwick al aeropuerto de Heathrow",
+        "Gatwick a distritos empresariales"
+      ]
+    },
+    "stansted-airport-transfer": {
+      "airport": "Stansted",
+      "badge": "Traslado al aeropuerto de Stansted",
+      "heading": "Traslado al aeropuerto de Stansted – Londres",
+      "metadata": {
+        "title": "Traslado al aeropuerto de Stansted | Airport & City Transfer",
+        "description": "Reserve un traslado privado fiable entre Stansted y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+      },
+      "routes": [
+        "Stansted al centro de Londres",
+        "Stansted a Canary Wharf",
+        "Stansted a Mayfair",
+        "Stansted a hoteles de Londres",
+        "Stansted al aeropuerto de Heathrow",
+        "Stansted a distritos empresariales"
+      ]
+    },
+    "luton-airport-transfer": {
+      "airport": "Luton",
+      "badge": "Traslado al aeropuerto de Luton",
+      "heading": "Traslado al aeropuerto de Luton – Londres",
+      "metadata": {
+        "title": "Traslado al aeropuerto de Luton | Airport & City Transfer",
+        "description": "Reserve un traslado privado fiable entre Luton y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+      },
+      "routes": [
+        "Luton al centro de Londres",
+        "Luton a Canary Wharf",
+        "Luton a Mayfair",
+        "Luton a hoteles de Londres",
+        "Luton al aeropuerto de Heathrow",
+        "Luton a distritos empresariales"
+      ]
+    },
+    "london-city-airport-transfer": {
+      "airport": "London City Airport",
+      "badge": "Traslado al aeropuerto de London City Airport",
+      "heading": "Traslado al aeropuerto de London City Airport – Londres",
+      "metadata": {
+        "title": "Traslado al aeropuerto de London City Airport | Airport & City Transfer",
+        "description": "Reserve un traslado privado fiable entre London City Airport y Londres: precios fijos, conductores profesionales, vehículos de alta calidad, seguimiento de vuelos y reserva en línea 24/7."
+      },
+      "routes": [
+        "London City Airport al centro de Londres",
+        "London City Airport a Canary Wharf",
+        "London City Airport a Mayfair",
+        "London City Airport a hoteles de Londres",
+        "London City Airport al aeropuerto de Heathrow",
+        "London City Airport a distritos empresariales"
+      ],
+      "serviceParagraphs": [
+        "Airport & City Transfer ofrece traslados privados entre London City Airport y Londres. Para negocios, hoteles o conferencias, ACT permite reservar con antelación un traslado cómodo y fiable.",
+        "Nuestro servicio se dirige a viajeros de negocios, familias, turistas y profesionales que desean llegar tranquilos. Elija un vehículo estándar, una berlina ejecutiva, uno de lujo, uno de 7 plazas o una furgoneta de lujo.",
+        "ACT prioriza la comunicación clara, el servicio profesional, los precios fijos y la reserva sencilla, desde la recogida en el aeropuerto hasta su destino."
+      ],
+      "vehicleFaq": {
+        "q": "¿Puedo reservar una berlina ejecutiva desde London City Airport?",
+        "a": "Sí. Puede reservar una berlina ejecutiva, un vehículo de lujo, uno estándar, uno de 7 plazas o una furgoneta de lujo desde London City Airport."
+      }
+    }
+  }
+}

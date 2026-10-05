@@ -40,7 +40,6 @@
     "description": "الوصف",
     "color": "اللون",
     "brand": "العلامة التجارية",
-    "additional_notes": "ملاحظات إضافية",
     "lost_location": "مكان الفقدان",
     "contact_preference": "طريقة الاتصال المفضلة",
     "status": "الحالة",
@@ -143,4 +142,3 @@
   "select_item_type": "اختر نوع العنصر",
   "select_contact_method": "اختر طريقة الاتصال"
 }
-

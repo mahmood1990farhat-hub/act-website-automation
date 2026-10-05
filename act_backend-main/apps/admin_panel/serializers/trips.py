@@ -12,11 +12,13 @@ def _format_snapshot_phone(country_code, phone):
 class TripWithStopPointSerializer(serializers.ModelSerializer):
     passenger_info = serializers.SerializerMethodField()
     driver_info = serializers.SerializerMethodField()
+    vehicle_info = serializers.SerializerMethodField()
+    payment_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Trip
         fields = '__all__'
-        read_only_fields = ['passenger_info', 'driver_info']
+        read_only_fields = ['passenger_info', 'driver_info', 'vehicle_info', 'payment_info']
 
     def get_passenger_info(self, obj):
         if obj.passenger and obj.passenger.user:
@@ -35,6 +37,32 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
                 "is_guest_checkout": bool(obj.is_guest_checkout),
             }
         return None
+
+    def get_vehicle_info(self, obj):
+        if not obj.car_type:
+            return None
+        return {
+            "id": obj.car_type.id,
+            "code": obj.car_type.code,
+            "name": obj.car_type.name_en,
+            "max_passengers_count": obj.car_type.max_passengers_count,
+        }
+
+    def get_payment_info(self, obj):
+        return {
+            "is_paid": bool(obj.is_paid),
+            "payment_method": "Stripe (Card)" if obj.stripe_payment_intent else None,
+            "payment_intent_id": obj.stripe_payment_intent,
+            "invoice_id": obj.stripe_invoice_id,
+            "card_brand": obj.card_brand,
+            "last4": obj.last4,
+            "amount": str(obj.cost),
+            "currency": "GBP",
+            "refund_status": obj.refund_status,
+            "refund_id": obj.stripe_refund_id,
+            "refund_amount": str(obj.refund_amount) if obj.refund_amount is not None else None,
+            "refund_error": obj.refund_error or None,
+        }
 
     def get_driver_info(self, obj):
         # Check if it's a guest driver

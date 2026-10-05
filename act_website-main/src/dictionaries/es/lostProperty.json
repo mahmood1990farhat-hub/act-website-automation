@@ -1,0 +1,144 @@
+{
+  "title": "Objetos perdidos",
+  "subtitle": "Notifique objetos perdidos y siga sus solicitudes",
+  "tabs": {
+    "my_reports": "Mis informes",
+    "submit_report": "Enviar informe"
+  },
+  "stats": {
+    "total": "Total de informes",
+    "reported": "Notificado",
+    "under_investigation": "En investigación",
+    "found": "Encontrado",
+    "returned": "Devuelto",
+    "not_found": "No encontrado",
+    "closed": "Cerrada"
+  },
+  "report_list": {
+    "title": "Informes de objetos perdidos",
+    "empty": "No se encontraron informes de objetos perdidos",
+    "filter": {
+      "all": "Todas",
+      "status_label": "Filtrar por estado",
+      "item_type_label": "Filtrar por tipo de objeto"
+    },
+    "item_types": {
+      "all": "Todos los objetos",
+      "luggage": "Equipaje / Maleta",
+      "bag": "Bolsa / Bolso",
+      "wallet": "Cartera / Monedero",
+      "phone": "Teléfono móvil",
+      "keys": "Llaves",
+      "documents": "Documentos / Identificación",
+      "clothing": "Prendas de vestir",
+      "other": "Otros objetos"
+    }
+  },
+  "report_card": {
+    "report_id": "Referencia del informe",
+    "item_type": "Tipo de objeto",
+    "description": "Descripción",
+    "color": "Color",
+    "brand": "Marca",
+    "lost_location": "Lugar de pérdida",
+    "contact_preference": "Preferencia de contacto",
+    "status": "Estado",
+    "trip_date": "Fecha del viaje",
+    "created_at": "Notificado el",
+    "updated_at": "Última actualización",
+    "admin_notes": "Notas del equipo",
+    "found_at": "Encontrado el",
+    "returned_at": "Devuelto el",
+    "view_trip": "Ver detalles del viaje",
+    "show_details": "Mostrar detalles",
+    "report_details": "Detalles del informe de objeto perdido",
+    "close": "Cerrar",
+    "update_status": "Actualizar estado",
+    "item_details": "Detalles del objeto",
+    "reporter_info": "Datos del informante",
+    "trip_info": "Información del viaje",
+    "trip_id": "Referencia del viaje",
+    "trip_time": "Hora del viaje",
+    "distance": "Distancia",
+    "duration": "Duración estimada",
+    "passenger_info": "Información del pasajero",
+    "driver_info": "Información del conductor",
+    "name": "Nombre",
+    "phone_number": "Número de teléfono",
+    "email": "Correo electrónico",
+    "full_name": "Nombre completo",
+    "photo": "Fotografía",
+    "report_info": "Información del informe",
+    "downloadPdf": "Descargar PDF",
+    "updateReportTitle": "Actualizar informe de objeto perdido"
+  },
+  "submit_form": {
+    "title": "Notificar objeto perdido",
+    "subtitle": "Indique los detalles del objeto perdido",
+    "fields": {
+      "trip": "Seleccionar viaje",
+      "trip_placeholder": "Elija el viaje en el que perdió el objeto",
+      "item_type": "Tipo de objeto",
+      "item_description": "Descripción del objeto",
+      "item_description_placeholder": "Describa el objeto detalladamente",
+      "item_color": "Color del objeto",
+      "item_color_placeholder": "p. ej., negro, azul, rojo",
+      "item_brand": "Marca (opcional)",
+      "item_brand_placeholder": "p. ej., Samsonite, Apple, Nike",
+      "lost_location": "¿Dónde lo perdió?",
+      "lost_location_placeholder": "p. ej., en el vehículo, en el punto de recogida",
+      "contact_preference": "Método de contacto preferido",
+      "contact_options": {
+        "phone": "Llamada telefónica",
+        "email": "Correo electrónico",
+        "sms": "SMS"
+      },
+      "photo": "Foto (opcional)",
+      "photo_description": "Suba una foto del objeto perdido si dispone de ella",
+      "selected_photo": "Seleccionado"
+    },
+    "button": "Añadir informe",
+    "button_loading": "Añadiendo…",
+    "success_message": "¡Informe de objeto perdido enviado correctamente!",
+    "error_message": "No se pudo enviar el informe. Inténtelo de nuevo.",
+    "validation": {
+      "trip_required": "Seleccione un viaje",
+      "item_type_required": "Seleccione un tipo de objeto",
+      "item_type_invalid": "Elija un tipo de objeto válido de la lista",
+      "description_required": "Introduzca una descripción",
+      "description_min": "La descripción debe tener al menos 10 caracteres",
+      "color_required": "Indique el color del objeto",
+      "lost_location_required": "Indique dónde perdió el objeto",
+      "contact_preference_required": "Seleccione una preferencia de contacto",
+      "contact_preference_invalid": "Elija una preferencia de contacto válida"
+    }
+  },
+  "statuses": {
+    "reported": "Notificado",
+    "under_investigation": "En investigación",
+    "found": "Encontrado",
+    "returned": "Devuelto",
+    "not_found": "No encontrado",
+    "closed": "Cerrada"
+  },
+  "contact_preferences": {
+    "phone": "Llamada telefónica",
+    "email": "Correo electrónico",
+    "sms": "SMS"
+  },
+  "lost_locations": {
+    "in_vehicle": "En el vehículo",
+    "at_pickup": "En el punto de recogida",
+    "at_dropoff": "En el punto de destino",
+    "unsure": "No estoy seguro/a"
+  },
+  "download": "Descargar",
+  "choose_file": "Elegir archivo",
+  "no_file_chosen": "Ningún archivo seleccionado",
+  "click_to_view": "Haga clic para ver",
+  "image_downloaded": "Imagen descargada correctamente",
+  "image_download_failed": "No se pudo descargar la imagen",
+  "file_read_failed": "No se pudo leer el archivo de imagen",
+  "select_item_type": "Seleccionar tipo de objeto",
+  "select_contact_method": "Seleccionar método de contacto"
+}

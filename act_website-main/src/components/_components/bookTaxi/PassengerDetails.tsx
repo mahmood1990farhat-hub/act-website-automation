@@ -1,6 +1,10 @@
 "use client";
+import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
 import React, { useState } from "react";
+import { getCountries, getCountryCallingCode, isValidPhoneNumber } from "react-phone-number-input";
+import enCountries from "react-phone-number-input/locale/en.json";
+import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, User } from "lucide-react";
@@ -22,26 +26,50 @@ export default function PassengerDetails({
   nextStep,
   prevStep,
 }: Props) {
+  const countryLabels = customerPhoneLabels(locale);
   const isRTL = locale === "ar";
   const t = (text: string) => bookingText(locale, text);
-  const [isRequired, setIsRequired] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const updateField = (key: keyof PassengerDetailsForm, value: string) => {
     setPassengerDetails({ ...passengerDetails, [key]: value });
   };
 
   const onSubmit = () => {
-    const hasRequiredDetails =
-      passengerDetails.fullName.trim() &&
-      passengerDetails.email.trim() &&
-      passengerDetails.countryCode.trim() &&
-      passengerDetails.mobileNumber.trim();
+    const fullName = passengerDetails.fullName.trim();
+    const email = passengerDetails.email.trim();
+    const countryCode = passengerDetails.countryCode.trim();
+    const mobileNumber = passengerDetails.mobileNumber.trim();
 
-    if (!hasRequiredDetails) {
-      setIsRequired(true);
+    if (!fullName || !email || !countryCode || !mobileNumber) {
+      setValidationError(t("Passenger name, email, country code, and mobile number are required."));
       return;
     }
 
+    const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    if (!emailLooksValid) {
+      setValidationError(t("Enter a valid email address."));
+      return;
+    }
+
+    const dialCode = countryCode.match(/^\\+\\d+/)?.[0] ?? "";
+    const enteredDigits = mobileNumber.replace(/[^\\d+]/g, "");
+    const internationalPhone = enteredDigits.startsWith("+")
+      ? enteredDigits
+      : `${dialCode}${enteredDigits.replace(/^0+/, "")}`;
+
+    if (!dialCode || !isValidPhoneNumber(internationalPhone)) {
+      setValidationError(t("Enter a valid mobile number for the selected country code."));
+      return;
+    }
+
+    setPassengerDetails({
+      ...passengerDetails,
+      fullName,
+      email,
+      mobileNumber,
+    });
+    setValidationError("");
     nextStep();
   };
 
@@ -77,6 +105,8 @@ export default function PassengerDetails({
             <input
               id="passenger-full-name"
               value={passengerDetails.fullName}
+              maxLength={255}
+              autoComplete="name"
               onChange={(event) => updateField("fullName", event.target.value)}
               className={inputClass}
             />
@@ -89,6 +119,8 @@ export default function PassengerDetails({
               id="passenger-email"
               type="email"
               value={passengerDetails.email}
+              maxLength={254}
+              autoComplete="email"
               onChange={(event) => updateField("email", event.target.value)}
               className={inputClass}
             />
@@ -112,6 +144,12 @@ export default function PassengerDetails({
                 <option value="+965 Kuwait">{t("+965 Kuwait")}</option>
                 <option value="+973 Bahrain">{t("+973 Bahrain")}</option>
                 <option value="+968 Oman">{t("+968 Oman")}</option>
+                {getCountries()
+                  .filter(code => !["GB", "US", "AE", "SA", "QA", "KW", "BH", "OM"].includes(code))
+                  .sort((a, b) => countryLabels[a].localeCompare(countryLabels[b], locale))
+                  .map(code => <option key={code} value={`+${getCountryCallingCode(code)} ${enCountries[code]}`}>
+                    +{getCountryCallingCode(code)} {countryLabels[code]}
+                  </option>)}
               </select>
             </div>
             <div>
@@ -122,15 +160,18 @@ export default function PassengerDetails({
               id="passenger-mobile"
               type="tel"
               value={passengerDetails.mobileNumber}
+              maxLength={32}
+              autoComplete="tel"
+              inputMode="tel"
               onChange={(event) => updateField("mobileNumber", event.target.value)}
               className={inputClass}
             />
             </div>
           </div>
 
-          {isRequired && (
-            <p className="text-red-300 text-sm font-semibold">
-              {t("Passenger name, email, country code, and mobile number are required.")}
+          {validationError && (
+            <p role="alert" className="text-red-300 text-sm font-semibold">
+              {validationError}
             </p>
           )}
 
@@ -146,3 +187,4 @@ export default function PassengerDetails({
     </div>
   );
 }
+

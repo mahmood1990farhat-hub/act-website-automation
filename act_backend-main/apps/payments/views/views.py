@@ -1,6 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_GET
 from django.db import transaction
+from decimal import Decimal, ROUND_HALF_UP
 import stripe
 from django.conf import settings
 from apps.trips.models import Trip, StopPoint, Airport
@@ -13,10 +15,8 @@ from utils.common.notifications import (
     NOTIFICATION_TYPE_NEW_TRIP_REQUEST
 )
 from utils.common import notify_user
-from utils.common.email import send_passenger_confirmation, send_internal_notification
 from utils.common.google_map import reverse_geocode
 from utils.common import get_route_with_distance
-from apps.trips.services.booking_confirmation import ensure_booking_confirmation_pdf
 import logging
 from datetime import datetime
 
@@ -34,6 +34,25 @@ def stripe_to_plain(value):
         return [stripe_to_plain(v) for v in value]
     return value
 
+
+
+@require_GET
+def booking_status_view(request):
+    """Return fulfillment state only; never expose booking/customer details."""
+    payment_intent_id = str(request.GET.get('payment_intent_id') or '').strip()
+    if not payment_intent_id.startswith('pi_') or len(payment_intent_id) > 255:
+        return JsonResponse({'status': 'invalid'}, status=400)
+
+    if Trip.objects.filter(
+        stripe_payment_intent=payment_intent_id,
+        is_paid=True,
+    ).exists():
+        return JsonResponse({'status': 'confirmed'})
+
+    if PendingPayment.objects.filter(payment_intent_id=payment_intent_id).exists():
+        return JsonResponse({'status': 'processing'})
+
+    return JsonResponse({'status': 'unknown'}, status=404)
 
 
 @csrf_exempt
@@ -57,13 +76,27 @@ def stripe_webhook_view(request):
         f"payment_intent_id={payment_intent_id}, pending_payment_id={pending_payment_id}"
     )
 
-    if event_type == 'payment_intent.succeeded':
-        handle_payment_succeeded(event)
+    try:
+        if event_type == 'payment_intent.succeeded':
+            handle_payment_succeeded(event)
 
-    elif event_type == 'payment_intent.payment_failed':
-        handle_payment_failed(event)
+        elif event_type == 'payment_intent.payment_failed':
+            handle_payment_failed(event)
+    except Exception as processing_error:
+        # Return non-2xx so Stripe retries a verified event ACT could not persist/process.
+        logger.exception(
+            f"[STRIPE WEBHOOK] Processing failed for event_type={event_type}, "
+            f"payment_intent_id={payment_intent_id}: {str(processing_error)}"
+        )
+        return HttpResponse(status=500)
 
     return HttpResponse(status=200)
+
+
+def _queue_booking_confirmations(trip):
+    # Lazy import avoids importing Celery task modules during URL/module setup.
+    from apps.payments.tasks import deliver_paid_booking_confirmations
+    deliver_paid_booking_confirmations.delay(trip.id)
 
 
 def handle_payment_succeeded(event):
@@ -73,47 +106,26 @@ def handle_payment_succeeded(event):
     pending_payment_id = metadata.get('pending_payment_id')
 
     logger.info(f"[WEBHOOK] Processing success for PI={payment_intent_id}")
+    with transaction.atomic():
+        trip, created = create_trip_from_payment(payment_intent, pending_payment_id)
 
-    try:
+    # Queue PDF + passenger/internal email delivery for both new and duplicate
+    # events. The task has durable per-trip delivery markers and is retryable.
+    _queue_booking_confirmations(trip)
+
+    if not created:
         logger.info(
-            f"[WEBHOOK] Creating trip for PI={payment_intent_id}, pending_payment_id={pending_payment_id}"
+            f"[WEBHOOK] Duplicate success event for PI={payment_intent_id}; "
+            f"trip {trip.id} already exists, confirmation task safely re-queued"
         )
-        with transaction.atomic():
-            trip = create_trip_from_payment(payment_intent, pending_payment_id)
+        return trip
 
-        logger.info(
-            f"[WEBHOOK] Trip create/lookup complete for PI={payment_intent_id}: "
-            f"trip_id={trip.id}, passenger_email={trip.passenger_email}, "
-            f"is_guest_checkout={trip.is_guest_checkout}"
-        )
-
-        try:
-            logger.info(f"[WEBHOOK] Enriching addresses before PDF generation for trip {trip.id}")
-            enrich_addresses(trip)
-            logger.info(f"[WEBHOOK] Address enrichment complete before PDF generation for trip {trip.id}")
-        except Exception as address_error:
-            logger.warning(
-                f"[WEBHOOK] Failed to enrich addresses before PDF generation for trip {trip.id}: {str(address_error)}",
-                exc_info=True,
-            )
-
-        try:
-            logger.info(f"[WEBHOOK] Generating booking confirmation PDF for trip {trip.id}")
-            ensure_booking_confirmation_pdf(trip)
-            logger.info(f"[WEBHOOK] Booking confirmation PDF ready for trip {trip.id}")
-        except Exception as pdf_error:
-            logger.warning(
-                f"[WEBHOOK] Failed to generate booking confirmation PDF for trip {trip.id}: {str(pdf_error)}",
-                exc_info=True,
-            )
-
-        logger.info(f"[WEBHOOK] Starting post_trip_creation for trip {trip.id}")
-        post_trip_creation(trip)
-        logger.info(f"[WEBHOOK] Finished post_trip_creation for trip {trip.id}")
-
-    except Exception as e:
-        logger.exception(f"[WEBHOOK] Failed for PI={payment_intent_id}: {str(e)}")
-
+    logger.info(
+        f"[WEBHOOK] New paid trip {trip.id} persisted for PI={payment_intent_id}; "
+        "starting non-email operational notifications"
+    )
+    post_trip_creation(trip)
+    return trip
 
 def handle_payment_failed(event):
     payment_intent = event['data']['object']
@@ -130,11 +142,24 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
     if existing_trip:
         logger.info(f"[WEBHOOK] Trip already exists: {existing_trip.id}")
-        return existing_trip
+        return existing_trip, False
 
-    pending_payment = get_pending_payment(payment_intent_id, pending_payment_id)
+    pending_payment = get_pending_payment(
+        payment_intent_id,
+        pending_payment_id,
+        for_update=True,
+    )
     if not pending_payment:
+        # A concurrent delivery may have consumed the pending row while this
+        # request waited. Re-check the unique persisted booking before failing.
+        existing_trip = Trip.objects.filter(
+            stripe_payment_intent=payment_intent_id
+        ).first()
+        if existing_trip:
+            return existing_trip, False
         raise Exception(f"PendingPayment not found for PI={payment_intent_id}")
+
+    verify_payment_matches_pending(payment_intent, pending_payment)
 
     if pending_payment.passenger_id:
         passenger = Passenger.objects.get(id=pending_payment.passenger_id)
@@ -204,7 +229,32 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
     pending_payment.delete()
     logger.info(f"[WEBHOOK] Trip created: {trip.id}")
 
-    return trip
+    return trip, True
+
+
+def verify_payment_matches_pending(payment_intent, pending_payment):
+    """Verify Stripe settled the exact authoritative ACT amount and currency."""
+    expected_total = Decimal(str(pending_payment.price_breakdown.get('total_cost', '0')))
+    expected_cents = int(
+        (expected_total * Decimal('100')).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    )
+    received_cents = payment_intent.get('amount_received')
+    if received_cents is None:
+        received_cents = payment_intent.get('amount')
+
+    received_currency = str(payment_intent.get('currency') or '').upper()
+    expected_currency = str(pending_payment.currency or 'GBP').upper()
+
+    if received_cents != expected_cents:
+        raise Exception(
+            f"Payment amount mismatch for PI={payment_intent.get('id')}: "
+            f"received={received_cents}, expected={expected_cents}"
+        )
+    if received_currency != expected_currency:
+        raise Exception(
+            f"Payment currency mismatch for PI={payment_intent.get('id')}: "
+            f"received={received_currency}, expected={expected_currency}"
+        )
 
 
 def extract_card_details(payment_intent):
@@ -238,12 +288,19 @@ def extract_card_details(payment_intent):
     }
 
 
-def get_pending_payment(payment_intent_id, pending_payment_id):
+def get_pending_payment(payment_intent_id, pending_payment_id, for_update=False):
+    queryset = PendingPayment.objects
+    if for_update:
+        queryset = queryset.select_for_update()
+
     if pending_payment_id:
-        pending_payment = PendingPayment.objects.filter(id=pending_payment_id).first()
+        pending_payment = queryset.filter(
+            id=pending_payment_id,
+            payment_intent_id=payment_intent_id,
+        ).first()
         if pending_payment:
             logger.info(
-                f"[WEBHOOK] PendingPayment lookup by id succeeded: "
+                f"[WEBHOOK] PendingPayment lookup by id + payment_intent_id succeeded: "
                 f"pending_payment_id={pending_payment_id}, payment_intent_id={payment_intent_id}"
             )
             return pending_payment
@@ -254,7 +311,7 @@ def get_pending_payment(payment_intent_id, pending_payment_id):
             "falling back to payment_intent_id lookup"
         )
 
-    pending_payment = PendingPayment.objects.filter(
+    pending_payment = queryset.filter(
         payment_intent_id=payment_intent_id
     ).first()
     if pending_payment:
@@ -340,15 +397,11 @@ def enrich_addresses(trip):
 
 
 def send_notifications(trip):
+    """Queue in-app/driver operational notifications; booking emails use Celery task."""
     try:
         passenger = trip.passenger
         passenger_user = passenger.user if passenger and passenger.user else None
 
-        passenger_confirmation_sent = send_passenger_confirmation(passenger_user, trip)
-        logger.info(
-            f"[WEBHOOK] send_passenger_confirmation returned {passenger_confirmation_sent} "
-            f"for trip {trip.id}"
-        )
         if passenger_user:
             notify_user(
                 user=passenger_user.id,
@@ -361,12 +414,6 @@ def send_notifications(trip):
                 trip_id=trip.id
             )
 
-        internal_notification_sent = send_internal_notification(trip)
-        logger.info(
-            f"[WEBHOOK] send_internal_notification returned {internal_notification_sent} "
-            f"for trip {trip.id}"
-        )
-
         notify_all_drivers(
             title_en='New Trip Available',
             title_ar='رحلة جديدة متاحة',
@@ -378,5 +425,4 @@ def send_notifications(trip):
         )
 
     except Exception as e:
-        logger.exception(f"[WEBHOOK] Notification failed: {str(e)}")
-
+        logger.exception(f"[WEBHOOK] Operational notification failed: {str(e)}")

@@ -1,4 +1,7 @@
+import { customerText } from "@/lib/customer-text";
 const arabic: Record<string, string> = {
+  "Pickup": "الاستلام",
+  "Drop-off": "الوصول",
   "Back": "رجوع",
   "Continue": "متابعة",
   "Passenger Details": "بيانات الراكب",
@@ -7,6 +10,8 @@ const arabic: Record<string, string> = {
   "Country Code": "رمز الدولة",
   "Mobile Number": "رقم الهاتف المحمول",
   "Passenger name, email, country code, and mobile number are required.": "يرجى إدخال اسم الراكب والبريد الإلكتروني ورمز الدولة ورقم الهاتف المحمول.",
+  "Enter a valid email address.": "يرجى إدخال عنوان بريد إلكتروني صالح.",
+  "Enter a valid mobile number for the selected country code.": "يرجى إدخال رقم هاتف محمول صالح لرمز الدولة المحدد.",
   "+44 United Kingdom": "+44 المملكة المتحدة",
   "+1 United States": "+1 الولايات المتحدة",
   "+971 United Arab Emirates": "+971 الإمارات العربية المتحدة",
@@ -65,4 +70,4 @@ const arabic: Record<string, string> = {
 
 // Display text only: never translate stored booking values or customer input.
 export const bookingText = (locale: string, text: string): string =>
-  locale === "ar" ? arabic[text] ?? text : text;
+  locale === "ar" ? arabic[text] ?? text : customerText(locale, text);

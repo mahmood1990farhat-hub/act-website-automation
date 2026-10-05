@@ -56,7 +56,8 @@ class PricingIntegrationTestCase(TestCase):
         
         # Create vehicle type matching "Standard PHV"
         self.vehicle_type = VehicleType.objects.create(
-            name_en="Standard PHV",
+            code="comfort",
+            name_en="Comfort Class",
             name_ar="سيارة خاصة قياسية",
             max_passengers_count=4,
             order=1

@@ -237,7 +237,7 @@ def seed_demo_users(stdout, style, dry_run: bool = False) -> dict:
 
 
 def _resolve_vehicle_types():
-    preferred_names = ["Standard PHV", "Executive", "MPV", "Executive MPV"]
+    preferred_names = ["Comfort Class", "Executive Class", "Comfort XL", "Executive XL", "First Class"]
     resolved = []
     for name in preferred_names:
         vt = VehicleType.objects.filter(name_en=name).first()

@@ -1,3 +1,4 @@
+import { runtimeText } from "@/lib/customer-runtime";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,8 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params;
-  return getPublicPageSeo(locale, "about-us");
+  const copy = await getTrans(locale, "home");
+  return getPublicPageSeo(locale, "about-us", {title: copy.about_us.about_us_title + " | Airport & City Transfer", description: copy.about_us.readySubtitle});
 }
 
 export default async function AboutPage({ params }: PageProps) {
@@ -197,7 +199,12 @@ export default async function AboutPage({ params }: PageProps) {
             </div>
 
             <Card className="shadow-xl border-0 p-0 max-w-3xl mx-auto my-7">
-                <ContactUs form={about_us.get_in_touch.form} />
+                <div className="p-6 space-y-4 text-black">
+                  <p>{runtimeText(locale, "contactIntro")}</p>
+                  <a className="block underline break-all" href="mailto:info@airportandcitytransfer.com">info@airportandcitytransfer.com</a>
+                  <a className="block underline" href="tel:+442081530303">+44 208 153 0303</a>
+                  <p className="text-sm">{runtimeText(locale, "contactHint")}</p>
+                </div>
             </Card>
           </div>
         </div>
@@ -231,3 +238,4 @@ export default async function AboutPage({ params }: PageProps) {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+import { accountText } from "@/lib/customer-account-text";
 import React from "react";
 
 type PaginationProps = {
@@ -40,17 +41,6 @@ function getPaginationRange(
 }
 
 
-const translations = {
-  ar: {
-    prev: "السابق",
-    next: "التالي",
-  },
-  en: {
-    prev: "Previous",
-    next: "Next",
-  },
-};
-
 const Pagination: React.FC<PaginationProps> = ({
   locale,
   currentPage,
@@ -62,8 +52,7 @@ const Pagination: React.FC<PaginationProps> = ({
     return null
   }
   const pages = getPaginationRange(currentPage, totalPages);
-  const t =
-    translations[locale as keyof typeof translations] || translations["en"];
+  const t = { prev: accountText(locale, "previous"), next: accountText(locale, "next") };
 
   return (
     <div dir="ltr" className="flex items-center justify-center gap-3 py-6 flex-wrap">
@@ -73,6 +62,7 @@ const Pagination: React.FC<PaginationProps> = ({
                    transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
                    hover:bg-primary hover:text-black hover:border-primary disabled:hover:bg-foreground/40 
                    disabled:hover:text-white"
+        aria-label={t.prev}
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
@@ -113,6 +103,7 @@ const Pagination: React.FC<PaginationProps> = ({
                    transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
                    hover:bg-primary hover:text-black hover:border-primary disabled:hover:bg-foreground/40 
                    disabled:hover:text-white"
+        aria-label={t.next}
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >

@@ -15,7 +15,8 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params;
-  return getPublicPageSeo(locale, "download-app");
+  const copy = await getTrans(locale, "home");
+  return getPublicPageSeo(locale, "download-app", {title: copy.download_app.title + " | Airport & City Transfer", description: copy.download_app.subtitle});
 }
 
 export default async function DownloadAppPage({ params }: PageProps) {
@@ -45,4 +46,5 @@ export default async function DownloadAppPage({ params }: PageProps) {
     </div>
   );
 }
+
 

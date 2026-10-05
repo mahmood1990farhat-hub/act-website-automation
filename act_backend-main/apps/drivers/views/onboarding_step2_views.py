@@ -235,6 +235,8 @@ class DriverOnboardingStep2View(EMADBaseView):
             "pco": data.get("pco"),
             "dbs": data.get("dbs"),
             "dvla": data.get("dvla"),
+            "pco_licence_number": data.get("pco_licence_number"),
+            "driver_photo": data.get("driver_photo"),
             "bank_details_data": {
                 "bank_account_number": data.get("bank_account_number"),
                 "sort_code": data.get("sort_code"),
@@ -242,6 +244,9 @@ class DriverOnboardingStep2View(EMADBaseView):
             },
             "vehicle_data": {
                 "vehicle_number": data.get("vehicle_number"),
+                "make": data.get("vehicle_make"),
+                "model": data.get("vehicle_model"),
+                "color": data.get("vehicle_color"),
                 "year_of_manufacture": data.get("year_of_manufacture"),
                 "mot": data.get("mot"),
                 "phv": data.get("phv"),

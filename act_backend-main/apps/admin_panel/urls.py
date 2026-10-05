@@ -18,6 +18,7 @@ urlpatterns = [
     path('trips/<int:trip_id>/delete/', AdminDeleteTripView.as_view(), name='admin_trip_delete'),
     path('trips/<int:trip_id>/cancel/', AdminCancelTripView.as_view(), name='admin_trip_cancel'),
     path('trips/<int:trip_id>/assign-guest-driver/', AdminAssignGuestDriverView.as_view(), name='admin_trip_assign_guest_driver'),
+    path('trips/<int:trip_id>/assign-driver/', AdminAssignSystemDriverView.as_view(), name='admin_trip_assign_driver'),
     path('trips/<int:trip_id>/status/', AdminUpdateTripStatusView.as_view(), name='admin_trip_status'),
     
     # Complaints Management

@@ -77,7 +77,7 @@ class InstructionFileListView(EMADBaseView):
         
         # Check if file_type already exists
         file_type = serializer.validated_data.get('file_type')
-        if InstructionFile.objects.filter(file_type=file_type).exists():
+        if InstructionFile.objects.filter(file_type=file_type, language=serializer.validated_data['language']).exists():
             message = get_bilingual_error_message(
                 f'Instruction file with type {file_type} already exists. Use update endpoint instead.',
                 f'ملف التعليمات من نوع {file_type} موجود بالفعل. استخدم نقطة التحديث بدلاً من ذلك.',
@@ -183,18 +183,6 @@ class InstructionFileDetailView(EMADBaseView):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         
-        # Check if file_type is being changed and if new type already exists
-        if 'file_type' in serializer.validated_data:
-            new_file_type = serializer.validated_data['file_type']
-            if new_file_type != instruction_file.file_type:
-                if InstructionFile.objects.filter(file_type=new_file_type).exclude(id=file_id).exists():
-                    message = get_bilingual_error_message(
-                        f'Instruction file with type {new_file_type} already exists',
-                        f'ملف التعليمات من نوع {new_file_type} موجود بالفعل',
-                        locale
-                    )
-                    return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
-        
         with transaction.atomic():
             # Track if file is being updated (for version increment)
             old_file = instruction_file.file
@@ -228,11 +216,13 @@ class InstructionFilePublicListView(EMADBaseView):
     
     def handle_get(self, request):
         locale = get_locale(request=request)
+        if locale not in dict(InstructionFile.LANGUAGE_CHOICES):
+            return Response({'success': False, 'message': 'Unsupported document language.'}, status=status.HTTP_400_BAD_REQUEST)
         activate(locale)
         
         file_type_filter = request.query_params.get('file_type')
         
-        queryset = InstructionFile.objects.filter(is_active=True).order_by('-updated_at')
+        queryset = InstructionFile.objects.filter(is_active=True, language=locale).exclude(language='').order_by('-updated_at')
         
         if file_type_filter:
             queryset = queryset.filter(file_type=file_type_filter.upper())
@@ -257,12 +247,15 @@ class InstructionFilePublicDetailView(EMADBaseView):
     
     def handle_get(self, request, file_type):
         locale = get_locale(request=request)
+        if locale not in dict(InstructionFile.LANGUAGE_CHOICES):
+            return Response({'success': False, 'message': 'Unsupported document language.'}, status=status.HTTP_400_BAD_REQUEST)
         activate(locale)
         
         try:
             instruction_file = InstructionFile.objects.get(
                 file_type=file_type.upper(),
-                is_active=True
+                is_active=True,
+                language=locale,
             )
         except InstructionFile.DoesNotExist:
             message = get_bilingual_error_message(

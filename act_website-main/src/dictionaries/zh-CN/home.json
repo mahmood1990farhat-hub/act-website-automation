@@ -1,0 +1,553 @@
+{
+  "navbar": {
+    "navLinks": [
+      {
+        "name": "首页",
+        "url": "/zh-CN",
+        "protected": false
+      },
+      {
+        "name": "关于我们",
+        "url": "/zh-CN/about-us",
+        "protected": false
+      },
+      {
+        "name": "联系我们",
+        "url": "/zh-CN/about-us#contact-us",
+        "protected": false
+      },
+      {
+        "name": "我的行程",
+        "url": "/zh-CN/my-trips",
+        "protected": true
+      },
+      {
+        "name": "下载应用",
+        "url": "/zh-CN/download-app",
+        "protected": false
+      },
+      {
+        "name": "失物招领",
+        "url": "/zh-CN/lost-property",
+        "protected": true
+      },
+      {
+        "name": "投诉",
+        "url": "/zh-CN/complaints",
+        "protected": true
+      }
+    ],
+    "languages": {
+      "English": "英语",
+      "Arabic": "阿拉伯语"
+    },
+    "menuToggle": "展开/收起菜单",
+    "auth": {
+      "login": "登录",
+      "logout": "退出登录",
+      "profile": "个人资料",
+      "deleteAccount": "删除账户",
+      "changePassword": "修改密码",
+      "logoutConfirmTitle": "确认退出登录",
+      "logoutConfirmMessage": "确定要退出登录吗？",
+      "profileDescription": "管理您的账户",
+      "logoutDescription": "退出您的账户",
+      "logoutSuccess": "已成功退出登录",
+      "logoutError": "退出登录时出错",
+      "loggingOut": "正在退出登录…",
+      "deleteAccountConfirmTitle": "删除账户",
+      "deleteAccountConfirmMessage": "此操作无法撤销。请输入密码以永久删除您的账户。",
+      "passwordLabel": "密码",
+      "passwordRequired": "请输入密码",
+      "confirm": "确认",
+      "cancel": "取消"
+    }
+  },
+  "home": {
+    "Book_Taxi": {
+      "title": "轻松安排机场与城市接送",
+      "subtitle": "数秒即可预订，从接车到抵达，全程舒适、可靠、安心。",
+      "fromAirport": "从机场出发",
+      "toAirport": "前往机场",
+      "form": {
+        "PickUp_location": "上车地点",
+        "stop_ponit": "中途停靠点",
+        "DropOff_location": "下车地点",
+        "error": "地点无效",
+        "date": "日期",
+        "time": "时间",
+        "is_required": "此项为必填项。",
+        "button": "立即获取报价",
+        "smallSuitcase": "小行李箱",
+        "largeSuitcase": "大行李箱",
+        "NumberOfPassenger": "乘客人数",
+        "error_message": "抱歉，无法计算路线。",
+        "error_button": "关闭"
+      }
+    },
+    "Choose_car": {
+      "title": "选择车辆",
+      "button": "下一步"
+    },
+    "Additional_Information": {
+      "title": "补充信息",
+      "driverTitle": "给司机的补充信息",
+      "description": "请告知有助于行程安排的重要信息，例如航班详情、航站楼变更、行李要求、儿童座椅、行动辅助、无障碍需求或其他特殊要求。",
+      "back": "返回",
+      "continue": "继续"
+    },
+    "Confir_flight_details": {
+      "title": "确认预订详情",
+      "Distance": "距离",
+      "Trip": "行程",
+      "Car_type": "车辆类型",
+      "Cost": "费用",
+      "airport_vat": "机场费用",
+      "VAT": "商业加价（20%）",
+      "Edit": "编辑",
+      "details": "详情",
+      "Total_Cost": "总费用",
+      "button": "确认",
+      "cost_breakdown": "费用明细",
+      "transfer_fare": "接送车费",
+      "vat_20": "商业加价（20%）",
+      "airport_access_fee": "机场通行费",
+      "meet_and_greet": "举牌接机",
+      "included": "已包含",
+      "total_price": "总价"
+    },
+    "Payments_details": {
+      "title": "支付信息",
+      "subtitle": "接车前至少3小时收到取消通知：全额退款。不足3小时或乘客未出现时，可扣除合理且有证据支持的损失，最高不超过预订价格，并计入节省的成本或替代业务。付款前请阅读条款与条件。",
+      "form": {
+        "Card_Number": "银行卡号",
+        "Expired_date": "有效期",
+        "check": {
+          "Agree": "同意",
+          "privacy_policy": "隐私政策",
+          "terms_of_use": "使用条款"
+        },
+        "button": "立即预订"
+      }
+    },
+    "Booking_Confirmation": {
+      "title": "预订已确认！",
+      "desc": {
+        "span_1": "您将收到确认邮件。司机信息将在行程开始约 ",
+        "hour": " 2 ",
+        "hour_5": " 5 ",
+        "span_2": " 小时前发送。"
+      },
+      "button": "查看我的行程",
+      "button_Back_to_home": "返回首页"
+    }
+  },
+  "about_us": {
+    "about_us_title": "关于我们：",
+    "ourStory": "我们的故事",
+    "customers": "满意的客户",
+    "rating": "评分",
+    "available": "可用",
+    "readyTitle": "准备好预订下一趟行程了吗？",
+    "readySubtitle": "体验优质交通服务带来的便利与舒适",
+    "company_description_1": {
+      "title": "Airport & City",
+      "titlespan": "Transfer",
+      "desc": "是一家总部位于伦敦的私人租车接送公司，专注于可靠的机场和城市接送。我们以专业、准时和个性化服务重新定义便捷出行。无论前往机场、返回家中，还是穿行城市，我们都确保从开始到结束的顺畅体验。"
+    },
+    "company_description_2": {
+      "desc1": "我们获得以下机构的完整许可：",
+      "desc2": "Transport for London (TfL)",
+      "desc3": " 并致力于最高标准的安全、合规和客户服务。我们的每位司机均通过DBS背景审查，拥有完整保险，并接受专业培训，以体现我们的品牌品质。"
+    },
+    "company_description_3": "先进的预订和调度系统让乘客能够提前预订、跟踪行程并轻松沟通。我们重视透明度，清晰的价格结构避免意外费用，提供直接、可靠的服务。",
+    "company_description_4": "Airport & City Transfer提供的不只是接送，更是安心。",
+    "get_in_touch": {
+      "title": "发送",
+      "titlespan": "消息",
+      "subtitle": "准备体验优质交通服务了吗？今天就联系我们。",
+      "form": {
+        "FullName": "姓名",
+        "mail": "电子邮箱",
+        "Yourmessage": "您的留言",
+        "button": "发送消息"
+      }
+    },
+    "btns": {
+      "bookNow": "立即预订",
+      "learnMore": "了解更多",
+      "callUs": "联系我们"
+    },
+    "whyUs": {
+      "title": "为什么选择我们",
+      "subtitle": "体验优质交通服务的不同",
+      "steps": [
+        {
+          "title": "安全第一",
+          "desc": "专业司机，保险齐全的车辆"
+        },
+        {
+          "title": "全天候服务",
+          "desc": "全天随时为您服务"
+        },
+        {
+          "title": "优质体验",
+          "desc": "豪华车辆与卓越服务"
+        },
+        {
+          "title": "伦敦覆盖范围",
+          "desc": "覆盖整个大伦敦地区"
+        }
+      ]
+    },
+    "booking_title": {
+      "span": "简单的预订流程",
+      "title": "预订",
+      "titlespan": "行程",
+      "subtitle": "只需点击几下即可预订优质交通服务，体验豪华、可靠与专业。"
+    },
+    "joinUs": {
+      "title": "数秒即可加入",
+      "subtitle": "注册为乘客，或登记您的PCO车辆，今天就开始赚钱。",
+      "passenger": "乘客",
+      "driver": "PCO司机"
+    },
+    "howToWork": [
+      {
+        "title": "选择地点",
+        "desc": "选择上车和下车地点"
+      },
+      {
+        "title": "选择日期和时间",
+        "desc": "按您的时间安排行程"
+      },
+      {
+        "title": "选择车辆",
+        "desc": "从我们的优质车队中选择"
+      },
+      {
+        "title": "确认预订",
+        "desc": "安全付款，即时确认"
+      }
+    ],
+    "services": {
+      "title": "我们的服务",
+      "subtitle": "探索为您的舒适与便利而设计的全面交通方案"
+    },
+    "sections": [
+      {
+        "title": "来到伦敦这样的新城市？",
+        "text": "抵达新城市令人兴奋，但安排交通可能让人头疼。别担心，我们为您安排妥当。"
+      },
+      {
+        "title": "私人租车接送：您的理想选择",
+        "text": "告别漫长的出租车队伍和复杂的公共交通。选择私人机场接送，轻松舒适地抵达目的地。"
+      },
+      {
+        "title": "提前预订的好处",
+        "text": "通过Airport & City Transfer提前预订，确保您抵达时有司机等候。无需议价，无语言障碍，直接送达酒店或住处。"
+      },
+      {
+        "title": "如何使用",
+        "text": "出行前访问我们的网站，在线预订私人租车接送。提供航班详情和目的地，其余交给我们。别忘了订阅优惠活动。"
+      },
+      {
+        "title": "轻松无忧的出行",
+        "text": "通过我们可靠、专业的服务，轻松开启旅程。让我们安排机场交通，您可以专注探索新的环境。"
+      },
+      {
+        "title": "今天就预订您的行程",
+        "text": "立即访问我们的ATG网站，预订私人机场接送，为您的旅程开启美好开端！"
+      }
+    ]
+  },
+  "footer": {
+    "Our_Company": {
+      "title": "我们的公司",
+      "Elements": [
+        {
+          "name": "关于我们",
+          "href": "/zh-CN/about-us"
+        },
+        {
+          "name": "预订行程",
+          "href": "/zh-CN"
+        },
+        {
+          "name": "应用",
+          "href": "/zh-CN/download-app"
+        }
+      ]
+    },
+    "Call_us": {
+      "title": "联系方式",
+      "phone_numbers": {
+        "title": "电话：📞",
+        "Elements": [
+          "+44 746 494 0000",
+          "+44 208 153 0303"
+        ]
+      },
+      "Email_us": {
+        "title": "电子邮箱：",
+        "Elements": [
+          "Info@airportandcitytransfer.com"
+        ]
+      }
+    },
+    "Policies": {
+      "title": "政策",
+      "Elements": [
+        {
+          "name": "应用",
+          "href": "/zh-CN/download-app"
+        }
+      ]
+    },
+    "location": {
+      "title": "地址：",
+      "Elements": [
+        "ACT - 450 Bath Road Heathrow",
+        "Farhat Trading Solutions Ltd",
+        "Office 218",
+        "London",
+        "West Drayton",
+        "UB7 0EB"
+      ]
+    },
+    "logoAlt": "Airport & City Transfer标志",
+    "registeredCompany": "注册公司：Farhat Trading Solutions Ltd",
+    "copyright": "版权所有 © {year} Airport taxi Transfer Company"
+  },
+  "policy_and_terms": {
+    "policy": {
+      "Open_button": "隐私政策",
+      "title": "隐私政策 – Airport & City Transfer",
+      "desc": "Airport & City Transfer（“我们”）致力于保护您的隐私。本政策说明我们如何根据英国《通用数据保护条例》（UK GDPR）及《2018年数据保护法》收集、使用、存储和保护您的个人数据。",
+      "elements": [
+        {
+          "title": "我们收集的信息：",
+          "subDesc": [
+            "联系方式：姓名、电话号码、电子邮箱",
+            "预订信息：接送地点、日期和时间",
+            "支付信息：由第三方服务商安全处理",
+            "司机和车辆信息：用于遵守监管要求",
+            "反馈及投诉信息"
+          ]
+        },
+        {
+          "title": "我们如何使用您的数据：",
+          "subDesc": [
+            "处理预订并提供交通服务",
+            "与客户和司机沟通",
+            "保存内部记录并遵守法律规定",
+            "回复咨询、反馈或投诉",
+            "遵守伦敦交通局（TfL）的报告要求"
+          ]
+        },
+        {
+          "title": "处理数据的法律依据：",
+          "desc": "我们基于履行合同、法定义务或合法利益收集和处理个人数据。在需要时，我们会征得您的同意。"
+        },
+        {
+          "title": "共享您的信息：",
+          "desc": "我们仅在必要时共享数据：",
+          "subDesc": [
+            "依法向TfL或其他监管机构提供",
+            "在严格保密义务下向第三方服务商（如支付处理商）提供"
+          ],
+          "descEnd": "我们绝不向第三方出售您的数据。"
+        },
+        {
+          "title": "数据保留：",
+          "desc": "个人数据仅在履行法律、运营或财务义务所需的期限内保留。不再需要时，将安全删除或匿名化处理。"
+        },
+        {
+          "title": "您的权利：",
+          "desc": "您有权访问、更正、删除您的个人数据，或反对处理您的个人数据。您可以向我们的数据保护官提出书面请求。"
+        },
+        {
+          "title": "安全措施：",
+          "desc": "我们使用加密系统、安全存储和访问控制来保护您的数据。我们的员工和司机均接受数据保护流程培训。"
+        }
+      ],
+      "warning": "继续前请仔细阅读隐私政策和使用条款。使用我们的服务即表示您完全同意这些规定。",
+      "button": "完成"
+    },
+    "terms": {
+      "Open_button": "条款与条件",
+      "title": "条款与条件 – Airport & City Transfer",
+      "elements": [
+        {
+          "title": "预订与确认",
+          "desc": "所有预订必须通过我们的应用、网站、电话或授权合作伙伴进行。确认信息以电子方式提供。客户有责任确保所有预订信息准确无误。"
+        },
+        {
+          "title": "付款与费用",
+          "desc": "所有车费均以英镑GBP（£）报价。额外停靠、等候时间或非正常时段服务可能产生额外费用。除非另有约定，预订时须付款。"
+        },
+        {
+          "title": "接车前至少3小时取消",
+          "desc": "如果ACT在确认的接车时间至少3小时前收到您的取消通知（包括恰好提前3小时），您将获得全额退款。"
+        },
+        {
+          "title": "接车前不足3小时取消",
+          "desc": "ACT可扣除因您取消预订而直接造成的合理且有证据支持的损失，最高不超过预订价格。我们会采取合理措施减少损失，并计入节省的成本或获得的替代业务。任何剩余款项将予以退还。"
+        },
+        {
+          "title": "乘客未出现",
+          "desc": "只有在约定的等候时间结束，并有记录证明已尝试联系乘客后，才会判定为未出现。任何扣款均适用与不足3小时取消相同的按损失计算规则，且不超过预订价格。"
+        },
+        {
+          "title": "等候时间",
+          "desc": "普通接车的等候时间为15分钟，机场接车为60分钟，均从约定的接车时间起算。额外等候费用必须事先告知并经双方同意。"
+        },
+        {
+          "title": "如果ACT无法提供行程",
+          "desc": "我们会提供替代方案供您接受，或对无法提供的行程全额退款。"
+        },
+        {
+          "title": "航班延误或取消",
+          "desc": "航班有任何变动时，请联系ACT。我们会重新评估并商定接车安排。已知的航班延误不会自动被视为乘客未出现。"
+        },
+        {
+          "title": "修改预订",
+          "desc": "修改取决于可用情况。任何调整后的价格都会在您接受修改前告知。"
+        },
+        {
+          "title": "退款处理",
+          "desc": "确认退款金额后，我们会在5个工作日内向原支付方式发起退款。您的银行或支付服务商可能需要更长时间才能入账。"
+        },
+        {
+          "title": "如何取消或修改预订",
+          "desc": "请将预订编号发送至info@airportandcitytransfer.com。如需紧急变更，请同时致电+44 208 153 0303。取消时限按ACT收到通知的时间与确认的接车时间之间的间隔计算，而非按员工回复的时间计算。"
+        },
+        {
+          "title": "使用TfL许可的司机和车辆",
+          "desc": "所有行程均由获得伦敦交通局许可的司机和车辆提供。我们定期检查，以确保符合要求。"
+        },
+        {
+          "title": "安全与行为规范",
+          "desc": "所有司机均通过DBS背景审查，并遵守我们的行为准则。乘客应保持尊重，并遵守英国安全规定。"
+        },
+        {
+          "title": "失物",
+          "desc": "遗留在车内的物品将登记并保存最长6周。客户可联系我们安排取回。无人认领的物品将安全处置或捐赠。"
+        },
+        {
+          "title": "投诉流程",
+          "desc": "您可通过我们的网站、电话或电子邮件提交投诉。合规专员会进行调查并在5个工作日内回复。相关事项将在适用时向TfL报告。"
+        },
+        {
+          "title": "责任",
+          "desc": "对于交通或天气等不可预见情况造成的延误，Airport & City Transfer不承担责任。我们的责任以已支付的车费为限。"
+        },
+        {
+          "title": "数据保护",
+          "desc": "我们遵守UK GDPR的所有要求。完整详情请参阅隐私政策。"
+        },
+        {
+          "title": "适用法律",
+          "desc": "本条款受英格兰和威尔士法律管辖。"
+        }
+      ],
+      "warning": "继续前请仔细阅读隐私政策和使用条款。使用我们的服务即表示您完全同意这些规定。",
+      "button": "完成"
+    }
+  },
+  "faqs": {
+    "Open_button": "常见问题",
+    "title": "常见问题 – Airport & City Transfer",
+    "elements": [
+      {
+        "question": "如何通过Airport & City Transfer预订出租车？",
+        "answer": "您可以通过我们的网站、移动应用或拨打预订热线进行预订。所有预订均通过电子邮件或短信确认。"
+      },
+      {
+        "question": "可以提前预订出租车吗？",
+        "answer": "可以。我们接受提前数周预订，以确保您的接送得到安排和保障。"
+      },
+      {
+        "question": "如何知道司机已经到达？",
+        "answer": "司机出发时和到达后，您都会收到通知。通知包含司机和车辆信息。"
+      },
+      {
+        "question": "如果我的航班延误了怎么办？",
+        "answer": "如果航班延误或取消，请联系ACT，以便我们重新评估并商定接车安排。已知的航班延误不会自动被视为乘客未出现。"
+      },
+      {
+        "question": "你们的司机有执照并通过DBS审查吗？",
+        "answer": "是的。所有司机均获得伦敦交通局（TfL）许可，并通过增强型DBS背景审查，以保障您的安全。"
+      },
+      {
+        "question": "我可以取消或修改预订吗？",
+        "answer": "可以。如果ACT在确认的接车时间至少3小时前收到取消通知，您将获得全额退款。不足3小时时，可能扣除合理且有证据支持的取消损失，最高不超过预订价格，并扣减节省的成本或获得的替代业务。修改取决于可用情况，任何调整后的价格须经您接受。请将预订编号发送至info@airportandcitytransfer.com；紧急变更请致电+44 208 153 0303。关于等候、未出现和退款处理的详情，请参阅条款与条件。"
+      },
+      {
+        "question": "如果我把东西遗忘在车里怎么办？",
+        "answer": "请尽快联系我们的团队。失物会登记并安全保存最长6周，可协商取回或返还。"
+      },
+      {
+        "question": "你们提供儿童座椅或无障碍车辆吗？",
+        "answer": "提供。请在预订时提出需求，我们会尽力满足。"
+      },
+      {
+        "question": "如何投诉？",
+        "answer": "您可以通过我们的网站或电子邮件提交投诉。所有投诉均由合规与客户体验专员处理，并在5个工作日内回复。"
+      },
+      {
+        "question": "我的个人信息安全吗？",
+        "answer": "安全。我们完全遵守GDPR，并使用加密系统存储和保护您的数据。更多详情请参阅隐私政策。"
+      }
+    ],
+    "warning": "请仔细阅读这些常见问题。使用我们的服务即表示您接受所提供的信息。",
+    "button": "完成"
+  },
+  "download_app": {
+    "title": "下载我们的应用",
+    "subtitle": "获取Airport & City Transfer官方应用",
+    "downloading": "正在下载…",
+    "driver": {
+      "title": "司机应用",
+      "subtitle": "获取Airport & City Transfer官方司机应用，管理行程和收入",
+      "description": "下载安装应用，即可接单、查看收入并管理司机账户。",
+      "downloadButton": "下载司机APK",
+      "logoAlt": "司机应用",
+      "instructions": {
+        "title": "安装说明",
+        "downloadButton": "下载说明",
+        "downloadFileName": "driver-instructions.pdf",
+        "step1": "将APK文件下载到您的Android设备",
+        "step2": "在设备设置中允许安装未知来源的应用",
+        "step3": "打开下载的APK文件并按照提示安装",
+        "step4": "启动应用并使用司机账户登录"
+      },
+      "note": "注意：此应用仅适用于Android设备。下载前请确保有足够的存储空间。"
+    },
+    "passenger": {
+      "title": "乘客应用",
+      "subtitle": "获取Airport & City Transfer官方乘客应用，预订并管理行程",
+      "description": "下载安装应用，即可预订、跟踪行程并管理乘客账户。",
+      "downloadButton": "下载乘客APK",
+      "logoAlt": "乘客应用",
+      "instructions": {
+        "title": "安装说明",
+        "downloadButton": "下载说明",
+        "downloadFileName": "passenger-instructions.pdf",
+        "step1": "将APK文件下载到您的Android设备",
+        "step2": "在设备设置中允许安装未知来源的应用",
+        "step3": "打开下载的APK文件并按照提示安装",
+        "step4": "启动应用并使用乘客账户登录"
+      },
+      "note": "注意：此应用仅适用于Android设备。下载前请确保有足够的存储空间。"
+    }
+  },
+  "errorPage": {
+    "code": "404",
+    "title": "页面未找到",
+    "description": "抱歉，找不到您要访问的页面。页面可能已移动、删除或不存在。",
+    "goHome": "返回首页",
+    "goBack": "返回",
+    "helpText": "如果您认为这是错误，请联系我们的支持团队。"
+  }
+}

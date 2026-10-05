@@ -1,5 +1,6 @@
-from apps.trips.services.customer_language import booking_language, use_booking_language
-from apps.trips.services.customer_documents import render_arabic_document
+from apps.accounts.customer_messages import account_message
+from apps.trips.services.customer_language import booking_language, use_booking_language, use_internal_language
+from apps.trips.services.localized_documents import render_customer_document
 import threading
 import logging
 import re
@@ -35,6 +36,25 @@ def _format_passenger_phone(country_code: str, phone: str) -> str:
 
 
 # ---------- low-level helper ----------
+def _send_mail_now(
+    subject: str,
+    message: str,
+    recipient_list: List[str],
+    html_message: Optional[str] = None,
+) -> bool:
+    """Send synchronously and report SMTP acceptance to the caller."""
+    if not recipient_list:
+        return False
+    result = send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=recipient_list,
+        fail_silently=False,
+        html_message=html_message,
+    )
+    return bool(result)
+
 def _send_mail_async(
     subject: str,
     message: str,
@@ -144,51 +164,54 @@ def _send_mail_async(
 
 # ========== PASSENGER EMAILS ==========
 
-def send_passenger_registration_confirmation(user) -> None:
-    """
-    Send welcome email to newly registered passenger
-    """
+def send_passenger_registration_confirmation(user, locale="en") -> None:
+    """Welcome message in the registration request's language."""
+    if not user or not user.email:
+        return
     try:
-        subject = _("Welcome to Airport & City Transfer!")
-        message = _(
-            "Hello %(first_name)s,\n\n"
-            "Thank you for registering with Airport & City Transfer!\n\n"
-            "Your account has been successfully created. You can now book trips and enjoy our services.\n\n"
-            "If you have any questions, please don't hesitate to contact us.\n\n"
-            "Best regards,\n"
-            "The ATG Team"
-        ) % {
-            "first_name": user.first_name or user.get_full_name() or "Valued Customer",
-        }
+        subject, message = account_message("welcome", user, locale)
         _send_mail_async(subject, message, [user.email], fail_silently=True)
-    except Exception as e:
-        logger.error(f"Failed to send passenger registration email to {user.email}: {str(e)}")
+    except Exception:
+        logger.exception("Failed to prepare passenger registration email")
 
 
 
-def _send_arabic_customer_email(user, trip, kind, refund_message="", driver=None):
+def _booking_confirmation_download_url(trip) -> str:
+    token = getattr(trip, "booking_confirmation_token", None)
+    if not token:
+        return ""
+    return _absolute_app_url(f"/api/trips/booking-confirmation/{token}/")
+
+
+def _send_localized_customer_email(user, trip, kind, refund_message="", driver=None, send_now=False):
     recipient = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
     if not recipient:
         return False
     file_field = getattr(trip, "cancellation_confirmation_pdf" if kind == "cancellation" else "booking_confirmation_pdf", None)
-    download_url = _absolute_app_url(file_field.url) if file_field else ""
-    subject, html, text = render_arabic_document(
+    download_url = (
+        _absolute_app_url(file_field.url)
+        if kind == "cancellation" and file_field
+        else _booking_confirmation_download_url(trip) if kind == "booking" and file_field else ""
+    )
+    subject, html, text = render_customer_document(
         trip, kind, refund_message=refund_message, driver=driver, download_url=download_url,
         logo_uri=_email_asset_url("trip_accepted/footer-logo.png")
     )
+    if send_now:
+        return _send_mail_now(subject, text, [recipient], html_message=html)
     _send_mail_async(subject, text, [recipient], html_message=html, fail_silently=True)
     return True
 
 @use_booking_language
-def send_passenger_confirmation(user, trip) -> bool:
+def send_passenger_confirmation(user, trip, send_now=False) -> bool:
     """
     Send trip confirmation email to passenger
     """
     user_id = getattr(user, "id", "guest")
     logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "booking")
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "booking", send_now=send_now)
         recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
         if not recipient_email:
             logger.warning(
@@ -246,9 +269,9 @@ def send_passenger_confirmation(user, trip) -> bool:
             "booking_details": booking_details,
             "website_url": "https://airportandcitytransfer.com/en",
             "download_confirmation_url": (
-                _absolute_app_url(trip.booking_confirmation_pdf.url)
+                _booking_confirmation_download_url(trip)
                 if trip.booking_confirmation_pdf
-                else "https://airportandcitytransfer.com"
+                else ""
             ),
             "support_phone_primary": "+44 7464 940000",
             "support_phone_secondary": "+44 20 8153 0303",
@@ -271,6 +294,13 @@ def send_passenger_confirmation(user, trip) -> bool:
         }
         html_message = render_to_string("emails/trip_accepted_passenger.html", context)
         message = strip_tags(html_message)
+        if send_now:
+            return _send_mail_now(
+                subject,
+                message,
+                [recipient_email],
+                html_message=html_message,
+            )
         _send_mail_async(
             subject,
             message,
@@ -491,7 +521,8 @@ def _format_booking_details_text(booking_details) -> str:
     )
 
 
-def send_internal_notification(trip) -> None:
+@use_internal_language
+def send_internal_notification(trip, send_now=False) -> bool:
     """
     Send internal notification to admin when a new trip is booked
     """
@@ -611,6 +642,13 @@ def send_internal_notification(trip) -> None:
 
         logger.info(f"[EMAIL] Preparing admin notification email for trip #{trip.id} to {admin_email}")
         logger.info(f"[EMAIL] Calling _send_mail_async for admin notification")
+        if send_now:
+            return _send_mail_now(
+                subject,
+                message,
+                [admin_email],
+                html_message=html_message,
+            )
         _send_mail_async(
             subject,
             message,
@@ -619,10 +657,12 @@ def send_internal_notification(trip) -> None:
             fail_silently=True,
         )
         logger.info(f"[EMAIL] _send_mail_async called (running in background thread)")
+        return True
     except Exception as e:
         logger.error(f"[EMAIL] Failed to prepare admin notification email for trip #{trip.id}: {str(e)}")
         import traceback
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
+        return False
 
 
 def _trip_locations_for_email(trip):
@@ -672,13 +712,21 @@ def send_trip_accepted_to_passenger(
     """
     Email to passenger when a driver accepts / confirms the trip.
     """
-    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user.id}")
+    user_id = getattr(user, "id", "guest")
+    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
-        if not user.email:
-            logger.warning(f"[EMAIL] Cannot send trip accepted email: user {user.id} has no email")
-            return
+        recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
+        if not recipient_email:
+            logger.warning(f"[EMAIL] Cannot send driver details: trip #{trip.id} has no passenger email")
+            return False
 
-        first_name = user.first_name or user.get_full_name() or "Valued Customer"
+        user_full_name = user.get_full_name() if user and hasattr(user, "get_full_name") else ""
+        first_name = (
+            getattr(user, "first_name", "")
+            or user_full_name
+            or getattr(trip, "passenger_name", "")
+            or "Valued Customer"
+        )
 
         if is_guest_driver and guest_driver_info:
             driver_name = guest_driver_info.get("name") or "External Driver"
@@ -692,12 +740,11 @@ def send_trip_accepted_to_passenger(
             registration_number = guest_car.get("registration_number") or "N/A"
             vehicle_color = guest_car.get("color") or "N/A"
             driver_pco_url = ""
+            driver_licence_number = guest_driver_info.get("licence_number") or "N/A"
+            driver_photo_url = guest_driver_info.get("photo_url") or ""
         else:
-            driver_name = (
-                driver_user.get_full_name().strip()
-                if driver_user and driver_user.get_full_name().strip()
-                else (driver_user.first_name if driver_user else "")
-            ) or "N/A"
+            # TfL passenger disclosure uses the driver first name.
+            driver_name = (driver_user.first_name.strip() if driver_user and driver_user.first_name else "") or "N/A"
             driver_phone = getattr(driver_user, "phone_number", "") or "N/A"
 
             vehicle = (
@@ -708,13 +755,15 @@ def send_trip_accepted_to_passenger(
                 else None
             )
             vehicle_type = getattr(vehicle, "vehicle_type", None)
-            vehicle_label = (
+            vehicle_make = getattr(vehicle, "make", "") or ""
+            vehicle_model = getattr(vehicle, "model", "") or ""
+            vehicle_label = " ".join(part for part in (vehicle_make, vehicle_model) if part).strip() or (
                 getattr(vehicle_type, "name_en", None)
                 or getattr(vehicle_type, "name_ar", None)
                 or "Private Transfer"
             )
             registration_number = getattr(vehicle, "vehicle_number", "") or "N/A"
-            vehicle_color = "N/A"
+            vehicle_color = getattr(vehicle, "color", "") or "N/A"
 
             base_driver = getattr(trip, "base_driver", None)
             pco_file = getattr(base_driver, "pco", None) if base_driver else None
@@ -723,12 +772,21 @@ def send_trip_accepted_to_passenger(
                 if pco_file and getattr(pco_file, "name", None)
                 else ""
             )
+            driver_licence_number = getattr(base_driver, "pco_licence_number", "") or "N/A"
+            driver_photo_file = getattr(base_driver, "driver_photo", None)
+            driver_photo_url = (
+                _absolute_app_url(driver_photo_file.url)
+                if driver_photo_file and getattr(driver_photo_file, "name", None)
+                else ""
+            )
 
         context = {
             "first_name": first_name,
             "driver_name": driver_name,
             "driver_phone": driver_phone,
             "driver_pco_url": driver_pco_url,
+            "driver_licence_number": driver_licence_number,
+            "driver_photo_url": driver_photo_url,
             "vehicle_name": vehicle_label,
             "vehicle_registration": registration_number,
             "vehicle_color": vehicle_color,
@@ -743,11 +801,12 @@ def send_trip_accepted_to_passenger(
             "support_website": "https://airportandcitytransfer.com/en",
             "footer_logo_image_url": _email_asset_url("trip_accepted/footer-logo.png"),
         }
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "driver", driver={
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "driver", driver={
                 "name": driver_name, "phone": driver_phone,
                 "vehicle": (getattr(vehicle_type, "name_ar", None) or vehicle_label) if not (is_guest_driver and guest_driver_info) else vehicle_label,
                 "registration": registration_number, "color": vehicle_color, "pco_url": driver_pco_url,
+                "licence_number": driver_licence_number, "photo_url": driver_photo_url,
             })
         subject = _("Your Driver Details – Airport & City Transfer")
         html_message = render_to_string("emails/trip_driver_details_passenger.html", context)
@@ -755,13 +814,16 @@ def send_trip_accepted_to_passenger(
         _send_mail_async(
             subject,
             message,
-            [user.email],
+            [recipient_email],
             html_message=html_message,
             fail_silently=True,
         )
+        return True
     except Exception as e:
         logger.error(f"[EMAIL] send_trip_accepted_to_passenger failed for trip #{trip.id}: {e}")
+        return False
 
+@use_internal_language
 def send_trip_accepted_to_admin(trip, driver_user) -> None:
     """
     Email to operations admin when a driver accepts a trip.
@@ -800,8 +862,8 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
     """
     logger.info(f"[EMAIL] send_passenger_trip_cancellation_to_passenger trip #{trip.id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "cancellation", refund_message=refund_message)
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "cancellation", refund_message=refund_message)
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send passenger cancel email: user {user.id} has no email")
             return
@@ -883,6 +945,7 @@ def send_passenger_trip_cancellation_to_passenger(user, trip, refund_message: st
         logger.error(f"[EMAIL] send_passenger_trip_cancellation_to_passenger failed trip #{trip.id}: {e}")
 
 
+@use_internal_language
 def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") -> None:
     """
     Email to admin when a passenger cancels a trip (pending cancel or policy-based cancel).
@@ -916,6 +979,7 @@ def send_passenger_trip_cancellation_to_admin(trip, refund_message: str = "") ->
         logger.error(f"[EMAIL] send_passenger_trip_cancellation_to_admin failed trip #{trip.id}: {e}")
 
 
+@use_internal_language
 def send_admin_onboarding_notification(onboarding_request) -> None:
     """
     Send notification to admin when a new driver onboarding request is submitted
@@ -946,8 +1010,8 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
     """
     logger.info(f"[EMAIL] send_driver_cancellation_to_passenger called for trip #{trip.id}, user {user.id}")
     try:
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "driver_cancelled")
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "driver_cancelled")
         if not user.email:
             logger.warning(f"[EMAIL] Cannot send driver cancellation email: user {user.id} has no email address")
             return
@@ -1001,6 +1065,7 @@ def send_driver_cancellation_to_passenger(user, trip) -> None:
         logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
 
 
+@use_internal_language
 def send_driver_cancellation_to_admin(trip) -> None:
     """
     Send email to admin when a driver cancels a trip
@@ -1154,8 +1219,8 @@ def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_d
                 "driver_phone": driver_phone,
             }
         
-        if booking_language(trip) == "ar":
-            return _send_arabic_customer_email(user, trip, "reassigned", driver={
+        if booking_language(trip) != "en":
+            return _send_localized_customer_email(user, trip, "reassigned", driver={
                 "name": driver_name, "phone": driver_phone,
                 "company": driver_company if is_guest_driver and guest_driver_info else "",
             })
@@ -1166,68 +1231,9 @@ def send_trip_reassigned_to_passenger(user, trip, is_guest_driver=False, guest_d
         logger.error(f"[EMAIL] Failed to send trip reassignment email for trip #{trip.id} to {user.email}: {str(e)}")
 
 
-def send_password_reset_otp(user, otp_code) -> None:
-    """
-    Send password reset OTP code via email to user.
-    Supports bilingual (English/Arabic) email content.
-    
-    Args:
-        user: CustomUser instance
-        otp_code: 6-digit OTP code
-    """
+def send_password_reset_otp(user, otp_code, locale="en") -> None:
+    """Password reset message in the requesting customer's selected language."""
     if not user or not user.email:
-        logger.warning(f"[EMAIL] Cannot send password reset OTP: user {user.id if user else 'None'} has no email address")
         return
-    
-    try:
-        # English email content
-        subject_en = "Password Reset OTP Code"
-        message_en = f"""
-Hello {user.first_name or 'User'},
-
-You have requested to reset your password. Please use the following OTP code to complete the process:
-
-OTP Code: {otp_code}
-
-This code will expire in 15 minutes.
-
-If you did not request this password reset, please ignore this email.
-
-Best regards,
-Airport & City Transfer Team
-"""
-        
-        # Arabic email content
-        subject_ar = "رمز إعادة تعيين كلمة المرور"
-        message_ar = f"""
-مرحباً {user.first_name or 'المستخدم'},
-
-لقد طلبت إعادة تعيين كلمة المرور. يرجى استخدام رمز OTP التالي لإكمال العملية:
-
-رمز OTP: {otp_code}
-
-سينتهي صلاحية هذا الرمز خلال 15 دقيقة.
-
-إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد الإلكتروني.
-
-مع أطيب التحيات،
-فريق نقل المطار والمدينة
-"""
-        
-        # Send email (use English by default, but both are prepared)
-        # In a real implementation, you might want to detect user's preferred language
-        _send_mail_async(
-            subject=subject_en,
-            message=message_en,
-            recipient_list=[user.email],
-            html_message=None,
-            fail_silently=True
-        )
-        
-        logger.info(f"[EMAIL] Password reset OTP sent to {user.email}")
-        
-    except Exception as e:
-        logger.error(f"[EMAIL] Failed to send password reset OTP to {user.email}: {str(e)}")
-        import traceback
-        logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")       
-        logger.error(f"[EMAIL] Traceback: {traceback.format_exc()}")
+    subject, message = account_message("reset", user, locale, code=otp_code)
+    _send_mail_async(subject, message, [user.email], html_message=None, fail_silently=True)

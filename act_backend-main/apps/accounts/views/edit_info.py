@@ -21,7 +21,7 @@ class RequestEmailOrPhoneChangeView(EMADBaseView):
             user.temp_phone_number = new_phone
             user.phone_verification_in_progress = True
             user.save()
-            send_verification_code(new_phone)
+            send_verification_code(new_phone, locale=request.query_params.get("locale", "en"))
             return Response({"detail": "Verification code sent to new phone number."})
 
         if 'email' in serializer.validated_data:
@@ -29,7 +29,7 @@ class RequestEmailOrPhoneChangeView(EMADBaseView):
             user.temp_email = new_email
             user.email_verification_in_progress = True
             user.save()
-            send_verification_code(user.phone_number) 
+            send_verification_code(user.phone_number, locale=request.query_params.get("locale", "en"))
             return Response({"detail": "Verification code sent to your phone for email change confirmation."})
 
 

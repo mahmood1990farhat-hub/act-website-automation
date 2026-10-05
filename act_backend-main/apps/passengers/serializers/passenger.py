@@ -24,7 +24,6 @@ class PassengerSerializer(serializers.ModelSerializer):
             
             # Send registration confirmation email
             from utils.common.email import send_passenger_registration_confirmation
-            send_passenger_registration_confirmation(user)
+            send_passenger_registration_confirmation(user, locale=self.context.get("locale", "en"))
         return passenger
     
-

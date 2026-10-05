@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Exact 40-character Git commit SHA
+        description: Exact accepted 40-character Git commit SHA
         required: true
       apply_migrations:
-        description: Apply reviewed migrations (disabled until backup hook is configured)
+        description: Apply reviewed migrations after a verified pre-migration database backup
         type: boolean
         default: false
 
@@ -23,17 +23,80 @@ jobs:
     runs-on: self-hosted
     environment: production
     steps:
-      - name: Validate SHA
+      - name: Validate accepted SHA
         shell: bash
         run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
 
-      - name: Deploy exact commit
+      - name: Create and verify pre-migration database backup
+        if: ${{ inputs.apply_migrations }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v pg_dump >/dev/null
+          command -v pg_restore >/dev/null
+
+          tmp_backup="$RUNNER_TEMP/act-pre-migration-${{ github.run_id }}.dump"
+          final_name="act-pre-migration-${{ inputs.commit_sha }}-$(date -u +%Y%m%dT%H%M%SZ).dump"
+
+          /var/www/atg/atg-backend/current/.venv/bin/python - "$tmp_backup" <<'PY'
+          import os
+          import subprocess
+          import sys
+          import environ
+
+          target = sys.argv[1]
+          env = environ.Env()
+          environ.Env.read_env("/var/www/atg/atg-backend/shared/.env")
+
+          db_name = env("DB_NAME")
+          db_user = env("DB_USER")
+          db_password = env("DB_PASSWORD")
+          db_host = env("DB_HOST", default="localhost")
+          db_port = env("DB_PORT", default="5432")
+
+          child_env = os.environ.copy()
+          child_env["PGPASSWORD"] = db_password
+          subprocess.run(
+              [
+                  "pg_dump",
+                  "--format=custom",
+                  "--no-owner",
+                  "--no-privileges",
+                  "--host", db_host,
+                  "--port", str(db_port),
+                  "--username", db_user,
+                  "--file", target,
+                  db_name,
+              ],
+              check=True,
+              env=child_env,
+          )
+          subprocess.run(
+              ["pg_restore", "--list", target],
+              check=True,
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.PIPE,
+          )
+          if os.path.getsize(target) <= 0:
+              raise SystemExit("Database backup is empty")
+          PY
+
+          sudo install -d -m 0750 /var/www/atg/atg-backend/shared/backups
+          sudo install -m 0640 "$tmp_backup" "/var/www/atg/atg-backend/shared/backups/$final_name"
+          rm -f "$tmp_backup"
+
+          echo "Verified pre-migration backup: /var/www/atg/atg-backend/shared/backups/$final_name" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy exact accepted backend commit
         shell: bash
         env:
           GH_TOKEN: "${{ github.token }}"
         run: |
+          set -euo pipefail
           args=("${{ inputs.commit_sha }}" --github-token-stdin)
-          if [[ "${{ inputs.apply_migrations }}" == true ]]; then args+=(--migrate); fi
+          if [[ "${{ inputs.apply_migrations }}" == true ]]; then
+            args+=(--migrate)
+          fi
           printf '%s\n' "$GH_TOKEN" | sudo /usr/local/sbin/act-backend-deploy "${args[@]}" | tee "$RUNNER_TEMP/act-backend-deploy.log"
 
       - name: Deployment summary

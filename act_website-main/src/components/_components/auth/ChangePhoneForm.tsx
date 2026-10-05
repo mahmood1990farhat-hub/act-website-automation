@@ -1,4 +1,8 @@
 "use client";
+import { runtimeText } from "@/lib/customer-runtime";
+
+import { accountText } from "@/lib/customer-account-text";
+import { customerPhoneLabels } from "@/lib/customer-phone-labels";
 import { Button } from "@/components/ui/button";
 import React, { useState, useRef, useEffect } from "react";
 import { Locale } from "../../../../i18n.config";
@@ -80,7 +84,7 @@ export default function ChangePhoneForm({
 
   const onRequestChange = async () => {
     if (!token) {
-      toast.error("Please login to change your phone number");
+      toast.error(accountText(locale, "loginRequired"));
       return;
     }
 
@@ -94,6 +98,7 @@ export default function ChangePhoneForm({
     setIsLoading(true);
     try {
       await postData({
+        noToast: true,
         endpoint: "/api/auth/request-change/",
         body: {
           phone_number: phone,
@@ -102,10 +107,11 @@ export default function ChangePhoneForm({
         queryParams: { locale },
       });
       setRequestedPhone(phone);
+      toast.success(accountText(locale, "changeCodeSent"));
       setStep("verify");
       setTimeLeft(120);
     } catch (error) {
-      console.error("Error:", error);
+      toast.error(accountText(locale, "changeFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +119,7 @@ export default function ChangePhoneForm({
 
   const onConfirmChange = async () => {
     if (!token) {
-      toast.error("Please login to confirm phone change");
+      toast.error(accountText(locale, "loginRequired"));
       return;
     }
 
@@ -126,6 +132,7 @@ export default function ChangePhoneForm({
     setIsLoading(true);
     try {
       await postData({
+        noToast: true,
         endpoint: "/api/auth/confirm-change/",
         body: {
           code,
@@ -147,18 +154,19 @@ export default function ChangePhoneForm({
         onSuccess();
       }
     } catch (error) {
-      console.error("Error:", error);
+      toast.error(accountText(locale, "changeFailed"));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResend = async () => {
-    if (!requestedPhone) return;
-    setOtp(Array(6).fill(""));
-    setTimeLeft(120);
+    if (!requestedPhone || isLoading) return;
+    if (!token) { toast.error(accountText(locale, "loginRequired")); return; }
+    setIsLoading(true);
     try {
       await postData({
+        noToast: true,
         endpoint: "/api/auth/request-change/",
         body: {
           phone_number: requestedPhone,
@@ -166,8 +174,13 @@ export default function ChangePhoneForm({
         token,
         queryParams: { locale },
       });
+      setOtp(Array(6).fill(""));
+      setTimeLeft(120);
+      toast.success(accountText(locale, "changeCodeSent"));
     } catch (error) {
-      console.error("Error resending code:", error);
+      toast.error(accountText(locale, "changeCodeFailed"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -188,6 +201,8 @@ export default function ChangePhoneForm({
             <input
               key={idx}
               type="text"
+              inputMode="numeric"
+              aria-label={accountText(locale, "otpDigit").replace("{number}", String(idx + 1))}
               maxLength={1}
               className="w-12 h-12 text-center text-xl border-2 border-border rounded-lg bg-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               value={otp[idx] || ""}
@@ -204,12 +219,14 @@ export default function ChangePhoneForm({
           {timeLeft > 0 ? (
             <>
               {trans.otpNotReceived || "Didn't receive a code?"}
-              <span
-                className="underline text-primary cursor-pointer px-0.5"
+              <button
+                type="button"
+                disabled={isLoading || timeLeft > 0}
+                className="underline text-primary cursor-pointer px-0.5 disabled:opacity-50"
                 onClick={handleResend}
               >
                 {trans.resend || "Resend it"}
-              </span>
+              </button>
               <br />
               <span className="font-bold text-secondary text-lg">
                 {formatTime(timeLeft)}
@@ -219,6 +236,7 @@ export default function ChangePhoneForm({
             <button
               type="button"
               onClick={handleResend}
+              disabled={isLoading}
               className="text-primary underline cursor-pointer"
             >
               {trans.resend || "Resend"}
@@ -263,7 +281,7 @@ export default function ChangePhoneForm({
       </div>
       {currentPhone && (
         <div className="text-sm text-center text-muted">
-          Current phone: {currentPhone}
+          {runtimeText(locale, "currentPhone")} {currentPhone}
         </div>
       )}
       <div className="space-y-5">
@@ -277,6 +295,7 @@ export default function ChangePhoneForm({
           >
             <PhoneInputWithCountrySelect
               defaultCountry="GB"
+              labels={customerPhoneLabels(locale)}
               value={phone}
               onChange={(val) => {
                 setPhone(val || "");
@@ -304,4 +323,5 @@ export default function ChangePhoneForm({
     </div>
   );
 }
+
 

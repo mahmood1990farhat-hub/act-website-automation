@@ -16,7 +16,7 @@ class RegisterPassengerView(EMADBaseView):
     def handle_post(self, request):
         activate(get_locale(request=request))
         data = remove_empty_values(request.data)
-        serializer = PassengerSerializer(data = data)
+        serializer = PassengerSerializer(data=data, context={"locale": get_locale(request=request)})
         serializer.is_valid(raise_exception= True)
         serializer.save()
         return Response({"message": "Done"} , status=status.HTTP_200_OK)
@@ -36,4 +36,3 @@ class UpdatePassengerView(EMADBaseView):
         serializer.save()
         return Response({"message": _("Account updated successfully")}, status=status.HTTP_200_OK)
     
-

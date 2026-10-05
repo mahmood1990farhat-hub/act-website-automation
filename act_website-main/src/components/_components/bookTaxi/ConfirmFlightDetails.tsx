@@ -1,3 +1,6 @@
+import { runtimeText } from "@/lib/customer-runtime";
+import { LANGUAGE_CHANGE_EVENT } from "@/lib/booking-language-draft";
+import { customerText } from "@/lib/customer-text";
 import React, { useEffect, useState } from "react";
 import { bookingText } from "./booking-text";
 import { Button } from "@/components/ui/button";
@@ -86,6 +89,16 @@ export default function ModernConfirmFlightDetails({
 }: typeProps) {
 	const [token, setToken] = useState<string | undefined>();
 	const [isLoading, setIsLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  useEffect(() => {
+    if (!isLoading) return;
+    const block = (event: Event) => {
+      (event as CustomEvent).detail.reason = "payment";
+      event.preventDefault();
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, block);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, block);
+  }, [isLoading]);
 	const isRTL = locale === "ar";
   const t = (text: string) => bookingText(locale, text);
 
@@ -110,35 +123,34 @@ export default function ModernConfirmFlightDetails({
 
 	// Arabic text alternatives
 	const texts = {
-		confirmDetails: isRTL ? "تأكيد تفاصيل الحجز" : "Confirm Booking Details",
-		tripDetails: isRTL ? "تفاصيل الرحلة" : "Trip Details",
-		passengerInfo: isRTL ? "معلومات الركاب" : "Passenger Information",
-		vehicleDetails: isRTL ? "تفاصيل المركبة" : "Vehicle Details",
+		confirmDetails: isRTL ? "تأكيد تفاصيل الحجز" : customerText(locale, "Confirm Booking Details"),
+		tripDetails: isRTL ? "تفاصيل الرحلة" : customerText(locale, "Trip Details"),
+		passengerInfo: isRTL ? "معلومات الركاب" : customerText(locale, "Passenger Information"),
+		vehicleDetails: isRTL ? "تفاصيل المركبة" : customerText(locale, "Vehicle Details"),
 		costBreakdown: trans.Confir_flight_details.cost_breakdown,
-		back: isRTL ? "العودة" : t("Back"),
-		edit: isRTL ? "تعديل" : "Edit",
-		confirm: isRTL ? "التأكيد و المتابعة" : "Confirm & Continue",
-		pickup: isRTL ? "نقطة الانطلاق" : "Pickup Location",
-		dropoff: isRTL ? "نقطة الوصول" : "Drop-off Location",
-		stops: isRTL ? "نقاط التوقف" : "Stop Points",
-		distance: isRTL ? "المسافة" : "Distance",
-		date: isRTL ? "التاريخ" : "Date",
-		time: isRTL ? "الوقت المتوقع للوصول" : "ETA",
-		timeTrip: isRTL ? "مدة الرحلة" : "Trip Duration",
-		passengers: isRTL ? "عدد الركاب" : "Passengers",
-		smallLuggage: isRTL ? "حقائب صغيرة" : "Small Luggage",
-		largeLuggage: isRTL ? "حقائب كبيرة" : "Large Luggage",
-		vehicleType: isRTL ? "نوع المركبة" : "Vehicle Type",
+		back: isRTL ? "العودة" : customerText(locale, "Back"),
+		edit: isRTL ? "تعديل" : customerText(locale, "Edit"),
+		confirm: isRTL ? "التأكيد و المتابعة" : customerText(locale, "Confirm & Continue"),
+		pickup: isRTL ? "نقطة الانطلاق" : customerText(locale, "Pickup Location"),
+		dropoff: isRTL ? "نقطة الوصول" : customerText(locale, "Drop-off Location"),
+		stops: isRTL ? "نقاط التوقف" : customerText(locale, "Stop Points"),
+		distance: isRTL ? "المسافة" : customerText(locale, "Distance"),
+		date: isRTL ? "التاريخ" : customerText(locale, "Date"),
+		time: isRTL ? "وقت الاستلام" : customerText(locale, "Pickup Time"),
+		timeTrip: isRTL ? "مدة الرحلة" : customerText(locale, "Trip Duration"),
+		passengers: isRTL ? "عدد الركاب" : customerText(locale, "Passengers"),
+		smallLuggage: isRTL ? "حقائب صغيرة" : customerText(locale, "Small Luggage"),
+		largeLuggage: isRTL ? "حقائب كبيرة" : customerText(locale, "Large Luggage"),
+		vehicleType: isRTL ? "نوع المركبة" : customerText(locale, "Vehicle Type"),
 		baseCost: trans.Confir_flight_details.transfer_fare,
 		airportVAT: trans.Confir_flight_details.airport_access_fee,
 		regularVAT: trans.Confir_flight_details.vat_20,
-		meetAndGreet: trans.Confir_flight_details.meet_and_greet,
-		included: trans.Confir_flight_details.included,
 		totalCost: trans.Confir_flight_details.total_price,
-		routeMap: isRTL ? "خريطة المسار" : "Route Map",
+		routeMap: isRTL ? "خريطة المسار" : customerText(locale, "Route Map"),
 	};
 
 	const onSubmit = async () => {
+    setPaymentError("");
 		setIsLoading(true);
 		const stop_points = data.routePoints
 			.filter((p) => p.type === "stop")
@@ -220,16 +232,18 @@ export default function ModernConfirmFlightDetails({
 			},
 		};
 
-		// Note: stop_points might not be needed for initiate-payment
-		// If the API requires it, uncomment the following:
-		// if (stop_points.length > 0) {
-		//   bodyData.stop_points = stop_points;
-		// }
+		// Payment recalculates the authoritative route price. Preserve the same
+		// ordered stops used by the quote so a multi-stop journey cannot be
+		// repriced as a direct pickup-to-drop-off journey.
+		if (stop_points.length > 0) {
+			bodyData.stop_points = stop_points;
+		}
 
 		try {
 			const res = await postData<any>({
 				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
 				queryParams: { locale },
+        noToast: true,
 				token: token || undefined,
 				body: {
 					...bodyData,
@@ -242,6 +256,7 @@ export default function ModernConfirmFlightDetails({
 			setStep(8);
 		} catch (error) {
 			console.error(error);
+      setPaymentError(runtimeText(locale, "paymentStartFailed"));
 			setIsLoading(false);
 		}
 	};
@@ -256,11 +271,12 @@ export default function ModernConfirmFlightDetails({
 				<p className="text-white/80 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
 					{isRTL
 						? "تأكد من تفاصيل رحلتك قبل المتابعة"
-						: "Review your trip details before proceeding"}
+						: customerText(locale, "Review your trip details before proceeding")}
 				</p>
 			</div>
 
-			{/* Back Button */}
+			{paymentError && <p role="alert" className="mb-4 text-red-300">{paymentError}</p>}
+      {/* Back Button */}
 			<div className="mb-6">
 				<Button
 					onClick={() => setStep(6)}
@@ -612,7 +628,7 @@ export default function ModernConfirmFlightDetails({
 											<div className="relative h-16 w-16">
 												<Image
 													src={data.carImage}
-													alt="car"
+													alt={data.carName}
 													fill
 													className="object-contain"
 												/>
@@ -634,7 +650,7 @@ export default function ModernConfirmFlightDetails({
 											variant="outline"
 											className="bg-[#ffd100]/20 border-[#ffd100]/50 text-[#ffd100] text-xs"
 										>
-											{isRTL ? "فئة مميزة" : "Premium"}
+											{isRTL ? "فئة مميزة" : customerText(locale, "Premium")}
 										</Badge>
 									</div>
 								</div>
@@ -681,11 +697,6 @@ export default function ModernConfirmFlightDetails({
 									</div>
 								)}
 
-								<div className={`flex justify-between items-center`}>
-									<span className="text-white/80">{texts.meetAndGreet}</span>
-									<span className="text-[#ffd100] font-semibold">{texts.included}</span>
-								</div>
-
 							</div>
 
 							<Separator className="bg-white/20" />
@@ -714,7 +725,7 @@ export default function ModernConfirmFlightDetails({
 							{isLoading ? (
 								<div className="flex items-center gap-2">
 									<CarLoading />
-									<span>{isRTL ? "جاري المعالجة..." : "Processing..."}</span>
+									<span>{isRTL ? "جاري المعالجة..." : customerText(locale, "Processing...")}</span>
 								</div>
 							) : (
 								<div className="flex items-center gap-2">
@@ -732,13 +743,13 @@ export default function ModernConfirmFlightDetails({
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
 								<span>
 									{isRTL
-										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ24 ساعة على الأقل"
-										: "Full refund when cancelled at least 24 hours before your scheduled pickup"}
+										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ3 ساعات على الأقل"
+										: customerText(locale, "Full refund when cancelled at least 3 hours before your scheduled pickup")}
 								</span>
 							</div>
 									<div className="flex items-center justify-center gap-1 text-nowrap">
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-								<span>{isRTL ? "دفع آمن" : "Secure Payment"}</span>
+								<span>{isRTL ? "دفع آمن" : customerText(locale, "Secure Payment")}</span>
 							</div>
 						</div>
 					</div>
@@ -758,12 +769,13 @@ export default function ModernConfirmFlightDetails({
 							</CardHeader>
 							<CardContent className="p-0">
 								<div className="w-full h-64 sm:h-80 lg:h-[500px] relative">
-									<MapView
-										routePolyline={
-											rideOptions?.route_polyline ||
-											"vcyHjlwA?kC@ED@xCAPVHP@fAAvACz@Kl@Un@W`@QLULsAPkDb@a@Bc@A]K]Qy@u@aBwBWOc@OcCOsCQyE@aPDiMBK@SHSNONMb@U~@Gd@Cb@@`@d@tD@`C@pDCfAF`@HRLPNLLAPXT\\FF?R?n@?tEAvB?nEAtA?vFD~XCdNBbQ@|@PxACD?F@NELCBAxDEp@B|N@f@BD@L?PEHC@@lF@~DBhDJdARlAx@pDV|AJfAB`A?bBAtAA|@DT?p@?fC?jBBT?TFtCD|B@x@DhAL|BjA`S^jEPjAHZXx@R^j@r@|@f@^LnBn@rA\\z@LbAD~@CjCg@fDcAlAm@h@g@`AeAfAyAn@y@bAqAr@s@hA}@|@k@dAg@hAa@hA_@t@M~@ETChBHfCJfCLN@NGl@@t@Dt@LlBr@vAd@nCt@b@DZ@d@G\\M`@W\\a@f@cAVaAF_@Dc@NoDF}@F]Ne@NYNKNG\\EZ@~@ANKf@o@Ja@N{@f@{DPcCJgCDiCA{XAaPBwBLqBFe@b@cBXs@Zk@f@k@hAu@r@m@h@w@z@yAr@kAf@cAp@yBTcAVgBRoD^sITsHHuATmDPmDd@oKf@uKFkD\\kGZgFJwAXcCl@yETmBF{@BsAI_BGKEa@Ba@DOLIJAJBPVDN?H?DTLPJRHt@Z\\DZ?RGFETO@G@IBGFMJIJCVDPRH\\@f@Ml@KJUBMCWSAKw@CK?OtA"
-										}
-									/>
+									{rideOptions?.route_polyline ? (
+										<MapView routePolyline={rideOptions.route_polyline} />
+									) : (
+										<div role="status" className="flex h-full items-center justify-center px-6 text-center text-sm text-white/70">
+											{runtimeText(locale, "mapUnavailable")}
+										</div>
+									)}
 								</div>
 							</CardContent>
 						</Card>
@@ -773,3 +785,4 @@ export default function ModernConfirmFlightDetails({
 		</div>
 	);
 }
+

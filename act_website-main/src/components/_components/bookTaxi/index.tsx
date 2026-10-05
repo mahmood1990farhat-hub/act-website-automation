@@ -1,11 +1,15 @@
 "use client";
+import { LANGUAGE_CHANGE_EVENT, saveLanguageDraft, takeLanguageDraft } from "@/lib/booking-language-draft";
+import { languageSwitchText } from "@/lib/language-switch-text";
 import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
+import { customerText } from "@/lib/customer-text";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { PlaceSuggestion } from "./LocationSelector";
 import RoutePoints from "./RoutePoints";
 import ChooseCar from "./ChooseCar";
-import { Locale } from "../../../../i18n.config";
+import { Locale, directionFor, localizedVehicleValue } from "../../../../i18n.config";
 import ConfirmFlightDetails from "./ConfirmFlightDetails";
 import PaymentDsetails from "./PaymentDsetails";
 import BookingConfirmation from "./BookingConfirmation";
@@ -147,12 +151,14 @@ export type home = {
 };
 export type VehicleType = {
   id: number;
+  code: string;
   name_en: string;
   name_ar: string;
   desc_en: string;
   desc_ar: string;
-  icon_url: string;
+  icon_url: string | null;
   max_passengers_count: number;
+  luggage_patterns: [number, number][];
   airport_vat: number;
   airport_access_fee: number;
   base_trip_cost: number;
@@ -172,6 +178,7 @@ export type calculatTripCost = {
   distance_meters: number;
   distance_miles: number;
   route_polyline: string;
+  expected_trip_duration_minutes?: number;
 };
 
 type typeProps = {
@@ -223,6 +230,43 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   const [clientSecret, setClientSecret] = useState<string>('')
   const [paymentTotal, setPaymentTotal] = useState<number | null>(null);
   const [step, setStep] = useState<number>(1);
+  const [restoredDraft, setRestoredDraft] = useState(false);
+  useEffect(() => {
+    try {
+      const draft = takeLanguageDraft(window.sessionStorage, locale);
+      if (!draft) return;
+      setRoutePoints(draft.routePoints);
+      setFormDetails(draft.formDetails);
+      setPassengerDetails(draft.passengerDetails);
+      setChildInfantTravel(draft.childInfantTravel);
+      setFlightDetails(draft.flightDetails);
+      setAdditionalRequirements(draft.additionalRequirements);
+      setRestoredDraft(true);
+      // Always recalculate the quote; payment/price/vehicle state is never restored.
+      setStep(1);
+    } catch { /* Storage unavailable: no handoff to restore. */ }
+  }, [locale]);
+
+  useEffect(() => {
+    const transfer = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      if (clientSecret && step !== 9) {
+        detail.reason = "payment";
+        event.preventDefault();
+        return;
+      }
+      if (step === 9) return;
+      try {
+        saveLanguageDraft(window.sessionStorage, { routePoints, formDetails, passengerDetails, childInfantTravel, flightDetails, additionalRequirements }, detail.locale);
+      } catch {
+        detail.reason = "failed";
+        event.preventDefault();
+      }
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, transfer);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, transfer);
+  }, [routePoints, formDetails, passengerDetails, childInfantTravel, flightDetails, additionalRequirements, clientSecret, step]);
+
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -238,27 +282,100 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
 
   return (
     <div className={`${heroImage} bg-cover bg-no-repeat bg-center ${step !== 10 && 'py-16 lg:py-36'}`} id="book-now">
+      {restoredDraft && <p role="status" className="mx-auto max-w-3xl p-4 text-white">{languageSwitchText(locale, "restored")}</p>}
       {step !== 10 && (
         <div>
           <div
             className="flex items-center max-md:flex-col gap-5 py-5 w-full lg:px-24 px-5"
-            dir={locale === "en" ? "ltr" : "rtl"}
+            dir={directionFor(locale)}
           >
             <section
               className="flex-1 w-full"
-              dir={locale === "en" ? "ltr" : "rtl"}
+              dir={directionFor(locale)}
             >
               {step === 1 ? (
-                <RoutePoints
-                  locale={locale}
-                  routePoints={routePoints}
-                  setRoutePoints={setRoutePoints}
-                  book_Taxi={home.Book_Taxi}
-                  setValue={(d) => setFormDetails(d)}
-                  formDetails={formDetails}
-                  setTripData={(res) => setRideOptions(res)}
-                  nextStep={() => setStep(2)}
-                />
+                <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)] gap-8 xl:items-start">
+                  <RoutePoints
+                    locale={locale}
+                    routePoints={routePoints}
+                    setRoutePoints={setRoutePoints}
+                    book_Taxi={home.Book_Taxi}
+                    setValue={(d) => {
+                      setFormDetails(d);
+                      setChildInfantTravel((current) => ({
+                        infantSeatOption: d.infants > 0 ? current.infantSeatOption : "",
+                        childSeatOption: d.children > 0 ? current.childSeatOption : "",
+                      }));
+                    }}
+                    formDetails={formDetails}
+                    setTripData={(res) => setRideOptions(res)}
+                    resetQuoteState={() => {
+                      setRideOptions(null);
+                      setSelectedCar(undefined);
+                      setClientSecret("");
+                      setPaymentTotal(null);
+                    }}
+                    nextStep={() => setStep(2)}
+                  />
+                  <aside className="hidden xl:block sticky top-24">
+                    <div className="rounded-2xl border border-white/15 bg-black/35 p-5 text-white shadow-2xl backdrop-blur-md">
+                      <div className="mb-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd100]">
+                          {customerText(locale, "Journey summary")}
+                        </p>
+                        <h2 className="mt-1 text-2xl font-bold">{customerText(locale, "Your journey")}</h2>
+                      </div>
+                      <div className="space-y-3 text-sm">
+                        {routePoints.find((point) => point.type === "pickup")?.point?.description && (
+                          <div className="rounded-xl bg-white/5 p-3">
+                            <p className="text-white/55">{customerText(locale, "Pickup")}</p>
+                            <p className="mt-1 font-semibold">{routePoints.find((point) => point.type === "pickup")?.point?.description}</p>
+                          </div>
+                        )}
+                        {routePoints.find((point) => point.type === "dropoff")?.point?.description && (
+                          <div className="rounded-xl bg-white/5 p-3">
+                            <p className="text-white/55">{customerText(locale, "Drop-off")}</p>
+                            <p className="mt-1 font-semibold">{routePoints.find((point) => point.type === "dropoff")?.point?.description}</p>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-3">
+                          {formDetails.date && <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Date")}</p><p className="mt-1 font-semibold">{formDetails.date}</p></div>}
+                          {formDetails.time && <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Time")}</p><p className="mt-1 font-semibold">{formDetails.time}</p></div>}
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Passengers")}</p><p className="mt-1 font-semibold">{formDetails.adults + formDetails.children + formDetails.infants}</p></div>
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Large luggage")}</p><p className="mt-1 font-semibold">{formDetails.largeSuitcase}</p></div>
+                          <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Small luggage")}</p><p className="mt-1 font-semibold">{formDetails.smallSuitcase}</p></div>
+                        </div>
+                      </div>
+                      {rideOptions?.route_polyline ? (
+                        <>
+                          <div className="mt-4 h-[320px] overflow-hidden rounded-xl border border-white/10">
+                            <MapView routePolyline={rideOptions.route_polyline} />
+                          </div>
+                          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                            <div className="rounded-xl bg-white/5 p-3">
+                              <p className="text-white/55">{customerText(locale, "Distance")}</p>
+                              <p className="mt-1 font-semibold">{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(rideOptions.distance_miles)} mi</p>
+                            </div>
+                            <div className="rounded-xl bg-white/5 p-3">
+                              <p className="text-white/55">{customerText(locale, "Estimated journey time")}</p>
+                              <p className="mt-1 font-semibold">{rideOptions.expected_trip_duration_minutes ? `${Math.round(rideOptions.expected_trip_duration_minutes)} min` : "—"}</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="mt-4 flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-8 text-center">
+                          <MapPin className="mb-4 h-9 w-9 text-[#ffd100]" />
+                          <p className="text-lg font-semibold">{customerText(locale, "Your route map will appear after the price is calculated")}</p>
+                          <p className="mt-2 text-sm leading-6 text-white/60">
+                            {customerText(locale, "Your journey details update here as you complete the booking form.")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </aside>
+                </div>
               ) : step === 2 ? (
                 <ChooseCar
                   selectedCar={SelectedCar}
@@ -266,6 +383,9 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   locale={locale}
                   Choose_car={home.Choose_car}
                   rideOptions={rideOptions}
+                  tripDate={formDetails.date}
+                  largeSuitcaseLabel={home.Book_Taxi.form.largeSuitcase}
+                  smallSuitcaseLabel={home.Book_Taxi.form.smallSuitcase}
                   nextStep={() => setStep(3)}
                   prevStep={() => setStep(1)}
                 />
@@ -315,10 +435,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     routePoints: routePoints,
                     time: formDetails.time,
                     date: formDetails.date,
-                    distance: `   ${rideOptions?.distance_miles} miles / ${rideOptions && rideOptions?.distance_meters > 1000
-                      ? rideOptions?.distance_meters / 1000 + " K.m"
-                      : rideOptions?.distance_meters + " m"
-                      }  `,
+                    distance: `${new Intl.NumberFormat(locale, {style: "unit", unit: "mile", unitDisplay: "short", maximumFractionDigits: 2}).format(rideOptions?.distance_miles ?? 0)} / ${new Intl.NumberFormat(locale, {style: "unit", unit: "kilometer", unitDisplay: "short", maximumFractionDigits: 2}).format((rideOptions?.distance_meters ?? 0) / 1000)}`,
                     largeSuitcase: formDetails.largeSuitcase,
                     smallSuitcase: formDetails.smallSuitcase,
                     adults: formDetails.adults,
@@ -330,9 +447,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     flightDetails,
                     additionalRequirements,
                     carName: SelectedCar
-                      ? (SelectedCar[
-                        `name_${locale}` as keyof VehicleType
-                      ] as string)
+                      ? localizedVehicleValue(SelectedCar, "name", locale)
                       : "",
                       carImage: SelectedCar ? SelectedCar.icon_url : "",
                     cartype: SelectedCar?.id,
@@ -384,3 +499,4 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
     </div>
   );
 }
+

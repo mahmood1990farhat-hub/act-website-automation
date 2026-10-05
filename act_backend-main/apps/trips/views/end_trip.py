@@ -2,6 +2,7 @@ from utils.EMDBase import EMADBaseView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from apps.accounts.permissions import IsNormalDriver, IsVerifiedAndProfileCompleted
 from apps.trips.models import Trip
 from django.utils.translation import gettext as _, activate
@@ -63,6 +64,27 @@ class CompleteTripView(EMADBaseView):
         if trip.status != "active":
             # If already completed, return success
             if trip.status == "completed":
+                # Idempotent repair path for journeys completed by an older
+                # release before completion and ledger creation were atomic.
+                try:
+                    from apps.earnings.services.earnings_calculator import EarningsCalculator
+                    EarningsCalculator.calculate_and_record_earnings(trip)
+                except Exception as exc:
+                    logger.error(
+                        "Completed trip %s is missing/invalid financial ledger: %s",
+                        trip.id,
+                        exc,
+                        exc_info=True,
+                    )
+                    return create_error_response(
+                        get_bilingual_error_message(
+                            'Trip is completed but its financial record could not be verified.',
+                            'الرحلة مكتملة ولكن تعذر التحقق من سجلها المالي.',
+                            locale,
+                        ),
+                        locale=locale,
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
                 message = get_bilingual_error_message(
                     'Trip is already completed.',
                     'الرحلة مكتملة بالفعل.',
@@ -85,40 +107,50 @@ class CompleteTripView(EMADBaseView):
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
         try:
-            trip.status = "completed"
-            trip.save(update_fields=['status'])
+            # Completion and financial ledger creation are one operation. Do not
+            # leave a journey completed without its corresponding earnings/revenue.
+            with transaction.atomic():
+                locked_trip = Trip.objects.select_for_update().get(
+                    id=trip.id,
+                    base_driver=base_driver,
+                )
+                if locked_trip.status == "completed":
+                    trip = locked_trip
+                else:
+                    if locked_trip.status != "active":
+                        raise ValidationError(_("Only active trips can be completed."))
+                    locked_trip.status = "completed"
+                    locked_trip.save(update_fields=['status'])
 
-            # Note: Driver availability is managed through trip status checks
-            # No need to set is_active on BaseDriver (it doesn't have that field)
-            # The user.is_active field is for account activation, not trip availability
+                    from apps.earnings.services.earnings_calculator import EarningsCalculator
+                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(locked_trip)
+                    if earnings:
+                        logger.info(
+                            f"Earnings calculated for trip {locked_trip.id}: "
+                            f"driver={earnings.net_amount}, company={revenue.amount}"
+                        )
+                    else:
+                        logger.info(
+                            f"Earnings calculated for trip {locked_trip.id}: "
+                            f"company={revenue.amount} (guest driver)"
+                        )
+                    trip = locked_trip
 
             logger.info(f"Trip {trip.id} completed by driver {user.id}")
-            
-            # Calculate earnings if trip is paid (system driver or guest driver)
-            if trip.is_paid:
-                try:
-                    from apps.earnings.services.earnings_calculator import EarningsCalculator
-                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(trip)
-                    if earnings:
-                        logger.info(f"Earnings calculated for trip {trip.id}: driver={earnings.net_amount}, company={revenue.amount}")
-                    else:
-                        logger.info(f"Earnings calculated for trip {trip.id}: company={revenue.amount} (guest driver)")
-                except Exception as e:
-                    logger.error(f"Error calculating earnings for trip {trip.id}: {str(e)}", exc_info=True)
-                    # Don't fail trip completion, but log error
 
-            # Notify passenger
+            # Push notifications apply to registered passengers only.
             try:
-                notify_user(
-                    user=trip.passenger.user_id,
-                    title_en='Trip Completed',
-                    title_ar='اكتملت الرحلة',
-                    desc_en=f'Your trip #{trip.id} has been completed. Thank you for using our service!',
-                    desc_ar=f'اكتملت رحلتك #{trip.id}. شكراً لاستخدام خدمتنا!',
-                    locale=locale,
-                    notification_type=NOTIFICATION_TYPE_TRIP_COMPLETED,
-                    trip_id=trip.id
-                )
+                if trip.passenger:
+                    notify_user(
+                        user=trip.passenger.user_id,
+                        title_en='Trip Completed',
+                        title_ar='اكتملت الرحلة',
+                        desc_en=f'Your trip #{trip.id} has been completed. Thank you for using our service!',
+                        desc_ar=f'اكتملت رحلتك #{trip.id}. شكراً لاستخدام خدمتنا!',
+                        locale=locale,
+                        notification_type=NOTIFICATION_TYPE_TRIP_COMPLETED,
+                        trip_id=trip.id
+                    )
             except Exception as e:
                 logger.warning(f"Failed to send notification for trip {trip.id}: {str(e)}")
 

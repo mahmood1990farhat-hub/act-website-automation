@@ -3,6 +3,8 @@ from apps.office.models import Office
 
 
 class VehicleType(models.Model):
+    # Immutable machine identifier used by pricing/integrations; display names may change.
+    code = models.CharField(max_length=32, unique=True)
     name_en = models.CharField(max_length=100)
     name_ar = models.CharField(max_length=100)
     desc_en = models.TextField(blank=True)
@@ -17,6 +19,9 @@ class VehicleType(models.Model):
 
 class Vehicle(models.Model):
     vehicle_number = models.CharField(max_length=50)
+    make = models.CharField(max_length=80, blank=True, default="")
+    model = models.CharField(max_length=80, blank=True, default="")
+    color = models.CharField(max_length=50, blank=True, default="")
     mot = models.FileField(upload_to="vehicles/mot/")
     year_of_manufacture = models.PositiveIntegerField()
     phv = models.FileField(upload_to="vehicles/phv/")

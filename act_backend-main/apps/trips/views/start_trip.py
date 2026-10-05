@@ -79,18 +79,19 @@ class StartTripView(EMADBaseView):
 
             logger.info(f"Trip {trip.id} started by driver {user.id}")
 
-            # Notify passenger
+            # Push notifications apply to registered passengers only.
             try:
-                notify_user(
-                    user=trip.passenger.user_id,
-                    title_en='Trip Started',
-                    title_ar='بدأت الرحلة',
-                    desc_en=f'Your trip #{trip.id} has started.',
-                    desc_ar=f'بدأت رحلتك #{trip.id}.',
-                    locale=locale,
-                    notification_type=NOTIFICATION_TYPE_TRIP_STARTED,
-                    trip_id=trip.id
-                )
+                if trip.passenger:
+                    notify_user(
+                        user=trip.passenger.user_id,
+                        title_en='Trip Started',
+                        title_ar='بدأت الرحلة',
+                        desc_en=f'Your trip #{trip.id} has started.',
+                        desc_ar=f'بدأت رحلتك #{trip.id}.',
+                        locale=locale,
+                        notification_type=NOTIFICATION_TYPE_TRIP_STARTED,
+                        trip_id=trip.id
+                    )
             except Exception as e:
                 logger.warning(f"Failed to send notification for trip {trip.id}: {str(e)}")
 

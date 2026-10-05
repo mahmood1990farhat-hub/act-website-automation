@@ -12,6 +12,8 @@ class BaseDriver(models.Model):
     pco = models.FileField(upload_to="driver_docs/pco/")
     dbs = models.FileField(upload_to="driver_docs/dbs/")
     dvla = models.FileField(upload_to="driver_docs/dvla/")
+    pco_licence_number = models.CharField(max_length=50, blank=True, default="")
+    driver_photo = models.ImageField(upload_to="driver_docs/photos/", blank=True, null=True)
     bank_details = models.ForeignKey(BankDetails, on_delete=models.SET_NULL, null=True, blank=True)
     stripe_account_id = models.CharField(max_length=255, null=True, blank=True, help_text="Stripe Connect account ID")
     driver_commission_percentage = models.DecimalField(

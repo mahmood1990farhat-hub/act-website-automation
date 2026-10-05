@@ -1,0 +1,261 @@
+{
+  "en": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/en/privacy-policy.pdf",
+      "language": "en",
+      "title": "Privacy Policy – Airport & City Transfer",
+      "source_sha256": "a1b00d0c2e4c5658be3f3417085299704337439e4f33688635e3ca3008c41c95",
+      "pdf_sha256": "05f3df650664cfb1377e419c0d4d8c43f8c0d5b9049d38edfdfaaa6b2bed4b2e"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/en/terms-and-conditions.pdf",
+      "language": "en",
+      "title": "Terms and Conditions – Airport & City Transfer",
+      "source_sha256": "349385047dca5f299eb8a1d9eaf24270a7924624e56caf34016f41e7205fb379",
+      "pdf_sha256": "49e6eabacc63544548985845d61be5be656b94d2f12b9257d9b82b72f25da50b"
+    },
+    "FAQ": {
+      "file_url": "/documents/en/faq.pdf",
+      "language": "en",
+      "title": "Frequently Asked Questions – Airport & City Transfer",
+      "source_sha256": "bb87a410b59f495041f852c10d625302cbaa5f72faa82eb38777eea673078840",
+      "pdf_sha256": "27d753fa9b749eaaa9c2774de4f5f8da15393f342ecedc4ca894a4830139283c"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/en/driver-instructions.pdf",
+      "language": "en",
+      "title": "Driver App",
+      "source_sha256": "2c7c586693b205e50a34aee5dbeaf213e57a70f22d9157dfe1c54d6ed37807cd",
+      "pdf_sha256": "9c428eafaacc26c35f286b6a5f46bc49a9e892888aba0fa839dbdfa100650de1"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/en/passenger-instructions.pdf",
+      "language": "en",
+      "title": "Passenger App",
+      "source_sha256": "9db3644a4aef5b5253fd71fb395a2bf8e3deaa0c67b89fb3170616347d51fb44",
+      "pdf_sha256": "8c07b3b49891753852ac8cae78515ffb05cffb136864409e8b3cbbe5b01b08eb"
+    }
+  },
+  "ar": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/ar/privacy-policy.pdf",
+      "language": "ar",
+      "title": "سياسة الخصوصية – مجموعة Airport & City",
+      "source_sha256": "48d66d18d3a3d626c215b8d3941e6e6d4e3903f46ba1c5778bcfe53a4495e782",
+      "pdf_sha256": "75caca704fe9d60346a8bb73552c11b614cbfda1a9abb50be2e634811336caf5"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/ar/terms-and-conditions.pdf",
+      "language": "ar",
+      "title": "الشروط والأحكام – مجموعة Airport & City",
+      "source_sha256": "74a1911304470f244a3dfd3a454685402a0fe02813451f491c7cffb4ee3aedfc",
+      "pdf_sha256": "bd0caa5ff274d841090ee5bf094f76b27125cd9eea5efc8e3a66a1211edbb0f9"
+    },
+    "FAQ": {
+      "file_url": "/documents/ar/faq.pdf",
+      "language": "ar",
+      "title": "الأسئلة الشائعة – مجموعة Airport & City",
+      "source_sha256": "ae82c2a87d3024b11858f508a4ce1adce2a49c074e053629aba8c2f9f828b498",
+      "pdf_sha256": "3c4d25c2ce25af86ffbcd3ac2f1c64d3bc957db9c7d455d2306f0899f36919c0"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/ar/driver-instructions.pdf",
+      "language": "ar",
+      "title": "تحميل تطبيق السائق",
+      "source_sha256": "c5f679b3a1f2abba83850e17291ed3cc57072389ddceda670fab090bd0bf4a9a",
+      "pdf_sha256": "ce64ab38d2ddbf92a7136fffd15476beecc7dd141408b10a2bfa21c4e5d36fb2"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/ar/passenger-instructions.pdf",
+      "language": "ar",
+      "title": "تحميل تطبيق الراكب",
+      "source_sha256": "c01079dcfa2f4c5b05d071441638054720a242dfc253981498b4f8d3a4e06761",
+      "pdf_sha256": "08db4eeb4e68e57967dcea53d2bea0b4670cccf11e563c87588ec7a371232807"
+    }
+  },
+  "fr": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/fr/privacy-policy.pdf",
+      "language": "fr",
+      "title": "Politique de confidentialité – Airport & City Transfer",
+      "source_sha256": "61f39e00820a4ad62e6a7c256fbfa021d6d4cf12047458e6a6da54f814aee351",
+      "pdf_sha256": "6c1ef4a95c8af1a8cad320c7b52cc1762051fea87fc22bb4547d6139c373e79e"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/fr/terms-and-conditions.pdf",
+      "language": "fr",
+      "title": "Conditions générales – Airport & City Transfer",
+      "source_sha256": "22b28261dd68d7a93e44de51fbc1a4397379cde3dc7be16669519a30038c5c51",
+      "pdf_sha256": "972e1a6bcdca58dff3a5abbfef9e52e51b81f3aaef9fcea3ce50e797e13ad8a3"
+    },
+    "FAQ": {
+      "file_url": "/documents/fr/faq.pdf",
+      "language": "fr",
+      "title": "Questions fréquentes – Airport & City Transfer",
+      "source_sha256": "00816c0bae4f165a6db2e7da351f66b97333de031295386766585b613fb91bfd",
+      "pdf_sha256": "daf286490eb2f464bf7886edc13f91ee3da89883597e48fae082577e00c45de5"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/fr/driver-instructions.pdf",
+      "language": "fr",
+      "title": "Application chauffeur",
+      "source_sha256": "85cc815a5a25e187a4ffa3f904987c70cf45eea4f6c6b5533a0a7added141110",
+      "pdf_sha256": "650bcdb9c9506fd8835d6ede5394d03e1ed976642f0302aab507091791e278a9"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/fr/passenger-instructions.pdf",
+      "language": "fr",
+      "title": "Application passager",
+      "source_sha256": "8096336d8e7c487706165be4ead991e60c3bc5007307f7b9b7af064a87b4eaef",
+      "pdf_sha256": "1058164a8dec575c0c4cab9680df484f20ce8218c569f96ea2bdc311b6484e2d"
+    }
+  },
+  "de": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/de/privacy-policy.pdf",
+      "language": "de",
+      "title": "Datenschutzerklärung – Airport & City Transfer",
+      "source_sha256": "95ef6d86d787d74ab7aa0555020f7cbf217541ba037645b19aaa5a38ac8a6aa8",
+      "pdf_sha256": "0bae9ffab6d26438752ff541562190ddcec4729c971bd9286f09a52fa69d700c"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/de/terms-and-conditions.pdf",
+      "language": "de",
+      "title": "Allgemeine Geschäftsbedingungen – Airport & City Transfer",
+      "source_sha256": "f5a96ef5448007d1eaa45ceb710d80fb1fef04c101f89dda0f670be4b9721f02",
+      "pdf_sha256": "2bc64239a07031763bec263b0555ea82843517caab997e6cf4c16aaefffe4ef9"
+    },
+    "FAQ": {
+      "file_url": "/documents/de/faq.pdf",
+      "language": "de",
+      "title": "Häufig gestellte Fragen – Airport & City Transfer",
+      "source_sha256": "a772245f9da240f553d6fb349f5736c24363c731dfb9cddeb761ace138a53163",
+      "pdf_sha256": "9640ed4bdd0ce786a04ea12ca4974f3a41104801d388111dd76654dbf99f0daa"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/de/driver-instructions.pdf",
+      "language": "de",
+      "title": "Fahrer-App",
+      "source_sha256": "503fc52bd95542b98c8a8579759b60118342ad1fd5dbac8284f366549bbc0195",
+      "pdf_sha256": "85527b48e9f36c1e0570c6c601474ff758c366c4d31a6b443050a3db5e5eac73"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/de/passenger-instructions.pdf",
+      "language": "de",
+      "title": "Fahrgast-App",
+      "source_sha256": "74e25790e6573754488927ddd433a71a842899f72afa073f50c40d2036240395",
+      "pdf_sha256": "d861baeda2f0ca01918e7e5e5434d885aca1510408db9c59cbf37d2dd105b4de"
+    }
+  },
+  "es": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/es/privacy-policy.pdf",
+      "language": "es",
+      "title": "Política de privacidad – Airport & City Transfer",
+      "source_sha256": "830d60bfddee9e5566cf891faf8517b70c5c0b030206c4eae9ec1cbdd033260f",
+      "pdf_sha256": "3df4122745ab5e62113375b09b73e5a9a6f607a5e102989adb6f9b9af8e17302"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/es/terms-and-conditions.pdf",
+      "language": "es",
+      "title": "Términos y condiciones – Airport & City Transfer",
+      "source_sha256": "34d03c05d14851f075a793425bf12136115722ad1d17d19e8209a27c146e46b5",
+      "pdf_sha256": "96177f9aebcb6ec961d42cbd1685e4fac32a9169842c47ea714c6cc0030c9634"
+    },
+    "FAQ": {
+      "file_url": "/documents/es/faq.pdf",
+      "language": "es",
+      "title": "Preguntas frecuentes – Airport & City Transfer",
+      "source_sha256": "01ae5d2099b58c8e69e11dec695d3b0704e2205baf3bc88a742b2b2a5edcf37a",
+      "pdf_sha256": "e4edcae56f186ece8b82d665a7bcc325613bc70a00ee514a7eb5ff36a6e220b6"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/es/driver-instructions.pdf",
+      "language": "es",
+      "title": "Aplicación para conductores",
+      "source_sha256": "4ea3a162fefe96f31f9426487e2818443e650d9e4b4f83c796c2572a725c6d96",
+      "pdf_sha256": "27f7f5e0d1800e0b6cf2adc4720a283507ff46894479da9871373f21c0077495"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/es/passenger-instructions.pdf",
+      "language": "es",
+      "title": "Aplicación para pasajeros",
+      "source_sha256": "46703f0215762597e37d5b8482d85ba9ae6bd3bdf3cf564ee5dd6817ebc6048a",
+      "pdf_sha256": "8bc649e9b6a0af5af85738a06aae82680eb1da7091992b0c5e35592db169571f"
+    }
+  },
+  "tr": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/tr/privacy-policy.pdf",
+      "language": "tr",
+      "title": "Gizlilik Politikası – Airport & City Transfer",
+      "source_sha256": "1c49ed492bfa316d69c8649a1063c14e67b1bfd2569c0a8f1ce1a0658585f272",
+      "pdf_sha256": "e2843562200056ec9181c6b597ed7bf895fc0e6065a4fdccd29862e8b11ec17b"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/tr/terms-and-conditions.pdf",
+      "language": "tr",
+      "title": "Şartlar ve Koşullar – Airport & City Transfer",
+      "source_sha256": "a448666a6efff016c0d9559d21d1dd13d86dbc695a587a965a9208acb9993bb9",
+      "pdf_sha256": "5674aa4576cb43ed4c829a05c83b2d9b2333ee9b4ecdd7570b37a827f450da5b"
+    },
+    "FAQ": {
+      "file_url": "/documents/tr/faq.pdf",
+      "language": "tr",
+      "title": "Sık Sorulan Sorular – Airport & City Transfer",
+      "source_sha256": "7f72c8b8e05ee5fe1233327349bef96fc23de9b51f481b0cb74767c2bb197bf0",
+      "pdf_sha256": "516199a712c66bee6d7f3b2446c58fe903d9c1e4b61b62fd793cc9f02a42e5ef"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/tr/driver-instructions.pdf",
+      "language": "tr",
+      "title": "Sürücü uygulaması",
+      "source_sha256": "d8ed86ddc36e1963d926bf0ce884a8a69d109faecc109b80544bff1fd3da31b2",
+      "pdf_sha256": "d481b28540111bc33625ee881025930c47efc0111be263921edcefff45cf803e"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/tr/passenger-instructions.pdf",
+      "language": "tr",
+      "title": "Yolcu uygulaması",
+      "source_sha256": "a3cfbe35da68164ec273c8bf36e61e2e6ad4d5432e04bc4ec5268ca9c02d94b7",
+      "pdf_sha256": "0b1a862fcf399e5d57066f8a375f3c9e05d00ba81b335492d5dca36536e70d84"
+    }
+  },
+  "zh-CN": {
+    "PRIVACY_POLICY": {
+      "file_url": "/documents/zh-CN/privacy-policy.pdf",
+      "language": "zh-CN",
+      "title": "隐私政策 – Airport & City Transfer",
+      "source_sha256": "4b532209dcded707fa8fe824b91af60e08876eb3fae50e1bd9cb18e2eca5f408",
+      "pdf_sha256": "27e6347f038b5c91db8a4c68c1fe408279289ff8fb0e4c38dbf05ce1a1bb18f5"
+    },
+    "TERMS_AND_CONDITIONS": {
+      "file_url": "/documents/zh-CN/terms-and-conditions.pdf",
+      "language": "zh-CN",
+      "title": "条款与条件 – Airport & City Transfer",
+      "source_sha256": "a2d58a814f275efad9c4000d64a7d094dab734397dcbcbb524a52ce132526125",
+      "pdf_sha256": "1e8b4ec976601c1bb31e3d7f8706383566570a8c39f68e767481e70a3efe7f95"
+    },
+    "FAQ": {
+      "file_url": "/documents/zh-CN/faq.pdf",
+      "language": "zh-CN",
+      "title": "常见问题 – Airport & City Transfer",
+      "source_sha256": "7c408385935ded1d0007aa0189f9581db886df434e986c51ba46702fb03b9df6",
+      "pdf_sha256": "1cd9f17877882362f5246efeb67fd6eadb8d92927b9d2dc3ed7d7873db5f55df"
+    },
+    "DRIVER_GUIDELINES": {
+      "file_url": "/documents/zh-CN/driver-instructions.pdf",
+      "language": "zh-CN",
+      "title": "司机应用",
+      "source_sha256": "8d7ec2dd65f68874aeedb6a0c6530c733c9fb72ffd20fc48bce52247c24c5acf",
+      "pdf_sha256": "9adc47285300f8005ce6535839ab79b86e463483f61062e8024e47c0f381b6c7"
+    },
+    "PASSENGER_GUIDELINES": {
+      "file_url": "/documents/zh-CN/passenger-instructions.pdf",
+      "language": "zh-CN",
+      "title": "乘客应用",
+      "source_sha256": "d39da68eb072b4b843393f8e2f445eba2be9328c76c4199c1b8ae1ff43d760cf",
+      "pdf_sha256": "5f7fa7967d468344f2310c5074c0ef2cd9349cef275d2c9683e69483c4714945"
+    }
+  }
+}

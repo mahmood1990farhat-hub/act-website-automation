@@ -1,3 +1,7 @@
+import { accountText } from "@/lib/customer-account-text";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+import { localizedVehicleValue } from "../../../../i18n.config";
 import React, { useState } from "react";
 import { FaCarSide, FaRoute, FaCalendarAlt } from "react-icons/fa";
 import { TiLocation } from "react-icons/ti";
@@ -49,21 +53,40 @@ export default function MyTripsCard({
 	tripCardTrans,
 }: typeProps) {
 	const [openModal, setOpenModal] = useState(false);
+	const [cancelling, setCancelling] = useState(false);
+	const queryClient = useQueryClient();
 	const [openDetails, setOpenDetails] = useState(false);
 
 	const CancelTrip = async () => {
+		if (cancelling) return;
+		setCancelling(true);
 		try {
-			const res = await postData({
+			const res: any = await postData({
 				endpoint: `/api/trips/${data.id}/cancel/`,
+				noToast: true,
 				token: token,
 				queryParams: {
-					loacle: locale,
+					locale: locale,
 				},
 			});
 			setOpenModal(false);
-		} catch (error) {}
+			const refundStatus = res?.data?.refund_status;
+			toast.success(
+				refundStatus === "processed" || refundStatus === "processed_ledger_error"
+					? accountText(locale, "cancelTripRefunded")
+					: refundStatus === "manual_review" || refundStatus === "failed"
+						? accountText(locale, "cancelTripReview")
+						: accountText(locale, "cancelTripSuccess"),
+			);
+			void queryClient.invalidateQueries({ queryKey: ["myTrips"] });
+			void queryClient.invalidateQueries({ queryKey: ["Latest"] });
+		} catch (error) {
+			toast.error(accountText(locale, "cancelTripFailed"));
+		} finally {
+			setCancelling(false);
+		}
 	};
-	console.log(data);
+
 
 	return (
 		<>
@@ -108,7 +131,7 @@ export default function MyTripsCard({
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
 							{data.distance_miles.toFixed(2)}{" "}
-							{locale === "ar" ? "ميل" : "Mile"}
+							{accountText(locale, "miles")}
 						</p>
 					</div>
 
@@ -121,7 +144,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data.expected_trip_duration_minutes || "0"}
+							{data.expected_trip_duration_minutes || "0"} {accountText(locale, "minutes")}
 						</p>
 					</div>
 				</div>
@@ -168,7 +191,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-				
+
 						{data?.vehicle_info?.brand && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
@@ -201,7 +224,7 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.vehicle_type?.[`name_${locale}`] || "-"}
+									{localizedVehicleValue(data.vehicle_info.vehicle_type, "name", locale) || "-"}
 								</p>
 							</div>
 						)}
@@ -217,7 +240,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-					
+
 								{data?.vehicle_info?.color && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
@@ -289,8 +312,8 @@ export default function MyTripsCard({
 								e.stopPropagation();
 								setOpenDetails(true);
 							}}
-							className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg 
-                       bg-primary/10 hover:bg-primary/20 border border-primary/30 
+							className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                       bg-primary/10 hover:bg-primary/20 border border-primary/30
                        text-primary font-semibold text-sm transition-all duration-200
                        hover:scale-102 active:scale-95"
 						>
@@ -327,8 +350,8 @@ export default function MyTripsCard({
 									e.stopPropagation();
 									setOpenModal(true);
 								}}
-								className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg 
-                         bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 
+								className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                         bg-red-500/10 hover:bg-red-500/20 border border-red-500/30
                          text-red-400 font-semibold text-sm transition-all duration-200
                          hover:scale-105 active:scale-95"
 								title="Cancel Trip"
@@ -353,12 +376,12 @@ export default function MyTripsCard({
 
 					{/* Title */}
 					<h1 className="text-white text-xl md:text-2xl font-bold">
-						{trans.title}
+						{accountText(locale, "cancelTripTitle")}
 					</h1>
 
 					{/* Description */}
 					<p className="text-gray-300 text-sm md:text-base max-w-md">
-						{trans.desc}
+						{accountText(locale, "cancelTripPolicy")}
 					</p>
 
 					{/* Action Buttons */}
@@ -372,9 +395,10 @@ export default function MyTripsCard({
 						</Button>
 						<Button
 							onClick={CancelTrip}
+							disabled={cancelling}
 							className="w-full sm:w-1/2 text-base md:text-lg py-6 bg-red-600 hover:bg-red-700"
 						>
-							{trans.btuConfirm}
+							{cancelling ? accountText(locale, "cancelling") : accountText(locale, "cancelTrip")}
 						</Button>
 					</div>
 				</div>
@@ -388,7 +412,7 @@ export default function MyTripsCard({
 				>
 					<div
 						onClick={(e) => e.stopPropagation()}
-						className="bg-foreground/95 backdrop-blur-md border border-primary/20 rounded-2xl w-full max-w-5xl 
+						className="bg-foreground/95 backdrop-blur-md border border-primary/20 rounded-2xl w-full max-w-5xl
                      shadow-2xl shadow-primary/10 max-h-[90vh] overflow-hidden flex flex-col"
 					>
 						{/* Header */}
@@ -405,8 +429,8 @@ export default function MyTripsCard({
 									</>
 								) : (
 									<>
-										<span className="text-primary">Trip</span>{" "}
-										<span className="text-white">Details</span>
+										<span className="text-primary">{tripCardTrans?.tripDetails || "Trip Details"}</span>{" "}
+
 									</>
 								)}
 							</h2>
@@ -455,7 +479,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold">
-												{(data.distance_miles * 1.61).toFixed(2)} km
+												{new Intl.NumberFormat(locale, {style: "unit", unit: "kilometer", maximumFractionDigits: 2}).format(data.distance_miles * 1.61)}
 											</p>
 										</div>
 
@@ -468,7 +492,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold">
-												{data.expected_trip_duration_minutes || "0"} m
+												{data.expected_trip_duration_minutes || "0"} {accountText(locale, "minutes")}
 											</p>
 										</div>
 

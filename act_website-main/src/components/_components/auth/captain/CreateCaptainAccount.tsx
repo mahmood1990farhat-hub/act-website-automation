@@ -32,7 +32,12 @@ type FormData = {
   sort_code: string;
   registered_address: string;
   vehicle_number: string;
+  vehicle_make: string;
+  vehicle_model: string;
+  vehicle_color: string;
   year_of_manufacture: string;
+  pco_licence_number: string;
+  driver_photo: FileList;
   pco: FileList;
   dbs: FileList;
   dvla: FileList;
@@ -125,10 +130,17 @@ export default function CreateCaptainAccount({
     formData.append("sort_code", data.sort_code);
     formData.append("registered_address", data.registered_address);
     formData.append("vehicle_number", data.vehicle_number);
+    formData.append("vehicle_make", data.vehicle_make);
+    formData.append("vehicle_model", data.vehicle_model);
+    formData.append("vehicle_color", data.vehicle_color);
+    formData.append("pco_licence_number", data.pco_licence_number);
     formData.append("year_of_manufacture", data.year_of_manufacture);
     formData.append("interview_date", valueDateTime.date);
     formData.append("interview_time", valueDateTime.time);
 
+    if (data.driver_photo && data.driver_photo.length > 0) {
+      formData.append("driver_photo", data.driver_photo[0]);
+    }
     if (data.pco && data.pco.length > 0) {
       formData.append("pco", data.pco[0]);
     }
@@ -253,6 +265,33 @@ export default function CreateCaptainAccount({
             </h1>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 md:gap-6 items-start">
+                <label className="text-sm font-medium pt-3">TfL PHV driver licence number</label>
+                <InputField
+                  label=""
+                  placeholder="Enter TfL PHV driver licence number"
+                  register={register}
+                  name="pco_licence_number"
+                  value={watch("pco_licence_number")}
+                  requiredMsg={transInfo.locationRequired}
+                  error={errors.pco_licence_number}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 md:gap-6 items-start">
+                <div className="pt-3">
+                  <label className="text-sm font-medium block mb-1">Driver photograph</label>
+                  <p className="text-xs">Upload a clear current photograph that can be shown to passengers with driver details.</p>
+                </div>
+                <FileField
+                  label=""
+                  placeholder="driver photo"
+                  name="driver_photo"
+                  register={register}
+                  requiredMsg={transInfo.locationRequired}
+                  error={errors.driver_photo}
+                  value={watch("driver_photo")}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 md:gap-6 items-start">
                 <div className="pt-3">
                   <label className="text-sm font-medium    block mb-1">
                     {trans.DriverDocuments?.pcoLabel || "PCO driver licence issued by TfL (mandatory)"}
@@ -347,6 +386,24 @@ export default function CreateCaptainAccount({
                   />
                 </div>
               </div>
+              {[
+                ["vehicle_make", "Vehicle make", "e.g. Mercedes-Benz"],
+                ["vehicle_model", "Vehicle model", "e.g. E-Class"],
+                ["vehicle_color", "Vehicle colour", "e.g. Black"],
+              ].map(([name, label, placeholder]) => (
+                <div key={name} className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 md:gap-6 items-start">
+                  <label className="text-sm font-medium pt-3">{label}</label>
+                  <InputField
+                    label=""
+                    placeholder={placeholder}
+                    register={register}
+                    name={name as keyof FormData}
+                    value={watch(name as keyof FormData) as string}
+                    requiredMsg={transInfo.locationRequired}
+                    error={errors[name as keyof FormData]}
+                  />
+                </div>
+              ))}
               <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 md:gap-6 items-start">
                 <label className="text-sm font-medium    pt-3">
                   {trans.VehicleDocuments.Register}
@@ -360,7 +417,7 @@ export default function CreateCaptainAccount({
                     placeholder={trans.VehicleDocuments.RegisterDescription || "Select year"}
                     min={1950}
                     max={new Date().getFullYear()}
-                    language={locale}
+                    language={locale === "ar" ? "ar" : "en"}
                     error={errors.year_of_manufacture}
                     requiredMsg={transInfo.locationRequired}
                   />
@@ -491,7 +548,7 @@ export default function CreateCaptainAccount({
                   }
                   value={selectedDate}
                   onChange={setSelectedDate}
-                  language={locale}
+                  language={locale === "ar" ? "ar" : "en"}
                 />
                 {dateTimeError && !selectedDate && (
                   <p className="text-red-500">{transInfo.locationRequired}</p>
@@ -504,7 +561,7 @@ export default function CreateCaptainAccount({
                   }
                   value={selectedTime}
                   onChange={(time) => setSelectedTime(time)}
-                  language={locale}
+                  language={locale === "ar" ? "ar" : "en"}
                 />
                 {dateTimeError && !selectedTime && (
                   <p className="text-red-500">{transInfo.locationRequired}</p>
@@ -589,7 +646,7 @@ export default function CreateCaptainAccount({
                     <DateInput
                       value={selectedDate}
                       onChange={setSelectedDate}
-                      language={locale}
+                      language={locale === "ar" ? "ar" : "en"}
                       inCreateCaptain={true}
                     />
                   </div>
@@ -597,7 +654,7 @@ export default function CreateCaptainAccount({
                     <TimeInput
                       value={selectedTime}
                       onChange={setSelectedTime}
-                      language={locale}
+                      language={locale === "ar" ? "ar" : "en"}
                       inCreateCaptain={true}
                     />
                   </div>

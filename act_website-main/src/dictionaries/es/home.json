@@ -1,0 +1,553 @@
+{
+  "navbar": {
+    "navLinks": [
+      {
+        "name": "Inicio",
+        "url": "/es",
+        "protected": false
+      },
+      {
+        "name": "Quiénes somos",
+        "url": "/es/about-us",
+        "protected": false
+      },
+      {
+        "name": "Contacto",
+        "url": "/es/about-us#contact-us",
+        "protected": false
+      },
+      {
+        "name": "Mis viajes",
+        "url": "/es/my-trips",
+        "protected": true
+      },
+      {
+        "name": "descargar aplicación",
+        "url": "/es/download-app",
+        "protected": false
+      },
+      {
+        "name": "Objetos perdidos",
+        "url": "/es/lost-property",
+        "protected": true
+      },
+      {
+        "name": "Reclamaciones",
+        "url": "/es/complaints",
+        "protected": true
+      }
+    ],
+    "languages": {
+      "English": "Inglés",
+      "Arabic": "Árabe"
+    },
+    "menuToggle": "Abrir/cerrar menú",
+    "auth": {
+      "login": "Iniciar sesión",
+      "logout": "Cerrar sesión",
+      "profile": "Perfil",
+      "deleteAccount": "Eliminar cuenta",
+      "changePassword": "Cambiar contraseña",
+      "logoutConfirmTitle": "Confirmar cierre de sesión",
+      "logoutConfirmMessage": "¿Seguro que desea cerrar sesión?",
+      "profileDescription": "Gestionar su cuenta",
+      "logoutDescription": "Salir de su cuenta",
+      "logoutSuccess": "Sesión cerrada correctamente",
+      "logoutError": "Error al cerrar sesión",
+      "loggingOut": "Cerrando sesión…",
+      "deleteAccountConfirmTitle": "Eliminar cuenta",
+      "deleteAccountConfirmMessage": "Esta acción no se puede deshacer. Introduzca su contraseña para eliminar permanentemente su cuenta.",
+      "passwordLabel": "Contraseña",
+      "passwordRequired": "La contraseña es obligatoria",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    }
+  },
+  "home": {
+    "Book_Taxi": {
+      "title": "Traslados al aeropuerto y por la ciudad sin complicaciones",
+      "subtitle": "Reserve en segundos y disfrute de comodidad, fiabilidad y tranquilidad desde la recogida hasta el destino.",
+      "fromAirport": "Desde el aeropuerto",
+      "toAirport": "Al aeropuerto",
+      "form": {
+        "PickUp_location": "Lugar de recogida",
+        "stop_ponit": "Parada intermedia",
+        "DropOff_location": "Lugar de destino",
+        "error": "La ubicación no es válida",
+        "date": "Fecha",
+        "time": "Hora",
+        "is_required": "Este campo es obligatorio.",
+        "button": "Obtener precio ahora",
+        "smallSuitcase": "Maleta pequeña",
+        "largeSuitcase": "Maleta grande",
+        "NumberOfPassenger": "Número de pasajeros",
+        "error_message": "No hemos podido calcular la ruta.",
+        "error_button": "Cerrar"
+      }
+    },
+    "Choose_car": {
+      "title": "Elegir vehículo",
+      "button": "Siguiente"
+    },
+    "Additional_Information": {
+      "title": "Información adicional",
+      "driverTitle": "Información adicional para su conductor",
+      "description": "Indique cualquier información importante para su viaje, como datos del vuelo, cambios de terminal, necesidades de equipaje, sillas infantiles, asistencia de movilidad, accesibilidad u otras solicitudes especiales.",
+      "back": "Atrás",
+      "continue": "Continuar"
+    },
+    "Confir_flight_details": {
+      "title": "Confirmar datos de la reserva",
+      "Distance": "Distancia",
+      "Trip": "Viaje",
+      "Car_type": "Tipo de vehículo",
+      "Cost": "Precio",
+      "airport_vat": "Cargos aeroportuarios",
+      "VAT": "Recargo comercial (20 %)",
+      "Edit": "Editar",
+      "details": "Detalles",
+      "Total_Cost": "Precio total",
+      "button": "Confirmar",
+      "cost_breakdown": "Desglose del precio",
+      "transfer_fare": "Tarifa del traslado",
+      "vat_20": "Recargo comercial (20 %)",
+      "airport_access_fee": "Tasa de acceso al aeropuerto",
+      "meet_and_greet": "Recepción con cartel",
+      "included": "Incluido",
+      "total_price": "Precio total"
+    },
+    "Payments_details": {
+      "title": "Datos de pago",
+      "subtitle": "Cancelación recibida al menos 3 horas antes de la recogida: reembolso completo. Dentro de las 3 horas anteriores o en caso de no presentación, pueden deducirse pérdidas razonables y acreditadas, limitadas al precio de la reserva y teniendo en cuenta los costes ahorrados o servicios de sustitución obtenidos. Lea los términos y condiciones antes de pagar.",
+      "form": {
+        "Card_Number": "Número de tarjeta",
+        "Expired_date": "Fecha de caducidad",
+        "check": {
+          "Agree": "Acepto",
+          "privacy_policy": "política de privacidad",
+          "terms_of_use": "condiciones de uso"
+        },
+        "button": "Reservar ahora"
+      }
+    },
+    "Booking_Confirmation": {
+      "title": "¡Reserva confirmada!",
+      "desc": {
+        "span_1": "Recibirá una confirmación por correo electrónico. Los datos del conductor se enviarán aproximadamente ",
+        "hour": " 2 ",
+        "hour_5": " 5 ",
+        "span_2": " horas antes del viaje."
+      },
+      "button": "Ver mis viajes",
+      "button_Back_to_home": "Volver al inicio"
+    }
+  },
+  "about_us": {
+    "about_us_title": "Quiénes somos:",
+    "ourStory": "Nuestra historia",
+    "customers": "Clientes satisfechos",
+    "rating": "Valoración",
+    "available": "Disponible",
+    "readyTitle": "¿Listo para reservar su próximo viaje?",
+    "readySubtitle": "Disfrute de la comodidad de nuestro servicio de transporte de alta calidad",
+    "company_description_1": {
+      "title": "Airport & City",
+      "titlespan": "Transfer",
+      "desc": "es una empresa de transporte privado con conductor con sede en Londres, especializada en traslados fiables al aeropuerto y por la ciudad. Nuestra misión es facilitar los viajes con profesionalidad, puntualidad y atención personalizada. Tanto si va al aeropuerto, vuelve a casa o cruza la ciudad, garantizamos una experiencia fluida de principio a fin."
+    },
+    "company_description_2": {
+      "desc1": "Contamos con licencia de",
+      "desc2": "Transport for London (TfL)",
+      "desc3": " y nos comprometemos con los más altos estándares de seguridad, cumplimiento y atención al cliente. Todos los conductores de nuestra red han superado controles DBS, están plenamente asegurados y reciben formación profesional que refleja la calidad de nuestra marca."
+    },
+    "company_description_3": "Nuestros sistemas avanzados de reservas y asignación permiten reservar con antelación, seguir los viajes y comunicarse fácilmente. Priorizamos la transparencia: nuestra estructura de precios clara evita sorpresas y ofrece un servicio sencillo y fiable.",
+    "company_description_4": "En Airport & City Transfer no solo ofrecemos un viaje: ofrecemos tranquilidad.",
+    "get_in_touch": {
+      "title": "Envíe un ",
+      "titlespan": "mensaje",
+      "subtitle": "¿Quiere disfrutar de un transporte de alta calidad? Contacte con nosotros hoy.",
+      "form": {
+        "FullName": "Nombre completo",
+        "mail": "Correo electrónico",
+        "Yourmessage": "Su mensaje",
+        "button": "Enviar mensaje"
+      }
+    },
+    "btns": {
+      "bookNow": "Reservar ahora",
+      "learnMore": "Más información",
+      "callUs": "Contacte con nosotros"
+    },
+    "whyUs": {
+      "title": "Por qué elegirnos",
+      "subtitle": "Descubra la diferencia con nuestro servicio de transporte de alta calidad",
+      "steps": [
+        {
+          "title": "La seguridad primero",
+          "desc": "Conductores profesionales y vehículos plenamente asegurados"
+        },
+        {
+          "title": "Servicio 24/7",
+          "desc": "Disponibles a cualquier hora para su comodidad"
+        },
+        {
+          "title": "Experiencia de alta calidad",
+          "desc": "Vehículos de lujo y servicio excepcional"
+        },
+        {
+          "title": "Cobertura en Londres",
+          "desc": "Cobertura completa en el Gran Londres"
+        }
+      ]
+    },
+    "booking_title": {
+      "span": "Reserva sencilla",
+      "title": "Reservar un ",
+      "titlespan": "viaje",
+      "subtitle": "Reserve su transporte de alta calidad en unos pocos clics. Disfrute del lujo, la fiabilidad y el servicio profesional."
+    },
+    "joinUs": {
+      "title": "Únase en segundos",
+      "subtitle": "Regístrese como pasajero o inscriba su vehículo PCO y empiece a ganar hoy.",
+      "passenger": "Pasajero",
+      "driver": "Conductor PCO"
+    },
+    "howToWork": [
+      {
+        "title": "Elegir ubicación",
+        "desc": "Seleccione los lugares de recogida y destino"
+      },
+      {
+        "title": "Elegir fecha y hora",
+        "desc": "Programe su viaje cuando le convenga"
+      },
+      {
+        "title": "Seleccionar vehículo",
+        "desc": "Elija entre nuestra flota de alta calidad"
+      },
+      {
+        "title": "Confirmar reserva",
+        "desc": "Pago seguro y confirmación inmediata"
+      }
+    ],
+    "services": {
+      "title": "Nuestros servicios",
+      "subtitle": "Descubra nuestras soluciones integrales de transporte, diseñadas para su comodidad"
+    },
+    "sections": [
+      {
+        "title": "¿Llega a una ciudad nueva como Londres?",
+        "text": "Llegar a una nueva ciudad puede ser emocionante, pero organizar el transporte puede resultar estresante. No se preocupe, nos encargamos nosotros."
+      },
+      {
+        "title": "Transporte privado con conductor: su mejor opción",
+        "text": "Olvídese de las largas colas de taxis y del transporte público confuso. Elija un traslado privado al aeropuerto para llegar a su destino de forma cómoda y sencilla."
+      },
+      {
+        "title": "Ventajas de reservar con antelación",
+        "text": "Reservar con Airport & City Transfer garantiza que un conductor le espere a su llegada. Sin regatear ni barreras lingüísticas: un viaje directo a su hotel o alojamiento."
+      },
+      {
+        "title": "Cómo funciona",
+        "text": "Visite nuestro sitio web y reserve su transporte privado antes de viajar. Indique los datos de su vuelo y su destino, y nosotros nos ocupamos del resto. No olvide suscribirse a nuestras promociones."
+      },
+      {
+        "title": "Viaje sin estrés",
+        "text": "Comience su viaje con tranquilidad gracias a nuestro servicio fiable y profesional. Nos ocupamos del traslado al aeropuerto para que usted pueda descubrir su nuevo entorno."
+      },
+      {
+        "title": "Reserve su viaje hoy",
+        "text": "Visite ahora nuestro sitio web ATG para reservar su traslado privado al aeropuerto. ¡Empiece bien su aventura!"
+      }
+    ]
+  },
+  "footer": {
+    "Our_Company": {
+      "title": "Nuestra empresa",
+      "Elements": [
+        {
+          "name": "Quiénes somos",
+          "href": "/es/about-us"
+        },
+        {
+          "name": "Reservar un viaje",
+          "href": "/es"
+        },
+        {
+          "name": "Aplicaciones",
+          "href": "/es/download-app"
+        }
+      ]
+    },
+    "Call_us": {
+      "title": "Datos de contacto",
+      "phone_numbers": {
+        "title": "Por teléfono: 📞",
+        "Elements": [
+          "+44 746 494 0000",
+          "+44 208 153 0303"
+        ]
+      },
+      "Email_us": {
+        "title": "Correo electrónico:",
+        "Elements": [
+          "Info@airportandcitytransfer.com"
+        ]
+      }
+    },
+    "Policies": {
+      "title": "Políticas",
+      "Elements": [
+        {
+          "name": "Aplicaciones",
+          "href": "/es/download-app"
+        }
+      ]
+    },
+    "location": {
+      "title": "Ubicación:",
+      "Elements": [
+        "ACT - 450 Bath Road Heathrow",
+        "Farhat Trading Solutions Ltd",
+        "Office 218",
+        "London",
+        "West Drayton",
+        "UB7 0EB"
+      ]
+    },
+    "logoAlt": "Logotipo de Airport & City Transfer",
+    "registeredCompany": "Empresa registrada: Farhat Trading Solutions Ltd",
+    "copyright": "Todos los derechos reservados © {year} Airport taxi Transfer Company"
+  },
+  "policy_and_terms": {
+    "policy": {
+      "Open_button": "Política de privacidad",
+      "title": "Política de privacidad – Airport & City Transfer",
+      "desc": "Airport & City Transfer («nosotros», «nuestro») se compromete a proteger su privacidad. Esta política explica cómo recopilamos, utilizamos, almacenamos y protegemos sus datos personales de conformidad con el Reglamento General de Protección de Datos del Reino Unido (UK GDPR) y la Ley de Protección de Datos de 2018.",
+      "elements": [
+        {
+          "title": "Información que recopilamos:",
+          "subDesc": [
+            "Datos de contacto: nombre, teléfono y correo electrónico",
+            "Datos de la reserva: lugares de recogida y destino, fechas y horas",
+            "Datos de pago: procesados de forma segura por proveedores externos",
+            "Información de conductores y vehículos: para cumplir los requisitos normativos",
+            "Comentarios e información sobre reclamaciones"
+          ]
+        },
+        {
+          "title": "Cómo utilizamos sus datos:",
+          "subDesc": [
+            "Para gestionar reservas y prestar servicios de transporte",
+            "Para comunicarnos con clientes y conductores",
+            "Para mantener registros internos y cumplir las obligaciones legales",
+            "Para responder a consultas, comentarios o reclamaciones",
+            "Para cumplir los requisitos de información de Transport for London (TfL)"
+          ]
+        },
+        {
+          "title": "Base jurídica del tratamiento:",
+          "desc": "Recopilamos y tratamos datos personales sobre la base de la ejecución de un contrato, una obligación legal o un interés legítimo. Solicitamos el consentimiento cuando es necesario."
+        },
+        {
+          "title": "Comunicación de sus datos:",
+          "desc": "Solo compartimos datos cuando es necesario:",
+          "subDesc": [
+            "Con TfL u otros organismos reguladores cuando lo exige la ley",
+            "Con proveedores externos (por ejemplo, procesadores de pagos) bajo estrictas obligaciones de confidencialidad"
+          ],
+          "descEnd": "Nunca vendemos sus datos a terceros."
+        },
+        {
+          "title": "Conservación de datos:",
+          "desc": "Los datos personales se conservan únicamente durante el tiempo necesario para cumplir las obligaciones legales, operativas o financieras. Cuando dejan de ser necesarios, se eliminan de forma segura o se anonimizan."
+        },
+        {
+          "title": "Sus derechos:",
+          "desc": "Tiene derecho a acceder a sus datos personales, rectificarlos, suprimirlos u oponerse a su tratamiento. Puede dirigir sus solicitudes por escrito a nuestro delegado de protección de datos."
+        },
+        {
+          "title": "Medidas de seguridad:",
+          "desc": "Utilizamos sistemas cifrados, almacenamiento seguro y controles de acceso para proteger sus datos. Nuestro personal y nuestros conductores reciben formación en protección de datos."
+        }
+      ],
+      "warning": "Lea detenidamente la política de privacidad y las condiciones de uso antes de continuar. El uso de nuestros servicios implica su plena aceptación.",
+      "button": "Listo"
+    },
+    "terms": {
+      "Open_button": "Términos y condiciones",
+      "title": "Términos y condiciones – Airport & City Transfer",
+      "elements": [
+        {
+          "title": "Reservas y confirmaciones",
+          "desc": "Todas las reservas deben realizarse a través de nuestra aplicación, sitio web, teléfono o colaboradores autorizados. La confirmación se facilita electrónicamente. El cliente es responsable de comprobar que todos los datos de la reserva sean correctos."
+        },
+        {
+          "title": "Pagos y cargos",
+          "desc": "Todos los precios se indican en GBP (£). Pueden aplicarse cargos adicionales por paradas extra, tiempo de espera o servicios fuera del horario habitual. El pago debe efectuarse al reservar, salvo acuerdo en contrario."
+        },
+        {
+          "title": "Cancelación con al menos 3 horas de antelación",
+          "desc": "Si ACT recibe su cancelación al menos 3 horas antes de la hora de recogida confirmada, incluidas exactamente 3 horas antes, recibirá un reembolso completo."
+        },
+        {
+          "title": "Cancelación dentro de las 3 horas anteriores",
+          "desc": "ACT podrá deducir las pérdidas razonables y acreditadas causadas directamente por su cancelación, hasta el precio de la reserva. Tomamos medidas razonables para reducir esas pérdidas y tenemos en cuenta los costes ahorrados o los servicios de sustitución obtenidos. Se reembolsará cualquier saldo restante."
+        },
+        {
+          "title": "No presentación del pasajero",
+          "desc": "Solo se considera una no presentación una vez transcurrido el tiempo de espera acordado y tras intentos documentados de contactar con el pasajero. Toda deducción sigue la misma regla basada en pérdidas que una cancelación dentro de las 3 horas anteriores y está limitada al precio de la reserva."
+        },
+        {
+          "title": "Tiempos de espera",
+          "desc": "El tiempo de espera es de 15 minutos para recogidas ordinarias y de 60 minutos para recogidas en aeropuertos, contados desde la hora de recogida acordada. Cualquier cargo por espera adicional debe comunicarse y acordarse."
+        },
+        {
+          "title": "Si ACT no puede realizar el trayecto",
+          "desc": "Le ofrecemos una alternativa para que la acepte o el reembolso completo del trayecto que no pueda realizarse."
+        },
+        {
+          "title": "Retrasos o cancelaciones de vuelos",
+          "desc": "Contacte con ACT ante cualquier cambio en su vuelo. Revisaremos y acordaremos nuevas condiciones de recogida. Un retraso de vuelo conocido no se considera automáticamente una no presentación del pasajero."
+        },
+        {
+          "title": "Modificaciones de la reserva",
+          "desc": "Los cambios están sujetos a disponibilidad. Cualquier precio revisado se comunica antes de que usted acepte el cambio."
+        },
+        {
+          "title": "Tramitación de reembolsos",
+          "desc": "Iniciamos los reembolsos al método de pago original en un plazo de 5 días laborables desde la confirmación del importe a reembolsar. Su banco o proveedor de pagos puede tardar más en abonar los fondos."
+        },
+        {
+          "title": "Cómo cancelar o modificar una reserva",
+          "desc": "Envíe un correo a info@airportandcitytransfer.com con su referencia de reserva. Para cambios urgentes, llame también al +44 208 153 0303. El plazo de cancelación se calcula desde que ACT recibe el aviso, respecto de la hora de recogida confirmada, y no desde la respuesta del personal."
+        },
+        {
+          "title": "Conductores y vehículos autorizados por TfL",
+          "desc": "Todos los trayectos los realizan exclusivamente conductores y vehículos con licencia de Transport for London. Realizamos comprobaciones periódicas para garantizar el cumplimiento."
+        },
+        {
+          "title": "Seguridad y conducta",
+          "desc": "Todos los conductores han superado controles DBS y siguen nuestro código de conducta. Se espera que los pasajeros se comporten con respeto y cumplan las normas de seguridad del Reino Unido."
+        },
+        {
+          "title": "Objetos perdidos",
+          "desc": "Los objetos olvidados en los vehículos se registran y se conservan hasta 6 semanas. Los clientes pueden contactarnos para acordar su recuperación. Los objetos no reclamados se desechan de forma segura o se donan."
+        },
+        {
+          "title": "Procedimiento de reclamaciones",
+          "desc": "Las reclamaciones pueden presentarse a través de nuestro sitio web, por teléfono o por correo electrónico. Un responsable de cumplimiento las investiga y responde en un plazo de 5 días laborables. Los asuntos pertinentes se comunican a TfL cuando corresponde."
+        },
+        {
+          "title": "Responsabilidad",
+          "desc": "Airport & City Transfer no se responsabiliza de retrasos debidos a circunstancias imprevistas, como el tráfico o el clima. Nuestra responsabilidad se limita al precio del trayecto pagado."
+        },
+        {
+          "title": "Protección de datos",
+          "desc": "Cumplimos todos los requisitos del UK GDPR. Consulte nuestra política de privacidad para obtener información completa."
+        },
+        {
+          "title": "Legislación aplicable",
+          "desc": "Estas condiciones se rigen por las leyes de Inglaterra y Gales."
+        }
+      ],
+      "warning": "Lea detenidamente la política de privacidad y las condiciones de uso antes de continuar. El uso de nuestros servicios implica su plena aceptación.",
+      "button": "Listo"
+    }
+  },
+  "faqs": {
+    "Open_button": "Preguntas frecuentes",
+    "title": "Preguntas frecuentes – Airport & City Transfer",
+    "elements": [
+      {
+        "question": "¿Cómo reservo un taxi con Airport & City Transfer?",
+        "answer": "Puede reservar en nuestro sitio web, mediante nuestra aplicación móvil o llamando a nuestra línea de reservas. Todas las reservas se confirman por correo electrónico o SMS."
+      },
+      {
+        "question": "¿Puedo reservar un taxi con antelación?",
+        "answer": "Sí. Aceptamos reservas con hasta varias semanas de antelación para que su traslado quede planificado y garantizado."
+      },
+      {
+        "question": "¿Cómo sabré que ha llegado mi conductor?",
+        "answer": "Recibirá una notificación cuando el conductor esté en camino y otra cuando haya llegado. La notificación incluirá los datos del conductor y del vehículo."
+      },
+      {
+        "question": "¿Qué ocurre si mi vuelo se retrasa?",
+        "answer": "Contacte con ACT si su vuelo se retrasa o se cancela para que podamos revisar y acordar nuevas condiciones de recogida. Un retraso de vuelo conocido no se considera automáticamente una no presentación del pasajero."
+      },
+      {
+        "question": "¿Sus conductores tienen licencia y controles DBS?",
+        "answer": "Sí. Todos nuestros conductores tienen licencia de Transport for London (TfL) y han superado controles DBS ampliados para su seguridad."
+      },
+      {
+        "question": "¿Puedo cancelar o cambiar mi reserva?",
+        "answer": "Sí. Si ACT recibe su cancelación al menos 3 horas antes de la hora de recogida confirmada, recibirá un reembolso completo. Dentro de las 3 horas anteriores, pueden deducirse pérdidas razonables y acreditadas derivadas de la cancelación, limitadas al precio de la reserva y reducidas por los costes ahorrados o los servicios de sustitución obtenidos. Los cambios dependen de la disponibilidad; todo precio revisado requiere su aceptación. Envíe su referencia de reserva a info@airportandcitytransfer.com y llame al +44 208 153 0303 para cambios urgentes. Consulte nuestros términos y condiciones para los detalles sobre espera, no presentación y tramitación de reembolsos."
+      },
+      {
+        "question": "¿Qué hago si he olvidado algo en el vehículo?",
+        "answer": "Contacte con nuestro equipo lo antes posible. Los objetos perdidos se registran, se guardan de forma segura hasta 6 semanas y pueden recogerse o devolverse mediante acuerdo."
+      },
+      {
+        "question": "¿Ofrecen sillas infantiles o vehículos accesibles?",
+        "answer": "Sí. Solicítelos al realizar la reserva y haremos todo lo posible por atender sus necesidades."
+      },
+      {
+        "question": "¿Cómo presento una reclamación?",
+        "answer": "Puede presentar una reclamación a través de nuestro sitio web o por correo electrónico. Nuestro responsable de cumplimiento y experiencia del cliente gestiona todas las reclamaciones y responde en un plazo de 5 días laborables."
+      },
+      {
+        "question": "¿Están seguros mis datos personales?",
+        "answer": "Sí. Cumplimos plenamente el RGPD y utilizamos sistemas cifrados para almacenar y proteger sus datos. Consulte nuestra política de privacidad para más información."
+      }
+    ],
+    "warning": "Lea detenidamente estas preguntas frecuentes. El uso de nuestros servicios implica que acepta la información facilitada.",
+    "button": "Listo"
+  },
+  "download_app": {
+    "title": "Descargar nuestras aplicaciones",
+    "subtitle": "Obtenga las aplicaciones oficiales de Airport & City Transfer",
+    "downloading": "Descargando…",
+    "driver": {
+      "title": "Aplicación para conductores",
+      "subtitle": "Obtenga la aplicación oficial de Airport & City Transfer para conductores y gestione sus viajes e ingresos",
+      "description": "Descargue e instale la aplicación para aceptar viajes, consultar sus ingresos y gestionar su cuenta de conductor.",
+      "downloadButton": "Descargar APK para conductores",
+      "logoAlt": "Aplicación para conductores",
+      "instructions": {
+        "title": "Instrucciones de instalación",
+        "downloadButton": "Descargar instrucciones",
+        "downloadFileName": "driver-instructions.pdf",
+        "step1": "Descargue el archivo APK en su dispositivo Android",
+        "step2": "Active la instalación desde orígenes desconocidos en los ajustes del dispositivo",
+        "step3": "Abra el archivo APK descargado y siga las instrucciones de instalación",
+        "step4": "Abra la aplicación e inicie sesión con sus credenciales de conductor"
+      },
+      "note": "Nota: esta aplicación es solo para dispositivos Android. Compruebe que dispone de suficiente espacio antes de descargarla."
+    },
+    "passenger": {
+      "title": "Aplicación para pasajeros",
+      "subtitle": "Obtenga la aplicación oficial de Airport & City Transfer para pasajeros y reserve y gestione sus viajes",
+      "description": "Descargue e instale la aplicación para reservar viajes, seguirlos y gestionar su cuenta de pasajero.",
+      "downloadButton": "Descargar APK para pasajeros",
+      "logoAlt": "Aplicación para pasajeros",
+      "instructions": {
+        "title": "Instrucciones de instalación",
+        "downloadButton": "Descargar instrucciones",
+        "downloadFileName": "passenger-instructions.pdf",
+        "step1": "Descargue el archivo APK en su dispositivo Android",
+        "step2": "Active la instalación desde orígenes desconocidos en los ajustes del dispositivo",
+        "step3": "Abra el archivo APK descargado y siga las instrucciones de instalación",
+        "step4": "Abra la aplicación e inicie sesión con sus credenciales de pasajero"
+      },
+      "note": "Nota: esta aplicación es solo para dispositivos Android. Compruebe que dispone de suficiente espacio antes de descargarla."
+    }
+  },
+  "errorPage": {
+    "code": "404",
+    "title": "Página no encontrada",
+    "description": "No hemos encontrado la página que busca. Es posible que se haya movido, eliminado o que no exista.",
+    "goHome": "Ir al inicio",
+    "goBack": "Volver",
+    "helpText": "Si cree que se trata de un error, contacte con nuestro equipo de asistencia."
+  }
+}

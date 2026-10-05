@@ -527,6 +527,7 @@ class TripsReportingView(EMADBaseView):
                 },
                 'car_type': {
                     'id': trip.car_type.id,
+                    'code': trip.car_type.code,
                     'name': trip.car_type.name_en,
                 } if trip.car_type else None,
                 'cost': float(trip.cost) if trip.cost else 0,

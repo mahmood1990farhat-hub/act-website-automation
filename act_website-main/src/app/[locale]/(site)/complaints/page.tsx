@@ -9,7 +9,8 @@ type PageProps = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
-  return getPublicPageSeo(locale, "complaints")
+  const copy = await getTrans(locale, "complaints");
+  return getPublicPageSeo(locale, "complaints", {title: copy.title + " | Airport & City Transfer", description: copy.subtitle});
 }
 
 export default async function ComplaintsPage({params}: PageProps) {
@@ -27,4 +28,5 @@ export default async function ComplaintsPage({params}: PageProps) {
     </div>
   )
 }
+
 

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="{{ locale }}" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} – Airport &amp; City Transfer</title>
+<style>
+{% if locale == "zh-CN" and font_uri %}
+@font-face {font-family: "ACT Customer CJK";src:url("{{ font_uri }}");}
+{% endif %}
+@page { size: A4; margin: 16mm; }
+body { font-family: "ACT Customer CJK", "DejaVu Sans", "Noto Sans CJK SC", Arial, sans-serif; color: #142b3e; background: #fff; margin: 0; line-height: 1.35; font-size: 11px; }
+main { max-width: 650px; margin: auto; padding: 14px; }
+h1 { font-size: 22px; margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: 3px 9px; border-bottom: 1px solid #ddd; text-align: left; overflow-wrap: anywhere; }
+th { width: 34%; background: #f4f6f8; }
+tr { break-inside: avoid; }
+a { color: #164d78; }
+</style>
+</head>
+<body dir="ltr" style="direction:ltr;text-align:left;font-family:'ACT Customer CJK','DejaVu Sans','Noto Sans CJK SC',Arial,sans-serif">
+<main>
+{% if logo_uri %}<p style="text-align:left;margin:0 0 8px"><img src="{{ logo_uri }}" alt="Airport &amp; City Transfer" style="width:180px;height:auto" /></p>
+{% else %}<p><strong>Airport &amp; City Transfer</strong></p>{% endif %}
+<h1>{{ title }}</h1>
+<p>{{ intro }}</p>
+{% if refund_message %}<p>{{ refund_message }}</p>{% endif %}
+<table role="presentation" dir="ltr">
+{% for label, value in rows %}<tr><th>{{ label }}</th><td><bdi>{{ value }}</bdi></td></tr>{% endfor %}
+</table>
+{% if driver_pco_url %}<p><a href="{{ driver_pco_url }}">{{ labels.license_link }}</a></p>{% endif %}
+{% if download_url %}<p><a href="{{ download_url }}">{{ labels.download_link }}</a></p>{% endif %}
+<div style="break-inside:avoid"><p>{{ contact }}</p>
+<p><a href="{{ website_url }}">{{ labels.website_link }}</a></p></div>
+</main>
+</body>
+</html>

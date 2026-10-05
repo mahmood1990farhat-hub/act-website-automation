@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import SelectLanguage from "../header/SelectLanguage";
-import { Locale } from "../../../../i18n.config";
+import { Locale, localizedPath } from "../../../../i18n.config";
 import { IoMenu, IoClose } from "react-icons/io5";
 import Link from "next/link";
 import Image from "next/image";
@@ -95,11 +95,6 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
     return true;
   });
 
-  const handleLanguageSwitch = () => {
-    const newLocale = locale === "en" ? "ar" : "en";
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-    router.push(newPathname);
-  };
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
@@ -140,15 +135,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
     }
   };
 
-  // Normalize URL to use current locale
-  const normalizeUrl = (url: string) => {
-    // If URL is just "/en" or "/ar", replace with current locale
-    if (url === "/en" || url === "/ar") {
-      return `/${locale}`;
-    }
-    // Replace any locale prefix (/en or /ar) with current locale
-    return url.replace(/^\/(en|ar)/, `/${locale}`);
-  };
+  const normalizeUrl = (url: string) => localizedPath(url, locale);
 
   return (
     <div className="relative" dir={locale === "ar" ? "rtl" : "ltr"}>
@@ -207,20 +194,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
           </ul>
         </nav>
         <div className="flex items-center gap-6">
-          {/* <div className="w-fit">
-            <SelectLanguage locale={locale} language={navbar.languages} />
-          </div> */}
-
-          <button
-              onClick={handleLanguageSwitch}
-              className="group flex items-center gap-2 px-4 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary/80 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-200 font-medium"
-            >
-              <TbWorld className="text-lg transition-transform duration-200 group-hover:scale-110" />
-              <span className="text-sm">
-                {locale === "en" ? navbar.languages?.Arabic || "AR" : navbar.languages?.English || "EN"}
-              </span>
-            </button>
-
+          <SelectLanguage locale={locale} language={navbar.languages} />
 
          {isLoggedIn && authState.accountType === "passenger" ? (
             <PassengerAccountMenu
@@ -316,7 +290,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
                 disabled={isLoggingOut}
                 className="group flex items-center justify-center gap-3 px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg border border-red-500/30 hover:border-red-500/50 transition-all duration-200 font-medium disabled:opacity-50"
               >
-                {isLoggingOut ? "Logging out..." : navbar?.auth?.logout}
+                {isLoggingOut ? navbar?.auth?.loggingOut : navbar?.auth?.logout}
               </button>
             ) : (
               <Link
@@ -340,7 +314,7 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
           <div className="relative w-full h-[70px] md:me-auto">
             <Image
               src="/images/logo-witn-text.png"
-              alt="landing_image"
+              alt="Airport & City Transfer"
               fill
               className="object-contain"
               quality={100}
@@ -352,3 +326,4 @@ export default function Header({ navbar, locale ,token }: tpyeProps) {
     </div>
   );
 }
+

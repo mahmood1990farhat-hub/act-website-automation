@@ -77,10 +77,14 @@ export default function TripsDashboard({
 	const [ordering, setOrdering] = useState("-created_at");
 	const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
 	const [showAssignGuestModal, setShowAssignGuestModal] = useState(false);
+	const [showAssignActDriverModal, setShowAssignActDriverModal] = useState(false);
+	const [selectedActDriverId, setSelectedActDriverId] = useState("");
 	const [guestDriverForm, setGuestDriverForm] = useState<{
 		name: string;
 		phone: string;
 		company: string;
+		licence_number: string;
+		photo_url: string;
 		car_info: {
 			brand: string;
 			model: string;
@@ -93,6 +97,8 @@ export default function TripsDashboard({
 		name: "",
 		phone: "",
 		company: "",
+		licence_number: "",
+		photo_url: "",
 		car_info: {
 			brand: "",
 			model: "",
@@ -161,6 +167,43 @@ export default function TripsDashboard({
 		},
 	});
 
+	const { data: actDrivers, isLoading: actDriversLoading } = useQuery<any>({
+		queryKey: ["act assignment drivers", detailsTrips?.car_type],
+		queryFn: () =>
+			fetchData({
+				endpoint: "/api/admin-panel/normal-drivers/",
+				token,
+				queryParams: { is_active: "true", page_size: "100" },
+			}),
+		enabled: showAssignActDriverModal,
+	});
+
+	const compatibleActDrivers = (actDrivers?.data?.drivers || []).filter(
+		(driver: any) =>
+			driver?.vehicle?.vehicle_type?.id ===
+			(detailsTrips?.car_type || detailsTrips?.vehicle_info?.id),
+	);
+
+	const assignActDriverMutation = useMutation({
+		mutationFn: async () => {
+			if (!detailsTrips?.id || !selectedActDriverId) {
+				throw new Error("Trip and driver are required");
+			}
+			return postData<any>({
+				endpoint: `/api/admin-panel/trips/${detailsTrips.id}/assign-driver/`,
+				token,
+				body: { driver_id: Number(selectedActDriverId) },
+				noToast: false,
+			});
+		},
+		onSuccess: (response) => {
+			if (response?.data) setDetailsTrips(response.data);
+			setShowAssignActDriverModal(false);
+			setSelectedActDriverId("");
+			queryClient.invalidateQueries({ queryKey: ["my Trips driver"] });
+		},
+	});
+
 	const assignGuestDriverMutation = useMutation({
 		mutationFn: async () => {
 			if (!detailsTrips?.id) {
@@ -182,6 +225,8 @@ export default function TripsDashboard({
 			const body: any = {
 				guest_driver_name: guestDriverForm.name,
 				guest_driver_phone: guestDriverForm.phone,
+				guest_driver_licence_number: guestDriverForm.licence_number,
+				guest_driver_photo_url: guestDriverForm.photo_url,
 			};
 
 			if (guestDriverForm.company.trim()) {
@@ -1265,30 +1310,42 @@ export default function TripsDashboard({
 								{(detailsTrips?.status === "pending" ||
 									detailsTrips?.cancelled_by_driver) &&
 									!detailsTrips?.is_guest_driver && (
-										<Button
-											type="button"
-											onClick={() => {
-												setGuestDriverForm({
-													name: "",
-													phone: "",
-													company: "",
-													car_info: {
-														brand: "",
-														model: "",
-														color: "",
-														registration_number: "",
-														year: "",
-														additional_notes: "",
-													},
-												});
-												setShowAssignGuestModal(true);
-											}}
-											className="w-full sm:flex-1 font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30"
-										>
-											{trans?.trips?.assignToNewDriver ||
-												trans?.trips?.assignGuestDriver ||
-												"Assign to new driver"}
-										</Button>
+										<>
+											<Button
+												type="button"
+												onClick={() => {
+													setSelectedActDriverId("");
+													setShowAssignActDriverModal(true);
+												}}
+												className="w-full sm:flex-1 font-semibold bg-yellow-500 hover:bg-yellow-600 text-black shadow-lg shadow-yellow-500/30"
+											>
+												{trans?.trips?.assignActDriver || "Assign ACT driver"}
+											</Button>
+											<Button
+												type="button"
+												onClick={() => {
+													setGuestDriverForm({
+														name: "",
+														phone: "",
+														company: "",
+														licence_number: "",
+														photo_url: "",
+														car_info: {
+															brand: "",
+															model: "",
+															color: "",
+															registration_number: "",
+															year: "",
+															additional_notes: "",
+														},
+													});
+													setShowAssignGuestModal(true);
+												}}
+												className="w-full sm:flex-1 font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30"
+											>
+												{trans?.trips?.assignGuestDriver || "Assign external driver"}
+											</Button>
+										</>
 									)}
 							</div>
 						</div>
@@ -1340,6 +1397,66 @@ export default function TripsDashboard({
 				</div>
 			</GlobalModal>
 
+			{/* Assign registered ACT Driver Modal */}
+			<GlobalModal
+				isOpen={showAssignActDriverModal}
+				onClose={() => {
+					if (!assignActDriverMutation.isPending) {
+						setShowAssignActDriverModal(false);
+						setSelectedActDriverId("");
+					}
+				}}
+			>
+				<div className="p-4 sm:p-6 w-full max-w-lg">
+					<h2 className="text-xl font-bold text-foreground mb-2">
+						{trans?.trips?.assignActDriver || "Assign ACT driver"}
+					</h2>
+					<p className="text-sm text-muted-foreground mb-4">
+						The driver will receive this booking as pending and must accept it before passenger driver details are confirmed.
+					</p>
+					{actDriversLoading ? (
+						<p className="text-sm text-muted-foreground">Loading compatible drivers...</p>
+					) : compatibleActDrivers.length === 0 ? (
+						<p className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-foreground">
+							No active approved ACT driver with the required vehicle class is available.
+						</p>
+					) : (
+						<select
+							value={selectedActDriverId}
+							onChange={(event) => setSelectedActDriverId(event.target.value)}
+							className="w-full rounded-lg border-2 border-border bg-background p-3 text-foreground"
+						>
+							<option value="">Select a compatible driver</option>
+							{compatibleActDrivers.map((driver: any) => (
+								<option key={driver.driver.id} value={driver.driver.id}>
+									{[driver.driver.user.first_name, driver.driver.user.last_name].filter(Boolean).join(" ") || driver.driver.user.email}
+									{" — "}{driver.vehicle?.vehicle_number || "Vehicle"} ({driver.vehicle?.vehicle_type?.name_en || "Class"})
+								</option>
+							))}
+						</select>
+					)}
+					<div className="mt-5 flex gap-3">
+						<Button
+							type="button"
+							variant="secondary"
+							className="flex-1"
+							onClick={() => setShowAssignActDriverModal(false)}
+							disabled={assignActDriverMutation.isPending}
+						>
+							Cancel
+						</Button>
+						<Button
+							type="button"
+							className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+							onClick={() => assignActDriverMutation.mutate()}
+							disabled={!selectedActDriverId || assignActDriverMutation.isPending}
+						>
+							{assignActDriverMutation.isPending ? "Assigning..." : "Assign driver"}
+						</Button>
+					</div>
+				</div>
+			</GlobalModal>
+
 			{/* Assign Guest Driver Modal */}
 			<GlobalModal
 				isOpen={showAssignGuestModal}
@@ -1349,6 +1466,8 @@ export default function TripsDashboard({
 							name: "",
 							phone: "",
 							company: "",
+							licence_number: "",
+							photo_url: "",
 							car_info: {
 								brand: "",
 								model: "",
@@ -1375,11 +1494,17 @@ export default function TripsDashboard({
 							e.preventDefault();
 							if (
 								!guestDriverForm.name.trim() ||
-								!guestDriverForm.phone.trim()
+								!guestDriverForm.phone.trim() ||
+								!guestDriverForm.licence_number.trim() ||
+								!guestDriverForm.photo_url.trim() ||
+								!guestDriverForm.car_info.brand.trim() ||
+								!guestDriverForm.car_info.model.trim() ||
+								!guestDriverForm.car_info.color.trim() ||
+								!guestDriverForm.car_info.registration_number.trim()
 							) {
 								toast.error(
 									trans?.trips?.assignGuestValidation ||
-										"Name and phone are required",
+										"Driver name, phone, TfL licence number, photo URL, vehicle make/model/colour and registration are required",
 								);
 								return;
 							}
@@ -1461,11 +1586,35 @@ export default function TripsDashboard({
 								}
 							/>
 						</div>
+						<div>
+							<label className="block text-sm font-medium text-foreground mb-1">
+								TfL PHV driver licence number <span className="text-red-500">*</span>
+							</label>
+							<input
+								type="text"
+								value={guestDriverForm.licence_number}
+								onChange={(e) => setGuestDriverForm((prev) => ({ ...prev, licence_number: e.target.value }))}
+								className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground"
+								placeholder="TfL PHV driver licence number"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-foreground mb-1">
+								Passenger-visible driver photo URL <span className="text-red-500">*</span>
+							</label>
+							<input
+								type="url"
+								value={guestDriverForm.photo_url}
+								onChange={(e) => setGuestDriverForm((prev) => ({ ...prev, photo_url: e.target.value }))}
+								className="w-full p-3 border-2 border-border rounded-lg bg-background text-foreground"
+								placeholder="https://..."
+							/>
+						</div>
 
 						{/* Car Information Section */}
 						<div className="pt-4 border-t border-border">
 							<h3 className="text-base font-semibold text-foreground mb-3">
-								{trans?.trips?.carInfoTitle || "Car Information (Optional)"}
+								{trans?.trips?.carInfoTitle || "Vehicle Information"}
 							</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
