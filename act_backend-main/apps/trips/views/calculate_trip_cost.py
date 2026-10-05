@@ -4,6 +4,7 @@ from utils.EMDBase import EMADBaseView
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from apps.vehicle.models import VehicleType
+from apps.vehicle.catalog import luggage_patterns_for_vehicle, vehicle_accepts_luggage
 from django.utils.translation import gettext as _ , activate
 from ..serializers import TripSerializer 
 from utils.common import get_locale , remove_empty_values , is_past_datetime , get_route_with_distance , validate_int_value
@@ -75,6 +76,8 @@ class CalculateTripCostView(EMADBaseView):
         trip_time_obj = validated_data.get('trip_time')
         trip_date = validated_data.get('trip_date')
         passengers_count = validated_data.get('passengers_count')
+        large_suitcases = validated_data.get('large_suitcase', 0)
+        small_suitcases = validated_data.get('small_suitcase', 0)
         booking_details = request.data.get('booking_details') or {}
 
         car_types_qs = VehicleType.objects.filter(max_passengers_count__gte=passengers_count)
@@ -84,6 +87,13 @@ class CalculateTripCostView(EMADBaseView):
         distance_too_long = False
         
         for car_type_obj in car_types_qs:
+            if not vehicle_accepts_luggage(
+                car_type_obj.code,
+                large_suitcases,
+                small_suitcases,
+            ):
+                continue
+
             vehicle_debug = {
                 "vehicle_type_id": car_type_obj.id,
                 "vehicle_name": car_type_obj.name_en,
@@ -124,6 +134,7 @@ class CalculateTripCostView(EMADBaseView):
                     "desc_ar": car_type_obj.desc_ar,
                     "icon_url": request.build_absolute_uri(car_type_obj.icon.url) if car_type_obj.icon else None,
                     "max_passengers_count": car_type_obj.max_passengers_count,
+                    "luggage_patterns": [list(pattern) for pattern in luggage_patterns_for_vehicle(car_type_obj.code)],
                     "total_cost": total_cost,
                     'regular_vat': regular_vat,
                     'airport_vat': airport_vat,
