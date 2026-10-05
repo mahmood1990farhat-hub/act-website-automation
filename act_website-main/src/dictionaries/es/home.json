@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Datos de pago",
-      "subtitle": "Cancelación recibida al menos 24 horas antes de la recogida: reembolso completo. Dentro de las 24 horas anteriores o en caso de no presentación, pueden deducirse pérdidas razonables y acreditadas, limitadas al precio de la reserva y teniendo en cuenta los costes ahorrados o servicios de sustitución obtenidos. Lea los términos y condiciones antes de pagar.",
+      "subtitle": "Cancelación recibida al menos 3 horas antes de la recogida: reembolso completo. Dentro de las 3 horas anteriores o en caso de no presentación, pueden deducirse pérdidas razonables y acreditadas, limitadas al precio de la reserva y teniendo en cuenta los costes ahorrados o servicios de sustitución obtenidos. Lea los términos y condiciones antes de pagar.",
       "form": {
         "Card_Number": "Número de tarjeta",
         "Expired_date": "Fecha de caducidad",
@@ -387,16 +387,16 @@
           "desc": "Todos los precios se indican en GBP (£). Pueden aplicarse cargos adicionales por paradas extra, tiempo de espera o servicios fuera del horario habitual. El pago debe efectuarse al reservar, salvo acuerdo en contrario."
         },
         {
-          "title": "Cancelación con al menos 24 horas de antelación",
-          "desc": "Si ACT recibe su cancelación al menos 24 horas antes de la hora de recogida confirmada, incluidas exactamente 24 horas antes, recibirá un reembolso completo."
+          "title": "Cancelación con al menos 3 horas de antelación",
+          "desc": "Si ACT recibe su cancelación al menos 3 horas antes de la hora de recogida confirmada, incluidas exactamente 3 horas antes, recibirá un reembolso completo."
         },
         {
-          "title": "Cancelación dentro de las 24 horas anteriores",
+          "title": "Cancelación dentro de las 3 horas anteriores",
           "desc": "ACT podrá deducir las pérdidas razonables y acreditadas causadas directamente por su cancelación, hasta el precio de la reserva. Tomamos medidas razonables para reducir esas pérdidas y tenemos en cuenta los costes ahorrados o los servicios de sustitución obtenidos. Se reembolsará cualquier saldo restante."
         },
         {
           "title": "No presentación del pasajero",
-          "desc": "Solo se considera una no presentación una vez transcurrido el tiempo de espera acordado y tras intentos documentados de contactar con el pasajero. Toda deducción sigue la misma regla basada en pérdidas que una cancelación dentro de las 24 horas anteriores y está limitada al precio de la reserva."
+          "desc": "Solo se considera una no presentación una vez transcurrido el tiempo de espera acordado y tras intentos documentados de contactar con el pasajero. Toda deducción sigue la misma regla basada en pérdidas que una cancelación dentro de las 3 horas anteriores y está limitada al precio de la reserva."
         },
         {
           "title": "Tiempos de espera",
@@ -481,7 +481,7 @@
       },
       {
         "question": "¿Puedo cancelar o cambiar mi reserva?",
-        "answer": "Sí. Si ACT recibe su cancelación al menos 24 horas antes de la hora de recogida confirmada, recibirá un reembolso completo. Dentro de las 24 horas anteriores, pueden deducirse pérdidas razonables y acreditadas derivadas de la cancelación, limitadas al precio de la reserva y reducidas por los costes ahorrados o los servicios de sustitución obtenidos. Los cambios dependen de la disponibilidad; todo precio revisado requiere su aceptación. Envíe su referencia de reserva a info@airportandcitytransfer.com y llame al +44 208 153 0303 para cambios urgentes. Consulte nuestros términos y condiciones para los detalles sobre espera, no presentación y tramitación de reembolsos."
+        "answer": "Sí. Si ACT recibe su cancelación al menos 3 horas antes de la hora de recogida confirmada, recibirá un reembolso completo. Dentro de las 3 horas anteriores, pueden deducirse pérdidas razonables y acreditadas derivadas de la cancelación, limitadas al precio de la reserva y reducidas por los costes ahorrados o los servicios de sustitución obtenidos. Los cambios dependen de la disponibilidad; todo precio revisado requiere su aceptación. Envíe su referencia de reserva a info@airportandcitytransfer.com y llame al +44 208 153 0303 para cambios urgentes. Consulte nuestros términos y condiciones para los detalles sobre espera, no presentación y tramitación de reembolsos."
       },
       {
         "question": "¿Qué hago si he olvidado algo en el vehículo?",
