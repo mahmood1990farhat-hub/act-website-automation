@@ -194,6 +194,7 @@ class InitiatePaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             metadata=payment_metadata,
             idempotency_key=idempotency_key
         )
@@ -380,6 +381,7 @@ class InitiateGuestPaymentView(EMADBaseView):
         payment_intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency="gbp",
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             metadata=payment_metadata,
             receipt_email=guest_contact['passenger_email'],
             idempotency_key=idempotency_key
