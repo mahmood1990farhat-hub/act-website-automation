@@ -818,8 +818,10 @@ def send_trip_accepted_to_passenger(
             html_message=html_message,
             fail_silently=True,
         )
+        return True
     except Exception as e:
         logger.error(f"[EMAIL] send_trip_accepted_to_passenger failed for trip #{trip.id}: {e}")
+        return False
 
 @use_internal_language
 def send_trip_accepted_to_admin(trip, driver_user) -> None:
