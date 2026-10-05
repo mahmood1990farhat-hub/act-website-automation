@@ -104,6 +104,7 @@ class Trip(models.Model):
     booking_confirmation_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     passenger_confirmation_sent_at = models.DateTimeField(null=True, blank=True)
     internal_booking_notification_sent_at = models.DateTimeField(null=True, blank=True)
+    driver_details_reminder_sent_at = models.DateTimeField(null=True, blank=True)
     booking_confirmation_pdf = models.FileField(
         upload_to="trips/booking_confirmations/",
         null=True,
