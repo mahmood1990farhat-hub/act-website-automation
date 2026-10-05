@@ -1,39 +1,59 @@
-name: Deploy Frontend
+name: Deploy ACT frontend
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact accepted 40-character Git commit SHA
+        required: true
 
 concurrency:
   group: act-frontend-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy-frontend:
-    name: Deploy ACT frontend
+    name: Deploy accepted ACT frontend
     runs-on: self-hosted
+    environment: production
 
     steps:
-      - name: Deploy frontend on VPS
+      - name: Validate accepted SHA
+        shell: bash
+        run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
+
+      - name: Deploy exact accepted frontend commit
         shell: bash
         run: |
           set -euo pipefail
 
-          cd /var/www/atg/front-end/airportandcitytransfer_repo
-          git fetch origin
-          git checkout main
-          git pull --ff-only origin main
+          repo=/var/www/atg/front-end/airportandcitytransfer_repo
+          release="$RUNNER_TEMP/act-frontend-${{ github.run_id }}"
+          cleanup() {
+            git -C "$repo" worktree remove --force "$release" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          git -C "$repo" fetch origin main
+          git -C "$repo" cat-file -e "${{ inputs.commit_sha }}^{commit}"
+          git -C "$repo" merge-base --is-ancestor "${{ inputs.commit_sha }}" origin/main
+
+          rm -rf "$release"
+          git -C "$repo" worktree add --detach "$release" "${{ inputs.commit_sha }}"
 
           rsync -a --delete \
             --exclude='.env' \
             --exclude='.next' \
             --exclude='node_modules' \
-            /var/www/atg/front-end/airportandcitytransfer_repo/act_website-main/ \
+            "$release/act_website-main/" \
             /var/www/atg/front-end/airportandcitytransfer/
 
           source ~/.nvm/nvm.sh
           cd /var/www/atg/front-end/airportandcitytransfer
+          npm ci
           npm run build
           pm2 restart act --update-env
           pm2 save
