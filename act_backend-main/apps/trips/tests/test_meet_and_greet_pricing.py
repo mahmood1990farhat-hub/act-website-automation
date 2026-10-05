@@ -86,6 +86,10 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
         self.assertEqual(pending.price_breakdown['meet_and_greet_fee'], 20.0)
         self.assertEqual(pending.booking_details['extra_services'][0]['total_amount'], 20.0)
         self.assertEqual(stripe_create.call_args.kwargs['amount'], 7000)
+        self.assertEqual(
+            stripe_create.call_args.kwargs['automatic_payment_methods'],
+            {'enabled': True, 'allow_redirects': 'never'},
+        )
 
     def test_guest_payment_recalculates_same_authoritative_fee(self):
         response, stripe_create = self.run_payment(guest=True)
@@ -94,6 +98,10 @@ class MeetAndGreetQuoteAndPaymentTests(TestCase):
         self.assertEqual(response.data['price_breakdown']['total_cost'], 70.0)
         self.assertEqual(pending.price_breakdown['meet_and_greet_total'], 20.0)
         self.assertEqual(stripe_create.call_args.kwargs['amount'], 7000)
+        self.assertEqual(
+            stripe_create.call_args.kwargs['automatic_payment_methods'],
+            {'enabled': True, 'allow_redirects': 'never'},
+        )
 
     def test_quote_and_payment_totals_match(self):
         serializer = Mock()
