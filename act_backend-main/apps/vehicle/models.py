@@ -19,6 +19,9 @@ class VehicleType(models.Model):
 
 class Vehicle(models.Model):
     vehicle_number = models.CharField(max_length=50)
+    make = models.CharField(max_length=80, blank=True, default="")
+    model = models.CharField(max_length=80, blank=True, default="")
+    color = models.CharField(max_length=50, blank=True, default="")
     mot = models.FileField(upload_to="vehicles/mot/")
     year_of_manufacture = models.PositiveIntegerField()
     phv = models.FileField(upload_to="vehicles/phv/")
