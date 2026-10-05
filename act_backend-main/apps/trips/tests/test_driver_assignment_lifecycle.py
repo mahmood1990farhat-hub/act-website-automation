@@ -85,9 +85,14 @@ class DriverAssignmentLifecycleTests(TestCase):
             pco="driver_docs/pco/test.pdf",
             dbs="driver_docs/dbs/test.pdf",
             dvla="driver_docs/dvla/test.pdf",
+            pco_licence_number="TPH123456",
+            driver_photo="driver_docs/photos/test.jpg",
         )
         vehicle = Vehicle.objects.create(
             vehicle_number=number,
+            make="Mercedes-Benz",
+            model="E-Class",
+            color="Black",
             mot="vehicles/mot/test.pdf",
             year_of_manufacture=2025,
             phv="vehicles/phv/test.pdf",
