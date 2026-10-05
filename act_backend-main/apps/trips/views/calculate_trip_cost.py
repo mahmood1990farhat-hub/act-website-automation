@@ -91,6 +91,7 @@ class CalculateTripCostView(EMADBaseView):
                 car_type_obj.code,
                 large_suitcases,
                 small_suitcases,
+                passengers_count,
             ):
                 continue
 
@@ -134,7 +135,7 @@ class CalculateTripCostView(EMADBaseView):
                     "desc_ar": car_type_obj.desc_ar,
                     "icon_url": request.build_absolute_uri(car_type_obj.icon.url) if car_type_obj.icon else None,
                     "max_passengers_count": car_type_obj.max_passengers_count,
-                    "luggage_patterns": [list(pattern) for pattern in luggage_patterns_for_vehicle(car_type_obj.code)],
+                    "luggage_patterns": [list(pattern) for pattern in luggage_patterns_for_vehicle(car_type_obj.code, passengers_count)],
                     "total_cost": total_cost,
                     'regular_vat': regular_vat,
                     'airport_vat': airport_vat,
