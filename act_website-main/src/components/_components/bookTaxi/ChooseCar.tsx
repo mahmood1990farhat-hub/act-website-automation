@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  Luggage,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -34,6 +35,8 @@ type typeProps = {
   Choose_car: Choose_car;
   rideOptions: calculatTripCost | null;
   tripDate: string;
+  largeSuitcaseLabel: string;
+  smallSuitcaseLabel: string;
   nextStep: () => void;
   prevStep: () => void;
 };
@@ -45,6 +48,8 @@ export default function ModernChooseCar({
   Choose_car,
   rideOptions,
   tripDate,
+  largeSuitcaseLabel,
+  smallSuitcaseLabel,
   nextStep,
   prevStep,
 }: typeProps) {
@@ -222,6 +227,17 @@ export default function ModernChooseCar({
                     <ShieldCheck className="h-4 w-4" />
                     {runtimeText(locale, "privateTransfer")}
                   </Badge>
+                  {car.luggage_patterns?.length > 0 && (
+                    <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5 px-3 py-1.5 text-white/80">
+                      <Luggage className="h-4 w-4" />
+                      {car.luggage_patterns.map(([large, small]) => {
+                        const parts = [];
+                        if (large) parts.push(`${large} ${largeSuitcaseLabel.trim()}`);
+                        if (small) parts.push(`${small} ${smallSuitcaseLabel.trim()}`);
+                        return parts.join(" + ");
+                      }).join(" / ")}
+                    </Badge>
+                  )}
                 </div>
 
                 {localizedVehicleValue(car, "desc", locale) && (
