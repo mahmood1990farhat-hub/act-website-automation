@@ -1004,16 +1004,13 @@ class AdminAssignGuestDriverView(EMADBaseView):
             
             logger.info(f"Admin {request.user.id} assigned guest driver to trip {trip_id}: {guest_driver_name} ({guest_driver_phone})")
             
-            # Send notification to registered passengers and email to both
-            # registered and guest-checkout passengers.
+            # Push notification is available for registered passengers; email
+            # also covers guest checkout using the booking email snapshot.
             passenger_user = trip.passenger.user if trip.passenger else None
             if passenger_user:
                 try:
                     from utils.common import notify_user
                     from utils.common.notifications import NOTIFICATION_TYPE_GUEST_DRIVER_ASSIGNED
-                    from utils.common.email import send_trip_accepted_to_passenger
-                    
-                    # Send notification
                     notify_user(
                         user=passenger_user.id,
                         title_en='External Driver Assigned',
@@ -1024,32 +1021,32 @@ class AdminAssignGuestDriverView(EMADBaseView):
                         notification_type=NOTIFICATION_TYPE_GUEST_DRIVER_ASSIGNED,
                         trip_id=trip.id
                     )
-                    
-                    # Send emailhtml_message = render_to_string("emails/trip_driver_details_passenger.html", context)
-                    guest_driver_info = {
-                        'name': guest_driver_name,
-                        'phone': guest_driver_phone,
-                        'company': guest_driver_company if guest_driver_company else None,
-                        'licence_number': guest_driver_licence_number,
-                        'photo_url': guest_driver_photo_url,
-                        'car': None
-                    }
-                    
-                    # Include car info if available
-                    if guest_driver_car:
-                        from apps.trips.serializers.guest_driver_car import GuestDriverCarSerializer
-                        guest_driver_info['car'] = GuestDriverCarSerializer(guest_driver_car).data
-                    
-                    send_trip_accepted_to_passenger(
-                        passenger_user,
-                        trip,
-                        driver_user=None,
-                        is_guest_driver=True,
-                        guest_driver_info=guest_driver_info
-                    )
                 except Exception as e:
-                    logger.warning(f"Failed to send notification/email for guest driver assignment to trip {trip.id}: {str(e)}")
-            
+                    logger.warning(f"Failed to send guest-driver push notification for trip {trip.id}: {str(e)}")
+
+            try:
+                from utils.common.email import send_trip_accepted_to_passenger
+                guest_driver_info = {
+                    'name': guest_driver_name,
+                    'phone': guest_driver_phone,
+                    'company': guest_driver_company if guest_driver_company else None,
+                    'licence_number': guest_driver_licence_number,
+                    'photo_url': guest_driver_photo_url,
+                    'car': None,
+                }
+                if guest_driver_car:
+                    from apps.trips.serializers.guest_driver_car import GuestDriverCarSerializer
+                    guest_driver_info['car'] = GuestDriverCarSerializer(guest_driver_car).data
+                send_trip_accepted_to_passenger(
+                    passenger_user,
+                    trip,
+                    driver_user=None,
+                    is_guest_driver=True,
+                    guest_driver_info=guest_driver_info,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send guest-driver email for trip {trip.id}: {str(e)}")
+
             message = get_bilingual_error_message(
                 'Guest driver assigned successfully. Passenger has been notified.',
                 'تم تعيين السائق الضيف بنجاح. تم إشعار الراكب.',
