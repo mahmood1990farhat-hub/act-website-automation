@@ -39,7 +39,10 @@
     "retry": "Try again",
     "loading": "Loading…",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "cancelTripPolicy": "Full refund when ACT receives your cancellation at least 3 hours before pickup. Within 3 hours, no automatic refund is issued; contact ACT support for any applicable review.",
+    "cancelTripRefunded": "Your trip has been cancelled and the refund has been processed to your original payment method.",
+    "cancelTripReview": "Your trip has been cancelled. No automatic refund was issued; contact ACT support if you need a refund review."
   },
   "ar": {
     "email": "البريد الإلكتروني",
@@ -81,7 +84,10 @@
     "retry": "إعادة المحاولة",
     "loading": "جارٍ التحميل…",
     "previous": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "cancelTripPolicy": "استرداد كامل إذا استلمت ACT طلب الإلغاء قبل موعد الاستلام بثلاث ساعات على الأقل. خلال ثلاث ساعات، لا يتم إصدار استرداد تلقائي؛ تواصل مع دعم ACT لأي مراجعة تنطبق.",
+    "cancelTripRefunded": "تم إلغاء رحلتك ومعالجة الاسترداد إلى وسيلة الدفع الأصلية.",
+    "cancelTripReview": "تم إلغاء رحلتك. لم يتم إصدار استرداد تلقائي؛ تواصل مع دعم ACT إذا كنت بحاجة إلى مراجعة الاسترداد."
   },
   "fr": {
     "email": "Adresse e-mail",
@@ -123,7 +129,10 @@
     "retry": "Réessayer",
     "loading": "Chargement…",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "cancelTripPolicy": "Remboursement intégral si ACT reçoit votre annulation au moins 3 heures avant la prise en charge. À moins de 3 heures, aucun remboursement automatique n’est émis ; contactez l’assistance ACT pour toute révision applicable.",
+    "cancelTripRefunded": "Votre trajet a été annulé et le remboursement a été traité vers votre moyen de paiement d’origine.",
+    "cancelTripReview": "Votre trajet a été annulé. Aucun remboursement automatique n’a été émis ; contactez l’assistance ACT si vous souhaitez une révision."
   },
   "de": {
     "email": "E-Mail-Adresse",
@@ -165,7 +174,10 @@
     "retry": "Erneut versuchen",
     "loading": "Wird geladen…",
     "previous": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "cancelTripPolicy": "Vollständige Erstattung, wenn ACT Ihre Stornierung mindestens 3 Stunden vor der Abholung erhält. Innerhalb von 3 Stunden erfolgt keine automatische Erstattung; wenden Sie sich für eine mögliche Prüfung an den ACT-Support.",
+    "cancelTripRefunded": "Ihre Fahrt wurde storniert und die Erstattung auf die ursprüngliche Zahlungsmethode veranlasst.",
+    "cancelTripReview": "Ihre Fahrt wurde storniert. Es wurde keine automatische Erstattung veranlasst; wenden Sie sich bei Bedarf an den ACT-Support."
   },
   "es": {
     "email": "Correo electrónico",
@@ -207,7 +219,10 @@
     "retry": "Reintentar",
     "loading": "Cargando…",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "cancelTripPolicy": "Reembolso completo si ACT recibe la cancelación al menos 3 horas antes de la recogida. Dentro de las 3 horas anteriores no se emite un reembolso automático; contacte con soporte de ACT para cualquier revisión aplicable.",
+    "cancelTripRefunded": "Tu viaje se ha cancelado y el reembolso se ha procesado al método de pago original.",
+    "cancelTripReview": "Tu viaje se ha cancelado. No se emitió un reembolso automático; contacta con soporte de ACT si necesitas una revisión."
   },
   "tr": {
     "email": "E-posta",
@@ -249,7 +264,10 @@
     "retry": "Tekrar dene",
     "loading": "Yükleniyor…",
     "previous": "Önceki",
-    "next": "Sonraki"
+    "next": "Sonraki",
+    "cancelTripPolicy": "ACT iptal bildiriminizi alınıştan en az 3 saat önce alırsa tam geri ödeme yapılır. Son 3 saat içinde otomatik geri ödeme yapılmaz; uygun bir inceleme için ACT desteğiyle iletişime geçin.",
+    "cancelTripRefunded": "Yolculuğunuz iptal edildi ve geri ödeme asıl ödeme yönteminize işlendi.",
+    "cancelTripReview": "Yolculuğunuz iptal edildi. Otomatik geri ödeme yapılmadı; inceleme gerekiyorsa ACT desteğiyle iletişime geçin."
   },
   "zh-CN": {
     "email": "电子邮箱",
@@ -291,6 +309,9 @@
     "retry": "重试",
     "loading": "正在加载…",
     "previous": "上一页",
-    "next": "下一页"
+    "next": "下一页",
+    "cancelTripPolicy": "如果 ACT 在接车前至少3小时收到取消通知，将全额退款。接车前3小时内不会自动退款；如需适用的退款审核，请联系 ACT 客服。",
+    "cancelTripRefunded": "您的行程已取消，退款已退回原支付方式。",
+    "cancelTripReview": "您的行程已取消。未自动退款；如需退款审核，请联系 ACT 客服。"
   }
 }
