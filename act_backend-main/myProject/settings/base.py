@@ -207,6 +207,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "trips.tasks.expire_old_trips",
         "schedule": 60.0,
     },
+    "driver-details-reminders-every-minute": {
+        "task": "trips.tasks.send_driver_details_reminders",
+        "schedule": 60.0,
+    },
 }
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
