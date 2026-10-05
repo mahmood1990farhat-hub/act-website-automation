@@ -192,7 +192,20 @@ def calculate_trip_cost(trip_time, car_type, distance_miles):
     )
 
     rate_per_mile = get_rate_per_mile(car_type, distance_miles, is_peak)
-    trip_cost = round(rate_per_mile * distance_miles, 2)
+    raw_cost = rate_per_mile * distance_miles
+
+    # Distance-band discounts must never make a longer journey cheaper.
+    # Preserve the configured whole-trip rate model, but floor the new band at
+    # the highest fare reached at every earlier band boundary.
+    car_code = canonical_vehicle_code(car_type)
+    pricing_list = PRICING[car_code]["peak" if is_peak else "normal"]
+    boundary_floor = 0.0
+    for max_distance, earlier_rate in pricing_list:
+        if max_distance > distance_miles:
+            break
+        boundary_floor = max(boundary_floor, max_distance * earlier_rate)
+
+    trip_cost = round(max(raw_cost, boundary_floor), 2)
     return trip_cost
 
 
