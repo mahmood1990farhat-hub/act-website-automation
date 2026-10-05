@@ -18,5 +18,7 @@ expect(review.includes("3 hours before your scheduled pickup"), "Booking review 
 expect(!chooseCar.includes("24 hours before pickup"), "Vehicle selection must not retain the superseded 24-hour cancellation rule.");
 expect(!review.includes("24 hours before your scheduled pickup"), "Booking review must not retain the superseded 24-hour cancellation rule.");
 expect(myTrips.includes("/api/trips/"), "Passenger My Trips must retain a working cancellation action through the unified backend route.");
+expect(myTrips.includes('accountText(locale, "cancelTripPolicy")'), "Cancellation confirmation must explain the three-hour rule before submission.");
+expect(myTrips.includes('cancelTripRefunded') && myTrips.includes('cancelTripReview'), "Passenger cancellation result must distinguish processed refunds from support review.");
 
 console.log("Three-hour cancellation presentation guard passed.");
