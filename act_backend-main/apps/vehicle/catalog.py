@@ -51,20 +51,37 @@ def canonical_vehicle_code(value):
     return LEGACY_NAME_TO_CODE.get(value) or DISPLAY_NAME_TO_CODE.get(value) or value
 
 
-# Approved luggage combinations are expressed as (large, small) maxima.
-# A request is suitable when it fits wholly within at least one approved pattern.
+# Customer-facing luggage promises must be achievable for the booked occupancy.
+# Patterns are (large, small) maxima; a request must fit wholly within one pattern.
 VEHICLE_LUGGAGE_PATTERNS = {
     "comfort": ((2, 2), (0, 4)),
-    "comfort_xl": ((3, 3), (4, 0)),
-    "executive": ((2, 2), (0, 4)),
+    # Comfort XL is handled by occupancy below because the third row consumes boot space.
+    "comfort_xl": ((4, 2),),
+    # Conservative saloon promise that remains safe when a hybrid/PHEV is dispatched.
+    "executive": ((2, 0), (0, 3)),
+    # Maximum capacity assumes a suitable long-wheelbase passenger van.
     "executive_xl": ((5, 4), (6, 2)),
-    "first_class": ((2, 2), (0, 4)),
+    # Conservative S-Class/i7-class promise; avoids relying on a full-size non-hybrid boot.
+    "first_class": ((2, 0), (0, 3)),
 }
 
 
-def vehicle_accepts_luggage(vehicle_code, large_suitcases, small_suitcases):
+def luggage_patterns_for_vehicle(vehicle_code, passengers_count=None):
     code = canonical_vehicle_code(vehicle_code)
-    patterns = VEHICLE_LUGGAGE_PATTERNS.get(code)
+    if code == "comfort_xl" and passengers_count is not None:
+        passengers = int(passengers_count or 0)
+        if passengers >= 6:
+            return ((1, 0), (0, 2))
+    return VEHICLE_LUGGAGE_PATTERNS.get(code, ())
+
+
+def vehicle_accepts_luggage(
+    vehicle_code,
+    large_suitcases,
+    small_suitcases,
+    passengers_count=None,
+):
+    patterns = luggage_patterns_for_vehicle(vehicle_code, passengers_count)
     if not patterns:
         return False
     large = int(large_suitcases or 0)
@@ -73,7 +90,3 @@ def vehicle_accepts_luggage(vehicle_code, large_suitcases, small_suitcases):
         large <= max_large and small <= max_small
         for max_large, max_small in patterns
     )
-
-
-def luggage_patterns_for_vehicle(vehicle_code):
-    return VEHICLE_LUGGAGE_PATTERNS.get(canonical_vehicle_code(vehicle_code), ())
