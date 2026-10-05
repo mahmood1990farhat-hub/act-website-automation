@@ -35,6 +35,8 @@ def send_driver_details_reminders():
             guest_info = {
                 "name": trip.guest_driver_name,
                 "phone": trip.guest_driver_phone,
+                "licence_number": trip.guest_driver_licence_number,
+                "photo_url": trip.guest_driver_photo_url,
                 "car": {
                     "brand_model": f"{car.brand} {car.model}".strip() if car else "",
                     "registration_number": car.registration_number if car else "",
