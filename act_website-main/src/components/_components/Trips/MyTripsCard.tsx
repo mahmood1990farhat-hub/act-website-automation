@@ -61,7 +61,7 @@ export default function MyTripsCard({
 		if (cancelling) return;
 		setCancelling(true);
 		try {
-			const res = await postData({
+			const res: any = await postData({
 				endpoint: `/api/trips/${data.id}/cancel/`,
 				noToast: true,
 				token: token,
@@ -70,7 +70,14 @@ export default function MyTripsCard({
 				},
 			});
 			setOpenModal(false);
-			toast.success(accountText(locale, "cancelTripSuccess"));
+			const refundStatus = res?.data?.refund_status;
+			toast.success(
+				refundStatus === "processed" || refundStatus === "processed_ledger_error"
+					? accountText(locale, "cancelTripRefunded")
+					: refundStatus === "manual_review" || refundStatus === "failed"
+						? accountText(locale, "cancelTripReview")
+						: accountText(locale, "cancelTripSuccess"),
+			);
 			void queryClient.invalidateQueries({ queryKey: ["myTrips"] });
 			void queryClient.invalidateQueries({ queryKey: ["Latest"] });
 		} catch (error) {
@@ -374,7 +381,7 @@ export default function MyTripsCard({
 
 					{/* Description */}
 					<p className="text-gray-300 text-sm md:text-base max-w-md">
-						{trans.desc}
+						{accountText(locale, "cancelTripPolicy")}
 					</p>
 
 					{/* Action Buttons */}
