@@ -118,6 +118,7 @@ jobs:
           apps.trips.tests.test_meet_and_greet_pricing
           apps.trips.tests.test_vehicle_capacity_payment
           apps.trips.tests.test_driver_assignment_lifecycle
+          apps.trips.tests.test_passenger_driver_details
           apps.admin_panel.tests
           apps.pricing.tests.test_monotonic_pricing
           apps.pricing.tests.test_pricing_engine
