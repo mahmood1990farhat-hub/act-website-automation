@@ -20,7 +20,7 @@ from apps.vehicle.models import VehicleType
 )
 def _plain_json_value(value):
     """Convert StripeObject/nested mappings without relying on SDK-private helpers."""
-    if isinstance(value, Mapping):
+    if isinstance(value, Mapping) or callable(getattr(value, "items", None)):
         return {key: _plain_json_value(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [_plain_json_value(item) for item in value]
