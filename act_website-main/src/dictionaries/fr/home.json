@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Informations de paiement",
-      "subtitle": "Annulation reçue au moins 24 heures avant la prise en charge : remboursement intégral. À moins de 24 heures ou en cas d’absence, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation et en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Veuillez lire les conditions générales avant de payer.",
+      "subtitle": "Annulation reçue au moins 3 heures avant la prise en charge : remboursement intégral. À moins de 3 heures ou en cas d’absence, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation et en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Veuillez lire les conditions générales avant de payer.",
       "form": {
         "Card_Number": "Numéro de carte",
         "Expired_date": "Date d’expiration",
@@ -387,16 +387,16 @@
           "desc": "Tous les tarifs sont indiqués en livres sterling, GBP (£). Des frais supplémentaires peuvent s’appliquer pour les arrêts additionnels, le temps d’attente ou les services en dehors des horaires habituels. Le paiement doit être effectué à la réservation, sauf accord contraire."
         },
         {
-          "title": "Annulation au moins 24 heures avant la prise en charge",
-          "desc": "Si ACT reçoit votre annulation au moins 24 heures avant l’heure de prise en charge confirmée, y compris exactement 24 heures avant, vous bénéficiez d’un remboursement intégral."
+          "title": "Annulation au moins 3 heures avant la prise en charge",
+          "desc": "Si ACT reçoit votre annulation au moins 3 heures avant l’heure de prise en charge confirmée, y compris exactement 3 heures avant, vous bénéficiez d’un remboursement intégral."
         },
         {
-          "title": "Annulation moins de 24 heures avant la prise en charge",
+          "title": "Annulation moins de 3 heures avant la prise en charge",
           "desc": "ACT peut déduire les pertes raisonnables et justifiées directement causées par votre annulation, dans la limite du prix de la réservation. Nous prenons des mesures raisonnables pour réduire ces pertes et tenons compte des coûts économisés ou des prestations de remplacement obtenues. Le solde éventuel vous est remboursé."
         },
         {
           "title": "Absence du passager",
-          "desc": "Une absence n’est constatée qu’après le délai d’attente convenu et des tentatives documentées de contacter le passager. Toute retenue suit la même règle fondée sur les pertes que pour une annulation à moins de 24 heures et reste limitée au prix de la réservation."
+          "desc": "Une absence n’est constatée qu’après le délai d’attente convenu et des tentatives documentées de contacter le passager. Toute retenue suit la même règle fondée sur les pertes que pour une annulation à moins de 3 heures et reste limitée au prix de la réservation."
         },
         {
           "title": "Délais d’attente",
@@ -481,7 +481,7 @@
       },
       {
         "question": "Puis-je annuler ou modifier ma réservation ?",
-        "answer": "Oui. Si ACT reçoit votre annulation au moins 24 heures avant l’heure de prise en charge confirmée, vous bénéficiez d’un remboursement intégral. À moins de 24 heures, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation, en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Les modifications dépendent des disponibilités ; tout nouveau prix nécessite votre accord. Écrivez à info@airportandcitytransfer.com avec votre référence de réservation et appelez le +44 208 153 0303 pour les changements urgents. Consultez les conditions générales pour les délais d’attente, les absences et le traitement des remboursements."
+        "answer": "Oui. Si ACT reçoit votre annulation au moins 3 heures avant l’heure de prise en charge confirmée, vous bénéficiez d’un remboursement intégral. À moins de 3 heures, des pertes raisonnables et justifiées peuvent être déduites, dans la limite du prix de la réservation, en tenant compte des coûts économisés ou des prestations de remplacement obtenues. Les modifications dépendent des disponibilités ; tout nouveau prix nécessite votre accord. Écrivez à info@airportandcitytransfer.com avec votre référence de réservation et appelez le +44 208 153 0303 pour les changements urgents. Consultez les conditions générales pour les délais d’attente, les absences et le traitement des remboursements."
       },
       {
         "question": "Que faire si j’ai oublié un objet dans le véhicule ?",
