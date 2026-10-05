@@ -86,8 +86,9 @@ def arabic_document_context(trip, kind, refund_message="", driver=None, download
         if getattr(trip, "card_brand", None):
             rows.append(("البطاقة", f'{trip.card_brand} ****{getattr(trip, "last4", "") or ""}'))
     driver = driver or {}
-    for key, label in (("name", "اسم السائق"), ("phone", "هاتف السائق"), ("company", "الشركة"),
-                       ("vehicle", "المركبة"), ("registration", "رقم تسجيل المركبة"), ("color", "لون المركبة")):
+    for key, label in (("name", "اسم السائق"), ("licence_number", "رقم رخصة سائق النقل الخاص من TfL"),
+                       ("phone", "هاتف السائق"), ("company", "الشركة"), ("vehicle", "المركبة"),
+                       ("registration", "رقم تسجيل المركبة (VRM)"), ("color", "لون المركبة")):
         if driver.get(key):
             rows.append((label, value(driver[key])))
     return {
@@ -96,6 +97,7 @@ def arabic_document_context(trip, kind, refund_message="", driver=None, download
         "website_url": "https://airportandcitytransfer.com/ar",
         "refund_message": REFUNDS.get(refund_message, "للاستفسار عن حالة الاسترداد، يرجى التواصل معنا مع ذكر مرجع الحجز." if refund_message else ""),
         "download_url": download_url, "driver_pco_url": driver.get("pco_url", ""),
+        "driver_photo_url": driver.get("photo_url", ""),
     }
 
 
