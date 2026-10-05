@@ -743,8 +743,8 @@ export default function ModernConfirmFlightDetails({
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
 								<span>
 									{isRTL
-										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ24 ساعة على الأقل"
-										: customerText(locale, "Full refund when cancelled at least 24 hours before your scheduled pickup")}
+										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ3 ساعات على الأقل"
+										: customerText(locale, "Full refund when cancelled at least 3 hours before your scheduled pickup")}
 								</span>
 							</div>
 									<div className="flex items-center justify-center gap-1 text-nowrap">
