@@ -1,5 +1,6 @@
 import json
 import os
+from collections.abc import Mapping
 import time
 from datetime import timedelta
 from unittest.mock import patch
@@ -17,6 +18,15 @@ from apps.vehicle.models import VehicleType
     STRIPE_WEBHOOK_SECRET="whsec_act_local_acceptance",
     CELERY_TASK_ALWAYS_EAGER=True,
 )
+def _plain_json_value(value):
+    """Convert StripeObject/nested mappings without relying on SDK-private helpers."""
+    if isinstance(value, Mapping):
+        return {key: _plain_json_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain_json_value(item) for item in value]
+    return value
+
+
 class StripeSandboxFulfillmentAcceptanceTests(TestCase):
     """Opt-in integration test: requires STRIPE_SANDBOX_SECRET_KEY."""
 
@@ -112,9 +122,9 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         event = self._find_success_event(intent.id)
         self.assertFalse(event.livemode)
 
-        # StripeObject is mapping-compatible across supported SDK versions;
-        # avoid version-specific to_dict_recursive helpers.
-        payload = json.dumps(event, separators=(",", ":"))
+        # StripeObject is mapping-compatible; recursively convert nested SDK
+        # objects without depending on version-specific/private helpers.
+        payload = json.dumps(_plain_json_value(event), separators=(",", ":"))
         timestamp = int(time.time())
         secret = "whsec_act_local_acceptance"
         signature = stripe.WebhookSignature._compute_signature(
