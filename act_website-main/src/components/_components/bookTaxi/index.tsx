@@ -158,6 +158,7 @@ export type VehicleType = {
   desc_ar: string;
   icon_url: string | null;
   max_passengers_count: number;
+  luggage_patterns: [number, number][];
   airport_vat: number;
   airport_access_fee: number;
   base_trip_cost: number;
