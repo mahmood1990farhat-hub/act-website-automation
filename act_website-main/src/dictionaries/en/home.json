@@ -118,7 +118,7 @@
     },
     "Payments_details": {
       "title": "Payments Details",
-      "subtitle": "Cancellation received at least 24 hours before pickup: full refund. Within 24 hours or for a no-show, reasonable evidenced losses may be deducted, capped at the booking price and allowing for costs saved or replacement work. Please read the Terms & Conditions before paying.",
+      "subtitle": "Cancellation received at least 3 hours before pickup: full refund. Within 3 hours or for a no-show, reasonable evidenced losses may be deducted, capped at the booking price and allowing for costs saved or replacement work. Please read the Terms & Conditions before paying.",
       "form": {
         "Card_Number": "Card Number",
         "Expired_date": "Expired date",
@@ -387,16 +387,16 @@
           "desc": "All fares are quoted in GBP (£). Additional fees may apply for extra stops, waiting time, or out-of-hours service. Payments must be made at booking unless agreed otherwise."
         },
         {
-          "title": "Cancellation at least 24 hours before pickup",
-          "desc": "If ACT receives your cancellation at least 24 hours before the confirmed pickup time, including exactly 24 hours beforehand, you receive a full refund."
+          "title": "Cancellation at least 3 hours before pickup",
+          "desc": "If ACT receives your cancellation at least 3 hours before the confirmed pickup time, including exactly 3 hours beforehand, you receive a full refund."
         },
         {
-          "title": "Cancellation within 24 hours",
+          "title": "Cancellation within 3 hours",
           "desc": "ACT may deduct reasonable, evidenced losses directly caused by your cancellation, up to the booking price. We take reasonable steps to reduce these losses and account for costs saved or replacement work. Any remaining balance is refunded."
         },
         {
           "title": "Passenger no-show",
-          "desc": "A no-show is assessed only after the agreed waiting period and documented attempts to contact the passenger. Any deduction follows the same loss-based rule as a cancellation within 24 hours and is capped at the booking price."
+          "desc": "A no-show is assessed only after the agreed waiting period and documented attempts to contact the passenger. Any deduction follows the same loss-based rule as a cancellation within 3 hours and is capped at the booking price."
         },
         {
           "title": "Waiting periods",
@@ -481,7 +481,7 @@
       },
       {
         "question": "Can I cancel or change my booking?",
-        "answer": "Yes. If ACT receives your cancellation at least 24 hours before the confirmed pickup time, you receive a full refund. Within 24 hours, reasonable evidenced cancellation losses may be deducted, capped at the booking price and reduced for costs saved or replacement work. Changes depend on availability; any revised price requires your acceptance. Email info@airportandcitytransfer.com with your booking reference and telephone +44 208 153 0303 for urgent changes. See our Terms & Conditions for waiting, no-show and refund-processing details."
+        "answer": "Yes. If ACT receives your cancellation at least 3 hours before the confirmed pickup time, you receive a full refund. Within 3 hours, reasonable evidenced cancellation losses may be deducted, capped at the booking price and reduced for costs saved or replacement work. Changes depend on availability; any revised price requires your acceptance. Email info@airportandcitytransfer.com with your booking reference and telephone +44 208 153 0303 for urgent changes. See our Terms & Conditions for waiting, no-show and refund-processing details."
       },
       {
         "question": "What if I’ve left something in the vehicle?",
