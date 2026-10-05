@@ -170,10 +170,10 @@ class TripSerializer(serializers.ModelSerializer):
                 ) % {"count": passengers},
             })
 
-        if suitcases > 8:
+        if suitcases > 9:
             raise serializers.ValidationError({
                 "details": _(
-                    "We're sorry, but online bookings support a maximum of 8 suitcases in total. "
+                    "We're sorry, but online bookings support a maximum of 9 suitcases in total. "
                     "You selected %(large)s large + %(small)s small = %(total)s suitcases, "
                     "so please contact us directly at 07464 940 000 to complete your booking."
                 ) % {"large": large, "small": small, "total": suitcases},
