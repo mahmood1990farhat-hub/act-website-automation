@@ -39,7 +39,7 @@ def validate_vehicle_capacity(data, car_type):
         raise ValidationError({
             'car_type': _('The selected vehicle does not have enough passenger capacity.')
         })
-    if not vehicle_accepts_luggage(car_type.code, large, small):
+    if not vehicle_accepts_luggage(car_type.code, large, small, passengers):
         raise ValidationError({
             'car_type': _('The selected vehicle does not have enough luggage capacity. Please choose another vehicle class.')
         })
