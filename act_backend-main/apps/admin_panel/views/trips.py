@@ -1159,20 +1159,47 @@ class AdminUpdateTripStatusView(EMADBaseView):
                 locale
             )
             return create_error_response(message, errors=None, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
-        trip.status = new_status
-        trip.save(update_fields=['status'])
-        logger.info(f"Admin {request.user.id} set trip {trip_id} status to {new_status} (was {current})")
         if new_status == 'completed':
-            if trip.is_paid:
-                try:
+            # Completion and ledger creation must succeed together; otherwise
+            # keep the journey active so operations can retry safely.
+            try:
+                with transaction.atomic():
+                    locked_trip = Trip.objects.select_for_update().get(id=trip.id)
+                    if locked_trip.status != 'active':
+                        raise ValidationError(
+                            {'status': _('Only an active trip can be completed.')}
+                        )
+                    locked_trip.status = 'completed'
+                    locked_trip.save(update_fields=['status'])
                     from apps.earnings.services.earnings_calculator import EarningsCalculator
-                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(trip)
+                    earnings, revenue = EarningsCalculator.calculate_and_record_earnings(locked_trip)
+                    trip = locked_trip
                     if earnings:
-                        logger.info(f"Earnings recorded for trip {trip.id}: driver={earnings.net_amount}, company={revenue.amount}")
+                        logger.info(
+                            f"Earnings recorded for trip {trip.id}: "
+                            f"driver={earnings.net_amount}, company={revenue.amount}"
+                        )
                     else:
-                        logger.info(f"Earnings recorded for trip {trip.id}: company={revenue.amount} (guest driver)")
-                except Exception as e:
-                    logger.error(f"Error recording earnings for trip {trip.id}: {str(e)}", exc_info=True)
+                        logger.info(
+                            f"Earnings recorded for trip {trip.id}: "
+                            f"company={revenue.amount} (guest driver)"
+                        )
+            except Exception as e:
+                logger.error(
+                    f"Could not complete trip {trip.id} with financial ledger: {str(e)}",
+                    exc_info=True,
+                )
+                return create_error_response(
+                    get_bilingual_error_message(
+                        'Trip could not be completed because its financial record could not be created.',
+                        'تعذر إكمال الرحلة لأنه تعذر إنشاء سجلها المالي.',
+                        locale,
+                    ),
+                    errors=None,
+                    locale=locale,
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            logger.info(f"Admin {request.user.id} set trip {trip_id} status to completed (was {current})")
             try:
                 notify_user(
                     user=trip.passenger.user_id,
@@ -1192,6 +1219,13 @@ class AdminUpdateTripStatusView(EMADBaseView):
                 stop_trip_tracking(trip.id, reason="completed")
             except Exception as e:
                 logger.warning(f"Failed to stop trip tracking for trip {trip.id}: {str(e)}")
+        else:
+            trip.status = new_status
+            trip.save(update_fields=['status'])
+            logger.info(
+                f"Admin {request.user.id} set trip {trip_id} status to {new_status} "
+                f"(was {current})"
+            )
         trip.refresh_from_db()
         trip_serializer = TripWithStopPointSerializer(trip, context={'request': request})
         return Response({
