@@ -1,6 +1,5 @@
 import json
 import os
-from collections.abc import Mapping
 import time
 from datetime import timedelta
 from unittest.mock import patch
@@ -18,21 +17,6 @@ from apps.vehicle.models import VehicleType
     STRIPE_WEBHOOK_SECRET="whsec_act_local_acceptance",
     CELERY_TASK_ALWAYS_EAGER=True,
 )
-def _plain_json_value(value):
-    """Convert StripeObject/nested values across Stripe SDK versions."""
-    public_converter = getattr(value, "to_dict_recursive", None)
-    private_converter = getattr(value, "_to_dict_recursive", None)
-    if callable(public_converter):
-        return _plain_json_value(public_converter())
-    if callable(private_converter):
-        return _plain_json_value(private_converter())
-    if isinstance(value, Mapping) or callable(getattr(value, "items", None)):
-        return {key: _plain_json_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_plain_json_value(item) for item in value]
-    return value
-
-
 class StripeSandboxFulfillmentAcceptanceTests(TestCase):
     """Opt-in integration test: requires STRIPE_SANDBOX_SECRET_KEY."""
 
@@ -128,9 +112,27 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         event = self._find_success_event(intent.id)
         self.assertFalse(event.livemode)
 
-        # StripeObject is mapping-compatible; recursively convert nested SDK
-        # objects without depending on version-specific/private helpers.
-        payload = json.dumps(_plain_json_value(event), separators=(",", ":"))
+        # Use the real sandbox PaymentIntent and Stripe success-event ID,
+        # while serializing only documented webhook fields ACT consumes.
+        event_payload = {
+            "id": event.id,
+            "object": "event",
+            "type": "payment_intent.succeeded",
+            "livemode": False,
+            "created": event.created,
+            "data": {
+                "object": {
+                    "id": intent.id,
+                    "object": "payment_intent",
+                    "amount": intent.amount,
+                    "amount_received": intent.amount_received,
+                    "currency": intent.currency,
+                    "metadata": dict(intent.metadata),
+                    "latest_charge": intent.latest_charge,
+                }
+            },
+        }
+        payload = json.dumps(event_payload, separators=(",", ":"))
         timestamp = int(time.time())
         secret = "whsec_act_local_acceptance"
         signature = stripe.WebhookSignature._compute_signature(
