@@ -78,8 +78,7 @@ class ThreeHourCancellationPolicyTests(TestCase):
 
     @patch("apps.trips.views.passenger_trips.send_passenger_trip_cancellation_to_admin")
     @patch("apps.trips.views.passenger_trips.send_passenger_trip_cancellation_to_passenger")
-    @patch("apps.trips.views.passenger_trips.RefundRulesService.process_refund", create=True)
-    def test_exactly_three_hours_gets_full_automatic_refund(self, ledger, passenger_email, admin_email):
+    def test_exactly_three_hours_gets_full_automatic_refund(self, passenger_email, admin_email):
         trip = self._trip(3, status="accepted")
         trip.base_driver = self.driver
         trip.save(update_fields=["base_driver"])
