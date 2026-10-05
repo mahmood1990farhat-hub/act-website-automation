@@ -1196,8 +1196,10 @@ class AdminAssignSystemDriverView(EMADBaseView):
         from datetime import datetime
 
         with transaction.atomic():
+            # Lock only the Trip row. car_type is nullable, and PostgreSQL
+            # rejects SELECT FOR UPDATE across the nullable side of an outer join.
             trip = get_object_or_404(
-                Trip.objects.select_for_update().select_related('car_type'),
+                Trip.objects.select_for_update(),
                 id=trip_id,
             )
             if not trip.is_paid:
