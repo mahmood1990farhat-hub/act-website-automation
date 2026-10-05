@@ -8,6 +8,8 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.passengers.models import Passenger
+from apps.drivers.models import BaseDriver
+from apps.earnings.models import DriverRefundLedger, CompanyRefundLedger
 from apps.trips.models import Trip
 from apps.vehicle.models import VehicleType
 
@@ -38,6 +40,20 @@ class ThreeHourCancellationPolicyTests(TestCase):
             icon="vehicle_types/icons/test.png",
             max_passengers_count=4,
         )
+        self.driver_user = User.objects.create_user(
+            username="cancel-driver",
+            email="cancel-driver@example.invalid",
+            password="testpass123",
+            first_name="Driver",
+            account_type="normal_driver",
+            address="Test",
+        )
+        self.driver = BaseDriver.objects.create(
+            user=self.driver_user,
+            pco="driver_docs/pco/test.pdf",
+            dbs="driver_docs/dbs/test.pdf",
+            dvla="driver_docs/dvla/test.pdf",
+        )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         self.now = timezone.make_aware(datetime(2030, 1, 1, 9, 0, 0))
@@ -65,6 +81,8 @@ class ThreeHourCancellationPolicyTests(TestCase):
     @patch("apps.trips.views.passenger_trips.RefundRulesService.process_refund", create=True)
     def test_exactly_three_hours_gets_full_automatic_refund(self, ledger, passenger_email, admin_email):
         trip = self._trip(3, status="accepted")
+        trip.base_driver = self.driver
+        trip.save(update_fields=["base_driver"])
         refund = SimpleNamespace(id="re_three_hour", amount=8000)
         with patch("apps.trips.views.passenger_trips.timezone.now", return_value=self.now), patch(
             "apps.trips.views.passenger_trips.stripe.Refund.create",
@@ -78,6 +96,10 @@ class ThreeHourCancellationPolicyTests(TestCase):
         create_refund.assert_called_once()
         trip.refresh_from_db()
         self.assertEqual(trip.status, "cancelled")
+        self.assertEqual(trip.refund_status, "processed")
+        self.assertEqual(trip.stripe_refund_id, "re_three_hour")
+        self.assertEqual(DriverRefundLedger.objects.filter(trip=trip).count(), 0)
+        self.assertEqual(CompanyRefundLedger.objects.filter(trip=trip).count(), 1)
 
     @patch("apps.trips.views.passenger_trips.send_passenger_trip_cancellation_to_admin")
     @patch("apps.trips.views.passenger_trips.send_passenger_trip_cancellation_to_passenger")
@@ -93,6 +115,7 @@ class ThreeHourCancellationPolicyTests(TestCase):
         create_refund.assert_not_called()
         trip.refresh_from_db()
         self.assertEqual(trip.status, "cancelled")
+        self.assertEqual(trip.refund_status, "manual_review")
 
     def test_active_journey_cannot_be_cancelled_online(self):
         trip = self._trip(2, status="active")
