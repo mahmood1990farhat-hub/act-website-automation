@@ -1328,6 +1328,8 @@ export default function TripsDashboard({
 														name: "",
 														phone: "",
 														company: "",
+														licence_number: "",
+														photo_url: "",
 														car_info: {
 															brand: "",
 															model: "",
@@ -1464,6 +1466,8 @@ export default function TripsDashboard({
 							name: "",
 							phone: "",
 							company: "",
+							licence_number: "",
+							photo_url: "",
 							car_info: {
 								brand: "",
 								model: "",
