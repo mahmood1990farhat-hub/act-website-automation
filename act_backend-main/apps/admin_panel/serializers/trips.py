@@ -58,6 +58,10 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
             "last4": obj.last4,
             "amount": str(obj.cost),
             "currency": "GBP",
+            "refund_status": obj.refund_status,
+            "refund_id": obj.stripe_refund_id,
+            "refund_amount": str(obj.refund_amount) if obj.refund_amount is not None else None,
+            "refund_error": obj.refund_error or None,
         }
 
     def get_driver_info(self, obj):
