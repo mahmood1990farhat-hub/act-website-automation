@@ -45,4 +45,15 @@ expect(
   "Successful driver acceptance must enter the accepted-booking flow.",
 );
 
-console.log("Driver assignment lifecycle frontend guard passed.");
+expect(
+  tripDetails.includes("/driver-on-the-way/") &&
+    tripDetails.includes("/start/") &&
+    tripDetails.includes("/complete/"),
+  "Driver journey controls must preserve the accepted → on-way → active → completed sequence.",
+);
+expect(
+  tripDetails.includes('router.push(\`/\${locale}/driver\`)'),
+  "A completed journey must leave the upcoming queue and return to My Trips.",
+);
+
+console.log("Driver assignment and completed-journey frontend guard passed.");
