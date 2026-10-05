@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 import os
 import time
@@ -135,11 +137,12 @@ class StripeSandboxFulfillmentAcceptanceTests(TestCase):
         payload = json.dumps(event_payload, separators=(",", ":"))
         timestamp = int(time.time())
         secret = "whsec_act_local_acceptance"
-        signature = stripe.WebhookSignature._compute_signature(
-            timestamp,
-            payload,
-            secret,
-        )
+        signed_payload = f"{timestamp}.{payload}".encode("utf-8")
+        signature = hmac.new(
+            secret.encode("utf-8"),
+            signed_payload,
+            hashlib.sha256,
+        ).hexdigest()
         signature_header = f"t={timestamp},v1={signature}"
 
         response = self.client.post(
