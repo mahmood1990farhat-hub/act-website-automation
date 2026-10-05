@@ -384,6 +384,8 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                   Choose_car={home.Choose_car}
                   rideOptions={rideOptions}
                   tripDate={formDetails.date}
+                  largeSuitcaseLabel={home.Book_Taxi.form.largeSuitcase}
+                  smallSuitcaseLabel={home.Book_Taxi.form.smallSuitcase}
                   nextStep={() => setStep(3)}
                   prevStep={() => setStep(1)}
                 />
