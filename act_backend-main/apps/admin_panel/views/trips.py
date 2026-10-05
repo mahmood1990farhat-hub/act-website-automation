@@ -1171,3 +1171,106 @@ class AdminUpdateTripStatusView(EMADBaseView):
             'data': trip_serializer.data
         }, status=status.HTTP_200_OK)
 
+
+
+class AdminAssignSystemDriverView(EMADBaseView):
+    """Assign a paid booking to an ACT driver for explicit driver acceptance."""
+    http_method_names = ['post']
+    permission_classes = [IsAdminUser]
+
+    def handle_post(self, request, trip_id):
+        locale = get_locale(request=request)
+        activate(locale)
+        driver_id = request.data.get('driver_id')
+        if not driver_id:
+            raise ValidationError({'driver_id': _('Driver is required')})
+
+        from apps.trips.utils.time_conflict import driver_has_time_conflict
+        from datetime import datetime
+
+        with transaction.atomic():
+            trip = get_object_or_404(
+                Trip.objects.select_for_update().select_related('car_type'),
+                id=trip_id,
+            )
+            if not trip.is_paid:
+                raise ValidationError({'trip': _('Only paid bookings can be assigned to a driver')})
+            if trip.status not in ('pending', 'accepted'):
+                raise ValidationError({
+                    'trip': _('Only pending or accepted bookings can be assigned or reassigned')
+                })
+
+            driver = get_object_or_404(
+                BaseDriver.objects.select_related(
+                    'user',
+                    'normal_driver__vehicle__vehicle_type',
+                ),
+                id=driver_id,
+            )
+            if not driver.user.is_active:
+                raise ValidationError({'driver_id': _('Selected driver is not active')})
+            if not driver.user.is_admin_verified or not driver.user.is_profile_completed:
+                raise ValidationError({'driver_id': _('Selected driver is not fully approved')})
+
+            try:
+                driver_vehicle_type_id = driver.normal_driver.vehicle.vehicle_type_id
+            except AttributeError:
+                driver_vehicle_type_id = None
+            if not driver_vehicle_type_id:
+                raise ValidationError({'driver_id': _('Selected driver does not have a configured vehicle type')})
+            if trip.car_type_id != driver_vehicle_type_id:
+                raise ValidationError({
+                    'driver_id': _('Selected driver vehicle class does not match this booking')
+                })
+            if trip.cancelled_by_driver_id_id == driver.id:
+                raise ValidationError({
+                    'driver_id': _('A driver who cancelled this booking cannot be reassigned to it')
+                })
+
+            trip_datetime = timezone.make_aware(datetime.combine(trip.trip_date, trip.trip_time))
+            if driver_has_time_conflict(driver, trip_datetime, exclude_trip_id=trip.id):
+                raise ValidationError({
+                    'driver_id': _('Selected driver has a time conflict with another trip')
+                })
+
+            trip.base_driver = driver
+            # Assignment is not acceptance. The selected driver must accept explicitly.
+            trip.status = 'pending'
+            trip.is_guest_driver = False
+            trip.guest_driver_name = None
+            trip.guest_driver_phone = None
+            trip.guest_driver_company = None
+            trip.guest_driver_car = None
+            trip.save(update_fields=[
+                'base_driver',
+                'status',
+                'is_guest_driver',
+                'guest_driver_name',
+                'guest_driver_phone',
+                'guest_driver_company',
+                'guest_driver_car',
+            ])
+
+        try:
+            notify_user(
+                user=driver.user_id,
+                title_en='Trip Assigned',
+                title_ar='تم تعيين رحلة لك',
+                desc_en=f'Trip #{trip.id} has been assigned to you. Please review and accept it.',
+                desc_ar=f'تم تعيين الرحلة #{trip.id} لك. يرجى مراجعتها وقبولها.',
+                locale=locale,
+                notification_type='TRIP_ASSIGNED',
+                trip_id=trip.id,
+            )
+        except Exception as exc:
+            logger.warning('Failed to notify assigned driver for trip %s: %s', trip.id, exc)
+
+        return Response({
+            'success': True,
+            'message': get_bilingual_error_message(
+                'Driver assigned. Waiting for driver acceptance.',
+                'تم تعيين السائق. بانتظار قبول السائق.',
+                locale,
+            ),
+            'data': TripWithStopPointSerializer(trip, context={'request': request}).data,
+        }, status=status.HTTP_200_OK)
