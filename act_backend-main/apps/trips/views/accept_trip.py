@@ -48,6 +48,23 @@ class AcceptTripAPIView(EMADBaseView):
                 raise ValidationError(_("You cannot accept a trip that you have previously cancelled"))
             
             vehicle = base_driver.normal_driver.vehicle
+            missing_passenger_details = []
+            if not (base_driver.pco_licence_number or "").strip():
+                missing_passenger_details.append("TfL PHV driver licence number")
+            if not base_driver.driver_photo:
+                missing_passenger_details.append("driver photo")
+            if not (vehicle.make or "").strip():
+                missing_passenger_details.append("vehicle make")
+            if not (vehicle.model or "").strip():
+                missing_passenger_details.append("vehicle model")
+            if not (vehicle.color or "").strip():
+                missing_passenger_details.append("vehicle colour")
+            if missing_passenger_details:
+                raise ValidationError(
+                    _("Complete the passenger-facing driver details before accepting trips: {}").format(
+                        ", ".join(missing_passenger_details)
+                    )
+                )
 
             new_trip_datetime = timezone.make_aware(
                 datetime.combine(trip.trip_date, trip.trip_time)
