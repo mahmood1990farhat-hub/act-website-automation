@@ -138,18 +138,19 @@ class CompleteTripView(EMADBaseView):
 
             logger.info(f"Trip {trip.id} completed by driver {user.id}")
 
-            # Notify passenger
+            # Push notifications apply to registered passengers only.
             try:
-                notify_user(
-                    user=trip.passenger.user_id,
-                    title_en='Trip Completed',
-                    title_ar='اكتملت الرحلة',
-                    desc_en=f'Your trip #{trip.id} has been completed. Thank you for using our service!',
-                    desc_ar=f'اكتملت رحلتك #{trip.id}. شكراً لاستخدام خدمتنا!',
-                    locale=locale,
-                    notification_type=NOTIFICATION_TYPE_TRIP_COMPLETED,
-                    trip_id=trip.id
-                )
+                if trip.passenger:
+                    notify_user(
+                        user=trip.passenger.user_id,
+                        title_en='Trip Completed',
+                        title_ar='اكتملت الرحلة',
+                        desc_en=f'Your trip #{trip.id} has been completed. Thank you for using our service!',
+                        desc_ar=f'اكتملت رحلتك #{trip.id}. شكراً لاستخدام خدمتنا!',
+                        locale=locale,
+                        notification_type=NOTIFICATION_TYPE_TRIP_COMPLETED,
+                        trip_id=trip.id
+                    )
             except Exception as e:
                 logger.warning(f"Failed to send notification for trip {trip.id}: {str(e)}")
 
