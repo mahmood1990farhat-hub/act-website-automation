@@ -419,6 +419,13 @@ class AdminUpdateTripView(EMADBaseView):
         try:
             # Prepare update data
             data = request.data.copy()
+
+            # Driver assignment has its own guarded lifecycle endpoint so a
+            # generic edit cannot bypass explicit driver acceptance.
+            if 'driver_id' in data:
+                raise ValidationError({
+                    'driver_id': _('Use the dedicated driver assignment action for this booking')
+                })
             
             # Handle passenger_id update
             if 'passenger_id' in data:
