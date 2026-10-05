@@ -255,3 +255,24 @@ class PricingEngineTestCase(TestCase):
         )
         self.assertEqual(fee_to, Decimal('8.00'))
 
+
+
+    def test_dynamic_tier_boundary_never_makes_longer_trip_cheaper(self):
+        before = PricingEngine.calculate_trip_cost(
+            trip_time=time(14, 0),
+            vehicle_type=self.vehicle_type,
+            distance_miles=9.99,
+        )
+        at_boundary = PricingEngine.calculate_trip_cost(
+            trip_time=time(14, 0),
+            vehicle_type=self.vehicle_type,
+            distance_miles=10.0,
+        )
+        after = PricingEngine.calculate_trip_cost(
+            trip_time=time(14, 0),
+            vehicle_type=self.vehicle_type,
+            distance_miles=10.01,
+        )
+
+        self.assertGreaterEqual(at_boundary.total_cost, before.total_cost)
+        self.assertGreaterEqual(after.total_cost, at_boundary.total_cost)
