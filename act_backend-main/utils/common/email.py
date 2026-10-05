@@ -712,13 +712,21 @@ def send_trip_accepted_to_passenger(
     """
     Email to passenger when a driver accepts / confirms the trip.
     """
-    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user.id}")
+    user_id = getattr(user, "id", "guest")
+    logger.info(f"[EMAIL] send_trip_accepted_to_passenger trip #{trip.id}, user {user_id}")
     try:
-        if not user.email:
-            logger.warning(f"[EMAIL] Cannot send trip accepted email: user {user.id} has no email")
-            return
+        recipient_email = getattr(user, "email", None) or getattr(trip, "passenger_email", None)
+        if not recipient_email:
+            logger.warning(f"[EMAIL] Cannot send driver details: trip #{trip.id} has no passenger email")
+            return False
 
-        first_name = user.first_name or user.get_full_name() or "Valued Customer"
+        user_full_name = user.get_full_name() if user and hasattr(user, "get_full_name") else ""
+        first_name = (
+            getattr(user, "first_name", "")
+            or user_full_name
+            or getattr(trip, "passenger_name", "")
+            or "Valued Customer"
+        )
 
         if is_guest_driver and guest_driver_info:
             driver_name = guest_driver_info.get("name") or "External Driver"
@@ -806,7 +814,7 @@ def send_trip_accepted_to_passenger(
         _send_mail_async(
             subject,
             message,
-            [user.email],
+            [recipient_email],
             html_message=html_message,
             fail_silently=True,
         )
