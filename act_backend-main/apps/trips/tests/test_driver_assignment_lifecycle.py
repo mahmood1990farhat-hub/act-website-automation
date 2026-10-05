@@ -167,3 +167,52 @@ class DriverAssignmentLifecycleTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.trip.refresh_from_db()
         self.assertIsNone(self.trip.base_driver_id)
+
+
+    def test_paid_assigned_journey_reaches_completed_with_financial_ledgers(self):
+        assigned = self.admin_client.post(
+            f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
+            {"driver_id": self.driver1.id},
+            format="json",
+        )
+        self.assertEqual(assigned.status_code, 200, assigned.data)
+
+        driver_client = APIClient()
+        driver_client.force_authenticate(user=self.driver1.user)
+        with patch("apps.trips.views.accept_trip.send_trip_accepted_to_passenger"):
+            accepted = driver_client.post(
+                f"/api/trips/{self.trip.id}/accept/", {}, format="json"
+            )
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+
+        on_way = driver_client.post(
+            f"/api/trips/{self.trip.id}/driver-on-the-way/", {}, format="json"
+        )
+        self.assertEqual(on_way.status_code, 200, on_way.data)
+
+        started = driver_client.post(
+            f"/api/trips/{self.trip.id}/start/", {}, format="json"
+        )
+        self.assertEqual(started.status_code, 200, started.data)
+
+        with patch("apps.trips.views.end_trip.stop_trip_tracking") as stop_tracking:
+            completed = driver_client.post(
+                f"/api/trips/{self.trip.id}/complete/", {}, format="json"
+            )
+        self.assertEqual(completed.status_code, 200, completed.data)
+
+        self.trip.refresh_from_db()
+        self.assertEqual(self.trip.status, "completed")
+        self.assertEqual(self.trip.driver_earning.status, "AVAILABLE")
+        self.assertEqual(str(self.trip.driver_earning.gross_amount), "80.00")
+        self.assertEqual(str(self.trip.company_revenue.amount), "16.00")
+        stop_tracking.assert_called_once_with(self.trip.id, reason="completed")
+
+        # Completion is idempotent and must not duplicate financial records.
+        repeated = driver_client.post(
+            f"/api/trips/{self.trip.id}/complete/", {}, format="json"
+        )
+        self.assertEqual(repeated.status_code, 200, repeated.data)
+        from apps.earnings.models import DriverEarningLedger, CompanyRevenueLedger
+        self.assertEqual(DriverEarningLedger.objects.filter(trip=self.trip).count(), 1)
+        self.assertEqual(CompanyRevenueLedger.objects.filter(trip=self.trip).count(), 1)
