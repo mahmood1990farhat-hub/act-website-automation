@@ -49,8 +49,7 @@
                     padding-bottom: 6px;
                   "
                 >
-                  Airport & City Transfer – Email Preview Mockups for Driver
-                  details (sent to passenger as soon as driver identified)
+                  Your Airport & City Transfer Driver Details
                 </h1>
                 <p
                   style="
@@ -61,7 +60,7 @@
                     font-weight: 600;
                   "
                 >
-                  Subject: Your Driver Details
+                  Your driver and vehicle have been confirmed for your journey.
                 </p>
               </td>
             </tr>
@@ -107,6 +106,14 @@
                       <p style="margin: 0 0 8px 0; font-size: 14px">
                         <strong>Name:</strong> {{ driver_name }}
                       </p>
+                      {% if driver_photo_url %}
+                      <p style="margin: 0 0 10px 0">
+                        <img src="{{ driver_photo_url }}" alt="Your driver" width="96" style="width:96px;height:96px;object-fit:cover;border-radius:48px" />
+                      </p>
+                      {% endif %}
+                      <p style="margin: 0 0 8px 0; font-size: 14px">
+                        <strong>TfL PHV Driver Licence No.:</strong> {{ driver_licence_number }}
+                      </p>
                       <p style="margin: 0; font-size: 14px">
                         <strong>Phone:</strong> {{ driver_phone }}
                       </p>
@@ -139,7 +146,7 @@
                         <strong>Vehicle:</strong> {{ vehicle_name }}
                       </p>
                       <p style="margin: 0 0 8px 0; font-size: 14px">
-                        <strong>Registration:</strong> {{ vehicle_registration }}
+                        <strong>Registration (VRM):</strong> {{ vehicle_registration }}
                       </p>
                       {% if vehicle_color != "N/A" %}
                       <p style="margin: 0; font-size: 14px">
