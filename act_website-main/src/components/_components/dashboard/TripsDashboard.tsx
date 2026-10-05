@@ -77,6 +77,8 @@ export default function TripsDashboard({
 	const [ordering, setOrdering] = useState("-created_at");
 	const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
 	const [showAssignGuestModal, setShowAssignGuestModal] = useState(false);
+	const [showAssignActDriverModal, setShowAssignActDriverModal] = useState(false);
+	const [selectedActDriverId, setSelectedActDriverId] = useState("");
 	const [guestDriverForm, setGuestDriverForm] = useState<{
 		name: string;
 		phone: string;
@@ -158,6 +160,43 @@ export default function TripsDashboard({
 				token: token,
 				queryParams,
 			});
+		},
+	});
+
+	const { data: actDrivers, isLoading: actDriversLoading } = useQuery<any>({
+		queryKey: ["act assignment drivers", detailsTrips?.car_type],
+		queryFn: () =>
+			fetchData({
+				endpoint: "/api/admin-panel/normal-drivers/",
+				token,
+				queryParams: { is_active: "true", page_size: "100" },
+			}),
+		enabled: showAssignActDriverModal,
+	});
+
+	const compatibleActDrivers = (actDrivers?.data?.drivers || []).filter(
+		(driver: any) =>
+			driver?.vehicle?.vehicle_type?.id ===
+			(detailsTrips?.car_type || detailsTrips?.vehicle_info?.id),
+	);
+
+	const assignActDriverMutation = useMutation({
+		mutationFn: async () => {
+			if (!detailsTrips?.id || !selectedActDriverId) {
+				throw new Error("Trip and driver are required");
+			}
+			return postData<any>({
+				endpoint: `/api/admin-panel/trips/${detailsTrips.id}/assign-driver/`,
+				token,
+				body: { driver_id: Number(selectedActDriverId) },
+				noToast: false,
+			});
+		},
+		onSuccess: (response) => {
+			if (response?.data) setDetailsTrips(response.data);
+			setShowAssignActDriverModal(false);
+			setSelectedActDriverId("");
+			queryClient.invalidateQueries({ queryKey: ["my Trips driver"] });
 		},
 	});
 
