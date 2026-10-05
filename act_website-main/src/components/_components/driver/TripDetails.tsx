@@ -34,10 +34,12 @@ export default function TripDetails({
 
   const AcceptTrip = async () => {
     try {
-      const res = await postData({
+      await postData({
         endpoint: `/api/trips/${detailsTrips.id}/accept/`,
         token: token,
       });
+      router.push(`/${locale}/driver/acceptable-trips`);
+      router.refresh();
     } catch (err) {
       console.log(err);
     }
