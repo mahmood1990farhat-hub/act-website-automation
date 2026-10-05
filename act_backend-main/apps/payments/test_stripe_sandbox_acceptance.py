@@ -19,7 +19,13 @@ from apps.vehicle.models import VehicleType
     CELERY_TASK_ALWAYS_EAGER=True,
 )
 def _plain_json_value(value):
-    """Convert StripeObject/nested mappings without relying on SDK-private helpers."""
+    """Convert StripeObject/nested values across Stripe SDK versions."""
+    public_converter = getattr(value, "to_dict_recursive", None)
+    private_converter = getattr(value, "_to_dict_recursive", None)
+    if callable(public_converter):
+        return _plain_json_value(public_converter())
+    if callable(private_converter):
+        return _plain_json_value(private_converter())
     if isinstance(value, Mapping) or callable(getattr(value, "items", None)):
         return {key: _plain_json_value(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
