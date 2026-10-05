@@ -14,7 +14,7 @@ class BaseDriverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BaseDriver
-        fields = ['id', 'user', 'pco', 'dbs', 'dvla', 'bank_details']
+        fields = ['id', 'user', 'pco', 'pco_licence_number', 'driver_photo', 'dbs', 'dvla', 'bank_details']
 
 
 class NormalDriverSerializer(serializers.ModelSerializer):
