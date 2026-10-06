@@ -35,6 +35,10 @@ jobs:
           command -v pg_dump >/dev/null
           command -v pg_restore >/dev/null
 
+          backup_dir="/var/www/atg/atg-backend/shared/backups"
+          test -d "$backup_dir"
+          test -w "$backup_dir"
+
           tmp_backup="$RUNNER_TEMP/act-pre-migration-${{ github.run_id }}.dump"
           final_name="act-pre-migration-${{ inputs.commit_sha }}-$(date -u +%Y%m%dT%H%M%SZ).dump"
 
@@ -81,11 +85,10 @@ jobs:
               raise SystemExit("Database backup is empty")
           PY
 
-          sudo install -d -m 0750 /var/www/atg/atg-backend/shared/backups
-          sudo install -m 0640 "$tmp_backup" "/var/www/atg/atg-backend/shared/backups/$final_name"
+          install -m 0640 "$tmp_backup" "$backup_dir/$final_name"
           rm -f "$tmp_backup"
 
-          echo "Verified pre-migration backup: /var/www/atg/atg-backend/shared/backups/$final_name" >> "$GITHUB_STEP_SUMMARY"
+          echo "Verified pre-migration backup: $backup_dir/$final_name" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy exact accepted backend commit
         shell: bash
