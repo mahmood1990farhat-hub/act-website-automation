@@ -29,7 +29,7 @@ jobs:
           ACCEPTED_SHA: "${{ inputs.commit_sha }}"
         run: |
           set -euo pipefail
-          printf '%s\\n' "$ACCEPTED_SHA" | grep -Eq '^[0-9a-f]{40}$'
+          printf '%s\n' "$ACCEPTED_SHA" | grep -Eq '^[0-9a-f]{40}$'
 
       - name: Create and verify pre-migration database backup
         if: ${{ inputs.apply_migrations }}
