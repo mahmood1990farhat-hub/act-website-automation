@@ -208,7 +208,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           workflow = Path(".github/workflows/deploy-frontend.yml").read_text()
-          assert 'ACCEPTED_SHA: "' + '
+          assert 'ACCEPTED_SHA: "' + '          grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
           from pathlib import Path
@@ -244,7 +244,7 @@ jobs:
             docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
           done
  + '{{ inputs.commit_sha }}"' in workflow
-          assert 'ACCEPTED_SHA="' + '
+          assert 'ACCEPTED_SHA="' + '          grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
           from pathlib import Path
@@ -280,7 +280,7 @@ jobs:
             docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
           done
  + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
-          assert 'echo "accepted_sha=' + '
+          assert 'echo "accepted_sha=' + '          grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
           from pathlib import Path
@@ -315,7 +315,7 @@ jobs:
           do
             docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
           done
- + 'ACCEPTED_SHA" >> "' + '
+ + 'ACCEPTED_SHA" >> "' + '          grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
           from pathlib import Path
@@ -351,7 +351,7 @@ jobs:
             docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
           done
  + 'GITHUB_OUTPUT"' in workflow
-          assert '
+          assert '          grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
           from pathlib import Path
