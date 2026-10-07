@@ -66,7 +66,7 @@ function validateContact(changes) {
   return state;
 }
 
-async function checkPaymentHandoff(details, token) {
+async function checkPaymentHandoff(details, token, expectedPhone) {
   const requests = [];
   const result = {};
   await submitReview.runInNewContext({
@@ -98,6 +98,10 @@ async function checkPaymentHandoff(details, token) {
     ['passenger_country_code', 'countryCode'], ['passenger_phone', 'mobileNumber']]) {
     assert.equal(requests[0].body[wire], details[field], 'payment must preserve ' + wire);
   }
+  const body = requests[0].body;
+  const callingCode = body.passenger_country_code.split(' ')[0];
+  assert.match(body.passenger_phone, /^[0-9]+$/, 'backend receives national digits without another prefix');
+  assert.equal(callingCode + body.passenger_phone, expectedPhone, 'combined backend contact contains exactly one calling code');
   assert.equal(result.step, 8, 'successful payment initiation must reach the payment step');
   assert.equal(result.secret, 'synthetic-not-a-stripe-secret');
   assert.equal(result.total, 100);
@@ -124,15 +128,20 @@ async function checkContactSubmission() {
     assert.deepEqual(state.validated, [expectedPhone], 'validate the expected international number');
     assert.equal(state.saved.fullName, 'Test Passenger');
     assert.equal(state.saved.email, 'Passenger.Test+trip@example.com');
-    assert.equal(state.saved.mobileNumber, mobileNumber.trim());
-    await checkPaymentHandoff(state.saved, undefined);
-    await checkPaymentHandoff(state.saved, 'synthetic-session-token');
+    assert.equal(state.saved.countryCode, countryCode);
+    assert.equal(state.saved.mobileNumber, expectedPhone.slice(countryCode.split(' ')[0].length));
+    const resubmitted = validateContact(state.saved);
+    assert.equal(resubmitted.error, '', 'normalized contact remains valid after Back/Continue');
+    assert.equal(resubmitted.saved.mobileNumber, state.saved.mobileNumber, 'normalization must be idempotent');
+    await checkPaymentHandoff(state.saved, undefined, expectedPhone);
+    await checkPaymentHandoff(state.saved, 'synthetic-session-token', expectedPhone);
   }
   const invalid = [
     { fullName: ' ' }, { email: '' }, { countryCode: '' }, { mobileNumber: ' ' },
     { email: 'not-an-email' }, { email: 'a@@example.com' }, { email: 'a b@example.com' },
     { mobileNumber: '123' }, { mobileNumber: 'abc' }, { mobileNumber: '0000000000' },
     { countryCode: 'United Kingdom' }, { mobileNumber: '++447464940000' },
+    { countryCode: '+44 United Kingdom', mobileNumber: '+33612345678' },
   ];
   for (const fields of invalid) {
     const state = validateContact(fields);
@@ -140,6 +149,6 @@ async function checkContactSubmission() {
     assert.equal(state.advances, 0, 'invalid contact must not advance');
     assert.equal(state.saves, 0, 'invalid contact must not be saved for payment');
   }
-  console.log('PASS 8 valid and 12 invalid passenger submissions; 16 mocked guest/authenticated payment handoffs; real phone validator');
+  console.log('PASS 8 valid and 13 invalid passenger submissions; 8 normalized resubmissions; 16 canonical mocked guest/authenticated payment handoffs; real phone validator');
 }
 checkContactSubmission().catch((error) => { console.error(error); process.exitCode = 1; });
