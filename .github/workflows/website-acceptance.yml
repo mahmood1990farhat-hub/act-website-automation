@@ -214,7 +214,10 @@ jobs:
           grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
           grep -q -- "--verified-backup" server/deploy/act-backend-deploy
           grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
           grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
           ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
       - name: Booking regression guards
         run: |
