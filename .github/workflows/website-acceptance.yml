@@ -210,6 +210,15 @@ jobs:
           grep -q "pg_dump" .github/workflows/deploy-backend.yml
           grep -q "pg_restore" .github/workflows/deploy-backend.yml
           grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
       - name: Booking regression guards
         run: |
           for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs

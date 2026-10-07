@@ -44,9 +44,15 @@ shift || true
 
 MIGRATE=0
 TOKEN_STDIN=0
+VERIFIED_BACKUP=""
 while (($#)); do
   case $1 in
     --migrate) MIGRATE=1 ;;
+    --verified-backup)
+      shift
+      (($#)) || { echo "verified backup path required" >&2; exit 1; }
+      VERIFIED_BACKUP=$1
+      ;;
     --github-token-stdin) TOKEN_STDIN=1 ;;
     *) echo "unsupported argument: $1" >&2; exit 1 ;;
   esac
@@ -133,12 +139,6 @@ cd "$RELEASE"
 .venv/bin/python manage.py migrate --plan | tee "$ACT_ROOT/shared/logs/migration-plan-$ID.txt"
 MIGRATION_STATE=$(.venv/bin/python manage.py showmigrations --plan | sha256sum | awk '{print $1}')
 
-if ((MIGRATE)); then
-  [[ ${ACT_MIGRATION_AUTHORIZED:-} == YES ]] || { echo "migration authorization missing" >&2; exit 1; }
-  echo "Automatic migration execution is intentionally disabled until a reviewed backup hook is configured." >&2
-  exit 1
-fi
-
 REQ_HASH=$(sha256sum requirements.txt | awk '{print $1}')
 cat >release.json <<EOF
 {"git_sha":"$SHA","build_time":"$(date -u +%FT%TZ)","python_version":"$(.venv/bin/python -V 2>&1)","requirements_sha256":"$REQ_HASH","migration_state_sha256":"$MIGRATION_STATE","workflow_run":"${GITHUB_RUN_ID:-manual}"}
@@ -150,7 +150,24 @@ chgrp www-data "$ACT_ROOT/releases/$ID" "$RELEASE"
 chgrp -hR www-data "$RELEASE/.venv"
 runuser -u www-data -- "$RELEASE/.venv/bin/python" -c "import celery, weasyprint"
 
+if ((MIGRATE)); then
+  BACKUP_ROOT="$ACT_ROOT/shared/backups"
+  [[ -n $VERIFIED_BACKUP ]] || { echo "verified backup required for migrations" >&2; exit 1; }
+  [[ $VERIFIED_BACKUP == "$BACKUP_ROOT"/act-pre-migration-"$SHA"-*.dump ]] || {
+    echo "verified backup does not match accepted SHA" >&2
+    exit 1
+  }
+  [[ -f $VERIFIED_BACKUP && -s $VERIFIED_BACKUP ]] || { echo "verified backup missing or empty" >&2; exit 1; }
+  command -v pg_restore >/dev/null
+  pg_restore --list "$VERIFIED_BACKUP" >/dev/null
+  log_event migration_backup_verified "path=$VERIFIED_BACKUP git_sha=$SHA"
+  .venv/bin/python manage.py migrate --noinput
+  log_event migrations_applied "git_sha=$SHA"
+fi
+
 SWITCHED=0
+MIGRATIONS_APPLIED=0
+((MIGRATE)) && MIGRATIONS_APPLIED=1
 ROLLBACK_REASON=unspecified_post_switch_failure
 
 rollback() {
@@ -158,9 +175,11 @@ rollback() {
   trap - ERR
   log_event rollback_trigger \
     "reason=$ROLLBACK_REASON exit_code=$rc line=$line command=$(printf '%q' "$command") previous=$PREVIOUS"
-  if ((SWITCHED)); then
+  if ((SWITCHED)) && ((MIGRATIONS_APPLIED == 0)); then
     ln -sfn "$PREVIOUS" "$ACT_ROOT/.current.rollback"
     mv -Tf "$ACT_ROOT/.current.rollback" "$ACT_ROOT/current"
+  elif ((SWITCHED)) && ((MIGRATIONS_APPLIED)); then
+    log_event rollback_skipped "reason=migrations_applied keep_release=$RELEASE"
   fi
   for unit in "${PRE_ACTIVE_UNITS[@]}"; do
     log_event rollback_restart "unit=$unit command=systemctl_restart"
