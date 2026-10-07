@@ -32,6 +32,7 @@ jobs:
           grep -Eqx '[0-9a-f]{40}' <<<"$ACCEPTED_SHA"
 
       - name: Create and verify pre-migration database backup
+        id: migration_backup
         if: ${{ inputs.apply_migrations }}
         shell: bash
         run: |
@@ -89,10 +90,14 @@ jobs:
               raise SystemExit("Database backup is empty")
           PY
 
-          install -m 0640 "$tmp_backup" "$backup_dir/$final_name"
+          final_backup="$backup_dir/$final_name"
+          install -m 0640 "$tmp_backup" "$final_backup"
           rm -f "$tmp_backup"
+          test -s "$final_backup"
+          pg_restore --list "$final_backup" >/dev/null
 
-          echo "Verified pre-migration backup: $backup_dir/$final_name" >> "$GITHUB_STEP_SUMMARY"
+          echo "backup_path=$final_backup" >> "$GITHUB_OUTPUT"
+          echo "Verified pre-migration backup: $final_backup" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy exact accepted backend commit
         shell: bash
@@ -102,7 +107,9 @@ jobs:
           set -euo pipefail
           args=("${{ inputs.commit_sha }}" --github-token-stdin)
           if [[ "${{ inputs.apply_migrations }}" == true ]]; then
-            args+=(--migrate)
+            backup_path="${{ steps.migration_backup.outputs.backup_path }}"
+            [[ -n "$backup_path" ]] || { echo "verified backup path missing" >&2; exit 1; }
+            args+=(--migrate --verified-backup "$backup_path")
           fi
           printf '%s\n' "$GH_TOKEN" | sudo /usr/local/sbin/act-backend-deploy "${args[@]}" | tee "$RUNNER_TEMP/act-backend-deploy.log"
 
