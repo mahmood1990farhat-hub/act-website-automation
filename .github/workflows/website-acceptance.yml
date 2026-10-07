@@ -205,6 +205,192 @@ jobs:
           grep -q "commit_sha:" .github/workflows/deploy-frontend.yml
           grep -q "environment: production" .github/workflows/deploy-frontend.yml
           ! grep -q "branches: \[main\]" .github/workflows/deploy-frontend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-frontend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '
+          grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
+          grep -q "pg_dump" .github/workflows/deploy-backend.yml
+          grep -q "pg_restore" .github/workflows/deploy-backend.yml
+          grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
+      - name: Live-smoke blocker regression guards
+        run: |
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+      - name: Booking regression guards
+        run: |
+          for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
+          do
+            docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
+          done
+ + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '
+          grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
+          grep -q "pg_dump" .github/workflows/deploy-backend.yml
+          grep -q "pg_restore" .github/workflows/deploy-backend.yml
+          grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
+      - name: Live-smoke blocker regression guards
+        run: |
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+      - name: Booking regression guards
+        run: |
+          for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
+          do
+            docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
+          done
+ + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '
+          grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
+          grep -q "pg_dump" .github/workflows/deploy-backend.yml
+          grep -q "pg_restore" .github/workflows/deploy-backend.yml
+          grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
+      - name: Live-smoke blocker regression guards
+        run: |
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+      - name: Booking regression guards
+        run: |
+          for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
+          do
+            docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
+          done
+ + 'ACCEPTED_SHA" >> "' + '
+          grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
+          grep -q "pg_dump" .github/workflows/deploy-backend.yml
+          grep -q "pg_restore" .github/workflows/deploy-backend.yml
+          grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
+      - name: Live-smoke blocker regression guards
+        run: |
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+      - name: Booking regression guards
+        run: |
+          for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
+          do
+            docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
+          done
+ + 'GITHUB_OUTPUT"' in workflow
+          assert '
+          grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
+          grep -q "pg_dump" .github/workflows/deploy-backend.yml
+          grep -q "pg_restore" .github/workflows/deploy-backend.yml
+          grep -q "shared/backups" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" .github/workflows/deploy-backend.yml
+          grep -q "migration_backup.outputs.backup_path" .github/workflows/deploy-backend.yml
+          grep -q -- "--verified-backup" server/deploy/act-backend-deploy
+          grep -q 'pg_restore --list "$VERIFIED_BACKUP"' server/deploy/act-backend-deploy
+          grep -q 'pg_restore --file /dev/null "$final_backup"' .github/workflows/deploy-backend.yml
+          grep -q 'runuser -u www-data' server/deploy/act-backend-deploy
+          grep -q 'manage.py migrate --noinput' server/deploy/act-backend-deploy
+          grep -q 'rollback_skipped.*migrations_applied' server/deploy/act-backend-deploy
+          ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
+      - name: Live-smoke blocker regression guards
+        run: |
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+      - name: Booking regression guards
+        run: |
+          for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
+          do
+            docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
+          done
+ + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
+          normalized_frontend="$(printf '  d9cbd2b203f0dde6b168740c3305a87727058dc2  \n' | tr -d '[:space:]')"
+          [[ "$normalized_frontend" == "d9cbd2b203f0dde6b168740c3305a87727058dc2" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized_frontend"
           grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
           python - <<'PY'
