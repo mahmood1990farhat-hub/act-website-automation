@@ -232,8 +232,8 @@ jobs:
           ! grep -q "Automatic migration execution is intentionally disabled" server/deploy/act-backend-deploy
       - name: Live-smoke blocker regression guards
         run: |
-          grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
-          ! grep -Fq 'const emailLooksValid = /^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          grep -Fq 'const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
+          ! grep -Fq 'const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);' act_website-main/src/components/_components/bookTaxi/PassengerDetails.tsx
       - name: Booking regression guards
         run: |
           for test in             tests/check-quote-coordinate-validation.cjs             tests/check-quote-state-invalidation.cjs             tests/check-booking-journey-summary.cjs             tests/check-vehicle-selection-safety.cjs             tests/check-vehicle-image-fallback.cjs             tests/check-vehicle-capacity-presentation.cjs             tests/check-driver-assignment-lifecycle.cjs             tests/check-three-hour-cancellation.cjs             tests/check-vehicle-class-rename.cjs             tests/check-passenger-flight-review-handoff.cjs             tests/check-payment-fulfillment-safety.cjs
