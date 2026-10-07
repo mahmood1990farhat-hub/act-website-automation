@@ -46,7 +46,7 @@ export default function PassengerDetails({
       return;
     }
 
-    const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!emailLooksValid) {
       setValidationError(t("Enter a valid email address."));
       return;
