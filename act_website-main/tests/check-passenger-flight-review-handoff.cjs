@@ -21,3 +21,134 @@ assert.ok(index.includes('infantSeatOption: d.infants > 0 ? current.infantSeatOp
 assert.ok(index.includes('childSeatOption: d.children > 0 ? current.childSeatOption : ""'),"removed children must clear stale child-seat choice");
 
 console.log("PASS passenger/flight/review handoff regression guard");
+
+const ts = require('typescript');
+const vm = require('node:vm');
+const { isValidPhoneNumber } = require('react-phone-number-input');
+
+// Execute the actual component callbacks, not a duplicate regex or validator.
+// React state and the payment HTTP boundary are replaced; phone metadata is real.
+function compileSubmit(sourceText, filename) {
+  const source = ts.createSourceFile(filename, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const handlers = [];
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && node.name.getText(source) === 'onSubmit' &&
+        node.initializer && ts.isArrowFunction(node.initializer)) handlers.push(node.initializer);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  assert.equal(handlers.length, 1, filename + ' must have exactly one submission callback');
+  const compiled = ts.transpileModule('(' + handlers[0].getText(source) + ')', {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.None },
+  }).outputText;
+  return new vm.Script(compiled, { filename });
+}
+
+const submitPassenger = compileSubmit(passenger, 'PassengerDetails.tsx');
+const submitReview = compileSubmit(confirm, 'ConfirmFlightDetails.tsx');
+assert.ok(passenger.includes('onClick={onSubmit}'), 'Continue must use the tested callback');
+const contact = { fullName: '  Test Passenger  ', email: '  Passenger.Test+trip@example.com  ',
+  countryCode: '+44 United Kingdom', mobileNumber: '7464940000' };
+
+function validateContact(changes) {
+  const state = { saved: null, saves: 0, advances: 0, error: 'uncleared', validated: [] };
+  submitPassenger.runInNewContext({
+    passengerDetails: { ...contact, ...changes },
+    t: (text) => text,
+    setValidationError: (error) => { state.error = error; },
+    setPassengerDetails: (details) => { state.saved = details; state.saves += 1; },
+    nextStep: () => { state.advances += 1; },
+    isValidPhoneNumber: (phone) => {
+      state.validated.push(phone);
+      return isValidPhoneNumber(phone);
+    },
+  })();
+  return state;
+}
+
+async function checkPaymentHandoff(details, token, expectedPhone) {
+  const requests = [];
+  const result = {};
+  await submitReview.runInNewContext({
+    data: {
+      routePoints: [
+        { type: 'pickup', point: { coordinates: { lat: 51.47, lng: -0.4543 } } },
+        { type: 'dropoff', point: { coordinates: { lat: 51.5074, lng: -0.1278 } } },
+      ],
+      date: '2030-01-01', time: '12:00', numberOfPassengers: 1,
+      adults: 1, children: 0, infants: 0, smallSuitcase: 0, largeSuitcase: 0,
+      cartype: 1, total_cost: 100, passengerDetails: details,
+      flightDetails: {}, childInfantTravel: {}, additionalRequirements: {},
+    },
+    token, locale: 'en', console,
+    runtimeText: (_locale, text) => text,
+    setPaymentError: (error) => { result.error = error; },
+    setIsLoading: (loading) => { result.loading = loading; },
+    setClientSecret: (value) => { result.secret = value; },
+    setPaymentTotal: (value) => { result.total = value; },
+    setStep: (value) => { result.step = value; },
+    postData: async (request) => {
+      requests.push(request);
+      return { client_secret: 'synthetic-not-a-stripe-secret', price_breakdown: { total_cost: 100 } };
+    },
+  })();
+  assert.equal(requests.length, 1, 'review must initiate payment exactly once');
+  assert.equal(requests[0].endpoint, token ? '/api/trips/initiate-payment/' : '/api/trips/initiate-guest-payment/');
+  for (const [wire, field] of [['passenger_name', 'fullName'], ['passenger_email', 'email'],
+    ['passenger_country_code', 'countryCode'], ['passenger_phone', 'mobileNumber']]) {
+    assert.equal(requests[0].body[wire], details[field], 'payment must preserve ' + wire);
+  }
+  const body = requests[0].body;
+  const callingCode = body.passenger_country_code.split(' ')[0];
+  assert.match(body.passenger_phone, /^[0-9]+$/, 'backend receives national digits without another prefix');
+  assert.equal(callingCode + body.passenger_phone, expectedPhone, 'combined backend contact contains exactly one calling code');
+  assert.equal(result.step, 8, 'successful payment initiation must reach the payment step');
+  assert.equal(result.secret, 'synthetic-not-a-stripe-secret');
+  assert.equal(result.total, 100);
+  assert.equal(result.loading, false);
+  assert.equal(result.error, '');
+}
+
+async function checkContactSubmission() {
+  const valid = [
+    ['+44 United Kingdom', '7464940000', '+447464940000'],
+    ['+44 United Kingdom', '07464940000', '+447464940000'],
+    ['+44 United Kingdom', ' 07464 940000 ', '+447464940000'],
+    ['+44 United Kingdom', '(07464) 940-000', '+447464940000'],
+    ['+44 United Kingdom', '+447464940000', '+447464940000'],
+    ['+44 United Kingdom', '+44 7464 940000', '+447464940000'],
+    ['+33 France', '0612345678', '+33612345678'],
+    ['+1 United States', '2133734253', '+12133734253'],
+  ];
+  for (const [countryCode, mobileNumber, expectedPhone] of valid) {
+    const state = validateContact({ countryCode, mobileNumber });
+    assert.equal(state.error, '', 'valid contact must not display an error');
+    assert.equal(state.advances, 1, 'valid contact must advance once');
+    assert.equal(state.saves, 1, 'valid contact must be saved before advancing');
+    assert.deepEqual(state.validated, [expectedPhone], 'validate the expected international number');
+    assert.equal(state.saved.fullName, 'Test Passenger');
+    assert.equal(state.saved.email, 'Passenger.Test+trip@example.com');
+    assert.equal(state.saved.countryCode, countryCode);
+    assert.equal(state.saved.mobileNumber, expectedPhone.slice(countryCode.split(' ')[0].length));
+    const resubmitted = validateContact(state.saved);
+    assert.equal(resubmitted.error, '', 'normalized contact remains valid after Back/Continue');
+    assert.equal(resubmitted.saved.mobileNumber, state.saved.mobileNumber, 'normalization must be idempotent');
+    await checkPaymentHandoff(state.saved, undefined, expectedPhone);
+    await checkPaymentHandoff(state.saved, 'synthetic-session-token', expectedPhone);
+  }
+  const invalid = [
+    { fullName: ' ' }, { email: '' }, { countryCode: '' }, { mobileNumber: ' ' },
+    { email: 'not-an-email' }, { email: 'a@@example.com' }, { email: 'a b@example.com' },
+    { mobileNumber: '123' }, { mobileNumber: 'abc' }, { mobileNumber: '0000000000' },
+    { countryCode: 'United Kingdom' }, { mobileNumber: '++447464940000' },
+    { countryCode: '+44 United Kingdom', mobileNumber: '+33612345678' },
+  ];
+  for (const fields of invalid) {
+    const state = validateContact(fields);
+    assert.ok(state.error && state.error !== 'uncleared', 'invalid contact must display an error');
+    assert.equal(state.advances, 0, 'invalid contact must not advance');
+    assert.equal(state.saves, 0, 'invalid contact must not be saved for payment');
+  }
+  console.log('PASS 8 valid and 13 invalid passenger submissions; 8 normalized resubmissions; 16 canonical mocked guest/authenticated payment handoffs; real phone validator');
+}
+checkContactSubmission().catch((error) => { console.error(error); process.exitCode = 1; });
