@@ -58,16 +58,18 @@ export default function PassengerDetails({
       ? enteredDigits
       : `${dialCode}${enteredDigits.replace(/^0+/, "")}`;
 
-    if (!dialCode || !isValidPhoneNumber(internationalPhone)) {
+    if (!dialCode || !internationalPhone.startsWith(dialCode) || !isValidPhoneNumber(internationalPhone)) {
       setValidationError(t("Enter a valid mobile number for the selected country code."));
       return;
     }
 
+    // The backend stores/displays the country code and national number separately.
     setPassengerDetails({
       ...passengerDetails,
       fullName,
       email,
-      mobileNumber,
+      countryCode,
+      mobileNumber: internationalPhone.slice(dialCode.length),
     });
     setValidationError("");
     nextStep();
