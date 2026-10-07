@@ -86,6 +86,12 @@ jobs:
               stdout=subprocess.DEVNULL,
               stderr=subprocess.PIPE,
           )
+          subprocess.run(
+              ["pg_restore", "--file", os.devnull, target],
+              check=True,
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.PIPE,
+          )
           if os.path.getsize(target) <= 0:
               raise SystemExit("Database backup is empty")
           PY
@@ -95,6 +101,7 @@ jobs:
           rm -f "$tmp_backup"
           test -s "$final_backup"
           pg_restore --list "$final_backup" >/dev/null
+          pg_restore --file /dev/null "$final_backup"
 
           echo "backup_path=$final_backup" >> "$GITHUB_OUTPUT"
           echo "Verified pre-migration backup: $final_backup" >> "$GITHUB_STEP_SUMMARY"
