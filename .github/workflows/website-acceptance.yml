@@ -207,6 +207,13 @@ jobs:
           ! grep -q "branches: \[main\]" .github/workflows/deploy-frontend.yml
           grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
+          grep -Fq 'ACCEPTED_SHA: "${{ inputs.commit_sha }}"' .github/workflows/deploy-backend.yml
+          grep -Fq 'ACCEPTED_SHA="${ACCEPTED_SHA//[[:space:]]/}"' .github/workflows/deploy-backend.yml
+          grep -Fq 'echo "accepted_sha=$ACCEPTED_SHA" >> "$GITHUB_OUTPUT"' .github/workflows/deploy-backend.yml
+          grep -Fq '${{ steps.accepted_sha.outputs.accepted_sha }}' .github/workflows/deploy-backend.yml
+          normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
+          [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
+          grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
           grep -q "pg_dump" .github/workflows/deploy-backend.yml
           grep -q "pg_restore" .github/workflows/deploy-backend.yml
           grep -q "shared/backups" .github/workflows/deploy-backend.yml
