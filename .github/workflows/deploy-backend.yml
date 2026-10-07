@@ -24,12 +24,15 @@ jobs:
     environment: production
     steps:
       - name: Validate accepted SHA
+        id: accepted_sha
         shell: bash
         env:
           ACCEPTED_SHA: "${{ inputs.commit_sha }}"
         run: |
           set -euo pipefail
+          ACCEPTED_SHA="${ACCEPTED_SHA//[[:space:]]/}"
           grep -Eqx '[0-9a-f]{40}' <<<"$ACCEPTED_SHA"
+          echo "accepted_sha=$ACCEPTED_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Create and verify pre-migration database backup
         id: migration_backup
@@ -45,7 +48,7 @@ jobs:
           test -w "$backup_dir"
 
           tmp_backup="$RUNNER_TEMP/act-pre-migration-${{ github.run_id }}.dump"
-          final_name="act-pre-migration-${{ inputs.commit_sha }}-$(date -u +%Y%m%dT%H%M%SZ).dump"
+          final_name="act-pre-migration-${{ steps.accepted_sha.outputs.accepted_sha }}-$(date -u +%Y%m%dT%H%M%SZ).dump"
 
           /var/www/atg/atg-backend/current/.venv/bin/python - "$tmp_backup" <<'PY'
           import os
@@ -112,7 +115,7 @@ jobs:
           GH_TOKEN: "${{ github.token }}"
         run: |
           set -euo pipefail
-          args=("${{ inputs.commit_sha }}" --github-token-stdin)
+          args=("${{ steps.accepted_sha.outputs.accepted_sha }}" --github-token-stdin)
           if [[ "${{ inputs.apply_migrations }}" == true ]]; then
             backup_path="${{ steps.migration_backup.outputs.backup_path }}"
             [[ -n "$backup_path" ]] || { echo "verified backup path missing" >&2; exit 1; }
