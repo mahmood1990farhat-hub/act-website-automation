@@ -207,10 +207,14 @@ jobs:
           ! grep -q "branches: \[main\]" .github/workflows/deploy-frontend.yml
           grep -q "workflow_dispatch:" .github/workflows/deploy-backend.yml
           grep -q "commit_sha:" .github/workflows/deploy-backend.yml
-          grep -Fq 'ACCEPTED_SHA: "${{ inputs.commit_sha }}"' .github/workflows/deploy-backend.yml
-          grep -Fq 'ACCEPTED_SHA="${ACCEPTED_SHA//[[:space:]]/}"' .github/workflows/deploy-backend.yml
-          grep -Fq 'echo "accepted_sha=$ACCEPTED_SHA" >> "$GITHUB_OUTPUT"' .github/workflows/deploy-backend.yml
-          grep -Fq '${{ steps.accepted_sha.outputs.accepted_sha }}' .github/workflows/deploy-backend.yml
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/deploy-backend.yml").read_text()
+          assert 'ACCEPTED_SHA: "' + '$' + '{{ inputs.commit_sha }}"' in workflow
+          assert 'ACCEPTED_SHA="' + '$' + '{ACCEPTED_SHA//[[:space:]]/}"' in workflow
+          assert 'echo "accepted_sha=' + '$' + 'ACCEPTED_SHA" >> "' + '$' + 'GITHUB_OUTPUT"' in workflow
+          assert '$' + '{{ steps.accepted_sha.outputs.accepted_sha }}' in workflow
+          PY
           normalized="$(printf '  279f2aa0321d4ceca5ae243bb454419bf39c0494  \n' | tr -d '[:space:]')"
           [[ "$normalized" == "279f2aa0321d4ceca5ae243bb454419bf39c0494" ]]
           grep -Eqx '[0-9a-f]{40}' <<<"$normalized"
