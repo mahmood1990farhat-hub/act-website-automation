@@ -22,8 +22,15 @@ jobs:
 
     steps:
       - name: Validate accepted SHA
+        id: accepted_sha
         shell: bash
-        run: "[[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]"
+        env:
+          ACCEPTED_SHA: "${{ inputs.commit_sha }}"
+        run: |
+          set -euo pipefail
+          ACCEPTED_SHA="${ACCEPTED_SHA//[[:space:]]/}"
+          grep -Eqx '[0-9a-f]{40}' <<<"$ACCEPTED_SHA"
+          echo "accepted_sha=$ACCEPTED_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Deploy exact accepted frontend commit
         shell: bash
@@ -38,11 +45,11 @@ jobs:
           trap cleanup EXIT
 
           git -C "$repo" fetch origin main
-          git -C "$repo" cat-file -e "${{ inputs.commit_sha }}^{commit}"
-          git -C "$repo" merge-base --is-ancestor "${{ inputs.commit_sha }}" origin/main
+          git -C "$repo" cat-file -e "${{ steps.accepted_sha.outputs.accepted_sha }}^{commit}"
+          git -C "$repo" merge-base --is-ancestor "${{ steps.accepted_sha.outputs.accepted_sha }}" origin/main
 
           rm -rf "$release"
-          git -C "$repo" worktree add --detach "$release" "${{ inputs.commit_sha }}"
+          git -C "$repo" worktree add --detach "$release" "${{ steps.accepted_sha.outputs.accepted_sha }}"
 
           rsync -a --delete \
             --exclude='.env' \
