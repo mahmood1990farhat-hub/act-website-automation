@@ -27,7 +27,7 @@ jobs:
         id: accepted_sha
         shell: bash
         env:
-          ACCEPTED_SHA: "${{ steps.accepted_sha.outputs.accepted_sha }}"
+          ACCEPTED_SHA: "${{ inputs.commit_sha }}"
         run: |
           set -euo pipefail
           ACCEPTED_SHA="${ACCEPTED_SHA//[[:space:]]/}"
