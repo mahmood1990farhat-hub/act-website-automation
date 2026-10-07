@@ -52,8 +52,8 @@ export default function PassengerDetails({
       return;
     }
 
-    const dialCode = countryCode.match(/^\\+\\d+/)?.[0] ?? "";
-    const enteredDigits = mobileNumber.replace(/[^\\d+]/g, "");
+    const dialCode = countryCode.match(/^\+\d+/)?.[0] ?? "";
+    const enteredDigits = mobileNumber.replace(/[^\d+]/g, "");
     const internationalPhone = enteredDigits.startsWith("+")
       ? enteredDigits
       : `${dialCode}${enteredDigits.replace(/^0+/, "")}`;
