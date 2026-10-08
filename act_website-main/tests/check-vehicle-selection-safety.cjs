@@ -64,3 +64,15 @@ for (const [locale, [executive, first]] of Object.entries(approved)) {
 }
 assert.equal(vehicleExample("unknown-locale", "first_class"), approved.en[1], "Keep the existing English fallback");
 console.log("PASS approved First/Executive model examples in all 7 languages; existing class mapping, fallback and disclaimer preserved");
+
+// Showcase assets must be bound to stable class codes, never response-array positions.
+for (const s of [
+  'car.code === "first_class"',
+  'car.code === "executive"',
+  '"/images/vehicles/first-class-showcase.jpg"',
+  '"/images/vehicles/executive-class-showcase.jpg"',
+  'showcaseImage ?? car.icon_url',
+  'src={vehicleImage}',
+]) assert.ok(car.includes(s), "showcase class mapping missing: " + s);
+assert.ok(!car.includes('src={car.icon_url}'), "image source must use stable class mapping");
+console.log("PASS stable vehicle showcase image mapping");
