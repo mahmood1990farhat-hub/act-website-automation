@@ -131,6 +131,12 @@ export default function ModernChooseCar({
           const isDisabled = disabledCarIndices.includes(index);
           const isSelected = selectedCar?.id === car.id && !isDisabled;
           const example = vehicleExample(locale, car.code);
+          const showcaseImage = car.code === "first_class"
+            ? "/images/vehicles/first-class-showcase.jpg"
+            : car.code === "executive"
+              ? "/images/vehicles/executive-class-showcase.jpg"
+              : null;
+          const vehicleImage = showcaseImage ?? car.icon_url;
 
           return (
             <Card
@@ -158,9 +164,9 @@ export default function ModernChooseCar({
               }`}
             >
               <div className="relative h-48 sm:h-56 overflow-hidden border-b border-white/10 bg-gradient-to-b from-white to-zinc-100">
-                {car.icon_url ? (
+                {vehicleImage ? (
                   <Image
-                    src={car.icon_url}
+                    src={vehicleImage}
                     alt={localizedVehicleValue(car, "name", locale)}
                     fill
                     className="object-contain p-4 sm:p-6 drop-shadow-2xl transition-transform duration-300 group-hover:scale-[1.03]"
