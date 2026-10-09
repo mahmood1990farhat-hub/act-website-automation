@@ -23,8 +23,8 @@ expect(
   "Vehicle quote type must allow a missing image URL returned by the backend.",
 );
 expect(
-  chooseCar.includes("car.icon_url ? ("),
-  "Choose Car must guard the Next Image component when a vehicle image is missing.",
+  chooseCar.includes("vehicleImage ? ("),
+  "Choose Car must guard the Next Image component when the selected image is missing.",
 );
 expect(
   chooseCar.includes("<CarFront"),
