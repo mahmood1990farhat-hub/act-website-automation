@@ -199,6 +199,30 @@ class CommissionManagementTests(TestCase):
         self.assertFalse(CommissionRule.objects.filter(vehicle_type__isnull=True).exists())
 
     @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
+    def test_legacy_vehicle_rules_block_all_new_category_writes(self):
+        legacy = CommissionRule.objects.create(
+            vehicle_type=self.vehicle(),
+            company_percentage=Decimal('30.00'),
+            driver_percentage=Decimal('70.00'),
+        )
+        actions = [
+            ('set_global', {'company_percentage': '20'}),
+            ('set_individual', {'driver_ids': [self.drivers[0].pk], 'company_percentage': '25'}),
+            ('clear_individual', {'driver_ids': [self.drivers[0].pk]}),
+            ('create_group', {'name': 'DSS', 'driver_ids': [self.drivers[0].pk], 'company_percentage': '15'}),
+        ]
+        for action, payload in actions:
+            with self.subTest(action=action):
+                response = self.command(action, **payload)
+                self.assertEqual(response.status_code, 409, response.data)
+        legacy.refresh_from_db()
+        self.assertTrue(legacy.is_active)
+        self.assertEqual(legacy.company_percentage, Decimal('30.00'))
+        self.assertFalse(DriverCommissionGroup.objects.exists())
+        self.assertFalse(DriverCommissionMembership.objects.exists())
+        self.assertFalse(LogEntry.objects.filter(object_repr='ACT commission management').exists())
+
+    @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
     def test_unfinished_assigned_journey_blocks_affected_rate_changes(self):
         Trip.objects.create(pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.5, dropoff_lng=-0.12,
             trip_date=date.today(), trip_time=time(12), car_type=self.vehicle(), cost=Decimal('100.00'),
