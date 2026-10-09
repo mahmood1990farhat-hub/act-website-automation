@@ -15,7 +15,10 @@ class PayoutAgreementQuerySet(models.QuerySet):
         # Financial corrections belong in adjustment records, not in this history.
         if set(kwargs) != {'released_at'} or kwargs['released_at'] is None:
             raise ValidationError('Accepted payout terms cannot be rewritten.')
-        return super().filter(released_at__isnull=True).update(**kwargs)
+        # filter() retains this subclass. Calling its .update() would recursively
+        # enter this method again, including when no prior agreement exists.
+        unreleased = self.filter(released_at__isnull=True)
+        return models.QuerySet.update(unreleased, **kwargs)
 
     def delete(self):
         raise ValidationError('Accepted payout history cannot be deleted.')
