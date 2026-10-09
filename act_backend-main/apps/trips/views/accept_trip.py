@@ -18,6 +18,8 @@ from utils.common.error_handlers import (
 from apps.drivers.models import BaseDriver
 from ..utils.time_conflict import driver_has_time_conflict
 from apps.trips.services.booking_confirmation import ensure_booking_confirmation_pdf
+from apps.earnings.services.commission_lock import lock_commission_configuration
+from apps.earnings.services.payout_agreements import capture_driver_payout
 import logging
 from django.shortcuts import get_object_or_404
 
@@ -34,8 +36,11 @@ class AcceptTripAPIView(EMADBaseView):
         activate(locale)
         if not trip_id:
             raise ValidationError(_("Trip ID is required"))
-        base_driver = get_object_or_404(BaseDriver, user_id=request.user.id)
         with transaction.atomic():
+            # Same order as admin commission commands: configuration -> driver -> trip.
+            # NO KEY UPDATE permits concurrent ledger foreign-key inserts at completion.
+            lock_commission_configuration()
+            base_driver = get_object_or_404(BaseDriver.objects.select_for_update(no_key=True), user_id=request.user.id)
             try:
                 trip = Trip.objects.select_for_update().get(id=trip_id, is_paid=True)
             except Trip.DoesNotExist:
@@ -74,6 +79,10 @@ class AcceptTripAPIView(EMADBaseView):
 
             if trip.car_type_id != vehicle.vehicle_type_id:
                 raise ValidationError(_("You cannot accept a trip that does not match your vehicle type"))
+            try:
+                agreement = capture_driver_payout(trip, base_driver)
+            except ValueError as error:
+                raise ValidationError(str(error))
             trip.base_driver = base_driver
             trip.status = "accepted"
             trip.cancelled_by_driver = False
@@ -123,7 +132,9 @@ class AcceptTripAPIView(EMADBaseView):
             "message": _("Trip accepted successfully"),
             "data": {
                 "trip_id": trip.id,
-                "status": trip.status
+                "status": trip.status,
+                "driver_earnings": str(agreement.net_amount),
+                "payout_agreement_id": str(agreement.pk),
             }
         }, status=status.HTTP_200_OK)
 

@@ -6,38 +6,28 @@ from apps.drivers.models import BaseDriver
 
 class CommissionResolver:
     @staticmethod
-    def get_commission_rule(vehicle_type: VehicleType = None, driver: BaseDriver = None) -> CommissionRule:
+    def get_commission_rule(vehicle_type: VehicleType = None, driver: BaseDriver = None, *, for_update=False) -> CommissionRule:
+        """Resolve the existing policy without changing its legacy precedence.
+
+        Individual DRIVER share -> active group ACT deduction -> vehicle rule ->
+        configured global -> existing 20/80 fallback. Acceptance passes a freshly
+        locked driver and for_update=True inside the shared commission transaction.
         """
-        Get the appropriate commission rule for a vehicle type and/or driver.
-        
-        Priority order:
-        1. Driver-specific percentage (if driver has driver_commission_percentage set)
-        2. Vehicle type rule
-        3. Global default rule
-        4. Hardcoded default (80/20)
-        
-        Args:
-            vehicle_type: VehicleType instance or None
-            driver: BaseDriver instance or None
-            
-        Returns:
-            CommissionRule instance (or default if none found)
-        """
-        # Priority 1: Check if driver has custom percentage
         if driver and driver.driver_commission_percentage is not None:
             driver_percentage = driver.driver_commission_percentage
-            company_percentage = Decimal('100.00') - driver_percentage
-            # Return a non-persisted instance for calculation
             return CommissionRule(
-                company_percentage=company_percentage,
-                driver_percentage=driver_percentage
+                company_percentage=Decimal('100.00') - driver_percentage,
+                driver_percentage=driver_percentage,
             )
-        
-        # Group rates apply only when no individual driver override exists.
+
+        memberships = DriverCommissionMembership.objects.select_related('group')
+        rules = CommissionRule.objects.all()
+        if for_update:
+            memberships = memberships.select_for_update()
+            rules = rules.select_for_update()
+
         if driver:
-            membership = DriverCommissionMembership.objects.select_related('group').filter(
-                driver=driver, group__is_active=True
-            ).first()
+            membership = memberships.filter(driver=driver, group__is_active=True).first()
             if membership:
                 company_percentage = membership.group.company_percentage
                 return CommissionRule(
@@ -45,29 +35,13 @@ class CommissionResolver:
                     driver_percentage=Decimal('100.00') - company_percentage,
                 )
 
-        # Priority 2: Try vehicle-specific rule
         if vehicle_type:
-            rule = CommissionRule.objects.filter(
-                vehicle_type=vehicle_type,
-                is_active=True
-            ).first()
-            
+            rule = rules.filter(vehicle_type=vehicle_type, is_active=True).first()
             if rule:
                 return rule
-        
-        # Priority 3: Fall back to global rule (vehicle_type=None)
-        rule = CommissionRule.objects.filter(
-            vehicle_type__isnull=True,
-            is_active=True
-        ).first()
-        
+
+        rule = rules.filter(vehicle_type__isnull=True, is_active=True).first()
         if rule:
             return rule
-        
-        # Priority 4: Default: 20/80 split (return a non-persisted instance for calculation)
-        # Note: This should ideally be created via migration, but this is a fallback
-        return CommissionRule(
-            company_percentage=Decimal('20.00'),
-            driver_percentage=Decimal('80.00')
-        )
 
+        return CommissionRule(company_percentage=Decimal('20.00'), driver_percentage=Decimal('80.00'))

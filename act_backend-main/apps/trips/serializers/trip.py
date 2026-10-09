@@ -10,6 +10,7 @@ from .airport import AirportSerializer
 from .guest_driver_car import GuestDriverCarSerializer
 from apps.vehicle.serializers import VehicleSerializer
 from apps.earnings.services.commission_resolver import CommissionResolver
+from apps.earnings.services.payout_agreements import driver_payout_display
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 from decimal import Decimal
@@ -234,7 +235,7 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
     passenger = serializers.SerializerMethodField()
     car_type = serializers.SerializerMethodField()
     cancelled_by_driver = serializers.SerializerMethodField()
-    # When context['for_driver'] is true: estimate driver share using CommissionResolver + base_driver
+    # Retain the existing driver fields, preferring locked acceptance terms.
     driver_earnings = serializers.SerializerMethodField()
     driver_commission_percentage = serializers.SerializerMethodField()
 
@@ -255,32 +256,14 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
     def get_driver_earnings(self, obj):
         if not (self.context or {}).get('for_driver'):
             return None
-        driver = self._base_driver_for_commission()
-        if driver is None or obj.cost is None:
-            return None
-
-        rule = CommissionResolver.get_commission_rule(
-            vehicle_type=obj.car_type,
-            driver=driver,
-        )
-        share = (
-            Decimal(str(obj.cost))
-            * (rule.driver_percentage / Decimal('100'))
-        ).quantize(Decimal('0.01'))
-        return str(share)
+        net, _ = driver_payout_display(obj, self._base_driver_for_commission())
+        return str(net) if net is not None else None
 
     def get_driver_commission_percentage(self, obj):
         if not (self.context or {}).get('for_driver'):
             return None
-        driver = self._base_driver_for_commission()
-        if driver is None:
-            return None
-
-        rule = CommissionResolver.get_commission_rule(
-            vehicle_type=obj.car_type,
-            driver=driver,
-        )
-        return float(rule.driver_percentage)
+        _, share = driver_payout_display(obj, self._base_driver_for_commission())
+        return float(share) if share is not None else None
 
     def get_passenger(self, obj):
         """Return passenger full information instead of just ID"""
@@ -438,7 +421,6 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
                 "phone_number": user.phone_number
             }
         }
-
 
 
 

@@ -1,7 +1,7 @@
 """Admin-only commission controls. No payment, notification or ledger mutation.
 
-Writes are disabled by default. Do not enable outside isolated tests until
-accepted-job payout snapshots and the legacy vehicle-rule transition are approved.
+Writes remain disabled by default pending the legacy rule transition and release
+approval. New acceptance snapshots protect agreed-but-uncompleted driver payouts.
 """
 import hashlib
 import json
@@ -10,7 +10,8 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.admin.models import CHANGE, LogEntry
 from django.core.exceptions import ValidationError as ModelValidationError
-from django.db import connection, transaction
+from django.db import transaction
+from django.db.models import Exists, OuterRef, Q
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAdminUser
@@ -18,8 +19,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.drivers.models import BaseDriver
-from apps.earnings.models import CommissionRule, DriverCommissionGroup, DriverCommissionMembership
+from apps.earnings.models import CommissionRule, DriverCommissionGroup, DriverCommissionMembership, DriverPayoutAgreement
 from apps.earnings.services.commission_resolver import CommissionResolver
+from apps.earnings.services.commission_lock import lock_commission_configuration
 from apps.trips.models import Trip
 
 
@@ -115,7 +117,7 @@ def commission_snapshot():
     data['revision'] = hashlib.sha256(json.dumps(data, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
     data['writes_enabled'] = getattr(settings, 'ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED', False) is True
     data['write_lock_reason'] = '' if data['writes_enabled'] else (
-        'Preview only. Saving is locked until accepted-journey payout protection is completed and approved.'
+        'Preview only. Saving is locked until payout protection, legacy commission transition and release are approved.'
     )
     return data
 
@@ -143,9 +145,19 @@ def _apply_command(command, before):
         affected = [item['id'] for item in before['drivers'] if item['category'] == 'global']
     elif action == 'set_group_rate':
         affected = [item.driver_id for item in members.values() if item.group_id == group.id]
-    # Additional safety barrier, NOT a substitute for offer/acceptance snapshots.
-    if Trip.objects.filter(base_driver_id__in=affected).exclude(status__in=['completed', 'cancelled', 'canceled']).exists():
-        raise CommissionConflict('A selected driver has an unfinished assigned journey. Its agreed earnings must be protected before changing rates.')
+    # Acceptance uses the SAME configuration lock. Only a matching persisted
+    # agreement permits changes while a driver's accepted journey is unfinished.
+    # Old/pending assignments without terms remain blocked; never backfill a guess.
+    protected = DriverPayoutAgreement.objects.filter(
+        trip_id=OuterRef('pk'), driver_id=OuterRef('base_driver_id'),
+        gross_amount=OuterRef('cost'), currency='GBP', released_at__isnull=True,
+    )
+    unfinished = Trip.objects.filter(base_driver_id__in=affected).exclude(status__in=['completed', 'cancelled', 'canceled'])
+    unsafe = unfinished.annotate(payout_protected=Exists(protected)).filter(
+        Q(payout_protected=False) | ~Q(status__in=['accepted', 'driver_on_the_way', 'active'])
+    )
+    if unsafe.exists():
+        raise CommissionConflict('A selected driver has an unfinished journey without matching accepted payout terms. No rates were changed.')
     percentage = command.get('company_percentage')
     if action == 'set_global':
         rule = CommissionRule.objects.filter(vehicle_type__isnull=True, is_active=True).first()
@@ -200,10 +212,7 @@ class CommissionManagementView(APIView):
         command = serializer.validated_data
         try:
             with transaction.atomic():
-                # Serialize management writes even when no global/group rows exist yet.
-                if connection.vendor == 'postgresql':
-                    with connection.cursor() as cursor:
-                        cursor.execute('SELECT pg_advisory_xact_lock(%s)', [1094931523])
+                lock_commission_configuration()
                 list(BaseDriver.objects.select_for_update().order_by('id').values_list('id', flat=True))
                 list(DriverCommissionGroup.objects.select_for_update().order_by('id').values_list('id', flat=True))
                 list(CommissionRule.objects.select_for_update().order_by('id').values_list('id', flat=True))

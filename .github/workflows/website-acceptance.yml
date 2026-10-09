@@ -132,6 +132,7 @@ jobs:
         run: >
           python manage.py test
           apps.earnings.tests.test_commission_groups
+          apps.earnings.tests.test_payout_agreements
           apps.admin_panel.test_commission_management
           --verbosity 2
       - name: Real Stripe sandbox successful payment and ACT webhook fulfillment
