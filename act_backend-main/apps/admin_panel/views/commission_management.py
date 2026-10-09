@@ -34,7 +34,7 @@ class CommissionConflict(APIException):
 class CommissionCommand(serializers.Serializer):
     action = serializers.ChoiceField(choices=[
         'set_global', 'set_individual', 'clear_individual', 'create_group',
-        'set_group_rate', 'add_members', 'release_members',
+        'set_group_rate', 'add_members', 'release_members', 'retire_legacy_vehicle_rules',
     ])
     revision = serializers.CharField(min_length=64, max_length=64)
     reason = serializers.CharField(max_length=500, allow_blank=False)
@@ -58,6 +58,7 @@ class CommissionCommand(serializers.Serializer):
             'set_group_rate': {'group_id', 'company_percentage'},
             'add_members': {'group_id', 'driver_ids'},
             'release_members': {'group_id', 'driver_ids'},
+            'retire_legacy_vehicle_rules': set(),
         }[data['action']]
         missing = required - data.keys()
         unexpected = set(self.initial_data) - required - {'action', 'revision', 'reason'}
@@ -139,12 +140,30 @@ def _apply_command(command, before):
     # Do not permit any new finance-category writes while legacy vehicle
     # rules can silently take precedence for global-category drivers.
     # Read-only preview and existing booking resolution remain unchanged.
-    if before['legacy_vehicle_rules'] and action != 'release_members':
+    if before['legacy_vehicle_rules'] and action not in ('release_members', 'retire_legacy_vehicle_rules'):
         raise CommissionConflict(
             'Legacy vehicle-specific rates must be explicitly reconciled before editing commission categories.'
         )
     if before['conflicting_driver_ids'] or before['multiple_global_rules']:
         raise CommissionConflict('Existing conflicting commission records require review before changes can be saved.')
+    if action == 'retire_legacy_vehicle_rules':
+        if not before['legacy_vehicle_rules']:
+            raise CommissionConflict('No active legacy vehicle-specific rules remain.')
+        # Explicit admin command only: no deletion or repricing of historical
+        # agreements/ledgers. Old assigned journeys without protected terms
+        # cannot be silently transitioned.
+        unprotected = Trip.objects.filter(
+            base_driver__isnull=False,
+        ).exclude(status__in=['completed', 'cancelled', 'canceled']).annotate(
+            payout_protected=Exists(DriverPayoutAgreement.objects.filter(
+                trip_id=OuterRef('pk'), driver_id=OuterRef('base_driver_id'),
+                gross_amount=OuterRef('cost'), currency='GBP', released_at__isnull=True,
+            )),
+        ).filter(payout_protected=False)
+        if unprotected.exists():
+            raise CommissionConflict('Unprotected assigned journeys require manual review before legacy rule retirement.')
+        CommissionRule.objects.filter(vehicle_type__isnull=False, is_active=True).update(is_active=False)
+        return
     affected = ids
     if action == 'set_global':
         if before['legacy_vehicle_rules']:
