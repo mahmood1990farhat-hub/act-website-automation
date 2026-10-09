@@ -34,6 +34,12 @@ class BaseDriver(models.Model):
                 })
     
     def save(self, *args, **kwargs):
+        if self.driver_commission_percentage is not None and self.pk:
+            from apps.earnings.models import DriverCommissionMembership
+            if DriverCommissionMembership.objects.filter(driver_id=self.pk).exists():
+                raise ValidationError({
+                    'driver_commission_percentage': 'Remove commission group membership before setting an individual override.'
+                })
         self.full_clean()
         super().save(*args, **kwargs)
 
