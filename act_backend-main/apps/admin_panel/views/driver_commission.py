@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from utils.EMDBase import EMADBaseView
 from apps.drivers.models import BaseDriver
+from apps.earnings.models import DriverCommissionMembership
 from apps.earnings.services.commission_resolver import CommissionResolver
 from apps.vehicle.models import VehicleType
 from utils.common import get_locale
@@ -54,6 +55,8 @@ class DriverCommissionView(EMADBaseView):
         # Determine fallback source
         if driver.driver_commission_percentage is not None:
             fallback_source = 'driver'
+        elif DriverCommissionMembership.objects.filter(driver=driver, group__is_active=True).exists():
+            fallback_source = 'group'
         elif vehicle_type:
             fallback_source = 'vehicle'
         else:
@@ -120,8 +123,14 @@ class DriverCommissionView(EMADBaseView):
             )
             return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
         
-        # Update driver commission percentage
+        # Serialize commission configuration changes against group membership writes.
         with transaction.atomic():
+            driver = BaseDriver.objects.select_for_update().get(id=driver_id)
+            if DriverCommissionMembership.objects.filter(driver=driver).exists():
+                return create_error_response(
+                    'Remove the driver from their commission group before setting an individual rate',
+                    locale=locale, status_code=status.HTTP_400_BAD_REQUEST,
+                )
             driver.driver_commission_percentage = percentage_decimal
             driver.save()
         
