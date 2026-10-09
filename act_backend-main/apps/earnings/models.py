@@ -5,6 +5,33 @@ from decimal import Decimal
 import uuid
 
 
+class DriverCommissionGroup(models.Model):
+    """Exclusive driver group with an ACT deduction percentage."""
+    name = models.CharField(max_length=120, unique=True)
+    company_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if self.company_percentage is None or not Decimal("0") <= self.company_percentage <= Decimal("100"):
+            raise ValidationError({"company_percentage": "Commission must be between 0 and 100"})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class DriverCommissionMembership(models.Model):
+    """One active commission group at most per driver."""
+    driver = models.OneToOneField(
+        'drivers.BaseDriver', on_delete=models.CASCADE, related_name='commission_membership'
+    )
+    group = models.ForeignKey(
+        DriverCommissionGroup, on_delete=models.PROTECT, related_name='memberships'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class CommissionRule(models.Model):
     vehicle_type = models.ForeignKey('vehicle.VehicleType', null=True, blank=True, on_delete=models.CASCADE)
     company_percentage = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 20.00
