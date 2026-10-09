@@ -1,6 +1,6 @@
 from decimal import Decimal
 from apps.vehicle.models import VehicleType
-from apps.earnings.models import CommissionRule
+from apps.earnings.models import CommissionRule, DriverCommissionMembership
 from apps.drivers.models import BaseDriver
 
 
@@ -33,6 +33,18 @@ class CommissionResolver:
                 driver_percentage=driver_percentage
             )
         
+        # Group rates apply only when no individual driver override exists.
+        if driver:
+            membership = DriverCommissionMembership.objects.select_related('group').filter(
+                driver=driver, group__is_active=True
+            ).first()
+            if membership:
+                company_percentage = membership.group.company_percentage
+                return CommissionRule(
+                    company_percentage=company_percentage,
+                    driver_percentage=Decimal('100.00') - company_percentage,
+                )
+
         # Priority 2: Try vehicle-specific rule
         if vehicle_type:
             rule = CommissionRule.objects.filter(
