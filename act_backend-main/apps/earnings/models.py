@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from decimal import Decimal
@@ -39,8 +39,11 @@ class DriverCommissionMembership(models.Model):
             )
 
     def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
+        from apps.drivers.models import BaseDriver
+        with transaction.atomic():
+            BaseDriver.objects.select_for_update().get(pk=self.driver_id)
+            self.full_clean()
+            return super().save(*args, **kwargs)
 
 
 class CommissionRule(models.Model):
