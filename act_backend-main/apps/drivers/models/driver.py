@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from apps.office.models import Office
 from apps.vehicle.models import Vehicle
@@ -34,8 +34,17 @@ class BaseDriver(models.Model):
                 })
     
     def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            if self.pk:
+                type(self).objects.select_for_update().get(pk=self.pk)
+            if self.driver_commission_percentage is not None and self.pk:
+                from apps.earnings.models import DriverCommissionMembership
+                if DriverCommissionMembership.objects.filter(driver_id=self.pk).exists():
+                    raise ValidationError({
+                        'driver_commission_percentage': 'Remove commission group membership before setting an individual override.'
+                    })
+            self.full_clean()
+            super().save(*args, **kwargs)
 
 
 

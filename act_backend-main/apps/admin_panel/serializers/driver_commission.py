@@ -30,7 +30,7 @@ class DriverCommissionSerializer(serializers.Serializer):
         help_text="Effective company percentage (after fallback resolution)"
     )
     fallback_source = serializers.ChoiceField(
-        choices=['driver', 'vehicle', 'default'],
+        choices=['driver', 'group', 'vehicle', 'default'],
         read_only=True,
         help_text="Source of the commission percentage (driver-specific, vehicle rule, or default)"
     )

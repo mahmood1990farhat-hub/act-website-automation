@@ -195,6 +195,8 @@ class DriverDetailSerializer(serializers.ModelSerializer):
         # Determine fallback source
         if obj.driver.driver_commission_percentage is not None:
             fallback_source = 'driver'
+        elif obj.driver.commission_membership.group.is_active if hasattr(obj.driver, 'commission_membership') else False:
+            fallback_source = 'group'
         elif vehicle_type:
             fallback_source = 'vehicle'
         else:

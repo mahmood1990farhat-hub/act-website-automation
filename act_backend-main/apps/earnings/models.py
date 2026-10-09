@@ -1,8 +1,49 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from decimal import Decimal
 import uuid
+
+
+class DriverCommissionGroup(models.Model):
+    """Exclusive driver group with an ACT deduction percentage."""
+    name = models.CharField(max_length=120, unique=True)
+    company_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if self.company_percentage is None or not Decimal("0") <= self.company_percentage <= Decimal("100"):
+            raise ValidationError({"company_percentage": "Commission must be between 0 and 100"})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class DriverCommissionMembership(models.Model):
+    """One active commission group at most per driver."""
+    driver = models.OneToOneField(
+        'drivers.BaseDriver', on_delete=models.CASCADE, related_name='commission_membership'
+    )
+    group = models.ForeignKey(
+        DriverCommissionGroup, on_delete=models.PROTECT, related_name='memberships'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        super().clean()
+        if self.driver_id and self.driver.driver_commission_percentage is not None:
+            raise ValidationError(
+                {"driver": "Clear the individual driver commission override before joining a group."}
+            )
+
+    def save(self, *args, **kwargs):
+        from apps.drivers.models import BaseDriver
+        with transaction.atomic():
+            BaseDriver.objects.select_for_update().get(pk=self.driver_id)
+            self.full_clean()
+            return super().save(*args, **kwargs)
 
 
 class CommissionRule(models.Model):
