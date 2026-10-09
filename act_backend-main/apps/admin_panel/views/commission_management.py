@@ -80,20 +80,20 @@ def commission_snapshot():
     for driver in BaseDriver.objects.select_related('user', 'normal_driver__vehicle__vehicle_type').order_by('id'):
         member = memberships.get(driver.id)
         individual = driver.driver_commission_percentage is not None
-        if member and individual:
+        if member and (individual or not member.group.is_active):
             conflicts.append(driver.id)
-        category = 'conflict' if member and individual else 'group' if member else 'individual' if individual else 'global'
+        category = 'conflict' if member and (individual or not member.group.is_active) else 'group' if member else 'individual' if individual else 'global'
         normal = getattr(driver, 'normal_driver', None)
         vehicle_type = normal.vehicle.vehicle_type if normal and normal.vehicle else None
-        rule = CommissionResolver.get_commission_rule(vehicle_type=vehicle_type, driver=driver)
+        rule = None if member and not member.group.is_active else CommissionResolver.get_commission_rule(vehicle_type=vehicle_type, driver=driver)
         drivers.append({
             'id': driver.id,
             'name': (' '.join([driver.user.first_name or '', driver.user.last_name or '']).strip()
                      or driver.user.username),
             'category': category,
             'group_id': member.group_id if member else None,
-            'company_percentage': format(rule.company_percentage, '.2f'),
-            'driver_percentage': format(rule.driver_percentage, '.2f'),
+            'company_percentage': format(rule.company_percentage, '.2f') if rule else None,
+            'driver_percentage': format(rule.driver_percentage, '.2f') if rule else None,
         })
     global_rules = list(CommissionRule.objects.filter(vehicle_type__isnull=True, is_active=True).order_by('id'))
     default = global_rules[0].company_percentage if global_rules else CommissionResolver.get_commission_rule().company_percentage
