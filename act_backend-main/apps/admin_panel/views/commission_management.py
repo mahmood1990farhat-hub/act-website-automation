@@ -145,7 +145,24 @@ def _apply_command(command, before):
             'Legacy vehicle-specific rates must be explicitly reconciled before editing commission categories.'
         )
     if before['conflicting_driver_ids'] or before['multiple_global_rules']:
-        raise CommissionConflict('Existing conflicting commission records require review before changes can be saved.')
+        # Permit only the narrowly scoped repair of an inactive-group membership.
+        # Other conflicts, including dual individual/group membership, stay blocked.
+        inactive_repair = (
+            action == 'release_members'
+            and group is not None
+            and not group.is_active
+            and not before['multiple_global_rules']
+            and bool(ids)
+            and set(before['conflicting_driver_ids']) == set(ids)
+            and all(
+                member.driver_id in ids and member.group_id == group.id
+                and not member.driver.driver_commission_percentage is not None
+                for member in DriverCommissionMembership.objects.select_related('driver', 'group')
+                .filter(driver_id__in=ids)
+            )
+        )
+        if not inactive_repair:
+            raise CommissionConflict('Existing conflicting commission records require review before changes can be saved.')
     if action == 'retire_legacy_vehicle_rules':
         if not before['legacy_vehicle_rules']:
             raise CommissionConflict('No active legacy vehicle-specific rules remain.')
