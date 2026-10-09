@@ -230,6 +230,12 @@ class CommissionManagementTests(TestCase):
         )
         blocked = self.command('set_global', company_percentage='20')
         self.assertEqual(blocked.status_code, 409)
+        missing_replacement = self.command('retire_legacy_vehicle_rules')
+        self.assertEqual(missing_replacement.status_code, 409)
+        CommissionRule.objects.create(
+            company_percentage=Decimal('20.00'),
+            driver_percentage=Decimal('80.00'),
+        )
         retired = self.command('retire_legacy_vehicle_rules')
         self.assertEqual(retired.status_code, 200, retired.data)
         legacy.refresh_from_db()
