@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.core.exceptions import ValidationError
 from apps.vehicle.models import VehicleType
 from apps.earnings.models import CommissionRule, DriverCommissionMembership
 from apps.drivers.models import BaseDriver
@@ -27,7 +28,9 @@ class CommissionResolver:
             rules = rules.select_for_update()
 
         if driver:
-            membership = memberships.filter(driver=driver, group__is_active=True).first()
+            membership = memberships.filter(driver=driver).first()
+            if membership and not membership.group.is_active:
+                raise ValidationError('Inactive commission group still has a driver. Release membership before resolving a new offer.')
             if membership:
                 company_percentage = membership.group.company_percentage
                 return CommissionRule(
