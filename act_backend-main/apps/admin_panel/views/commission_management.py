@@ -156,7 +156,7 @@ def _apply_command(command, before):
             and set(before['conflicting_driver_ids']) == set(ids)
             and all(
                 member.driver_id in ids and member.group_id == group.id
-                and not member.driver.driver_commission_percentage is not None
+                and member.driver.driver_commission_percentage is None
                 for member in DriverCommissionMembership.objects.select_related('driver', 'group')
                 .filter(driver_id__in=ids)
             )
