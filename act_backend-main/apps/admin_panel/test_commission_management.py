@@ -223,6 +223,42 @@ class CommissionManagementTests(TestCase):
         self.assertFalse(LogEntry.objects.filter(object_repr='ACT commission management').exists())
 
     @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
+    def test_explicit_legacy_retirement_preserves_records_and_enables_global(self):
+        legacy = CommissionRule.objects.create(
+            vehicle_type=self.vehicle(), company_percentage=Decimal('30.00'),
+            driver_percentage=Decimal('70.00'),
+        )
+        blocked = self.command('set_global', company_percentage='20')
+        self.assertEqual(blocked.status_code, 409)
+        retired = self.command('retire_legacy_vehicle_rules')
+        self.assertEqual(retired.status_code, 200, retired.data)
+        legacy.refresh_from_db()
+        self.assertFalse(legacy.is_active)
+        self.assertEqual(legacy.company_percentage, Decimal('30.00'))
+        updated = self.command('set_global', company_percentage='20')
+        self.assertEqual(updated.status_code, 200, updated.data)
+        self.assertEqual(self.snapshot()['global_percentage'], '20.00')
+        self.assertEqual(LogEntry.objects.filter(object_repr='ACT commission management').count(), 2)
+
+    @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
+    def test_legacy_retirement_refuses_unprotected_assigned_journey(self):
+        vehicle = self.vehicle()
+        legacy = CommissionRule.objects.create(
+            vehicle_type=vehicle, company_percentage=Decimal('30.00'),
+            driver_percentage=Decimal('70.00'),
+        )
+        Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.5, dropoff_lng=-0.12,
+            trip_date=date.today(), trip_time=time(12), car_type=vehicle,
+            cost=Decimal('100.00'), passengers_count=1, status='accepted',
+            is_paid=True, base_driver=self.drivers[0],
+        )
+        response = self.command('retire_legacy_vehicle_rules')
+        self.assertEqual(response.status_code, 409, response.data)
+        legacy.refresh_from_db()
+        self.assertTrue(legacy.is_active)
+
+    @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
     def test_unfinished_assigned_journey_blocks_affected_rate_changes(self):
         Trip.objects.create(pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.5, dropoff_lng=-0.12,
             trip_date=date.today(), trip_time=time(12), car_type=self.vehicle(), cost=Decimal('100.00'),
