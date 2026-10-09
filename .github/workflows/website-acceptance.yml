@@ -13,6 +13,9 @@ jobs:
   backend-confirmation:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # Service containers are pulled before job steps. The backend needs a
+    # registry mirror or runner-level authentication; step-level docker login
+    # cannot resolve its unauthenticated PostGIS/Redis/MailHog pulls.
     services:
       postgres:
         image: postgis/postgis:16-3.4
