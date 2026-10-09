@@ -74,6 +74,25 @@ class CommissionManagementTests(TestCase):
         self.assertEqual(rows[self.drivers[2].id]['company_percentage'], '15.00')
 
     @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
+    def test_inactive_group_member_is_flagged_and_cannot_silently_fallback(self):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from apps.earnings.services.commission_resolver import CommissionResolver
+        group = DriverCommissionGroup.objects.create(
+            name='Inactive DSS', company_percentage=Decimal('15.00'), is_active=False,
+        )
+        DriverCommissionMembership.objects.create(driver=self.drivers[0], group=group)
+        data = self.snapshot()
+        member = next(row for row in data['drivers'] if row['id'] == self.drivers[0].id)
+        self.assertEqual(member['category'], 'conflict')
+        self.assertIsNone(member['company_percentage'])
+        self.assertIn(self.drivers[0].id, data['conflicting_driver_ids'])
+        with self.assertRaises(DjangoValidationError):
+            CommissionResolver.get_commission_rule(driver=self.drivers[0])
+        response = self.command('set_global', company_percentage='25.00')
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(CommissionRule.objects.exists())
+
+    @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
     def test_global_change_excludes_individual_and_group_drivers(self):
         driver = self.drivers[1]
         driver.driver_commission_percentage = Decimal('75.00')
