@@ -31,6 +31,17 @@ class DriverCommissionMembership(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        super().clean()
+        if self.driver_id and self.driver.driver_commission_percentage is not None:
+            raise ValidationError(
+                {"driver": "Clear the individual driver commission override before joining a group."}
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
 
 class CommissionRule(models.Model):
     vehicle_type = models.ForeignKey('vehicle.VehicleType', null=True, blank=True, on_delete=models.CASCADE)
