@@ -4,8 +4,12 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from apps.drivers.models import BaseDriver
-from apps.earnings.models import DriverCommissionGroup, DriverCommissionMembership, CommissionRule
+from apps.earnings.models import DriverCommissionGroup, DriverCommissionMembership, CommissionRule, DriverEarningLedger, CompanyRevenueLedger
 from apps.earnings.services.commission_resolver import CommissionResolver
+from apps.earnings.services.earnings_calculator import EarningsCalculator
+from apps.trips.models import Trip
+from apps.vehicle.models import VehicleType
+from datetime import date, time, timedelta
 
 
 class CommissionGroupTests(TestCase):
@@ -57,3 +61,23 @@ class CommissionGroupTests(TestCase):
         for rate in (Decimal("-1"), Decimal("101")):
             with self.assertRaises(ValidationError):
                 DriverCommissionGroup.objects.create(name="Invalid", company_percentage=rate)
+
+    def test_existing_earning_ledger_does_not_reprice_after_rate_change(self):
+        vehicle = VehicleType.objects.create(
+            code="comfort", name_en="Comfort", name_ar="Comfort",
+            icon="vehicle_types/icons/test.png", max_passengers_count=4,
+        )
+        trip = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50, dropoff_lng=-0.12,
+            trip_date=date.today() + timedelta(days=2), trip_time=time(12, 0),
+            car_type=vehicle, cost=Decimal("100.00"), passengers_count=1,
+            status="completed", is_paid=True, base_driver=self.driver,
+        )
+        DriverCommissionMembership.objects.create(driver=self.driver, group=self.group)
+        earning, company = EarningsCalculator.calculate_and_record_earnings(trip)
+        original = (earning.net_amount, company.amount)
+        self.group.company_percentage = Decimal("30.00")
+        self.group.save()
+        again, again_company = EarningsCalculator.calculate_and_record_earnings(trip)
+        self.assertEqual((again.net_amount, again_company.amount), original)
+        self.assertEqual(original, (Decimal("85.00"), Decimal("15.00")))
