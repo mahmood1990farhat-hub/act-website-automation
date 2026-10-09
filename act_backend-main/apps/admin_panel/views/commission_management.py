@@ -136,6 +136,13 @@ def _apply_command(command, before):
             raise ValidationError({'group_id': 'Group not found.'})
         if not group.is_active and action != 'release_members':
             raise CommissionConflict('This group is inactive. Release its members before changing its configuration.')
+    # Do not permit any new finance-category writes while legacy vehicle
+    # rules can silently take precedence for global-category drivers.
+    # Read-only preview and existing booking resolution remain unchanged.
+    if before['legacy_vehicle_rules'] and action != 'release_members':
+        raise CommissionConflict(
+            'Legacy vehicle-specific rates must be explicitly reconciled before editing commission categories.'
+        )
     if before['conflicting_driver_ids'] or before['multiple_global_rules']:
         raise CommissionConflict('Existing conflicting commission records require review before changes can be saved.')
     affected = ids
