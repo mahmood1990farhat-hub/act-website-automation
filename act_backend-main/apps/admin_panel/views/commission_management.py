@@ -162,6 +162,15 @@ def _apply_command(command, before):
         ).filter(payout_protected=False)
         if unprotected.exists():
             raise CommissionConflict('Unprotected assigned journeys require manual review before legacy rule retirement.')
+        # Require an explicitly configured global replacement; the historical
+        # 20% resolver fallback is not an approved commercial rate.
+        configured_global = CommissionRule.objects.filter(
+            vehicle_type__isnull=True, is_active=True,
+        )
+        if configured_global.count() != 1:
+            raise CommissionConflict(
+                'Configure exactly one active global replacement before retiring legacy vehicle rates.'
+            )
         CommissionRule.objects.filter(vehicle_type__isnull=False, is_active=True).update(is_active=False)
         return
     affected = ids
