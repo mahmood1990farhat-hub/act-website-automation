@@ -93,6 +93,23 @@ class CommissionManagementTests(TestCase):
         self.assertFalse(CommissionRule.objects.exists())
 
     @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
+    def test_inactive_group_can_be_explicitly_released_without_rate_change(self):
+        group = DriverCommissionGroup.objects.create(
+            name='Old DSS', company_percentage=Decimal('15.00'), is_active=False,
+        )
+        DriverCommissionMembership.objects.create(driver=self.drivers[0], group=group)
+        self.assertEqual(self.command('set_global', company_percentage='25').status_code, 409)
+        released = self.command(
+            'release_members', group_id=group.id, driver_ids=[self.drivers[0].id],
+        )
+        self.assertEqual(released.status_code, 200, released.data)
+        self.assertFalse(DriverCommissionMembership.objects.filter(driver=self.drivers[0]).exists())
+        self.assertEqual(self.snapshot()['drivers'][0]['category'], 'global')
+        group.refresh_from_db()
+        self.assertFalse(group.is_active)
+        self.assertEqual(group.company_percentage, Decimal('15.00'))
+
+    @override_settings(ACT_COMMISSION_MANAGEMENT_WRITES_ENABLED=True)
     def test_global_change_excludes_individual_and_group_drivers(self):
         driver = self.drivers[1]
         driver.driver_commission_percentage = Decimal('75.00')
