@@ -128,6 +128,12 @@ jobs:
           apps.pricing.tests.test_pricing_engine
           apps.vehicle.tests.test_vehicle_class_codes
           --verbosity 2
+      - name: Commission groups and admin controls
+        run: >
+          python manage.py test
+          apps.earnings.tests.test_commission_groups
+          apps.admin_panel.test_commission_management
+          --verbosity 2
       - name: Real Stripe sandbox successful payment and ACT webhook fulfillment
         env:
           STRIPE_SANDBOX_SECRET_KEY: ${{ secrets.STRIPE_SANDBOX_SECRET_KEY }}
@@ -252,3 +258,5 @@ jobs:
           do
             docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node "$test"
           done
+      - name: Admin commission presentation
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges act-booking node tests/check-commission-management.cjs
