@@ -78,13 +78,28 @@ jobs:
           cache: pip
           cache-dependency-path: act_backend-main/requirements.txt
       - name: Install GeoDjango system libraries
-        run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev libgeos-dev
+        run: |
+          if sudo apt-get update > /tmp/act-gdal-install.log 2>&1 && sudo apt-get install -y gdal-bin libgdal-dev libgeos-dev >> /tmp/act-gdal-install.log 2>&1; then
+            echo "GeoDjango system libraries installed."
+          else
+            tail -n 80 /tmp/act-gdal-install.log
+            exit 1
+          fi
       - name: Install backend dependencies
-        run: pip install -r requirements.txt
+        run: pip install -q -r requirements.txt
       - name: Migration consistency
         run: |
           python manage.py makemigrations --check --dry-run
           python manage.py migrate --plan
+      - name: Commission groups and admin controls
+        run: |
+          # Keep the precise failure visible without dropping tests or hiding exit status.
+          if python manage.py test apps.earnings.tests.test_commission_groups apps.earnings.tests.test_payout_agreements apps.admin_panel.test_commission_management --verbosity 1 > /tmp/act-commission-tests.log 2>&1; then
+            tail -n 6 /tmp/act-commission-tests.log
+          else
+            tail -n 100 /tmp/act-commission-tests.log
+            exit 1
+          fi
       - name: Celery worker discovers paid-booking confirmation task
         run: |
           celery -A myProject worker --pool=solo --loglevel=INFO --hostname=ci-worker@%h > /tmp/act-celery.log 2>&1 &
@@ -127,13 +142,6 @@ jobs:
           apps.pricing.tests.test_monotonic_pricing
           apps.pricing.tests.test_pricing_engine
           apps.vehicle.tests.test_vehicle_class_codes
-          --verbosity 2
-      - name: Commission groups and admin controls
-        run: >
-          python manage.py test
-          apps.earnings.tests.test_commission_groups
-          apps.earnings.tests.test_payout_agreements
-          apps.admin_panel.test_commission_management
           --verbosity 2
       - name: Real Stripe sandbox successful payment and ACT webhook fulfillment
         env:
