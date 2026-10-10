@@ -130,6 +130,14 @@ class DriverAssignmentLifecycleTests(TestCase):
         self.assertIn(str(self.trip.id), listed)
         self.assertNotIn(str(unpaid.id), listed)
         self.assertNotIn(str(wrong.id), listed)
+        # Once another driver accepts, the offer must disappear immediately.
+        from unittest.mock import patch
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        after = client.get(url)
+        self.assertEqual(after.status_code, 200, after.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in after.data['trips']})
         for row in response.data['trips']:
             self.assertNotIn('cost', row)
             self.assertNotIn('stripe_payment_intent', row)
