@@ -100,12 +100,16 @@ class NewTripRequestsView(EMADBaseView):
         # This pattern continues for larger vehicles
         # Note: Cancelled trips (status='pending', cancelled_by_driver=True) are available for other drivers
         # but excluded for the cancelling driver
+        # Admin-assigned pending jobs are offered only to their selected
+        # driver; unassigned jobs remain available to all eligible drivers.
+        from django.db.models import Q
         queryset = Trip.objects.filter(
             status='pending',
             is_paid=True,
             car_type_id=driver_vehicle_type.pk,
             passengers_count__lte=driver_max_passengers,
-            base_driver__isnull=True  # Only show paid, eligible unassigned trips
+        ).filter(
+            Q(base_driver__isnull=True) | Q(base_driver=base_driver)
         ).exclude(
             # Exclude trips cancelled by this driver (they can't accept their own cancelled trips)
             cancelled_by_driver_id=base_driver
