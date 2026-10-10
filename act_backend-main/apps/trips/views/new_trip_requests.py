@@ -101,8 +101,10 @@ class NewTripRequestsView(EMADBaseView):
         # but excluded for the cancelling driver
         queryset = Trip.objects.filter(
             status='pending',
-            passengers_count__lte=driver_max_passengers,  # Passenger count <= driver's vehicle capacity
-            base_driver__isnull=True  # Only show unassigned trips
+            is_paid=True,
+            car_type_id=driver_vehicle_type.pk,
+            passengers_count__lte=driver_max_passengers,
+            base_driver__isnull=True  # Only show paid, eligible unassigned trips
         ).exclude(
             # Exclude trips cancelled by this driver (they can't accept their own cancelled trips)
             cancelled_by_driver_id=base_driver
