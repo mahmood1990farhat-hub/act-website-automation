@@ -43,7 +43,7 @@ class UserTripsListView(EMADBaseView):
             try:
                 base_driver = BaseDriver.objects.get(user=user)
                 queryset = Trip.objects.filter(
-                    Q(base_driver=base_driver) | Q(cancelled_by_driver_id=base_driver)
+                    Q(base_driver=base_driver) | Q(cancelled_by_driver_id=base_driver, base_driver__isnull=True)
                 ).select_related(
                     'passenger__user',
                     'airport'

@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from .views import *
+from .views.commission_management import CommissionManagementView
 from .views.instruction_files import (
     InstructionFileListView,
     InstructionFileDetailView
@@ -46,6 +47,7 @@ urlpatterns = [
     path('passengers/<int:passenger_id>/update/', UpdatePassengerInfoView.as_view(), name='admin_passenger_update'),
     
     # Driver Commission
+    path('commission-management/', CommissionManagementView.as_view(), name='admin_commission_management'),
     path('drivers/<int:driver_id>/commission/', DriverCommissionView.as_view(), name='admin_driver_commission'),
     
     # Other endpoints

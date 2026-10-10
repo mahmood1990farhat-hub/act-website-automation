@@ -10,10 +10,25 @@ from .airport import AirportSerializer
 from .guest_driver_car import GuestDriverCarSerializer
 from apps.vehicle.serializers import VehicleSerializer
 from apps.earnings.services.commission_resolver import CommissionResolver
+from apps.earnings.services.payout_agreements import driver_payout_display
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 from decimal import Decimal
 import re
+
+
+# Driver-facing booking details must be an explicit operational allowlist.
+# Payment/provider breakdowns remain available only to authorised finance APIs.
+DRIVER_BOOKING_DETAIL_KEYS = (
+    'passenger_counts', 'flight_details', 'child_infant_travel',
+    'additional_requirements', 'extra_services', 'customer_language',
+)
+
+
+def _driver_booking_details(details):
+    if not isinstance(details, dict):
+        return {}
+    return {key: details[key] for key in DRIVER_BOOKING_DETAIL_KEYS if key in details}
 
 
 def _format_snapshot_phone(country_code, phone):
@@ -234,13 +249,30 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
     passenger = serializers.SerializerMethodField()
     car_type = serializers.SerializerMethodField()
     cancelled_by_driver = serializers.SerializerMethodField()
-    # When context['for_driver'] is true: estimate driver share using CommissionResolver + base_driver
+    # Retain the existing driver fields, preferring locked acceptance terms.
     driver_earnings = serializers.SerializerMethodField()
     driver_commission_percentage = serializers.SerializerMethodField()
 
     class Meta:
         model = Trip
         fields = '__all__'
+
+    # The driver must never receive the passenger charge or ACT's payment
+    # breakdown, even as unused JSON keys in the mobile API response.
+    DRIVER_PRIVATE_FIELDS = (
+        'cost', 'base_trip_cost', 'regular_vat', 'airport_vat',
+        'min_adjustment', 'stripe_payment_intent', 'stripe_invoice_id',
+        'last4', 'card_brand', 'refund_status', 'stripe_refund_id',
+        'refund_amount', 'refund_error',
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if (self.context or {}).get('for_driver'):
+            for name in self.DRIVER_PRIVATE_FIELDS:
+                data.pop(name, None)
+            data['booking_details'] = _driver_booking_details(data.get('booking_details'))
+        return data
 
     def _base_driver_for_commission(self):
         ctx = self.context or {}
@@ -255,32 +287,14 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
     def get_driver_earnings(self, obj):
         if not (self.context or {}).get('for_driver'):
             return None
-        driver = self._base_driver_for_commission()
-        if driver is None or obj.cost is None:
-            return None
-
-        rule = CommissionResolver.get_commission_rule(
-            vehicle_type=obj.car_type,
-            driver=driver,
-        )
-        share = (
-            Decimal(str(obj.cost))
-            * (rule.driver_percentage / Decimal('100'))
-        ).quantize(Decimal('0.01'))
-        return str(share)
+        net, _ = driver_payout_display(obj, self._base_driver_for_commission())
+        return str(net) if net is not None else None
 
     def get_driver_commission_percentage(self, obj):
         if not (self.context or {}).get('for_driver'):
             return None
-        driver = self._base_driver_for_commission()
-        if driver is None:
-            return None
-
-        rule = CommissionResolver.get_commission_rule(
-            vehicle_type=obj.car_type,
-            driver=driver,
-        )
-        return float(rule.driver_percentage)
+        _, share = driver_payout_display(obj, self._base_driver_for_commission())
+        return float(share) if share is not None else None
 
     def get_passenger(self, obj):
         """Return passenger full information instead of just ID"""
@@ -338,6 +352,23 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
 
 class TripWithStopPointSerializer(serializers.ModelSerializer):
     stop_points = StopPointSerializer(many=True, read_only=True)
+    driver_earnings = serializers.SerializerMethodField()
+
+    def get_driver_earnings(self, obj):
+        if self.get_account_type() != 'normal_driver':
+            return None
+        request = (self.context or {}).get('request')
+        driver = getattr(getattr(request, 'user', None), 'base_driver', None)
+        net, _ = driver_payout_display(obj, driver)
+        return str(net) if net is not None else None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.get_account_type() == 'normal_driver':
+            for field in TripWithStopPointBasicSerializer.DRIVER_PRIVATE_FIELDS:
+                data.pop(field, None)
+            data['booking_details'] = _driver_booking_details(data.get('booking_details'))
+        return data
 
     airport_info = AirportSerializer(source='airport', read_only=True)
     passenger_info = serializers.SerializerMethodField()
@@ -438,7 +469,6 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
                 "phone_number": user.phone_number
             }
         }
-
 
 
 

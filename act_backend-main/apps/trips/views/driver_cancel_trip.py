@@ -18,6 +18,7 @@ from utils.common.email import (
     send_driver_cancellation_to_admin
 )
 from apps.trips.services.trip_tracking import stop_trip_tracking
+from apps.earnings.services.payout_agreements import release_driver_payout
 import logging
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,8 @@ class DriverCancelTripView(EMADBaseView):
                 # Get cancellation reason from request if provided
                 cancellation_reason = request.data.get('cancellation_reason', '').strip()
 
+                # Preserve accepted terms as released history, within the trip transaction.
+                release_driver_payout(trip)
                 # Use the reusable cancellation method
                 trip.cancel_by_driver(base_driver, cancellation_reason)
                 

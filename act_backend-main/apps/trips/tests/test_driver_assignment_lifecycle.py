@@ -105,6 +105,175 @@ class DriverAssignmentLifecycleTests(TestCase):
         NormalDriver.objects.create(driver=base, vehicle=vehicle)
         return base
 
+    def test_driver_offer_list_excludes_unpaid_and_wrong_vehicle(self):
+        client = APIClient()
+        client.force_authenticate(user=self.driver1.user)
+        url = '/api/trips/new-trip-requests/'
+        # Verify against the existing registered route, not a new endpoint.
+        from django.urls import resolve
+        resolve(url)
+        unpaid = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.comfort,
+            cost='100.00', passengers_count=1, status='pending', is_paid=False,
+        )
+        wrong = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.executive,
+            cost='100.00', passengers_count=1, status='pending', is_paid=True,
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200, response.data)
+        listed = {str(row['id']) for row in response.data['trips']}
+        self.assertIn(str(self.trip.id), listed)
+        self.assertNotIn(str(unpaid.id), listed)
+        self.assertNotIn(str(wrong.id), listed)
+        # Once another driver accepts, the offer must disappear immediately.
+        from unittest.mock import patch
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        after = client.get(url)
+        self.assertEqual(after.status_code, 200, after.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in after.data['trips']})
+        other_client = APIClient()
+        other_client.force_authenticate(user=self.driver2.user)
+        other_offers = other_client.get(url)
+        self.assertEqual(other_offers.status_code, 200, other_offers.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_offers.data['trips']})
+        for row in response.data['trips']:
+            self.assertNotIn('cost', row)
+            self.assertNotIn('stripe_payment_intent', row)
+            self.assertIn('driver_earnings', row)
+
+    def test_cancelled_job_returns_to_other_eligible_drivers_only(self):
+        client1 = APIClient()
+        client1.force_authenticate(user=self.driver1.user)
+        client2 = APIClient()
+        client2.force_authenticate(user=self.driver2.user)
+        url = '/api/trips/new-trip-requests/'
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client1.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        with patch('apps.trips.views.driver_cancel_trip.stop_trip_tracking'):
+            cancelled = client1.post(
+                f'/api/trips/{self.trip.id}/driver-cancel/',
+                {'cancellation_reason': 'Isolated redistribution test'}, format='json',
+            )
+        self.assertEqual(cancelled.status_code, 200, cancelled.data)
+        self.trip.refresh_from_db()
+        self.assertEqual(self.trip.status, 'pending')
+        self.assertIsNone(self.trip.base_driver_id)
+        own = client1.get(url)
+        other = client2.get(url)
+        self.assertEqual(own.status_code, 200, own.data)
+        self.assertEqual(other.status_code, 200, other.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in own.data['trips']})
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in other.data['trips']})
+
+    def test_pending_admin_assignment_only_visible_to_selected_driver(self):
+        response = self.admin_client.post(
+            f'/api/admin-panel/trips/{self.trip.id}/assign-driver/',
+            {'driver_id': self.driver1.id}, format='json',
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        url = '/api/trips/new-trip-requests/'
+        selected = APIClient()
+        selected.force_authenticate(user=self.driver1.user)
+        other = APIClient()
+        other.force_authenticate(user=self.driver2.user)
+        selected_response = selected.get(url)
+        other_response = other.get(url)
+        self.assertEqual(selected_response.status_code, 200, selected_response.data)
+        self.assertEqual(other_response.status_code, 200, other_response.data)
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in selected_response.data['trips']})
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_response.data['trips']})
+
+    def test_driver_history_and_detail_hide_passenger_fare(self):
+        from apps.trips.serializers.trip import TripWithStopPointSerializer
+        client = APIClient()
+        client.force_authenticate(user=self.driver1.user)
+        self.trip.base_driver = self.driver1
+        self.trip.save(update_fields=['base_driver'])
+        serializer = TripWithStopPointSerializer(
+            self.trip, context={'request': type('Request', (), {'user': self.driver1.user})(),
+                                'account_type': 'normal_driver'},
+        )
+        self.trip.booking_details = {
+            'flight_details': {'flight_number': 'BA123'},
+            'total_cost': 100, 'price_breakdown': {'act_commission': 20},
+        }
+        self.trip.save(update_fields=['booking_details'])
+        payload = serializer.data
+        self.assertIn('driver_earnings', payload)
+        self.assertEqual(payload['booking_details'], {
+            'flight_details': {'flight_number': 'BA123'},
+        })
+        passenger_payload = TripWithStopPointSerializer(
+            self.trip, context={'account_type': 'passenger'},
+        ).data
+        self.assertEqual(str(passenger_payload['cost']), '80.00')
+        self.assertIsNone(passenger_payload['driver_earnings'])
+        for field in ('cost', 'base_trip_cost', 'stripe_payment_intent',
+                      'refund_amount', 'regular_vat'):
+            self.assertNotIn(field, payload)
+        for url in ('/api/driver/trips/', f'/api/driver/trips/{self.trip.id}/'):
+            response = client.get(url)
+            self.assertEqual(response.status_code, 200, response.data)
+            records = response.data['data']['trips'] if url.endswith('/trips/') else [response.data['data']]
+            for record in records:
+                for field in ('cost', 'base_trip_cost', 'stripe_payment_intent', 'refund_amount'):
+                    self.assertNotIn(field, record)
+
+    def test_former_driver_cannot_read_reassigned_trip(self):
+        self.trip.cancelled_by_driver = True
+        self.trip.cancelled_by_driver_id = self.driver1
+        self.trip.base_driver = self.driver2
+        self.trip.status = 'accepted'
+        self.trip.save(update_fields=[
+            'cancelled_by_driver', 'cancelled_by_driver_id', 'base_driver', 'status',
+        ])
+        from apps.trips.views.user_trip import UserTripsListView
+        from rest_framework.test import APIRequestFactory, force_authenticate
+        request = APIRequestFactory().get('/api/trips/user-trips/')
+        force_authenticate(request, user=self.driver1.user)
+        response = UserTripsListView.as_view()(request)
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertNotIn(str(self.trip.id), {
+            str(row['id']) for row in response.data['trips']
+        })
+
+    def test_push_notifications_do_not_advertise_unpaid_or_accepted_jobs(self):
+        from utils.common.notifications import notify_all_drivers
+        for paid, state in [(False, 'pending'), (True, 'accepted')]:
+            with self.subTest(paid=paid, state=state):
+                self.trip.is_paid = paid
+                self.trip.status = state
+                self.trip.save(update_fields=['is_paid', 'status'])
+                with patch('utils.common.notifications.notify_user') as notify:
+                    result = notify_all_drivers(
+                        title_en='New Trip', title_ar='رحلة جديدة',
+                        desc_en='Trip available', desc_ar='رحلة متاحة',
+                        trip_id=self.trip.id,
+                    )
+                self.assertEqual(result['total_drivers'], 0)
+                notify.assert_not_called()
+
+    def test_missing_vehicle_class_does_not_broadcast_driver_notification(self):
+        from utils.common.notifications import notify_all_drivers
+        self.trip.car_type = None
+        self.trip.save(update_fields=['car_type'])
+        with patch('utils.common.notifications.notify_user') as notify:
+            result = notify_all_drivers(
+                title_en='New Trip', title_ar='رحلة جديدة',
+                desc_en='Trip available', desc_ar='رحلة متاحة',
+                trip_id=self.trip.id,
+            )
+        self.assertEqual(result['total_drivers'], 0)
+        notify.assert_not_called()
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",

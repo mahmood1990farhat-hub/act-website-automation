@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Locale } from "../../../../i18n.config";
 import Earnings from "./Earnings";
 import IsLoading from "../ISloading";
+import CommissionManagement from "./CommissionManagement";
 
 type EarningsWrapperProps = {
   trans: any;
@@ -17,14 +18,17 @@ export default function EarningsWrapper({
   locale,
 }: EarningsWrapperProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center items-center min-h-[400px]">
-          <IsLoading />
-        </div>
-      }
-    >
-      <Earnings locale={locale} token={token} trans={trans} />
-    </Suspense>
+    <>
+      <CommissionManagement locale={locale} token={token} />
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center min-h-[400px]">
+            <IsLoading />
+          </div>
+        }
+      >
+        <Earnings locale={locale} token={token} trans={trans} />
+      </Suspense>
+    </>
   );
 }
