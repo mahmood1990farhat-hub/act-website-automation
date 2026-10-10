@@ -245,6 +245,22 @@ class DriverAssignmentLifecycleTests(TestCase):
             str(row['id']) for row in response.data['trips']
         })
 
+    def test_push_notifications_do_not_advertise_unpaid_or_accepted_jobs(self):
+        from utils.common.notifications import notify_all_drivers
+        for paid, state in [(False, 'pending'), (True, 'accepted')]:
+            with self.subTest(paid=paid, state=state):
+                self.trip.is_paid = paid
+                self.trip.status = state
+                self.trip.save(update_fields=['is_paid', 'status'])
+                with patch('utils.common.notifications.notify_user') as notify:
+                    result = notify_all_drivers(
+                        title_en='New Trip', title_ar='رحلة جديدة',
+                        desc_en='Trip available', desc_ar='رحلة متاحة',
+                        trip_id=self.trip.id,
+                    )
+                self.assertEqual(result['total_drivers'], 0)
+                notify.assert_not_called()
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
