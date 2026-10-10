@@ -98,8 +98,8 @@ class NewTripRequestsView(EMADBaseView):
         # - 5-seat cars: Rides with 1-5 passengers
         # - 7-seat cars: Rides with 1-7 passengers
         # This pattern continues for larger vehicles
-        # Note: Cancelled trips (status='pending', cancelled_by_driver=True) are available for other drivers
-        # but excluded for the cancelling driver
+        # Cancelled trips return to eligible drivers except the cancelling driver.
+        # Pending admin reservations remain visible only to their selected driver.
         # Admin-assigned pending jobs are offered only to their selected
         # driver; unassigned jobs remain available to all eligible drivers.
         from django.db.models import Q
