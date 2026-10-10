@@ -26,3 +26,11 @@ The existing driver trip serializer still has its pre-existing broad response co
 ## ACT AI Automation handoff
 
 Read this PR/CI as the shared development record. Only this workstream owns the backend money calculation, agreement creation, admin changes and release. The mobile-development agent may review contracts and evidence, but must not write rates, memberships or payouts or create a competing dispatch/commission engine. No n8n or Driver v2 diagnostic changes. This note is a GitHub handoff, not a claim of direct delivery into another ChatGPT conversation.
+
+## Driver API contract hardening — 10 October 2026
+
+The existing paid/pending driver-offer endpoint now filters by the driver's exact vehicle class and capacity. Pending admin-reserved jobs are visible only to their selected driver. An accepted job disappears from every driver's available list; cancellation returns the job to other eligible drivers while excluding the cancelling driver. These behaviours use the existing backend endpoints, not a second dispatch system.
+
+The driver offer, assigned-trip list/detail and shared user-trip serializer now omit passenger gross fare, pricing breakdown, Stripe identifiers and refund/payment details for driver-facing responses. Driver earnings remain available through the existing driver payout display. Passenger-facing trip responses retain their own fare fields. Former drivers cannot retrieve a reassigned trip via the shared user-trip listing. New isolated regression tests cover these boundaries.
+
+**Release gate:** the above changes are committed in draft PR #83, not merged or deployed. Android client compatibility, nested booking_details privacy, and all remaining driver-facing endpoints require review before any mobile release. ACT AI Automation may review CI and propose issues but must not create parallel payout or dispatch logic.
