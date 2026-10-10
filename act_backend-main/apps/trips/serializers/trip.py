@@ -337,6 +337,22 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
 
 class TripWithStopPointSerializer(serializers.ModelSerializer):
     stop_points = StopPointSerializer(many=True, read_only=True)
+    driver_earnings = serializers.SerializerMethodField()
+
+    def get_driver_earnings(self, obj):
+        if self.get_account_type() != 'normal_driver':
+            return None
+        request = (self.context or {}).get('request')
+        driver = getattr(getattr(request, 'user', None), 'base_driver', None)
+        net, _ = driver_payout_display(obj, driver)
+        return str(net) if net is not None else None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.get_account_type() == 'normal_driver':
+            for field in TripWithStopPointBasicSerializer.DRIVER_PRIVATE_FIELDS:
+                data.pop(field, None)
+        return data
 
     airport_info = AirportSerializer(source='airport', read_only=True)
     passenger_info = serializers.SerializerMethodField()
