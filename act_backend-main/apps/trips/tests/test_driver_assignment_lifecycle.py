@@ -201,8 +201,16 @@ class DriverAssignmentLifecycleTests(TestCase):
             self.trip, context={'request': type('Request', (), {'user': self.driver1.user})(),
                                 'account_type': 'normal_driver'},
         )
+        self.trip.booking_details = {
+            'flight_details': {'flight_number': 'BA123'},
+            'total_cost': 100, 'price_breakdown': {'act_commission': 20},
+        }
+        self.trip.save(update_fields=['booking_details'])
         payload = serializer.data
         self.assertIn('driver_earnings', payload)
+        self.assertEqual(payload['booking_details'], {
+            'flight_details': {'flight_number': 'BA123'},
+        })
         passenger_payload = TripWithStopPointSerializer(
             self.trip, context={'account_type': 'passenger'},
         ).data
