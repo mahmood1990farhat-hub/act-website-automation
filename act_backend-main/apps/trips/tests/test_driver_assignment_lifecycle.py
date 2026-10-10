@@ -105,6 +105,36 @@ class DriverAssignmentLifecycleTests(TestCase):
         NormalDriver.objects.create(driver=base, vehicle=vehicle)
         return base
 
+    def test_driver_offer_list_excludes_unpaid_and_wrong_vehicle(self):
+        client = APIClient()
+        client.force_authenticate(user=self.driver1.user)
+        url = '/api/trips/new-trip-requests/'
+        # Verify against the existing registered route, not a new endpoint.
+        from django.urls import resolve
+        resolve(url)
+        unpaid = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.comfort,
+            cost='100.00', passengers_count=1, status='pending', is_paid=False,
+        )
+        wrong = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.executive,
+            cost='100.00', passengers_count=1, status='pending', is_paid=True,
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200, response.data)
+        listed = {str(row['id']) for row in response.data['trips']}
+        self.assertIn(str(self.trip.id), listed)
+        self.assertNotIn(str(unpaid.id), listed)
+        self.assertNotIn(str(wrong.id), listed)
+        for row in response.data['trips']:
+            self.assertNotIn('cost', row)
+            self.assertNotIn('stripe_payment_intent', row)
+            self.assertIn('driver_earnings', row)
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
