@@ -30,3 +30,9 @@ The new tests cover permissions, the default write lock, exclusive category list
 ## Handoff to ACT AI Automation / mobile development agent
 
 GitHub is the shared handoff record. This development workstream owns the commission API, admin controls and release decisions. The automation agent may review the PR and CI and report missing coverage; it must not independently calculate authoritative rates, change memberships, initiate settlements or build a second dispatcher. Do not enable this API or disturb Driver v2 connector diagnostics. Driver/passenger apps continue using the shared backend; driver earnings privacy and offer snapshots must be completed before consuming any new finance contracts. No claim is made that this note sends a message to another ChatGPT conversation.
+
+## Acceptance checkpoint — 10 October 2026
+
+Latest candidate CI #378 passed all three configured jobs, including backend commission/payout/dispatch tests, frontend build and Stripe sandbox. The earlier release dependencies above were implemented in draft PR #83: immutable accepted-journey payout agreements with release/reassignment history; guarded explicit legacy vehicle-rule retirement requiring exactly one configured global replacement; inactive-group repair; and driver offer/notification/privacy hardening. Historical accepted terms remain protected by the tested transaction flow.
+
+**This is still a draft, not a merged or deployed feature.** New commission writes remain disabled by default, and no production migration or live commercial rate change has occurred. Before enabling saving, obtain the owner's commercial approval for the global rate, verify any legacy vehicle rules and unfinished journeys in the target environment, confirm the admin browser UI, and review the Android contract. The wider bonuses/reimbursements/third-party settlement features are future milestones.
