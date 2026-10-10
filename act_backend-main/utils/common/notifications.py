@@ -423,8 +423,9 @@ def notify_all_drivers(title_en, title_ar, desc_en, desc_ar, locale='en', mobile
         )
     elif trip_id:
         logger.warning(
-            f"[NOTIFY_ALL_DRIVERS] Trip {trip_id} has no car_type set, notifying all drivers"
+            f"[NOTIFY_ALL_DRIVERS] Trip {trip_id} has no car_type; no driver offers sent"
         )
+        return {'success_count': 0, 'failure_count': 0, 'total_drivers': 0}
 
     drivers_with_tokens = drivers_qs.distinct()
     
