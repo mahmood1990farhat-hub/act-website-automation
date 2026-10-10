@@ -206,6 +206,13 @@ class DriverAssignmentLifecycleTests(TestCase):
         for field in ('cost', 'base_trip_cost', 'stripe_payment_intent',
                       'refund_amount', 'regular_vat'):
             self.assertNotIn(field, payload)
+        for url in ('/api/driver/trips/', f'/api/driver/trips/{self.trip.id}/'):
+            response = client.get(url)
+            self.assertEqual(response.status_code, 200, response.data)
+            records = response.data['data']['trips'] if url.endswith('/trips/') else [response.data['data']]
+            for record in records:
+                for field in ('cost', 'base_trip_cost', 'stripe_payment_intent', 'refund_amount'):
+                    self.assertNotIn(field, record)
 
     def test_former_driver_cannot_read_reassigned_trip(self):
         self.trip.cancelled_by_driver = True
