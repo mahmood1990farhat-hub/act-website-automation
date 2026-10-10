@@ -203,6 +203,11 @@ class DriverAssignmentLifecycleTests(TestCase):
         )
         payload = serializer.data
         self.assertIn('driver_earnings', payload)
+        passenger_payload = TripWithStopPointSerializer(
+            self.trip, context={'account_type': 'passenger'},
+        ).data
+        self.assertEqual(str(passenger_payload['cost']), '80.00')
+        self.assertIsNone(passenger_payload['driver_earnings'])
         for field in ('cost', 'base_trip_cost', 'stripe_payment_intent',
                       'refund_amount', 'regular_vat'):
             self.assertNotIn(field, payload)
