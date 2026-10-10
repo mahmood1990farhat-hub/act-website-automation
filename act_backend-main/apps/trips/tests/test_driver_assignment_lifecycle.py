@@ -191,6 +191,22 @@ class DriverAssignmentLifecycleTests(TestCase):
         self.assertIn(str(self.trip.id), {str(row['id']) for row in selected_response.data['trips']})
         self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_response.data['trips']})
 
+    def test_driver_history_and_detail_hide_passenger_fare(self):
+        from apps.trips.serializers.trip import TripWithStopPointSerializer
+        client = APIClient()
+        client.force_authenticate(user=self.driver1.user)
+        self.trip.base_driver = self.driver1
+        self.trip.save(update_fields=['base_driver'])
+        serializer = TripWithStopPointSerializer(
+            self.trip, context={'request': type('Request', (), {'user': self.driver1.user})(),
+                                'account_type': 'normal_driver'},
+        )
+        payload = serializer.data
+        self.assertIn('driver_earnings', payload)
+        for field in ('cost', 'base_trip_cost', 'stripe_payment_intent',
+                      'refund_amount', 'regular_vat'):
+            self.assertNotIn(field, payload)
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
