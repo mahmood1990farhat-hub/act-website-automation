@@ -207,6 +207,24 @@ class DriverAssignmentLifecycleTests(TestCase):
                       'refund_amount', 'regular_vat'):
             self.assertNotIn(field, payload)
 
+    def test_former_driver_cannot_read_reassigned_trip(self):
+        self.trip.cancelled_by_driver = True
+        self.trip.cancelled_by_driver_id = self.driver1
+        self.trip.base_driver = self.driver2
+        self.trip.status = 'accepted'
+        self.trip.save(update_fields=[
+            'cancelled_by_driver', 'cancelled_by_driver_id', 'base_driver', 'status',
+        ])
+        from apps.trips.views.user_trip import UserTripsListView
+        from rest_framework.test import APIRequestFactory, force_authenticate
+        request = APIRequestFactory().get('/api/trips/user-trips/')
+        force_authenticate(request, user=self.driver1.user)
+        response = UserTripsListView.as_view()(request)
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertNotIn(str(self.trip.id), {
+            str(row['id']) for row in response.data['trips']
+        })
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
