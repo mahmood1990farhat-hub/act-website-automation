@@ -92,17 +92,24 @@ class NewTripRequestsView(EMADBaseView):
                 )
                 return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
-        # Filter trips: pending status, passenger count <= driver's vehicle capacity
+        # Dispatch only paid, pending, unassigned, matching-class trips.
+        # This read endpoint must never expose ACT's passenger fare.
         # Vehicle capacity determines which rides you can see:
         # - 5-seat cars: Rides with 1-5 passengers
         # - 7-seat cars: Rides with 1-7 passengers
         # This pattern continues for larger vehicles
-        # Note: Cancelled trips (status='pending', cancelled_by_driver=True) are available for other drivers
-        # but excluded for the cancelling driver
+        # Cancelled trips return to eligible drivers except the cancelling driver.
+        # Pending admin reservations remain visible only to their selected driver.
+        # Admin-assigned pending jobs are offered only to their selected
+        # driver; unassigned jobs remain available to all eligible drivers.
+        from django.db.models import Q
         queryset = Trip.objects.filter(
             status='pending',
-            passengers_count__lte=driver_max_passengers,  # Passenger count <= driver's vehicle capacity
-            base_driver__isnull=True  # Only show unassigned trips
+            is_paid=True,
+            car_type_id=driver_vehicle_type.pk,
+            passengers_count__lte=driver_max_passengers,
+        ).filter(
+            Q(base_driver__isnull=True) | Q(base_driver=base_driver)
         ).exclude(
             # Exclude trips cancelled by this driver (they can't accept their own cancelled trips)
             cancelled_by_driver_id=base_driver

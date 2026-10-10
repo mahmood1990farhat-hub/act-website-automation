@@ -385,6 +385,7 @@ def notify_all_drivers(title_en, title_ar, desc_en, desc_ar, locale='en', mobile
         account_type='normal_driver',
         is_active=True,
         is_profile_completed=True,
+        is_admin_verified=True,
         devices__isnull=False,
     )
 
@@ -401,6 +402,18 @@ def notify_all_drivers(title_en, title_ar, desc_en, desc_ar, locale='en', mobile
                 'total_drivers': 0
             }
 
+    if trip_id:
+        # Notification eligibility must agree with the offer-list contract.
+        # Do not advertise unpaid, assigned, or non-pending bookings.
+        if not trip.is_paid or trip.status != 'pending':
+            return {'success_count': 0, 'failure_count': 0, 'total_drivers': 0}
+        if trip.base_driver_id:
+            drivers_qs = drivers_qs.filter(base_driver__id=trip.base_driver_id)
+        if trip.cancelled_by_driver_id_id:
+            drivers_qs = drivers_qs.exclude(base_driver__id=trip.cancelled_by_driver_id_id)
+        drivers_qs = drivers_qs.filter(
+            base_driver__normal_driver__vehicle__vehicle_type__max_passengers_count__gte=trip.passengers_count
+        )
     if vehicle_type:
         drivers_qs = drivers_qs.filter(
             base_driver__normal_driver__vehicle__vehicle_type=vehicle_type
@@ -410,8 +423,9 @@ def notify_all_drivers(title_en, title_ar, desc_en, desc_ar, locale='en', mobile
         )
     elif trip_id:
         logger.warning(
-            f"[NOTIFY_ALL_DRIVERS] Trip {trip_id} has no car_type set, notifying all drivers"
+            f"[NOTIFY_ALL_DRIVERS] Trip {trip_id} has no car_type; no driver offers sent"
         )
+        return {'success_count': 0, 'failure_count': 0, 'total_drivers': 0}
 
     drivers_with_tokens = drivers_qs.distinct()
     

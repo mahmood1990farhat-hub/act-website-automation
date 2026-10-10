@@ -41,7 +41,7 @@ class DriverCommissionMembership(models.Model):
     def save(self, *args, **kwargs):
         from apps.drivers.models import BaseDriver
         with transaction.atomic():
-            BaseDriver.objects.select_for_update().get(pk=self.driver_id)
+            self.driver = BaseDriver.objects.select_for_update().get(pk=self.driver_id)
             self.full_clean()
             return super().save(*args, **kwargs)
 
@@ -257,3 +257,6 @@ class WithdrawalRequest(models.Model):
     def __str__(self):
         return f"WithdrawalRequest {self.id} - Driver {self.driver.id} - {self.status}"
 
+
+# Keep payout agreements separate from payable/settled earnings ledgers.
+from .payout_models import DriverPayoutAgreement  # noqa: E402,F401
