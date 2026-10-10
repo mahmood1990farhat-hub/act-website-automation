@@ -88,6 +88,9 @@ class PayoutAgreementTests(PayoutFixtures, TestCase):
         display = TripWithStopPointBasicSerializer(self.trip, context={'for_driver': True, 'base_driver': self.driver1}).data
         self.assertEqual(display['driver_earnings'], '85.00')
         self.assertNotIn('payout_agreements', display)
+        for private_field in TripWithStopPointBasicSerializer.DRIVER_PRIVATE_FIELDS:
+            self.assertNotIn(private_field, display)
+        self.assertEqual(display['driver_earnings'], '85.00')
         earning = self.complete(self.driver1)
         self.assertEqual(earning.net_amount, Decimal('85.00'))
         self.assertEqual(earning.commission_amount, Decimal('15.00'))
