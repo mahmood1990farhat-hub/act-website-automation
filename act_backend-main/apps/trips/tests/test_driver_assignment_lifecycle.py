@@ -138,6 +138,11 @@ class DriverAssignmentLifecycleTests(TestCase):
         after = client.get(url)
         self.assertEqual(after.status_code, 200, after.data)
         self.assertNotIn(str(self.trip.id), {str(row['id']) for row in after.data['trips']})
+        other_client = APIClient()
+        other_client.force_authenticate(user=self.driver2.user)
+        other_offers = other_client.get(url)
+        self.assertEqual(other_offers.status_code, 200, other_offers.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_offers.data['trips']})
         for row in response.data['trips']:
             self.assertNotIn('cost', row)
             self.assertNotIn('stripe_payment_intent', row)
