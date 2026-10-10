@@ -92,7 +92,8 @@ class NewTripRequestsView(EMADBaseView):
                 )
                 return create_error_response(message, locale=locale, status_code=status.HTTP_400_BAD_REQUEST)
 
-        # Filter trips: pending status, passenger count <= driver's vehicle capacity
+        # Dispatch only paid, pending, unassigned, matching-class trips.
+        # This read endpoint must never expose ACT's passenger fare.
         # Vehicle capacity determines which rides you can see:
         # - 5-seat cars: Rides with 1-5 passengers
         # - 7-seat cars: Rides with 1-7 passengers
