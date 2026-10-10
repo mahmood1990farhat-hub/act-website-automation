@@ -261,6 +261,19 @@ class DriverAssignmentLifecycleTests(TestCase):
                 self.assertEqual(result['total_drivers'], 0)
                 notify.assert_not_called()
 
+    def test_missing_vehicle_class_does_not_broadcast_driver_notification(self):
+        from utils.common.notifications import notify_all_drivers
+        self.trip.car_type = None
+        self.trip.save(update_fields=['car_type'])
+        with patch('utils.common.notifications.notify_user') as notify:
+            result = notify_all_drivers(
+                title_en='New Trip', title_ar='رحلة جديدة',
+                desc_en='Trip available', desc_ar='رحلة متاحة',
+                trip_id=self.trip.id,
+            )
+        self.assertEqual(result['total_drivers'], 0)
+        notify.assert_not_called()
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
