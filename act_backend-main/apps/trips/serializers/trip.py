@@ -243,6 +243,22 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
         model = Trip
         fields = '__all__'
 
+    # The driver must never receive the passenger charge or ACT's payment
+    # breakdown, even as unused JSON keys in the mobile API response.
+    DRIVER_PRIVATE_FIELDS = (
+        'cost', 'base_trip_cost', 'regular_vat', 'airport_vat',
+        'min_adjustment', 'stripe_payment_intent', 'stripe_invoice_id',
+        'last4', 'card_brand', 'refund_status', 'stripe_refund_id',
+        'refund_amount', 'refund_error',
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if (self.context or {}).get('for_driver'):
+            for name in self.DRIVER_PRIVATE_FIELDS:
+                data.pop(name, None)
+        return data
+
     def _base_driver_for_commission(self):
         ctx = self.context or {}
         driver = ctx.get('base_driver')
