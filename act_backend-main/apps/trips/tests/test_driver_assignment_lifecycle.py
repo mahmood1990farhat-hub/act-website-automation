@@ -173,6 +173,24 @@ class DriverAssignmentLifecycleTests(TestCase):
         self.assertNotIn(str(self.trip.id), {str(row['id']) for row in own.data['trips']})
         self.assertIn(str(self.trip.id), {str(row['id']) for row in other.data['trips']})
 
+    def test_pending_admin_assignment_only_visible_to_selected_driver(self):
+        response = self.admin_client.post(
+            f'/api/admin-panel/trips/{self.trip.id}/assign-driver/',
+            {'driver_id': self.driver1.id}, format='json',
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        url = '/api/trips/new-trip-requests/'
+        selected = APIClient()
+        selected.force_authenticate(user=self.driver1.user)
+        other = APIClient()
+        other.force_authenticate(user=self.driver2.user)
+        selected_response = selected.get(url)
+        other_response = other.get(url)
+        self.assertEqual(selected_response.status_code, 200, selected_response.data)
+        self.assertEqual(other_response.status_code, 200, other_response.data)
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in selected_response.data['trips']})
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_response.data['trips']})
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
