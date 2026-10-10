@@ -148,6 +148,31 @@ class DriverAssignmentLifecycleTests(TestCase):
             self.assertNotIn('stripe_payment_intent', row)
             self.assertIn('driver_earnings', row)
 
+    def test_cancelled_job_returns_to_other_eligible_drivers_only(self):
+        client1 = APIClient()
+        client1.force_authenticate(user=self.driver1.user)
+        client2 = APIClient()
+        client2.force_authenticate(user=self.driver2.user)
+        url = '/api/trips/new-trip-requests/'
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client1.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        with patch('apps.trips.views.driver_cancel_trip.stop_trip_tracking'):
+            cancelled = client1.post(
+                f'/api/trips/{self.trip.id}/driver-cancel/',
+                {'cancellation_reason': 'Isolated redistribution test'}, format='json',
+            )
+        self.assertEqual(cancelled.status_code, 200, cancelled.data)
+        self.trip.refresh_from_db()
+        self.assertEqual(self.trip.status, 'pending')
+        self.assertIsNone(self.trip.base_driver_id)
+        own = client1.get(url)
+        other = client2.get(url)
+        self.assertEqual(own.status_code, 200, own.data)
+        self.assertEqual(other.status_code, 200, other.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in own.data['trips']})
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in other.data['trips']})
+
     def test_admin_assignment_waits_for_selected_driver_acceptance(self):
         response = self.admin_client.post(
             f"/api/admin-panel/trips/{self.trip.id}/assign-driver/",
