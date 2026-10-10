@@ -21,7 +21,7 @@ import re
 # Payment/provider breakdowns remain available only to authorised finance APIs.
 DRIVER_BOOKING_DETAIL_KEYS = (
     'passenger_counts', 'flight_details', 'child_infant_travel',
-    'additional_requirements', 'extra_services', 'language',
+    'additional_requirements', 'extra_services', 'customer_language',
 )
 
 
