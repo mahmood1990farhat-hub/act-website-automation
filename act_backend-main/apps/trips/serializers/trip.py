@@ -17,6 +17,20 @@ from decimal import Decimal
 import re
 
 
+# Driver-facing booking details must be an explicit operational allowlist.
+# Payment/provider breakdowns remain available only to authorised finance APIs.
+DRIVER_BOOKING_DETAIL_KEYS = (
+    'passenger_counts', 'flight_details', 'child_infant_travel',
+    'additional_requirements', 'extra_services', 'language',
+)
+
+
+def _driver_booking_details(details):
+    if not isinstance(details, dict):
+        return {}
+    return {key: details[key] for key in DRIVER_BOOKING_DETAIL_KEYS if key in details}
+
+
 def _format_snapshot_phone(country_code, phone):
     dial_code_match = re.search(r"\+\d+", country_code or "")
     dial_code = dial_code_match.group(0) if dial_code_match else (country_code or "").strip()
@@ -257,6 +271,7 @@ class TripWithStopPointBasicSerializer(serializers.ModelSerializer):
         if (self.context or {}).get('for_driver'):
             for name in self.DRIVER_PRIVATE_FIELDS:
                 data.pop(name, None)
+            data['booking_details'] = _driver_booking_details(data.get('booking_details'))
         return data
 
     def _base_driver_for_commission(self):
@@ -352,6 +367,7 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
         if self.get_account_type() == 'normal_driver':
             for field in TripWithStopPointBasicSerializer.DRIVER_PRIVATE_FIELDS:
                 data.pop(field, None)
+            data['booking_details'] = _driver_booking_details(data.get('booking_details'))
         return data
 
     airport_info = AirportSerializer(source='airport', read_only=True)
