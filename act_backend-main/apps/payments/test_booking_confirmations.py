@@ -11,6 +11,13 @@ from apps.vehicle.models import VehicleType
 
 
 class PaidBookingConfirmationTaskTests(TestCase):
+    def test_confirmations_are_routed_to_isolated_queue(self):
+        # Worker listening only on this queue never drains legacy Beat tasks.
+        self.assertEqual(
+            deliver_paid_booking_confirmations.queue,
+            "act_booking_confirmations",
+        )
+
     def _trip(self):
         trip = MagicMock()
         trip.id = 42
