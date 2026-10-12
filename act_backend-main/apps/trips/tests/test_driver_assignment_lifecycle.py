@@ -216,3 +216,85 @@ class DriverAssignmentLifecycleTests(TestCase):
         from apps.earnings.models import DriverEarningLedger, CompanyRevenueLedger
         self.assertEqual(DriverEarningLedger.objects.filter(trip=self.trip).count(), 1)
         self.assertEqual(CompanyRevenueLedger.objects.filter(trip=self.trip).count(), 1)
+
+    def test_driver_offer_list_excludes_unpaid_and_wrong_vehicle(self):
+        client = APIClient()
+        client.force_authenticate(user=self.driver1.user)
+        url = '/api/trips/new-trip-requests/'
+        # Verify against the existing registered route, not a new endpoint.
+        from django.urls import resolve
+        resolve(url)
+        unpaid = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.comfort,
+            cost='100.00', passengers_count=1, status='pending', is_paid=False,
+        )
+        wrong = Trip.objects.create(
+            pickup_lat=51.47, pickup_lng=-0.45, dropoff_lat=51.50,
+            dropoff_lng=-0.12, trip_date=self.trip.trip_date,
+            trip_time=self.trip.trip_time, car_type=self.executive,
+            cost='100.00', passengers_count=1, status='pending', is_paid=True,
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200, response.data)
+        listed = {str(row['id']) for row in response.data['trips']}
+        self.assertIn(str(self.trip.id), listed)
+        self.assertNotIn(str(unpaid.id), listed)
+        self.assertNotIn(str(wrong.id), listed)
+        # Once another driver accepts, the offer must disappear immediately.
+        from unittest.mock import patch
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        after = client.get(url)
+        self.assertEqual(after.status_code, 200, after.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in after.data['trips']})
+        other_client = APIClient()
+        other_client.force_authenticate(user=self.driver2.user)
+        other_offers = other_client.get(url)
+        self.assertEqual(other_offers.status_code, 200, other_offers.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_offers.data['trips']})
+
+    def test_cancelled_job_returns_to_other_eligible_drivers_only(self):
+        client1 = APIClient()
+        client1.force_authenticate(user=self.driver1.user)
+        client2 = APIClient()
+        client2.force_authenticate(user=self.driver2.user)
+        url = '/api/trips/new-trip-requests/'
+        with patch('apps.trips.views.accept_trip.send_trip_accepted_to_passenger'):
+            accepted = client1.post(f'/api/trips/{self.trip.id}/accept/', {}, format='json')
+        self.assertEqual(accepted.status_code, 200, accepted.data)
+        with patch('apps.trips.views.driver_cancel_trip.stop_trip_tracking'):
+            cancelled = client1.post(
+                f'/api/trips/{self.trip.id}/driver-cancel/',
+                {'cancellation_reason': 'Isolated redistribution test'}, format='json',
+            )
+        self.assertEqual(cancelled.status_code, 200, cancelled.data)
+        self.trip.refresh_from_db()
+        self.assertEqual(self.trip.status, 'pending')
+        self.assertIsNone(self.trip.base_driver_id)
+        own = client1.get(url)
+        other = client2.get(url)
+        self.assertEqual(own.status_code, 200, own.data)
+        self.assertEqual(other.status_code, 200, other.data)
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in own.data['trips']})
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in other.data['trips']})
+
+    def test_pending_admin_assignment_only_visible_to_selected_driver(self):
+        response = self.admin_client.post(
+            f'/api/admin-panel/trips/{self.trip.id}/assign-driver/',
+            {'driver_id': self.driver1.id}, format='json',
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        url = '/api/trips/new-trip-requests/'
+        selected = APIClient()
+        selected.force_authenticate(user=self.driver1.user)
+        other = APIClient()
+        other.force_authenticate(user=self.driver2.user)
+        selected_response = selected.get(url)
+        other_response = other.get(url)
+        self.assertEqual(selected_response.status_code, 200, selected_response.data)
+        self.assertEqual(other_response.status_code, 200, other_response.data)
+        self.assertIn(str(self.trip.id), {str(row['id']) for row in selected_response.data['trips']})
+        self.assertNotIn(str(self.trip.id), {str(row['id']) for row in other_response.data['trips']})
