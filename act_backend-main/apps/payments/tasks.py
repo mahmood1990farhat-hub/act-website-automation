@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(
+    # Keep confirmations off the legacy default queue (large unreviewed backlog).
+    queue="act_booking_confirmations",
     bind=True,
     autoretry_for=(Exception,),
     retry_backoff=True,
