@@ -104,12 +104,8 @@ class PaidBookingConfirmationDatabaseTests(TestCase):
         self.assertTrue(result["pdf_ready"])
         self.assertIsNotNone(trip.passenger_confirmation_sent_at)
         self.assertIsNotNone(trip.internal_booking_notification_sent_at)
-        passenger_send.assert_called_once()
-        self.assertIsNone(passenger_send.call_args.args[0])
-        self.assertTrue(passenger_send.call_args.kwargs["send_now"])
-        internal_send.assert_called_once_with(
-            internal_send.call_args.args[0], send_now=True
-        )
+        passenger_send.assert_called_once_with(None, trip, send_now=True)
+        internal_send.assert_called_once_with(trip, send_now=True)
 
         # A duplicate webhook/confirmation run does not send duplicate email.
         deliver_paid_booking_confirmations.run(trip.id)
