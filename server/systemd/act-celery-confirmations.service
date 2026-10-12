@@ -1,0 +1,22 @@
+# ACT dedicated paid-booking confirmation worker.
+# Intentionally processes ONLY act_booking_confirmations; NEVER consumes
+# the existing 'celery' queue containing accumulated Beat jobs.
+# Template only. Installation/start requires separate owner approval after CI.
+[Unit]
+Description=ACT isolated paid-booking confirmation Celery worker
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/atg/atg-backend/current
+EnvironmentFile=/var/www/atg/atg-backend/shared/.env
+ExecStart=/var/www/atg/atg-backend/current/.venv/bin/python -m celery -A myProject worker --loglevel=INFO --pool=solo --concurrency=1 --prefetch-multiplier=1 --queues=act_booking_confirmations
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
