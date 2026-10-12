@@ -103,6 +103,7 @@ jobs:
             live_drift="$(rsync -rcni --delete \
               --exclude='.env' --exclude='.next' \
               --exclude='node_modules' --exclude='.git' \
+              --exclude='next-env.d.ts' \
               "$baseline_checkout/act_website-main/" \
               /var/www/atg/front-end/airportandcitytransfer/)"
             if [[ -n "$live_drift" ]]; then
@@ -117,6 +118,7 @@ jobs:
             --exclude='.next' \
             --exclude='node_modules' \
             --exclude='.git' \
+            --exclude='next-env.d.ts' \
             "$release/act_website-main/" \
             /var/www/atg/front-end/airportandcitytransfer/
 
