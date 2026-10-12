@@ -55,6 +55,17 @@ def deliver_paid_booking_confirmations(self, trip_id):
             trip.save(update_fields=["passenger_confirmation_sent_at"])
             logger.info("[BOOKING CONFIRMATION] Passenger email accepted for trip %s", trip_id)
 
+    # Commit passenger SMTP acceptance independently before attempting ACT's
+    # internal email. If that send fails, retries must not repeat passenger mail.
+    with transaction.atomic():
+        trip = (
+            Trip.objects.select_for_update(of=("self",))
+            .select_related("passenger__user", "car_type")
+            .get(id=trip_id)
+        )
+        if not trip.is_paid or not trip.booking_confirmation_pdf:
+            raise RuntimeError(f"Paid booking PDF missing for trip {trip_id}")
+
         if not trip.internal_booking_notification_sent_at:
             if not send_internal_notification(trip, send_now=True):
                 raise RuntimeError(f"Internal booking notification SMTP send failed for trip {trip_id}")
