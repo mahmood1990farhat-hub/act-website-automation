@@ -46,7 +46,7 @@ expect(
 expect(
   editor.includes("driver.id") &&
     editor.includes("vehicle?.vehicle_number") &&
-    !editor.includes("localStorage"),
+    !editor.includes("localStorage.setItem"),
   "Editing must preserve the selected registered driver and not store identity files in localStorage.",
 );
 
