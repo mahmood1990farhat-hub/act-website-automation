@@ -28,7 +28,9 @@ def deliver_paid_booking_confirmations(self, trip_id):
     """
     with transaction.atomic():
         trip = (
-            Trip.objects.select_for_update()
+            # Only lock the Trip row. Nullable guest-passenger LEFT JOINs
+            # cannot be targets of PostgreSQL FOR UPDATE.
+            Trip.objects.select_for_update(of=("self",))
             .select_related("passenger__user", "car_type")
             .get(id=trip_id)
         )
