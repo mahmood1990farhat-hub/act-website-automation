@@ -39,22 +39,84 @@ jobs:
 
           repo=/var/www/atg/front-end/airportandcitytransfer_repo
           release="$RUNNER_TEMP/act-frontend-${{ github.run_id }}"
+          baseline_checkout="$RUNNER_TEMP/act-frontend-prior-${{ github.run_id }}"
           cleanup() {
+            git -C "$repo" worktree remove --force "$baseline_checkout" >/dev/null 2>&1 || true
             git -C "$repo" worktree remove --force "$release" >/dev/null 2>&1 || true
           }
           trap cleanup EXIT
 
+          accepted="${{ steps.accepted_sha.outputs.accepted_sha }}"
+          scoped_release=0
           git -C "$repo" fetch origin main
-          git -C "$repo" cat-file -e "${{ steps.accepted_sha.outputs.accepted_sha }}^{commit}"
-          git -C "$repo" merge-base --is-ancestor "${{ steps.accepted_sha.outputs.accepted_sha }}" origin/main
+          if ! git -C "$repo" merge-base --is-ancestor "$accepted" origin/main; then
+            # One specifically reviewed frontend-only hotfix. Do not relax this
+            # to an arbitrary PR, branch or commit; normal main releases retain
+            # their original ancestry gate.
+            scoped_release=1
+            release_branch="release/act-driver-identity-frontend-20261012"
+            release_baseline="50cefda52e3c7997ad2b6854d3c10ea7865220b2"
+            release_sha="4ef5418408cbd3ef7f1027763963aca4ed02354e"
+            [[ "$accepted" == "$release_sha" ]] || {
+              echo "Commit is not an approved main ancestor or pinned frontend hotfix" >&2
+              exit 1
+            }
+
+            git -C "$repo" fetch origin \
+              "refs/heads/$release_branch:refs/remotes/origin/$release_branch"
+            [[ "$(git -C "$repo" rev-parse "refs/remotes/origin/$release_branch")" == "$release_sha" ]] || {
+              echo "Release branch has changed since review" >&2
+              exit 1
+            }
+            git -C "$repo" cat-file -e "$accepted^{commit}"
+            git -C "$repo" merge-base --is-ancestor "$release_baseline" "$accepted"
+
+            # Reject even one unrelated website, booking, finance or ops file.
+            expected_files=(
+              "act_website-main/src/components/_components/dashboard/AllDriversDashboard.tsx"
+              "act_website-main/src/components/_components/dashboard/DriverPassengerDetailsEditor.tsx"
+              "act_website-main/tests/check-driver-passenger-identity.cjs"
+            )
+            mapfile -t changed_files < <(git -C "$repo" diff --name-only "$release_baseline" "$accepted" --)
+            [[ "${changed_files[*]}" == "${expected_files[*]}" ]] || {
+              echo "Scoped release contains unexpected paths" >&2
+              printf '%s\n' "${changed_files[@]}" >&2
+              exit 1
+            }
+
+            # Pin each code blob to the exact reviewed and CI-passed PR #88.
+            [[ "$(git -C "$repo" rev-parse "$accepted:${expected_files[0]}")" == "45317a84f2b1ee66673373405c3cb0fb0fd08887" ]]
+            [[ "$(git -C "$repo" rev-parse "$accepted:${expected_files[1]}")" == "55aad0e1320df2c33fffc9800002faa39e9625b0" ]]
+            [[ "$(git -C "$repo" rev-parse "$accepted:${expected_files[2]}")" == "8ca7ad6d30c3e7a63ac8a0ae7c498639decb0888" ]]
+          else
+            git -C "$repo" cat-file -e "$accepted^{commit}"
+          fi
 
           rm -rf "$release"
-          git -C "$repo" worktree add --detach "$release" "${{ steps.accepted_sha.outputs.accepted_sha }}"
+          git -C "$repo" worktree add --detach "$release" "$accepted"
+
+          if [[ "$scoped_release" == 1 ]]; then
+            # A known GitHub deploy last wrote this baseline. If anyone has
+            # modified the live frontend since then, refuse to rsync --delete.
+            # Review live drift before a separate approved attempt.
+            git -C "$repo" worktree add --detach "$baseline_checkout" "$release_baseline"
+            live_drift="$(rsync -rcni --delete \
+              --exclude='.env' --exclude='.next' \
+              --exclude='node_modules' --exclude='.git' \
+              "$baseline_checkout/act_website-main/" \
+              /var/www/atg/front-end/airportandcitytransfer/)"
+            if [[ -n "$live_drift" ]]; then
+              echo "Live frontend differs from recorded accepted baseline; refusing to overwrite changes:" >&2
+              printf '%s\n' "$live_drift" >&2
+              exit 1
+            fi
+          fi
 
           rsync -a --delete \
             --exclude='.env' \
             --exclude='.next' \
             --exclude='node_modules' \
+            --exclude='.git' \
             "$release/act_website-main/" \
             /var/www/atg/front-end/airportandcitytransfer/
 
