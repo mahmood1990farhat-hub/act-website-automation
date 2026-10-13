@@ -231,8 +231,11 @@ def acceptance():
         ])
         admin_page = dashboard.new_page()
         admin_page.goto(WEB + "/en/dashboard/driver-onboarding", wait_until="domcontentloaded")
-        expect(admin_page.get_by_text(EMAIL, exact=False).first).to_be_visible(timeout=30000)
-        admin_page.get_by_role("button", name="View Details").first.click()
+        # ACT renders a hidden desktop table as well as visible mobile cards.
+        # Select only the mobile card; the first email match is a hidden row.
+        mobile_cards = admin_page.locator("div.my-5.xl\\:hidden")
+        expect(mobile_cards.get_by_text(EMAIL, exact=True)).to_be_visible(timeout=30000)
+        mobile_cards.get_by_role("button", name="View Details").first.click()
         admin_page.get_by_role("button", name="Review unified application and private evidence").click()
         modal = admin_page.get_by_role("dialog", name="Unified driver application review")
         expect(modal).to_be_visible(timeout=15000)
