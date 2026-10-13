@@ -78,6 +78,7 @@ class UnifiedOnboardingTests(TestCase):
             "vehicle_ownership": "phv_owner" if with_vehicle else "do_not_have_a_phv",
             "agrees_policies": "true",
             "dbs_consent": "true",
+            "passenger_photo_disclosure_consent": "true",
             "pco_front": pdf("pco_front.pdf"),
             "pco_back": pdf("pco_back.pdf"),
             "dvla_front": pdf("dvla_front.pdf"),
