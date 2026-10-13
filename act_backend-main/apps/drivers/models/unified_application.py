@@ -76,6 +76,7 @@ class UnifiedDriverApplication(models.Model):
     accepts_pets = models.BooleanField(null=True, blank=True)
     ownership_explanation = models.CharField(max_length=500, blank=True, default="")
     awaiting_vehicle = models.BooleanField(default=False)
+    passenger_photo_disclosure_consent = models.BooleanField(default=False)
     setup_token_hash = models.CharField(max_length=64, blank=True, default="")
     setup_token_expires_at = models.DateTimeField(null=True, blank=True)
     setup_token_used_at = models.DateTimeField(null=True, blank=True)
