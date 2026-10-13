@@ -8,6 +8,9 @@ const login = read("src/components/_components/auth/Login.tsx");
 const setup = read("src/components/_components/auth/captain/DriverPasswordSetup.tsx");
 const review = read("src/components/_components/dashboard/UnifiedDriverReview.tsx");
 const admin = read("src/components/_components/dashboard/DriverOnboardingRequests.tsx");
+const vehicleSupplement = read("src/components/_components/auth/captain/DriverVehicleSupplement.tsx");
+const correctionForm = read("src/components/_components/auth/captain/DriverApplicationCorrections.tsx");
+const statusPage = read("src/app/[locale]/(site)/driver-application-status/page.tsx");
 
 function check(value, message) {
   if (!value) { console.error(message); process.exit(1); }
@@ -47,4 +50,19 @@ check(review.includes("admin/unified-applications/") &&
   review.includes('dbs_cleared: dbsCleared') &&
   review.includes("photo_disclosure_consent: photoConsent"),
   "Approval must be a gated admin-only confirmation");
+check(form.includes("passenger_photo_disclosure_consent") &&
+  form.includes("/terms-and-conditions.pdf") &&
+  form.includes("/privacy-policy.pdf"),
+  "Applicants must see both policies and explicitly consent to passenger-facing photo disclosure");
+check(statusPage.includes("<DriverVehicleSupplement token={token}") &&
+  vehicleSupplement.includes("/api/drivers/onboarding/add-vehicle/"),
+  "Applicants who later acquire a PHV must add verified evidence without a second account");
+check(statusPage.includes("<DriverApplicationCorrections") &&
+  correctionForm.includes("/api/drivers/onboarding/correct/") &&
+  correctionForm.includes("requested.filter"),
+  "Applicants may replace only specific admin-requested private documents");
+check(review.includes("request_changes") &&
+  review.includes("files_to_modify: action ===") &&
+  review.includes("requestedCorrections"),
+  "ACT admin must be able to request targeted corrections rather than reject/restart");
 console.log("ACT unified driver application UI and approval wiring checks passed.");
