@@ -13,6 +13,29 @@ APPLICATION_DOCUMENTS = (
 )
 
 
+def validate_private_driver_document(kind, uploaded):
+    """Use identical private-evidence checks for initial and supplement forms."""
+    if uploaded.size < 1 or uploaded.size > MAX_DOC_BYTES:
+        raise serializers.ValidationError({kind: "Each document must be 10 MB or smaller."})
+    first = uploaded.read(16)
+    uploaded.seek(0)
+    is_pdf = first.startswith(b"%PDF-")
+    is_png = first.startswith(b"\x89PNG\r\n\x1a\n")
+    is_jpg = first.startswith(b"\xff\xd8\xff")
+    if not any((is_pdf, is_png, is_jpg)):
+        raise serializers.ValidationError({kind: "Upload a genuine PDF, PNG or JPEG file."})
+    if kind == "driver_photo" and not (is_png or is_jpg):
+        raise serializers.ValidationError({kind: "Driver photograph must be PNG or JPEG."})
+    if is_png or is_jpg:
+        try:
+            with Image.open(uploaded) as image:
+                image.verify()
+        except (UnidentifiedImageError, OSError, ValueError):
+            raise serializers.ValidationError({kind: "Image is corrupt or invalid."})
+        finally:
+            uploaded.seek(0)
+
+
 class UnifiedDriverApplicationSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=50, trim_whitespace=True)
     last_name = serializers.CharField(max_length=50, trim_whitespace=True)
@@ -120,26 +143,54 @@ class UnifiedDriverApplicationSerializer(serializers.Serializer):
 
         for kind in APPLICATION_DOCUMENTS:
             uploaded = data.get(kind)
-            if not uploaded:
-                continue
-            if uploaded.size < 1 or uploaded.size > MAX_DOC_BYTES:
-                raise serializers.ValidationError({kind: "Each document must be 10 MB or smaller."})
-            first = uploaded.read(16)
-            uploaded.seek(0)
-            is_pdf = first.startswith(b"%PDF-")
-            is_png = first.startswith(b"\x89PNG\r\n\x1a\n")
-            is_jpg = first.startswith(b"\xff\xd8\xff")
-            if not any((is_pdf, is_png, is_jpg)):
-                raise serializers.ValidationError({kind: "Upload a genuine PDF, PNG or JPEG file."})
-            if kind == "driver_photo" and not (is_png or is_jpg):
-                raise serializers.ValidationError({kind: "Driver photograph must be PNG or JPEG."})
-            if is_png or is_jpg:
-                try:
-                    with Image.open(uploaded) as img:
-                        img.verify()
-                except (UnidentifiedImageError, OSError, ValueError):
-                    raise serializers.ValidationError({kind: "Image is corrupt or invalid."})
-                finally:
-                    uploaded.seek(0)
+            if uploaded:
+                validate_private_driver_document(kind, uploaded)
 
         return data
+
+
+class UnifiedVehicleSupplementSerializer(serializers.Serializer):
+    """One complete vehicle and evidence submission for a pending applicant."""
+
+    vehicle_ownership = serializers.ChoiceField(choices=("phv_owner", "hiring_a_phv", "other"))
+    vehicle_class_code = serializers.ChoiceField(
+        choices=("comfort", "comfort_xl", "executive", "executive_xl", "first"),
+    )
+    vehicle_make = serializers.CharField(max_length=80)
+    vehicle_model = serializers.CharField(max_length=80)
+    vehicle_year = serializers.IntegerField(min_value=2015)
+    vehicle_registration = serializers.CharField(max_length=50)
+    vehicle_colour = serializers.CharField(max_length=50)
+    mot_expiry = serializers.DateField()
+    insurance_expiry = serializers.DateField()
+    accepts_pets = serializers.BooleanField()
+    ownership_explanation = serializers.CharField(max_length=500, required=False)
+    mot = serializers.FileField()
+    insurance = serializers.FileField()
+    vehicle_phv = serializers.FileField()
+    v5c = serializers.FileField(required=False)
+    hire_agreement = serializers.FileField(required=False)
+
+    def validate(self, values):
+        today = date.today()
+        if values["vehicle_year"] > today.year:
+            raise serializers.ValidationError({"vehicle_year": "Vehicle year cannot be in the future."})
+        for key in ("mot_expiry", "insurance_expiry"):
+            if values[key] <= today:
+                raise serializers.ValidationError({key: "Expiry date must be in the future."})
+        ownership = values["vehicle_ownership"]
+        if ownership == "phv_owner" and not values.get("v5c"):
+            raise serializers.ValidationError({"v5c": "Vehicle owners must supply their V5C."})
+        if ownership == "hiring_a_phv" and not values.get("hire_agreement"):
+            raise serializers.ValidationError({"hire_agreement": "Proof of lawful hire is required."})
+        if ownership == "other" and (
+            not values.get("ownership_explanation") or
+            not (values.get("v5c") or values.get("hire_agreement"))
+        ):
+            raise serializers.ValidationError({
+                "ownership_explanation": "Explain and document your lawful right to use the vehicle."
+            })
+        for key in ("mot", "insurance", "vehicle_phv", "v5c", "hire_agreement"):
+            if values.get(key):
+                validate_private_driver_document(key, values[key])
+        return values
