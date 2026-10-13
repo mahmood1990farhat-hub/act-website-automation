@@ -62,7 +62,7 @@ def _email_password_setup(profile_id, raw_token):
     profile = UnifiedDriverApplication.objects.select_related("onboarding_request__user").get(pk=profile_id)
     user = profile.onboarding_request.user
     base = getattr(settings, "ACT_PUBLIC_WEBSITE_URL", "https://airportandcitytransfer.com").rstrip("/")
-    link = f"{base}/en/driver/set-password/#{quote(raw_token, safe='')}"
+    link = f"{base}/en/driver-password-setup/#{quote(raw_token, safe='')}"
     try:
         sent = send_mail(
             "ACT Driver Application — Set up your password",
