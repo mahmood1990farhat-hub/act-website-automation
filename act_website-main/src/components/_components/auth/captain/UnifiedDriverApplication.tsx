@@ -286,7 +286,7 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
             { value: "comfort_xl", label: "Comfort XL (MPV)" },
             { value: "executive", label: "Executive Class" },
             { value: "executive_xl", label: "Executive XL (van)" },
-            { value: "first", label: "First Class" },
+            { value: "first_class", label: "First Class" },
           ])}
           {input("vehicle_registration", "Vehicle registration (VRM)")}
           {input("vehicle_colour", "Vehicle colour")}
