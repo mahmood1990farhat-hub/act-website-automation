@@ -9,6 +9,7 @@ from .views.driver_login_views import DriverLoginView, DriverOnboardingDashboard
 from .views.unified_application import (
     UnifiedDriverApplicationView, UnifiedDriverSetPasswordView,
     UnifiedDriverResendLinkView, PrivateDriverApplicationDocumentView,
+    UnifiedDriverVehicleSupplementView,
 )
 from .views.unified_admin import (
     AdminUnifiedApplicationDetailView, AdminUnifiedApplicationDecisionView,
@@ -24,6 +25,8 @@ urlpatterns = [
     # for applications already in progress (no data migration/cutover).
     path('onboarding/apply/', UnifiedDriverApplicationView.as_view(), name='unified_driver_apply'),
     path('onboarding/set-password/', UnifiedDriverSetPasswordView.as_view(), name='unified_driver_set_password'),
+    path('onboarding/add-vehicle/', UnifiedDriverVehicleSupplementView.as_view(),
+         name='unified_driver_add_vehicle'),
     path('onboarding/resend-password-link/', UnifiedDriverResendLinkView.as_view(), name='unified_driver_resend_link'),
     path('admin/unified-documents/<int:document_id>/', PrivateDriverApplicationDocumentView.as_view(),
          name='admin_private_driver_document'),
