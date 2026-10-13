@@ -207,6 +207,12 @@ export default function Login({
             router.push(`/${locale}/download-app`);
             router.refresh();
             return; // keep loading until navigation
+          } else if (onboardingStatus?.submission_mode === "unified") {
+            // One-form applicants never return to legacy Stage 2 after signing in.
+            // Their portal is status-only until authorized final approval.
+            router.push(`/${locale}/driver-application-status`);
+            router.refresh();
+            return;
           } else if (needsModification) {
             // Documents need modification - redirect to upload-documents page
             console.log("✅ Needs modification detected, redirecting to upload-documents");
