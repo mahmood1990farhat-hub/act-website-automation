@@ -44,6 +44,7 @@ class UnifiedDriverApplicationSerializer(serializers.Serializer):
     ownership_explanation = serializers.CharField(max_length=500, required=False)
     agrees_policies = serializers.BooleanField()
     dbs_consent = serializers.BooleanField()
+    passenger_photo_disclosure_consent = serializers.BooleanField()
 
     pco_front = serializers.FileField()
     pco_back = serializers.FileField()
