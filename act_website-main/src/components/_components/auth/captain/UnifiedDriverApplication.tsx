@@ -22,6 +22,7 @@ const initial: Draft = {
   vehicle_year: "", vehicle_registration: "", vehicle_colour: "",
   mot_expiry: "", insurance_expiry: "", accepts_pets: "",
   ownership_explanation: "", agrees_policies: false, dbs_consent: false,
+  passenger_photo_disclosure_consent: false,
 };
 type DocKind = "pco_front" | "pco_back" | "dvla_front" | "dvla_back" |
   "driver_photo" | "mot" | "insurance" | "v5c" | "vehicle_phv" |
