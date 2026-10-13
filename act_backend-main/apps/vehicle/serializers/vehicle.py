@@ -18,7 +18,7 @@ class VehicleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Vehicle
-        fields = ['id', 'vehicle_number', 'mot', 'year_of_manufacture', 'phv', 'vehicle_type', 'vehicle_type_id']
+        fields = ['id', 'vehicle_number', 'make', 'model', 'color', 'mot', 'year_of_manufacture', 'phv', 'vehicle_type', 'vehicle_type_id']
     
     def validate_year_of_manufacture(self, value):
         current_year = datetime.now().year
