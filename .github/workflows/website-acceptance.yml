@@ -143,6 +143,7 @@ jobs:
           apps.trips.tests.test_external_driver_passenger_details
           apps.trips.tests.test_three_hour_cancellation
           apps.admin_panel.tests
+          apps.admin_panel.test_driver_passenger_identity
           apps.pricing.tests.test_monotonic_pricing
           apps.pricing.tests.test_pricing_engine
           apps.vehicle.tests.test_vehicle_class_codes
