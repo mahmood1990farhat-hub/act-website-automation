@@ -6,6 +6,14 @@ from .views.onboarding_step2_views import (
     DriverConfirmDocumentModificationView
 )
 from .views.driver_login_views import DriverLoginView, DriverOnboardingDashboardView
+from .views.unified_application import (
+    UnifiedDriverApplicationView, UnifiedDriverSetPasswordView,
+    UnifiedDriverResendLinkView, PrivateDriverApplicationDocumentView,
+    UnifiedDriverVehicleSupplementView, UnifiedDriverCorrectionView,
+)
+from .views.unified_admin import (
+    AdminUnifiedApplicationDetailView, AdminUnifiedApplicationDecisionView,
+)
 
 urlpatterns = [
     # Legacy endpoints (deprecated)
@@ -13,6 +21,22 @@ urlpatterns = [
     path('complete-normal-driver-info/', CompleteNormalDriverInfoView.as_view()), #checked
     path('update-normal-driver-info/' , UpdateNormalDriverInfoView.as_view()),#checked
     
+    # Unified onboarding for new applicants. Legacy step1/step2 still work
+    # for applications already in progress (no data migration/cutover).
+    path('onboarding/apply/', UnifiedDriverApplicationView.as_view(), name='unified_driver_apply'),
+    path('onboarding/set-password/', UnifiedDriverSetPasswordView.as_view(), name='unified_driver_set_password'),
+    path('onboarding/add-vehicle/', UnifiedDriverVehicleSupplementView.as_view(),
+         name='unified_driver_add_vehicle'),
+    path('onboarding/correct/', UnifiedDriverCorrectionView.as_view(),
+         name='unified_driver_correct'),
+    path('onboarding/resend-password-link/', UnifiedDriverResendLinkView.as_view(), name='unified_driver_resend_link'),
+    path('admin/unified-documents/<int:document_id>/', PrivateDriverApplicationDocumentView.as_view(),
+         name='admin_private_driver_document'),
+    path('admin/unified-applications/<int:request_id>/', AdminUnifiedApplicationDetailView.as_view(),
+         name='admin_unified_application_detail'),
+    path('admin/unified-applications/<int:request_id>/decision/', AdminUnifiedApplicationDecisionView.as_view(),
+         name='admin_unified_application_decision'),
+
     # New three-step onboarding flow
     path('onboarding/step1/', DriverOnboardingStep1View.as_view(), name='driver_onboarding_step1'),
     path('onboarding/step2/', Step2View.as_view(), name='driver_onboarding_step2'),
