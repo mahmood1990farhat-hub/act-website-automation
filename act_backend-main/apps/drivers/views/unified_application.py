@@ -480,6 +480,10 @@ class UnifiedDriverCorrectionView(APIView):
                     transaction.on_commit(
                         lambda name=old_name: storage.delete(name), robust=True,
                     )
+        except serializers.ValidationError as exc:
+            for name in stored:
+                storage.delete(name)
+            return Response(exc.detail, status=400)
         except Exception:
             for name in stored:
                 storage.delete(name)
