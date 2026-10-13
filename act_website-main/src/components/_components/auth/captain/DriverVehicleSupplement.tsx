@@ -7,7 +7,7 @@ const baseInput = "mt-1 w-full rounded-lg border border-gray-300 bg-white p-3 te
 const classes = [
   ["comfort", "Comfort Class"], ["comfort_xl", "Comfort XL"],
   ["executive", "Executive Class"], ["executive_xl", "Executive XL"],
-  ["first", "First Class"],
+  ["first_class", "First Class"],
 ];
 
 export default function DriverVehicleSupplement({ token }: { token: string }) {
