@@ -2,6 +2,7 @@
 Serializers for admin user update operations
 """
 from rest_framework import serializers
+from django.db import transaction
 from django.contrib.auth import get_user_model
 from apps.passengers.models import Passenger
 from apps.drivers.models import NormalDriver, BaseDriver
@@ -53,7 +54,15 @@ class AdminUpdateDriverSerializer(serializers.Serializer):
     pco = serializers.FileField(required=False, allow_null=True)
     dbs = serializers.FileField(required=False, allow_null=True)
     dvla = serializers.FileField(required=False, allow_null=True)
-    
+    pco_licence_number = serializers.CharField(required=False, allow_blank=False, max_length=50)
+    driver_photo = serializers.ImageField(required=False)
+
+    def validate_driver_photo(self, image):
+        if image.size > 5 * 1024 * 1024:
+            raise serializers.ValidationError('Driver photo must be 5 MB or smaller.')
+        return image
+
+    @transaction.atomic
     def update(self, instance, validated_data):
         """Update driver information"""
         from apps.drivers.models import BankDetails
@@ -90,17 +99,17 @@ class AdminUpdateDriverSerializer(serializers.Serializer):
                 instance.driver.bank_details = bank_details
                 instance.driver.save()
         
-        # Update driver documents
-        if validated_data.get('pco'):
-            instance.driver.pco = validated_data['pco']
-        if validated_data.get('dbs'):
-            instance.driver.dbs = validated_data['dbs']
-        if validated_data.get('dvla'):
-            instance.driver.dvla = validated_data['dvla']
-        
-        if any([validated_data.get('pco'), validated_data.get('dbs'), validated_data.get('dvla')]):
-            instance.driver.save()
-        
+        # Update only the fields explicitly provided. Never clear an existing
+        # licence or driver photo because the edit form omitted that input.
+        driver_fields = []
+        for field in ('pco_licence_number', 'driver_photo', 'pco', 'dbs', 'dvla'):
+            if field in validated_data:
+                setattr(instance.driver, field, validated_data[field])
+                driver_fields.append(field)
+
+        if driver_fields:
+            instance.driver.save(update_fields=driver_fields)
+
         return instance
 
 
