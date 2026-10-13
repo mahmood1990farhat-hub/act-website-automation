@@ -148,7 +148,18 @@ jobs:
           admin.is_staff = True
           admin.is_superuser = True
           admin.save()
-          print("SYNTHETIC ADMIN CREATED")
+          # Production seeds ACT VehicleType rows separately; the isolated
+          # fresh staging database needs a synthetic approved Comfort class.
+          from apps.vehicle.models import VehicleType
+          VehicleType.objects.get_or_create(
+              code="comfort",
+              defaults={
+                  "name_en": "Comfort Class", "name_ar": "Comfort Class",
+                  "icon": "vehicle_types/icons/comfort.png",
+                  "max_passengers_count": 4,
+              },
+          )
+          print("SYNTHETIC ADMIN AND VEHICLE CLASS CREATED")
           '
 
       - name: Build ACT website with localhost-only API
