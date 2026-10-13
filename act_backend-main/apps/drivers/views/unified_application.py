@@ -32,6 +32,7 @@ from apps.drivers.serializers.unified_application import (
     UnifiedDriverApplicationSerializer,
     UnifiedVehicleSupplementSerializer,
     private_document_content_type,
+    validate_private_driver_document,
 )
 
 logger = logging.getLogger(__name__)
@@ -370,6 +371,124 @@ class UnifiedDriverResendLinkView(APIView):
                         robust=True,
                     )
         return Response({"detail": GENERIC_RESET_MESSAGE})
+
+
+class UnifiedDriverCorrectionView(APIView):
+    """Applicant-only replacement of EXACT fields requested by an ACT admin.
+
+    Original identity documents remain private. The database changes only after
+    all requested values/documents validate, with old files deleted on commit.
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    http_method_names = ["post"]
+
+    def post(self, request):
+        if _rate_limited(request, "corrections", 20):
+            return Response({"detail": "Please wait before resubmitting."}, status=429)
+        if not _private_uploads_ready():
+            return Response({"detail": "Private uploads are temporarily unavailable."}, status=503)
+        if request.user.account_type != "normal_driver":
+            return Response({"detail": "This is only for ACT driver applicants."}, status=403)
+
+        from datetime import date
+        from apps.drivers.views.unified_admin import PROFILE_CORRECTION_FIELDS
+        doc_kinds = {key for key, _ in DriverApplicationDocument.KINDS}
+        stored = []
+        displaced = []
+        storage = PrivateDriverDocumentStorage()
+        try:
+            with transaction.atomic():
+                profile = UnifiedDriverApplication.objects.select_for_update().select_related(
+                    "onboarding_request__user"
+                ).filter(onboarding_request__user_id=request.user.pk).first()
+                if not profile:
+                    return Response({"detail": "No unified driver application exists."}, status=404)
+                onboarding = profile.onboarding_request
+                if (onboarding.status != "needs_modification" or
+                        not profile.password_set_at or
+                        request.user.is_admin_verified or
+                        request.user.is_profile_completed or
+                        hasattr(request.user, "base_driver")):
+                    return Response({"detail": "Corrections are not authorized for this account."}, status=403)
+
+                requested = set(onboarding.files_need_modification or [])
+                if not requested or not requested.issubset(doc_kinds | PROFILE_CORRECTION_FIELDS):
+                    return Response({"detail": "Invalid admin correction request; contact ACT support."}, status=409)
+                submitted = set(request.data.keys())
+                if submitted != requested:
+                    return Response({
+                        "detail": "Submit every requested field only.",
+                        "missing": sorted(requested - submitted),
+                        "unexpected": sorted(submitted - requested),
+                    }, status=400)
+
+                amended_fields = []
+                for field in sorted(requested & PROFILE_CORRECTION_FIELDS):
+                    raw = request.data.get(field)
+                    if not isinstance(raw, str) or not raw.strip():
+                        return Response({field: "This corrected value is required."}, status=400)
+                    raw = raw.strip()
+                    value = raw
+                    if field.endswith("_expiry"):
+                        try:
+                            value = date.fromisoformat(raw)
+                        except ValueError:
+                            return Response({field: "Use YYYY-MM-DD."}, status=400)
+                        if value <= date.today():
+                            return Response({field: "Expiry must be in the future."}, status=400)
+                    elif field == "vehicle_year":
+                        try:
+                            value = int(raw)
+                        except ValueError:
+                            return Response({field: "Enter a valid vehicle year."}, status=400)
+                        if value < 2015 or value > date.today().year:
+                            return Response({field: "Vehicle year must be 2015–present."}, status=400)
+                    else:
+                        max_length = profile._meta.get_field(field).max_length
+                        if len(raw) > max_length:
+                            return Response({field: "Value is too long."}, status=400)
+                    setattr(profile, field, value)
+                    amended_fields.append(field)
+
+                for kind in sorted(requested & doc_kinds):
+                    upload = request.FILES.get(kind)
+                    if upload is None:
+                        return Response({kind: "A replacement document is required."}, status=400)
+                    validate_private_driver_document(kind, upload)
+                    old = profile.documents.filter(kind=kind).first()
+                    if old:
+                        displaced.append(old.file.name)
+                        doc = old
+                    else:
+                        doc = DriverApplicationDocument(application=profile, kind=kind)
+                    doc.content_type = private_document_content_type(upload)
+                    doc.original_name = os.path.basename(upload.name)[:200]
+                    doc.file_size = upload.size
+                    upload.seek(0)
+                    doc.file.save(upload.name, upload, save=False)
+                    stored.append(doc.file.name)
+                    doc.save()
+
+                if amended_fields:
+                    profile.save(update_fields=amended_fields)
+                onboarding.status = "pending"
+                onboarding.files_need_modification = []
+                onboarding.save(update_fields=["status", "files_need_modification"])
+                # Old private files are removed only after the new rows commit.
+                for old_name in displaced:
+                    transaction.on_commit(
+                        lambda name=old_name: storage.delete(name), robust=True,
+                    )
+        except Exception:
+            for name in stored:
+                storage.delete(name)
+            logger.warning("ACT driver requested corrections could not be saved.")
+            return Response({"detail": "Corrections could not be saved. Contact ACT support."}, status=503)
+        return Response({
+            "success": True, "status": "pending_verification",
+            "message": "Your corrections have been received for ACT admin re-review.",
+        })
 
 
 class PrivateDriverApplicationDocumentView(APIView):
