@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Locale } from "../../../../../i18n.config";
 import { privatePageSeo } from "@/lib/seo";
 import DriverVehicleSupplement from "@/components/_components/auth/captain/DriverVehicleSupplement";
+import DriverApplicationCorrections from "@/components/_components/auth/captain/DriverApplicationCorrections";
 
 export const metadata = privatePageSeo;
 
@@ -37,6 +38,14 @@ export default async function DriverApplicationStatusPage({
           {application.request?.submission_mode === "unified" ? (
             <>
               <p className="mt-3">ACT is verifying your application and documents. No additional standard document stage is required.</p>
+              {application.status === "needs_modification" && (
+                <DriverApplicationCorrections
+                  token={token}
+                  requested={Array.isArray(application.files_need_modification)
+                    ? application.files_need_modification : []}
+                  reason={application.request?.rejection_reason || ""}
+                />
+              )}
               {application.request?.awaiting_vehicle && (
                 <>
                   <p className="mt-3 rounded-lg border border-yellow-400 p-3 text-yellow-100">
