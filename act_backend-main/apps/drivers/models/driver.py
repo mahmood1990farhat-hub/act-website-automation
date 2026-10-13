@@ -9,9 +9,9 @@ from .bank import BankDetails
 
 class BaseDriver(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="base_driver")
-    pco = models.FileField(upload_to="driver_docs/pco/")
-    dbs = models.FileField(upload_to="driver_docs/dbs/")
-    dvla = models.FileField(upload_to="driver_docs/dvla/")
+    pco = models.FileField(upload_to="driver_docs/pco/", blank=True)
+    dbs = models.FileField(upload_to="driver_docs/dbs/", blank=True)
+    dvla = models.FileField(upload_to="driver_docs/dvla/", blank=True)
     pco_licence_number = models.CharField(max_length=50, blank=True, default="")
     driver_photo = models.ImageField(upload_to="driver_docs/photos/", blank=True, null=True)
     bank_details = models.ForeignKey(BankDetails, on_delete=models.SET_NULL, null=True, blank=True)
