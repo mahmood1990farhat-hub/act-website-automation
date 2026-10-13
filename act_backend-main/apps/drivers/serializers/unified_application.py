@@ -13,6 +13,19 @@ APPLICATION_DOCUMENTS = (
 )
 
 
+def private_document_content_type(uploaded):
+    """Report document type from inspected bytes, never an uploaded filename."""
+    signature = uploaded.read(16)
+    uploaded.seek(0)
+    if signature.startswith(b"%PDF-"):
+        return "application/pdf"
+    if signature.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if signature.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    raise serializers.ValidationError("Unsupported driver document content")
+
+
 def validate_private_driver_document(kind, uploaded):
     """Use identical private-evidence checks for initial and supplement forms."""
     if uploaded.size < 1 or uploaded.size > MAX_DOC_BYTES:
