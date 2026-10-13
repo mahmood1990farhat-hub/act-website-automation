@@ -227,6 +227,109 @@ class UnifiedOnboardingTests(TestCase):
         self.assertEqual(UnifiedDriverApplication.objects.count(), 0)
         self.assertFalse(User.objects.filter(email="newdriver@example.invalid").exists())
 
+    def test_admin_requested_corrections_replace_only_allowed_private_files(self):
+        created, _ = self.apply(with_vehicle=True)
+        self.assertEqual(created.status_code, 201, created.data)
+        cache.clear()
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN,
+            "password": "SomeVeryStrongPassword+2026",
+            "confirm_password": "SomeVeryStrongPassword+2026",
+        }, format="json")
+        self.assertEqual(activated.status_code, 200)
+        profile = UnifiedDriverApplication.objects.get(
+            onboarding_request__user__email="newdriver@example.invalid"
+        )
+        original = profile.documents.get(kind="pco_front")
+        old_path = original.file.name
+        old_file_id = original.pk
+        self.client.force_authenticate(user=self.admin)
+        endpoint = f"/api/drivers/admin/unified-applications/{created.data['application_id']}/decision/"
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                requested = self.client.post(endpoint, {
+                    "action": "request_changes",
+                    "reason": "Badge scan unclear; colour entered incorrectly.",
+                    "files_to_modify": ["pco_front", "vehicle_colour"],
+                }, format="json")
+        self.assertEqual(requested.status_code, 200, requested.data)
+        profile.onboarding_request.refresh_from_db()
+        self.assertEqual(profile.onboarding_request.status, "needs_modification")
+        self.assertEqual(profile.onboarding_request.files_need_modification,
+                         ["pco_front", "vehicle_colour"])
+        self.assertEqual(NormalDriver.objects.count(), 0)
+        cache.clear()
+        user = profile.onboarding_request.user
+        self.client.force_authenticate(user=user)
+        corrections_url = "/api/drivers/onboarding/correct/"
+        denied = self.client.post(corrections_url, {
+            "pco_front": pdf("replacement.pdf"), "vehicle_colour": "Blue",
+            "mot": pdf("extra.pdf"),
+        }, format="multipart")
+        self.assertEqual(denied.status_code, 400, denied.data)
+        original.refresh_from_db()
+        self.assertEqual(original.file.name, old_path)
+
+        cache.clear()
+        with self.captureOnCommitCallbacks(execute=True):
+            correct = self.client.post(corrections_url, {
+                "pco_front": pdf("replacement.pdf"),
+                "vehicle_colour": "Blue",
+            }, format="multipart")
+        self.assertEqual(correct.status_code, 200, correct.data)
+        profile.refresh_from_db()
+        profile.onboarding_request.refresh_from_db()
+        original.refresh_from_db()
+        self.assertEqual(profile.vehicle_colour, "Blue")
+        self.assertEqual(profile.onboarding_request.status, "pending")
+        self.assertEqual(profile.onboarding_request.files_need_modification, [])
+        self.assertEqual(original.pk, old_file_id)
+        self.assertNotEqual(original.file.name, old_path)
+        self.assertTrue(original.file.storage.exists(original.file.name))
+        self.assertFalse(original.file.storage.exists(old_path))
+        self.assertEqual(DriverApplicationDocument.objects.count(), 9)
+        self.assertFalse(user.is_admin_verified)
+        self.assertFalse(user.is_profile_completed)
+        self.assertEqual(BaseDriver.objects.count(), 0)
+
+        cache.clear()
+        replay = self.client.post(corrections_url, {
+            "pco_front": pdf("again.pdf"), "vehicle_colour": "Green",
+        }, format="multipart")
+        self.assertEqual(replay.status_code, 403)
+        profile.refresh_from_db()
+        self.assertEqual(profile.vehicle_colour, "Blue")
+
+    def test_private_storage_rejects_symlink_to_public_media(self):
+        from django.core.exceptions import ImproperlyConfigured
+        from pathlib import Path
+        from apps.drivers.models.unified_application import PrivateDriverDocumentStorage
+        with TemporaryDirectory() as root:
+            public = Path(root) / "public"
+            public.mkdir()
+            linked = Path(root) / "private-link"
+            linked.symlink_to(public, target_is_directory=True)
+            with override_settings(
+                MEDIA_ROOT=str(public),
+                ACT_DRIVER_PRIVATE_UPLOAD_ROOT=str(linked),
+            ):
+                with self.assertRaises(ImproperlyConfigured):
+                    _ = PrivateDriverDocumentStorage().location
+
+    def test_evidence_download_type_is_from_content_not_filename(self):
+        values = self.payload()
+        values["pco_front"] = pdf("looks-like-an-image.png")
+        created, _ = self.apply(values=values)
+        self.assertEqual(created.status_code, 201, created.data)
+        document = DriverApplicationDocument.objects.get(kind="pco_front")
+        self.assertEqual(document.content_type, "application/pdf")
+        self.client.force_authenticate(user=self.admin)
+        reply = self.client.get(
+            f"/api/drivers/admin/unified-documents/{document.pk}/"
+        )
+        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply["Content-Type"], "application/pdf")
+
     def test_password_is_single_use_but_never_verifies_driver(self):
         response, _ = self.apply()
         self.assertEqual(response.status_code, 201, response.data)
