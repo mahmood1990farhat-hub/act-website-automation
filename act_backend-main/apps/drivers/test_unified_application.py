@@ -193,9 +193,10 @@ class UnifiedOnboardingTests(TestCase):
         self.assertEqual(NormalDriver.objects.count(), 0)
 
         cache.clear()
+        duplicate_values = self.payload(with_vehicle=True)
         duplicate = self.client.post(
             "/api/drivers/onboarding/add-vehicle/",
-            {**addition, "mot": pdf("mot-second.pdf")},
+            {key: duplicate_values[key] for key in fields},
             format="multipart",
         )
         self.assertEqual(duplicate.status_code, 409)
