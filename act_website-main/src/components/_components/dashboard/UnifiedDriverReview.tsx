@@ -58,11 +58,11 @@ export default function UnifiedDriverReview({
     return () => controller.abort();
   }, [api, applicationId, token]);
 
-  const download = async (document: Review["documents"][number]) => {
+  const download = async (fileItem: Review["documents"][number]) => {
     if (!token || busy) return;
     setBusy(true); setError("");
     try {
-      const res = await fetch(api + document.download_endpoint, {
+      const res = await fetch(api + fileItem.download_endpoint, {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
@@ -72,7 +72,7 @@ export default function UnifiedDriverReview({
       try {
         const anchor = document.createElement("a");
         anchor.href = temporaryUrl;
-        anchor.download = document.name || "driver-evidence";
+        anchor.download = fileItem.name || "driver-evidence";
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();
