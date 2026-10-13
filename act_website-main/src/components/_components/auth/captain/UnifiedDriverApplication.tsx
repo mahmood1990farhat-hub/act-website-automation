@@ -12,6 +12,7 @@ type Draft = {
   vehicle_colour: string; mot_expiry: string; insurance_expiry: string;
   accepts_pets: string; ownership_explanation: string;
   agrees_policies: boolean; dbs_consent: boolean;
+  passenger_photo_disclosure_consent: boolean;
 };
 const initial: Draft = {
   first_name: "", last_name: "", date_of_birth: "", phone_number: "+44",
