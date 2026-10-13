@@ -20,11 +20,39 @@ from rest_framework.views import APIView
 
 from apps.drivers.models import (
     BaseDriver, NormalDriver, DriverOnboardingRequest, UnifiedDriverApplication,
+    DriverApplicationDocument,
 )
 from apps.vehicle.models import Vehicle, VehicleType
 
 logger = logging.getLogger(__name__)
 IDENTITY_DOCS = {"pco_front", "pco_back", "dvla_front", "dvla_back", "driver_photo"}
+
+
+PROFILE_CORRECTION_FIELDS = {
+    "pco_badge_number", "pco_badge_expiry",
+    "mot_expiry", "insurance_expiry", "vehicle_registration",
+    "vehicle_colour", "vehicle_make", "vehicle_model", "vehicle_year",
+}
+CORRECTION_KINDS = {key for key, _ in DriverApplicationDocument.KINDS} | PROFILE_CORRECTION_FIELDS
+
+
+def _notify_changes(profile_id):
+    profile = UnifiedDriverApplication.objects.select_related(
+        "onboarding_request__user"
+    ).get(pk=profile_id)
+    try:
+        send_mail(
+            "ACT Driver Application — Corrections required",
+            "ACT needs corrected information before we can finish reviewing "
+            "your driver application. Sign in to the ACT driver application "
+            "status page, review the request and upload only the requested "
+            "evidence. Your account is not approved for trips.",
+            getattr(settings, "DEFAULT_FROM_EMAIL", "info@airportandcitytransfer.com"),
+            [profile.onboarding_request.user.email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.warning("ACT driver correction email failed; admin follow-up required.")
 
 
 def _expected_document_kinds(profile):
@@ -123,8 +151,8 @@ class AdminUnifiedApplicationDecisionView(APIView):
 
     def post(self, request, request_id):
         action = request.data.get("action")
-        if action not in ("approve", "reject"):
-            return Response({"detail": "Choose approve or reject."}, status=400)
+        if action not in ("approve", "reject", "request_changes"):
+            return Response({"detail": "Choose approve, reject or request corrections."}, status=400)
 
         published_photo = None
         try:
@@ -156,6 +184,34 @@ class AdminUnifiedApplicationDecisionView(APIView):
                         lambda pk=profile.pk: _notify_review(pk, False), robust=True,
                     )
                     return Response({"success": True, "status": "final_rejected"})
+
+                if action == "request_changes":
+                    reason = str(request.data.get("reason", "")).strip()
+                    fields = request.data.get("files_to_modify", [])
+                    if len(reason) < 8:
+                        return Response({"reason": "Give a clear correction reason."}, status=400)
+                    if (not isinstance(fields, list) or not fields or len(fields) > 16
+                            or any(not isinstance(key, str) or key not in CORRECTION_KINDS for key in fields)
+                            or len(set(fields)) != len(fields)):
+                        return Response({"files_to_modify": "Select specific valid document or detail fields."}, status=400)
+                    onboarding.status = "needs_modification"
+                    onboarding.files_need_modification = fields
+                    onboarding.rejection_reason = reason
+                    onboarding.reviewed_by = request.user
+                    onboarding.reviewed_at = now
+                    onboarding.save(update_fields=[
+                        "status", "files_need_modification", "rejection_reason",
+                        "reviewed_by", "reviewed_at",
+                    ])
+                    profile.reviewed_at = now
+                    profile.save(update_fields=["reviewed_at"])
+                    transaction.on_commit(
+                        lambda pk=profile.pk: _notify_changes(pk), robust=True,
+                    )
+                    return Response({
+                        "success": True, "status": "needs_modification",
+                        "files_to_modify": fields,
+                    })
 
                 if profile.awaiting_vehicle:
                     return Response({"detail": "Driver has no verified vehicle. Approval for trip work is prohibited."}, status=400)
