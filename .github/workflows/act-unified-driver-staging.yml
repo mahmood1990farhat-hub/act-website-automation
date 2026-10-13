@@ -90,6 +90,34 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout pinned production-baseline backend candidate
+        uses: actions/checkout@v4
+        with:
+          ref: c02fa3c5520c7d0e00f8d8d9653471d726d58bac
+          path: release-backend
+          persist-credentials: false
+
+      - name: Checkout pinned production-baseline frontend candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 6c6aca306961ad9750ba81df8fefc9411dc5a24e
+          path: release-frontend
+          persist-credentials: false
+
+      - name: Assemble exactly the backend/frontend candidates under test
+        run: |
+          test "$(git -C release-backend rev-parse HEAD)" = c02fa3c5520c7d0e00f8d8d9653471d726d58bac
+          test "$(git -C release-frontend rev-parse HEAD)" = 6c6aca306961ad9750ba81df8fefc9411dc5a24e
+          cp act_website-main/tests/staging_unified_driver_journey.py "${RUNNER_TEMP}/act-driver-staging-acceptance.py"
+          rm -rf act_backend-main act_website-main
+          cp -a release-backend/act_backend-main act_backend-main
+          cp -a release-frontend/act_website-main act_website-main
+          mkdir -p act_website-main/tests
+          cp "${RUNNER_TEMP}/act-driver-staging-acceptance.py" act_website-main/tests/staging_unified_driver_journey.py
+          test -f act_backend-main/apps/drivers/views/unified_application.py
+          test -f act_website-main/src/components/_components/auth/captain/UnifiedDriverApplication.tsx
+          echo "TESTING PINNED RELEASE SHA: backend c02fa3c + frontend 6c6aca3; not modern main."
+
       - name: Assert this job cannot access ACT production services
         run: |
           test "$ACT_E2E_ISOLATED" = 1
