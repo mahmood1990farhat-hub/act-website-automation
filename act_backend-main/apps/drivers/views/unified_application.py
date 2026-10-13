@@ -31,6 +31,7 @@ from apps.drivers.serializers.unified_application import (
     APPLICATION_DOCUMENTS,
     UnifiedDriverApplicationSerializer,
     UnifiedVehicleSupplementSerializer,
+    private_document_content_type,
 )
 
 logger = logging.getLogger(__name__)
@@ -174,11 +175,7 @@ class UnifiedDriverApplicationView(APIView):
                     document = DriverApplicationDocument(
                         application=profile,
                         kind=kind,
-                        content_type=(
-                            "application/pdf" if uploaded.read(5).startswith(b"%PDF-") else
-                            "image/png" if uploaded.name.lower().endswith(".png") else
-                            "image/jpeg"
-                        ),
+                        content_type=private_document_content_type(uploaded),
                         original_name=os.path.basename(uploaded.name)[:200],
                         file_size=uploaded.size,
                     )
@@ -250,9 +247,7 @@ class UnifiedDriverVehicleSupplementView(APIView):
                 for kind, uploaded in uploads.items():
                     document = DriverApplicationDocument(
                         application=profile, kind=kind,
-                        content_type=("application/pdf" if uploaded.read(5).startswith(b"%PDF-")
-                                      else "image/png" if uploaded.name.lower().endswith(".png")
-                                      else "image/jpeg"),
+                        content_type=private_document_content_type(uploaded),
                         original_name=os.path.basename(uploaded.name)[:200],
                         file_size=uploaded.size,
                     )
