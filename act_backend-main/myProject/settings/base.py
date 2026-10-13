@@ -127,6 +127,11 @@ STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Secure, persistent directory outside the public media alias. Production
+# deployment must set this to a writable private shared volume. Fail closed
+# on uploads if it has not been configured.
+ACT_DRIVER_PRIVATE_UPLOAD_ROOT = env('ACT_DRIVER_PRIVATE_UPLOAD_ROOT', default='')
+
 # Public base URL for email image assets.
 # You can override this in .env (recommended in production/CDN).
 ACT_EMAIL_ASSETS_BASE_URL = env(
