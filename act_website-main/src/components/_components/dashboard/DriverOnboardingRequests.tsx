@@ -14,9 +14,12 @@ import GlobalModal from "../GlobalModal";
 import { toast } from "react-toastify";
 import Pagination from "../Pagination";
 import { extract_error } from "@/lib/api/errorApi";
+import UnifiedDriverReview from "./UnifiedDriverReview";
 
 type OnboardingRequest = {
   id: number;
+  submission_mode?: "legacy" | "unified";
+  awaiting_vehicle?: boolean;
   full_name: string;
   mobile_number: string;
   email_address: string;
@@ -141,6 +144,7 @@ export default function DriverOnboardingRequests({
   trans: any;
 }) {
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [unifiedReviewId, setUnifiedReviewId] = useState<number | null>(null);
   const [openDetails, setOpenDetails] = useState(false);
   const [actionModal, setActionModal] = useState<{
     open: boolean;
@@ -1478,8 +1482,17 @@ export default function DriverOnboardingRequests({
             {/* Action Buttons */}
             <div className="sticky bottom-0 bg-gradient-to-t from-card to-background px-4 md:px-6 py-4 md:py-5 border-t-2 border-border rounded-b-2xl">
               <div className="flex flex-col sm:flex-row items-center gap-3">
+                {selectedRequest?.submission_mode === "unified" && (
+                  <Button
+                    type="button"
+                    onClick={() => setUnifiedReviewId(selectedRequest.id)}
+                    className="w-full sm:flex-1 bg-yellow-500 font-bold text-black hover:bg-yellow-400"
+                  >
+                    Review unified application and private evidence
+                  </Button>
+                )}
                 {/* Initial Review Actions (for pending status) */}
-                {selectedRequest?.status === "pending" && (
+                {selectedRequest?.status === "pending" && selectedRequest?.submission_mode !== "unified" && (
                   <>
                     <Button
                       onClick={() =>
@@ -1839,6 +1852,22 @@ export default function DriverOnboardingRequests({
           </div>
         </div>
       </GlobalModal>
+
+      {unifiedReviewId !== null && (
+        <UnifiedDriverReview
+          applicationId={unifiedReviewId}
+          token={token}
+          onClose={() => setUnifiedReviewId(null)}
+          onDecision={() => {
+            setUnifiedReviewId(null);
+            setSelectedRequestId(null);
+            setOpenDetails(false);
+            queryClient.invalidateQueries({ queryKey: ["driver-onboarding-requests"] });
+            queryClient.invalidateQueries({ queryKey: ["driver-onboarding-statistics"] });
+            queryClient.invalidateQueries({ queryKey: ["driver-onboarding-request-details"] });
+          }}
+        />
+      )}
 
       {/* Image Preview Modal */}
       {imagePreview.open && (
