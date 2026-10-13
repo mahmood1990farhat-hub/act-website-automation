@@ -25,10 +25,16 @@ class PrivateDriverDocumentStorage(FileSystemStorage):
         root = getattr(settings, "ACT_DRIVER_PRIVATE_UPLOAD_ROOT", "")
         if not root:
             raise ImproperlyConfigured("ACT_DRIVER_PRIVATE_UPLOAD_ROOT is required for unified applications")
-        root = os.path.abspath(str(root))
-        public = os.path.abspath(str(settings.MEDIA_ROOT))
-        if os.path.commonpath([root, public]) == public:
-            raise ImproperlyConfigured("Driver identity files must be outside public MEDIA_ROOT")
+        # Resolve symlinks as well as ../ segments. A private-looking path
+        # linking into an Nginx-served media/static directory is NOT private.
+        root = os.path.realpath(os.path.abspath(str(root)))
+        prohibited_roots = (settings.MEDIA_ROOT, getattr(settings, "STATIC_ROOT", None))
+        for exposed in prohibited_roots:
+            if not exposed:
+                continue
+            public = os.path.realpath(os.path.abspath(str(exposed)))
+            if os.path.commonpath([root, public]) == public:
+                raise ImproperlyConfigured("Driver evidence storage cannot be inside a public media/static root")
         return root
 
     @property
