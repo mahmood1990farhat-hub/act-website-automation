@@ -77,6 +77,11 @@ class UnifiedDriverApplicationSerializer(serializers.Serializer):
             raise serializers.ValidationError({"pco_badge_expiry": "TfL badge must not be expired."})
         if not data.get("agrees_policies") or not data.get("dbs_consent"):
             raise serializers.ValidationError({"agrees_policies": "Privacy, policies and DBS checks must be accepted."})
+        if data.get("passenger_photo_disclosure_consent") is not True:
+            raise serializers.ValidationError({
+                "passenger_photo_disclosure_consent":
+                    "The verified driver photograph must be shared with passengers as required by ACT's driver disclosure policy."
+            })
 
         has_vehicle = data["vehicle_ownership"] != "do_not_have_a_phv"
         if has_vehicle:
