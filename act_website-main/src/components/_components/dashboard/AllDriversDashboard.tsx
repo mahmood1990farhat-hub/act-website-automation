@@ -7,13 +7,14 @@ import { fetchData } from "@/lib/api/fetchData";
 import { postData } from "@/lib/api/postData";
 import IsLoading from "../ISloading";
 import Pagination from "../Pagination";
-import { FaPlay, FaPause, FaUser, FaCheckCircle, FaTimesCircle, FaUserCheck, FaUserSlash, FaCar, FaFileAlt, FaMoneyBillWave } from "react-icons/fa";
+import { FaPlay, FaPause, FaUser, FaCheckCircle, FaTimesCircle, FaUserCheck, FaUserSlash, FaCar, FaFileAlt, FaMoneyBillWave, FaEdit } from "react-icons/fa";
 import GlobalModal from "../GlobalModal";
 import { Button } from "@/components/ui/button";
 import { HiOutlineEye, HiOutlineX } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { extract_error } from "@/lib/api/errorApi";
 import { formatDate } from "@/lib/FormatDate";
+import DriverPassengerDetailsEditor from "./DriverPassengerDetailsEditor";
 
 type DriverManagementProps = {
   trans: any;
@@ -46,6 +47,7 @@ export default function AllDriversDashboard({
   const [filterActive, setFilterActive] = useState<"" | "true" | "false">("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
+  const [editingDriverPassengerDetails, setEditingDriverPassengerDetails] = useState<any | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [documentPreview, setDocumentPreview] = useState<{ url: string; title: string } | null>(null);
@@ -377,6 +379,14 @@ export default function AllDriversDashboard({
                                 <HiOutlineEye className="text-base" />
                               </Button>
                               <Button
+                                onClick={() => setEditingDriverPassengerDetails(driverItem)}
+                                variant="ghost"
+                                className="p-1.5 hover:bg-muted text-emerald-600 hover:text-emerald-700 transition-colors"
+                                title="Edit driver passenger-facing details"
+                              >
+                                <FaEdit className="text-base" />
+                              </Button>
+                              <Button
                                 onClick={() => handleOpenCommission(driverItem)}
                                 variant="ghost"
                                 className="p-1.5 hover:bg-muted text-blue-600 hover:text-blue-700 transition-colors inline-flex"
@@ -505,6 +515,13 @@ export default function AllDriversDashboard({
                       className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-foreground font-bold shadow-lg shadow-yellow-500/20"
                     >
                       <HiOutlineEye className="mr-2" /> {trans.driver_card?.viewDetails || "View Details"}
+                    </Button>
+                    <Button
+                      onClick={() => setEditingDriverPassengerDetails(driverItem)}
+                      variant="outline"
+                      className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                    >
+                      <FaEdit className="mr-2" /> Edit details
                     </Button>
                     <Button
                       onClick={() => handleOpenCommission(driverItem)}
@@ -1155,6 +1172,20 @@ export default function AllDriversDashboard({
           )}
         </div>
       </GlobalModal>
+      {editingDriverPassengerDetails && (
+        <DriverPassengerDetailsEditor
+          driver={editingDriverPassengerDetails}
+          token={token}
+          onClose={() => setEditingDriverPassengerDetails(null)}
+          onSaved={(updatedDriver) => {
+            queryClient.invalidateQueries({ queryKey: ["admin-drivers"] });
+            if (selectedDriver?.id === updatedDriver.id) {
+              setSelectedDriver(updatedDriver);
+            }
+            setEditingDriverPassengerDetails(null);
+          }}
+        />
+      )}
     </div>
   );
 }
