@@ -158,6 +158,74 @@ class UnifiedOnboardingTests(TestCase):
         self.assertEqual(User.objects.filter(email="newdriver@example.invalid").count(), 1)
         self.assertEqual(DriverApplicationDocument.objects.count(), 5)
 
+    def test_adding_vehicle_after_initial_application_does_not_create_second_driver(self):
+        application, _ = self.apply()
+        self.assertEqual(application.status_code, 201, application.data)
+        cache.clear()
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN,
+            "password": "SomeVeryStrongPassword+2026",
+            "confirm_password": "SomeVeryStrongPassword+2026",
+        }, format="json")
+        self.assertEqual(activated.status_code, 200, activated.data)
+        user = User.objects.get(email="newdriver@example.invalid")
+        self.client.force_authenticate(user=user)
+        full = self.payload(with_vehicle=True)
+        fields = (
+            "vehicle_ownership", "vehicle_class_code", "vehicle_make",
+            "vehicle_model", "vehicle_year", "vehicle_registration",
+            "vehicle_colour", "mot_expiry", "insurance_expiry",
+            "accepts_pets", "mot", "insurance", "vehicle_phv", "v5c",
+        )
+        addition = {key: full[key] for key in fields}
+        response = self.client.post(
+            "/api/drivers/onboarding/add-vehicle/",
+            addition, format="multipart",
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        profile = UnifiedDriverApplication.objects.get(onboarding_request__user=user)
+        self.assertFalse(profile.awaiting_vehicle)
+        self.assertEqual(profile.vehicle_registration, "AB12 CDE")
+        self.assertEqual(DriverApplicationDocument.objects.count(), 9)
+        self.assertEqual(User.objects.filter(email=user.email).count(), 1)
+        self.assertFalse(user.is_admin_verified)
+        self.assertFalse(user.is_profile_completed)
+        self.assertEqual(NormalDriver.objects.count(), 0)
+
+        cache.clear()
+        duplicate = self.client.post(
+            "/api/drivers/onboarding/add-vehicle/",
+            {**addition, "mot": pdf("mot-second.pdf")},
+            format="multipart",
+        )
+        self.assertEqual(duplicate.status_code, 409)
+        self.assertEqual(DriverApplicationDocument.objects.count(), 9)
+
+        self.client.force_authenticate(user=self.admin)
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                approval = self.client.post(
+                    "/api/drivers/admin/unified-applications/"
+                    f"{application.data['application_id']}/decision/",
+                    {
+                        "action": "approve", "documents_reviewed": True,
+                        "dbs_cleared": True, "photo_disclosure_consent": True,
+                    }, format="json",
+                )
+        self.assertEqual(approval.status_code, 200, approval.data)
+        self.assertEqual(NormalDriver.objects.count(), 1)
+        user.refresh_from_db()
+        self.assertTrue(user.is_admin_verified)
+        self.assertTrue(user.is_profile_completed)
+
+    def test_explicit_passenger_photo_disclosure_consent_is_required(self):
+        payload = self.payload(with_vehicle=True)
+        payload.pop("passenger_photo_disclosure_consent")
+        response, _ = self.apply(values=payload)
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertEqual(UnifiedDriverApplication.objects.count(), 0)
+        self.assertFalse(User.objects.filter(email="newdriver@example.invalid").exists())
+
     def test_password_is_single_use_but_never_verifies_driver(self):
         response, _ = self.apply()
         self.assertEqual(response.status_code, 201, response.data)
