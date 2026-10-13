@@ -317,14 +317,22 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
         <label className="flex gap-3">
           <input type="checkbox" checked={form.agrees_policies}
             onChange={event => put("agrees_policies", event.target.checked)} />
-          I confirm the information is genuine and agree to ACT's driver terms and privacy policy.
+          I confirm the information is genuine and agree to ACT's{" "}
+          <a href={`/documents/${locale}/terms-and-conditions.pdf`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">driver terms</a>
+          {" "}and{" "}
+          <a href={`/documents/${locale}/privacy-policy.pdf`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">privacy policy</a>.
         </label>
         <label className="flex gap-3">
           <input type="checkbox" checked={form.dbs_consent}
             onChange={event => put("dbs_consent", event.target.checked)} />
           I understand ACT must check my DBS status and all necessary licences before allowing trips.
         </label>
-        <p className="text-xs text-gray-300">Your identity documents are stored privately and reviewed only by authorized ACT staff.</p>
+        <label className="flex gap-3">
+          <input type="checkbox" checked={form.passenger_photo_disclosure_consent}
+            onChange={event => put("passenger_photo_disclosure_consent", event.target.checked)} />
+          I understand my verified first name, PHV driver licence number, photograph and vehicle details will be shared with passengers when I am assigned a journey.
+        </label>
+        <p className="text-xs text-gray-300">Your original identity documents are stored privately and reviewed only by authorized ACT staff.</p>
       </div>}
       {error && <p role="alert" className="rounded-lg border border-red-500 bg-red-900/30 p-3 text-sm text-red-200">{error}</p>}
       <div className="flex gap-3 border-t border-gray-700 pt-4">
