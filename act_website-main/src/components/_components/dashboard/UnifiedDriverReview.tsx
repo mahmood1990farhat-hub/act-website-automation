@@ -16,6 +16,14 @@ type Review = {
   }[];
 };
 
+const correctionOptions = [
+  "pco_front", "pco_back", "dvla_front", "dvla_back", "driver_photo",
+  "mot", "insurance", "v5c", "vehicle_phv", "hire_agreement", "dbs",
+  "pco_badge_number", "pco_badge_expiry", "mot_expiry", "insurance_expiry",
+  "vehicle_registration", "vehicle_colour", "vehicle_make", "vehicle_model",
+  "vehicle_year",
+];
+
 export default function UnifiedDriverReview({
   applicationId, token, onClose, onDecision,
 }: {
@@ -31,6 +39,7 @@ export default function UnifiedDriverReview({
   const [dbsCleared, setDbsCleared] = useState(false);
   const [photoConsent, setPhotoConsent] = useState(false);
   const [reason, setReason] = useState("");
+  const [requestedCorrections, setRequestedCorrections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const api = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -84,14 +93,18 @@ export default function UnifiedDriverReview({
     } finally { setBusy(false); }
   };
 
-  const decide = async (action: "approve" | "reject") => {
+  const decide = async (action: "approve" | "reject" | "request_changes") => {
     if (!token || busy || !details) return;
     if (action === "approve" && (!docsReviewed || !dbsCleared || !photoConsent)) {
       setError("Verify all documents, actual DBS clearance and permission to disclose the driver photo.");
       return;
     }
-    if (action === "reject" && reason.trim().length < 8) {
-      setError("Give a specific reason for rejection.");
+    if (action !== "approve" && reason.trim().length < 8) {
+      setError("Give a specific reason for rejection or required corrections.");
+      return;
+    }
+    if (action === "request_changes" && requestedCorrections.length === 0) {
+      setError("Select the exact missing or incorrect details.");
       return;
     }
     setBusy(true); setError("");
@@ -107,6 +120,7 @@ export default function UnifiedDriverReview({
           body: JSON.stringify({
             action,
             reason,
+            files_to_modify: action === "request_changes" ? requestedCorrections : undefined,
             documents_reviewed: docsReviewed,
             dbs_cleared: dbsCleared,
             photo_disclosure_consent: photoConsent,
@@ -184,10 +198,29 @@ export default function UnifiedDriverReview({
             className="w-full rounded-lg bg-green-700 p-3 font-semibold text-white disabled:opacity-40">
             Final approve (driver eligible only after confirmation)
           </button>
-          <label className="block font-semibold">Rejection reason
+          <label className="block font-semibold">Reason for rejection or correction request
             <textarea className="mt-1 w-full rounded-lg border p-3" value={reason}
               onChange={e => setReason(e.target.value)} />
           </label>
+          <div className="space-y-2 rounded-lg border border-yellow-600/50 p-3">
+            <p className="font-semibold">Request specific corrections instead of rejecting</p>
+            <p className="text-xs text-gray-600">
+              Select only documents or details that are missing or incorrect. The applicant
+              can replace them securely using the same account.
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {correctionOptions.map(kind => <label key={kind} className="flex gap-2 text-xs">
+                <input type="checkbox" checked={requestedCorrections.includes(kind)}
+                  onChange={event => setRequestedCorrections(previous =>
+                    event.target.checked ? [...previous, kind] : previous.filter(item => item !== kind))} />
+                {kind.replace(/_/g, " ")}
+              </label>)}
+            </div>
+            <button type="button" disabled={busy} onClick={() => decide("request_changes")}
+              className="w-full rounded-lg border border-yellow-700 p-3 font-semibold text-yellow-800 disabled:opacity-40">
+              Request corrections
+            </button>
+          </div>
           <button type="button" onClick={() => decide("reject")} disabled={busy}
             className="w-full rounded-lg border border-red-600 p-3 font-semibold text-red-700 disabled:opacity-40">
             Reject application
