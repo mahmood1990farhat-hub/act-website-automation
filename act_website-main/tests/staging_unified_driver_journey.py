@@ -205,7 +205,7 @@ def acceptance():
         link = find_welcome_link()  # Not logged: this contains a one-time token.
         applicant_page.goto(link, wait_until="domcontentloaded")
         expect(applicant_page.get_by_role("heading", name="ACT Driver — Set your password")).to_be_visible()
-        fill(applicant_page, "Password", PASSWORD)
+        applicant_page.get_by_label("Password", exact=True).fill(PASSWORD)
         fill(applicant_page, "Confirm password", PASSWORD)
         applicant_page.get_by_role("button", name="Set up password").click()
         expect(applicant_page.get_by_text("Password set. Your application is still pending ACT verification.")).to_be_visible(timeout=20000)
