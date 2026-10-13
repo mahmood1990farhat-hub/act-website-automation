@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Locale } from "../../../../../i18n.config";
 import { privatePageSeo } from "@/lib/seo";
+import DriverVehicleSupplement from "@/components/_components/auth/captain/DriverVehicleSupplement";
 
 export const metadata = privatePageSeo;
 
@@ -37,9 +38,12 @@ export default async function DriverApplicationStatusPage({
             <>
               <p className="mt-3">ACT is verifying your application and documents. No additional standard document stage is required.</p>
               {application.request?.awaiting_vehicle && (
-                <p className="mt-3 rounded-lg border border-yellow-400 p-3 text-yellow-100">
-                  You can apply without a vehicle, but cannot receive trips until ACT verifies a licensed vehicle and its documents. Contact the ACT team when you have a suitable vehicle.
-                </p>
+                <>
+                  <p className="mt-3 rounded-lg border border-yellow-400 p-3 text-yellow-100">
+                    You can apply without a vehicle, but cannot receive trips until ACT verifies a licensed vehicle and its documents.
+                  </p>
+                  {application.status === "pending" && <DriverVehicleSupplement token={token} />}
+                </>
               )}
             </>
           ) : <p className="mt-3">{application.next_step}</p>}
