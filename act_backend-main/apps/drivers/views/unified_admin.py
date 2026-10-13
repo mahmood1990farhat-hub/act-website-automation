@@ -165,8 +165,10 @@ class AdminUnifiedApplicationDecisionView(APIView):
                     return Response({"documents_reviewed": "Confirm inspection of every required identity and vehicle document."}, status=400)
                 if not request.data.get("dbs_cleared") is True:
                     return Response({"dbs_cleared": "Confirm valid DBS clearance before approval."}, status=400)
-                if not request.data.get("photo_disclosure_consent") is True:
-                    return Response({"photo_disclosure_consent": "Confirm applicant consent to display verified driver photo to passengers."}, status=400)
+                if not profile.passenger_photo_disclosure_consent:
+                    return Response({"passenger_photo_disclosure_consent": "Applicant has not accepted passenger-facing driver photo disclosure."}, status=400)
+                if request.data.get("photo_disclosure_consent") is not True:
+                    return Response({"photo_disclosure_consent": "Confirm inspection of the applicant's photo disclosure consent."}, status=400)
                 today = date.today()
                 if profile.pco_badge_expiry <= today or not profile.mot_expiry or profile.mot_expiry <= today or not profile.insurance_expiry or profile.insurance_expiry <= today:
                     return Response({"detail": "One or more required licences/certificates are expired."}, status=400)
