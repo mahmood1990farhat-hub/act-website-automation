@@ -67,8 +67,31 @@ class UpdateDriverInfoView(EMADBaseView):
             'vehicle_data': request.data.get('vehicle_data', {}),
             'bank_details_data': request.data.get('bank_details_data', {}),
         }
-        
+        # Existing driver edit endpoint also accepts flat multipart fields, so
+        # the admin can securely upload a photo and update the same driver's
+        # passenger-facing identity without repeating driver onboarding.
+        vehicle_fields = {
+            'vehicle_make': 'make',
+            'vehicle_model': 'model',
+            'vehicle_color': 'color',
+        }
+        if any(key in request.data for key in vehicle_fields):
+            vehicle_data = data['vehicle_data']
+            if not isinstance(vehicle_data, dict):
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({'vehicle_data': 'Expected an object.'})
+            vehicle_data = dict(vehicle_data)
+            for posted, model_field in vehicle_fields.items():
+                if posted in request.data:
+                    vehicle_data[model_field] = request.data[posted]
+            data['vehicle_data'] = vehicle_data
+
+        if 'pco_licence_number' in request.data:
+            data['pco_licence_number'] = request.data['pco_licence_number']
+
         # Handle file uploads
+        if 'driver_photo' in request.FILES:
+            data['driver_photo'] = request.FILES['driver_photo']
         if 'pco' in request.FILES:
             data['pco'] = request.FILES['pco']
         if 'dbs' in request.FILES:

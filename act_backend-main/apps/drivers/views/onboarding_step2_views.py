@@ -30,9 +30,17 @@ class DriverOnboardingStep2View(EMADBaseView):
         activate(get_locale(request=request))
         user = request.user
         
-        # Check if user has an approved step 1 onboarding request or needs modification
+        # Existing two-stage applicants retain their upload route. A unified
+        # application already contains all the original evidence; never allow
+        # an unverified unified applicant to create or replace a driver record
+        # through the legacy public-media document handler.
         try:
             onboarding_request = user.driver_onboarding_request
+            if hasattr(onboarding_request, "unified_application"):
+                return Response(
+                    {"detail": "This driver application uses the unified verification process."},
+                    status=status.HTTP_409_CONFLICT,
+                )
             if onboarding_request.status not in ['step1_approved', 'needs_modification']:
                 locale = get_locale(request=request)
                 message = get_bilingual_error_message(
