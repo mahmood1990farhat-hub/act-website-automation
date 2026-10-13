@@ -10,7 +10,7 @@ import ResetPasswordForm from "./ResetPasswordForm";
 import Image from "next/image";
 import CreateCaptainAccount from "./captain/CreateCaptainAccount";
 import GetStartedCaptain from "./captain/GetStartedCaptain";
-import DriverOnboardingStep1 from "./captain/DriverOnboardingStep1";
+import UnifiedDriverApplication from "./captain/UnifiedDriverApplication";
 
 type typeProps = {
   locale: Locale;
@@ -124,11 +124,7 @@ export default function Auth({ locale, trans, isCaptain, isAdmin, setStep, isBoo
             // Driver Onboarding Step 1
             <div className="flex-1 w-full flex justify-center bg-gray-900/80 backdrop-blur-sm px-6 md:px-12 lg:px-20 py-10 rounded-3xl max-w-[1000px] mx-auto border border-gray-700">
               <div className="w-full" dir={locale === "ar" ? "rtl" : "ltr"}>
-                <DriverOnboardingStep1
-                  setTapAction={setTap}
-                  locale={locale}
-                  trans={trans.driverOnboarding || trans.signup}
-                />
+                <UnifiedDriverApplication locale={locale} />
               </div>
             </div>
           ) : tap === 6 ? (
