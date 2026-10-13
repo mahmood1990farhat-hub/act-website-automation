@@ -66,7 +66,7 @@ class UnifiedDriverApplicationSerializer(serializers.Serializer):
         choices=("phv_owner", "hiring_a_phv", "do_not_have_a_phv", "other"),
     )
     vehicle_class_code = serializers.ChoiceField(
-        choices=("comfort", "comfort_xl", "executive", "executive_xl", "first"),
+        choices=("comfort", "comfort_xl", "executive", "executive_xl", "first_class"),
         required=False,
     )
     vehicle_make = serializers.CharField(max_length=80, required=False)
@@ -167,7 +167,7 @@ class UnifiedVehicleSupplementSerializer(serializers.Serializer):
 
     vehicle_ownership = serializers.ChoiceField(choices=("phv_owner", "hiring_a_phv", "other"))
     vehicle_class_code = serializers.ChoiceField(
-        choices=("comfort", "comfort_xl", "executive", "executive_xl", "first"),
+        choices=("comfort", "comfort_xl", "executive", "executive_xl", "first_class"),
     )
     vehicle_make = serializers.CharField(max_length=80)
     vehicle_model = serializers.CharField(max_length=80)
