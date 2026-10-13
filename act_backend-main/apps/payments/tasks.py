@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(
+    # Keep confirmations off the legacy default queue (large unreviewed backlog).
+    queue="act_booking_confirmations",
     bind=True,
     autoretry_for=(Exception,),
     retry_backoff=True,
@@ -28,7 +30,9 @@ def deliver_paid_booking_confirmations(self, trip_id):
     """
     with transaction.atomic():
         trip = (
-            Trip.objects.select_for_update()
+            # Only lock the Trip row. Nullable guest-passenger LEFT JOINs
+            # cannot be targets of PostgreSQL FOR UPDATE.
+            Trip.objects.select_for_update(of=("self",))
             .select_related("passenger__user", "car_type")
             .get(id=trip_id)
         )
@@ -50,6 +54,17 @@ def deliver_paid_booking_confirmations(self, trip_id):
             trip.passenger_confirmation_sent_at = timezone.now()
             trip.save(update_fields=["passenger_confirmation_sent_at"])
             logger.info("[BOOKING CONFIRMATION] Passenger email accepted for trip %s", trip_id)
+
+    # Commit passenger SMTP acceptance independently before attempting ACT's
+    # internal email. If that send fails, retries must not repeat passenger mail.
+    with transaction.atomic():
+        trip = (
+            Trip.objects.select_for_update(of=("self",))
+            .select_related("passenger__user", "car_type")
+            .get(id=trip_id)
+        )
+        if not trip.is_paid or not trip.booking_confirmation_pdf:
+            raise RuntimeError(f"Paid booking PDF missing for trip {trip_id}")
 
         if not trip.internal_booking_notification_sent_at:
             if not send_internal_notification(trip, send_now=True):
