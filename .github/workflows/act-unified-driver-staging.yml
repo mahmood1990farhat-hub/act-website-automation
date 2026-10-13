@@ -80,7 +80,7 @@ jobs:
       APP_BASE_URL: "http://127.0.0.1:8000"
       ACT_PUBLIC_WEBSITE_URL: "http://127.0.0.1:3001"
       ACT_EMAIL_ASSETS_BASE_URL: "http://127.0.0.1:8000/static/email-assets"
-      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: ${{ runner.temp }}/act-private-driver-uploads
+      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: /tmp/act-private-driver-uploads-isolated-ci
       NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8000"
       NEXT_PUBLIC_GOOGLE_ADS_ID: ""
 
@@ -100,7 +100,7 @@ jobs:
           test "$ACT_PUBLIC_WEBSITE_URL" = http://127.0.0.1:3001
           test "$N8N_ENABLED" = False
           test "$NEXT_PUBLIC_API_BASE_URL" = http://127.0.0.1:8000
-          test "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT" = "${{ runner.temp }}/act-private-driver-uploads"
+          test "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT" = "/tmp/act-private-driver-uploads-isolated-ci"
           mkdir -p "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"
           chmod 700 "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"
           echo "ISOLATED: fresh PostGIS + private uploads + MailHog. No ACT production connections."
