@@ -127,6 +127,11 @@ STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Unified driver identity files must be persisted outside public media/static
+# and explicitly configured on the VPS before accepting live applications.
+# No implicit fallback to MEDIA_ROOT; unset value deliberately fails closed.
+ACT_DRIVER_PRIVATE_UPLOAD_ROOT = env('ACT_DRIVER_PRIVATE_UPLOAD_ROOT', default='')
+
 # Public base URL for email image assets.
 # You can override this in .env (recommended in production/CDN).
 ACT_EMAIL_ASSETS_BASE_URL = env(
