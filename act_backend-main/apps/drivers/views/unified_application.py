@@ -21,7 +21,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -30,6 +30,7 @@ from apps.drivers.models.unified_application import PrivateDriverDocumentStorage
 from apps.drivers.serializers.unified_application import (
     APPLICATION_DOCUMENTS,
     UnifiedDriverApplicationSerializer,
+    UnifiedVehicleSupplementSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -205,6 +206,98 @@ class UnifiedDriverApplicationView(APIView):
             "status": "awaiting_vehicle" if not has_vehicle else "pending_verification",
             "message": "Application received. Check your email to set a password. Admin verification is required.",
         }, status=status.HTTP_201_CREATED)
+
+
+class UnifiedDriverVehicleSupplementView(APIView):
+    """A pending vehicle-less applicant submits evidence without re-applying.
+
+    Only the owner of an existing unapproved, password-activated unified
+    application can add one complete licensed vehicle. This cannot approve,
+    verify, assign a trip or replace the private identity evidence.
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    http_method_names = ["post"]
+
+    def post(self, request):
+        if _rate_limited(request, "vehicle-supplement", 20):
+            return Response({"detail": "Please wait before resubmitting."}, status=429)
+        if not _private_uploads_ready():
+            return Response({"detail": "Private uploads are temporarily unavailable."}, status=503)
+        if request.user.account_type != "normal_driver":
+            return Response({"detail": "This action is only for pending ACT driver applicants."}, status=403)
+
+        serializer = UnifiedVehicleSupplementSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload = dict(serializer.validated_data)
+        kinds = ("mot", "insurance", "vehicle_phv", "v5c", "hire_agreement")
+        uploads = {kind: payload.pop(kind) for kind in kinds if kind in payload}
+        saved_names = []
+        storage = PrivateDriverDocumentStorage()
+        try:
+            with transaction.atomic():
+                profile = UnifiedDriverApplication.objects.select_for_update().select_related(
+                    "onboarding_request__user"
+                ).filter(onboarding_request__user_id=request.user.pk).first()
+                if not profile or not profile.awaiting_vehicle:
+                    return Response({"detail": "No pending vehicle supplement is required."}, status=409)
+                onboarding = profile.onboarding_request
+                if (onboarding.status != "pending" or not profile.password_set_at
+                        or request.user.is_admin_verified or request.user.is_profile_completed
+                        or hasattr(request.user, "base_driver")):
+                    return Response({"detail": "This applicant is not eligible to update vehicle evidence."}, status=403)
+
+                for kind, uploaded in uploads.items():
+                    document = DriverApplicationDocument(
+                        application=profile, kind=kind,
+                        content_type=("application/pdf" if uploaded.read(5).startswith(b"%PDF-")
+                                      else "image/png" if uploaded.name.lower().endswith(".png")
+                                      else "image/jpeg"),
+                        original_name=os.path.basename(uploaded.name)[:200],
+                        file_size=uploaded.size,
+                    )
+                    uploaded.seek(0)
+                    document.file.save(uploaded.name, uploaded, save=False)
+                    saved_names.append(document.file.name)
+                    document.save()
+
+                for field in (
+                    "vehicle_class_code", "vehicle_make", "vehicle_model",
+                    "vehicle_year", "vehicle_registration", "vehicle_colour",
+                    "mot_expiry", "insurance_expiry", "accepts_pets", "ownership_explanation",
+                ):
+                    if field in payload:
+                        setattr(profile, field, payload[field])
+                profile.awaiting_vehicle = False
+                profile.save(update_fields=[
+                    "vehicle_class_code", "vehicle_make", "vehicle_model", "vehicle_year",
+                    "vehicle_registration", "vehicle_colour", "mot_expiry",
+                    "insurance_expiry", "accepts_pets", "ownership_explanation",
+                    "awaiting_vehicle",
+                ])
+                onboarding.vehicle_ownership = payload["vehicle_ownership"]
+                legacy_map = {
+                    "comfort": "5_seater_standard", "comfort_xl": "7_seaters",
+                    "executive": "other", "executive_xl": "van_transporter",
+                    "first": "other",
+                }
+                onboarding.vehicle_type = legacy_map.get(payload["vehicle_class_code"], "other")
+                onboarding.save(update_fields=["vehicle_ownership", "vehicle_type"])
+        except IntegrityError:
+            for name in saved_names:
+                storage.delete(name)
+            return Response({"detail": "Vehicle evidence was already submitted."}, status=409)
+        except Exception:
+            for name in saved_names:
+                storage.delete(name)
+            logger.warning("An ACT driver vehicle supplement could not be saved.")
+            return Response({"detail": "Unable to save vehicle information. Contact ACT support."}, status=503)
+
+        return Response({
+            "success": True,
+            "status": "pending_verification",
+            "message": "Vehicle evidence received. ACT must still verify the driver and vehicle.",
+        })
 
 
 class UnifiedDriverSetPasswordView(APIView):
