@@ -130,7 +130,7 @@ class UnifiedDriverApplicationView(APIView):
                     "comfort_xl": "7_seaters",
                     "executive": "other",
                     "executive_xl": "van_transporter",
-                    "first": "other",
+                    "first_class": "other",
                 }
                 onboarding = DriverOnboardingRequest.objects.create(
                     user=user,
@@ -275,7 +275,7 @@ class UnifiedDriverVehicleSupplementView(APIView):
                 legacy_map = {
                     "comfort": "5_seater_standard", "comfort_xl": "7_seaters",
                     "executive": "other", "executive_xl": "van_transporter",
-                    "first": "other",
+                    "first_class": "other",
                 }
                 onboarding.vehicle_type = legacy_map.get(payload["vehicle_class_code"], "other")
                 onboarding.save(update_fields=["vehicle_ownership", "vehicle_type"])
