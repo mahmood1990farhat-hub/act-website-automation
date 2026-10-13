@@ -422,6 +422,39 @@ class UnifiedOnboardingTests(TestCase):
         user = User.objects.get(email="newdriver@example.invalid")
         self.assertFalse(user.is_admin_verified)
 
+    def test_first_class_uses_existing_first_class_vehicle_code(self):
+        first_class = VehicleType.objects.create(
+            code="first_class",
+            name_en="First Class",
+            name_ar="الدرجة الأولى",
+            icon="vehicle_types/icons/first.png",
+            max_passengers_count=4,
+        )
+        application = self.payload(with_vehicle=True)
+        application["vehicle_class_code"] = "first_class"
+        response, _ = self.apply(values=application)
+        self.assertEqual(response.status_code, 201, response.data)
+        cache.clear()
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN,
+            "password": "SomeVeryStrongPassword+2026",
+            "confirm_password": "SomeVeryStrongPassword+2026",
+        }, format="json")
+        self.assertEqual(activated.status_code, 200, activated.data)
+        self.client.force_authenticate(user=self.admin)
+        endpoint = f"/api/drivers/admin/unified-applications/{response.data['application_id']}/decision/"
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                decision = self.client.post(endpoint, {
+                    "action": "approve",
+                    "documents_reviewed": True,
+                    "dbs_cleared": True,
+                    "photo_disclosure_consent": True,
+                }, format="json")
+        self.assertEqual(decision.status_code, 200, decision.data)
+        driver = BaseDriver.objects.get(user__email="newdriver@example.invalid")
+        self.assertEqual(NormalDriver.objects.get(driver=driver).vehicle.vehicle_type, first_class)
+
     def test_full_evidence_approval_creates_only_one_eligible_driver(self):
         response, _ = self.apply(with_vehicle=True)
         self.assertEqual(response.status_code, 201, response.data)
