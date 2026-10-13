@@ -165,6 +165,7 @@ class UnifiedDriverApplicationView(APIView):
                     accepts_pets=values.get("accepts_pets"),
                     ownership_explanation=values.get("ownership_explanation", ""),
                     awaiting_vehicle=not has_vehicle,
+                    passenger_photo_disclosure_consent=values["passenger_photo_disclosure_consent"],
                     setup_token_hash=digest,
                     setup_token_expires_at=timezone.now() + timedelta(hours=24),
                 )
