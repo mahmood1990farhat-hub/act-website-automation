@@ -126,7 +126,8 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
           return "Explain the ownership arrangement and upload proof of lawful use.";
       }
     }
-    if (which === 4 && (!form.agrees_policies || !form.dbs_consent)) {
+    if (which === 4 && (!form.agrees_policies || !form.dbs_consent ||
+        !form.passenger_photo_disclosure_consent)) {
       return "You must agree to the ACT policies and DBS verification requirement.";
     }
     for (const [kind, file] of Object.entries(files)) {
