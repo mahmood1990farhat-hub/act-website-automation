@@ -250,7 +250,12 @@ def acceptance():
         modal.get_by_label("I have independently verified current DBS").check()
         modal.get_by_label("I confirmed consent to disclose").check()
         modal.get_by_role("button", name="Final approve").click()
-        expect(modal).to_be_hidden(timeout=15000)
+        try:
+            expect(modal).to_be_hidden(timeout=15000)
+        except AssertionError:
+            alert = modal.get_by_role("alert")
+            diagnostic = alert.inner_text(timeout=2000) if alert.count() else "No visible admin error"
+            raise AssertionError("Synthetic admin approval blocked: " + diagnostic[:450])
         status, verified = request_json("GET", detail_url, bearer=admin_token)
         assert status == 200 and verified["status"] == "final_approved", (status, verified.get("status"))
         status, trips = request_json("GET", "/api/driver/trips/", bearer=driver["access_token"])
