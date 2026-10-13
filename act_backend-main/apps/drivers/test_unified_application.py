@@ -192,6 +192,29 @@ class UnifiedOnboardingTests(TestCase):
         self.assertEqual(stage_one.status_code, 409)
         self.assertEqual(BaseDriver.objects.count(), 0)
 
+    def test_password_activated_unified_applicant_cannot_use_legacy_driver_completion(self):
+        response, _ = self.apply(with_vehicle=True)
+        self.assertEqual(response.status_code, 201, response.data)
+        cache.clear()
+        reply = self.client.post(self.setup_url, {
+            "token": TOKEN,
+            "password": "SomeVeryStrongPassword+2026",
+            "confirm_password": "SomeVeryStrongPassword+2026",
+        }, format="json")
+        self.assertEqual(reply.status_code, 200, reply.data)
+        user = User.objects.get(email="newdriver@example.invalid")
+        self.client.force_authenticate(user=user)
+        for endpoint in (
+            "/api/drivers/complete-normal-driver-info/",
+            "/api/drivers/onboarding/step2/",
+        ):
+            denied = self.client.post(endpoint, {}, format="multipart")
+            self.assertEqual(denied.status_code, 409, (endpoint, denied.data))
+        self.assertEqual(BaseDriver.objects.count(), 0)
+        user.refresh_from_db()
+        self.assertFalse(user.is_admin_verified)
+        self.assertFalse(user.is_profile_completed)
+
     def test_private_document_download_requires_admin_authorization(self):
         response, _ = self.apply()
         self.assertEqual(response.status_code, 201, response.data)
