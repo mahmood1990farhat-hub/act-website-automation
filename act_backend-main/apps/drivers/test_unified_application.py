@@ -223,6 +223,7 @@ class UnifiedOnboardingTests(TestCase):
                     {
                         "action": "approve", "documents_reviewed": True,
                         "dbs_cleared": True, "photo_disclosure_consent": True,
+                        **self.operator_approval_fields(),
                     }, format="json",
                 )
         self.assertEqual(approval.status_code, 200, approval.data)
