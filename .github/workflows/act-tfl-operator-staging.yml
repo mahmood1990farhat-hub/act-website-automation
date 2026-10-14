@@ -107,7 +107,7 @@ jobs:
           cp -a release-backend/act_backend-main act_backend-main
           cp -a release-frontend/act_website-main act_website-main
           mkdir -p act_website-main/tests
-          cp "${RUNNER_TEMP}/act-driver-staging-acceptance.py" act_website-main/tests/staging_unified_driver_journey.py
+          cp "${RUNNER_TEMP}/act-driver-staging-acceptance.py" act_website-main/tests/staging_tfl_operator_journey.py
           test -f act_backend-main/apps/drivers/views/unified_application.py
           test -f act_website-main/src/components/_components/auth/captain/UnifiedDriverApplication.tsx
           echo "TESTING DRAFT BACKEND $GITHUB_SHA + EXACT FRONTEND 67a3c02; NOT MAIN OR PRODUCTION."
