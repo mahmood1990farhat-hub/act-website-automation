@@ -45,7 +45,7 @@ class VehicleImage(models.Model):
 
 
 class OfficeVehicle(models.Model):
-    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, related_name="office_vehicles")
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="office_vehicles")
     office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name="office_vehicles")
 
 
