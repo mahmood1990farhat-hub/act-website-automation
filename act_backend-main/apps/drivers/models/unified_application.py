@@ -140,3 +140,83 @@ class DriverApplicationDocument(models.Model):
 
     def __str__(self):
         return f"Driver evidence #{self.application_id}: {self.kind}"
+
+
+def private_operator_vehicle_evidence_path(document, filename):
+    """Private evidence per vehicle period; never expose licence numbers/filenames."""
+    return f"operator-vehicles/{document.period_id}/{uuid.uuid4().hex}"
+
+
+class OperatorVehiclePeriod(models.Model):
+    """Historical vehicle and keeper snapshot; close an old period, never rewrite it."""
+
+    application = models.ForeignKey(
+        UnifiedDriverApplication, on_delete=models.PROTECT, related_name="operator_vehicle_periods",
+    )
+    vehicle = models.ForeignKey("vehicle.Vehicle", on_delete=models.PROTECT, related_name="+")
+    vehicle_registration = models.CharField(max_length=50)
+    vehicle_make = models.CharField(max_length=80)
+    vehicle_model = models.CharField(max_length=80)
+    vehicle_colour = models.CharField(max_length=50)
+    vehicle_class_code = models.CharField(max_length=32)
+    vehicle_year = models.PositiveSmallIntegerField()
+    ownership = models.CharField(max_length=20)
+    registered_keeper_name = models.CharField(max_length=150)
+    registered_keeper_address = models.CharField(max_length=500)
+    available_from = models.DateTimeField()
+    ceased_at = models.DateTimeField(null=True, blank=True)
+    close_reason = models.CharField(max_length=500, blank=True, default="")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+",
+    )
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+", null=True, blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("application",), condition=models.Q(ceased_at__isnull=True),
+                name="unique_active_unified_vehicle_period",
+            ),
+        ]
+        ordering = ["-available_from", "-id"]
+
+
+class OperatorVehicleEvidence(models.Model):
+    """New private evidence attached to the exact replacement vehicle period."""
+
+    KINDS = (
+        ("mot", "MOT certificate"), ("insurance", "Insurance certificate"),
+        ("vehicle_phv", "PHV vehicle licence"), ("v5c", "V5C logbook"),
+        ("hire_agreement", "Proof of lawful hire"),
+    )
+    period = models.ForeignKey(
+        OperatorVehiclePeriod, on_delete=models.PROTECT, related_name="evidence",
+    )
+    kind = models.CharField(max_length=25, choices=KINDS)
+    file = models.FileField(
+        storage=PrivateDriverDocumentStorage(), upload_to=private_operator_vehicle_evidence_path,
+        max_length=260,
+    )
+    original_name = models.CharField(max_length=200, blank=True)
+    content_type = models.CharField(max_length=60)
+    file_size = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("period", "kind"), name="unique_operator_vehicle_evidence_kind"),
+        ]
+
+
+class OperatorRecordAccessAudit(models.Model):
+    """No NI/document bytes are stored in activity log fields."""
+
+    application = models.ForeignKey(
+        UnifiedDriverApplication, on_delete=models.PROTECT, related_name="operator_record_audits",
+    )
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    action = models.CharField(max_length=30)
+    reason = models.CharField(max_length=500)
+    at = models.DateTimeField(auto_now_add=True)

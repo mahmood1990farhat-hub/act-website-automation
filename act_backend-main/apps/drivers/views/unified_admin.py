@@ -22,7 +22,7 @@ from rest_framework.views import APIView
 
 from apps.drivers.models import (
     BaseDriver, NormalDriver, DriverOnboardingRequest, UnifiedDriverApplication,
-    DriverApplicationDocument,
+    DriverApplicationDocument, OperatorVehiclePeriod,
 )
 from apps.vehicle.models import Vehicle, VehicleType
 from apps.drivers.operator_records import encrypt_operator_ni
@@ -336,6 +336,18 @@ class AdminUnifiedApplicationDecisionView(APIView):
                     "vehicle_available_from", "operator_record_verified_at",
                     "reviewed_at",
                 ])
+                # An immutable vehicle/keeper period anchors later replacements.
+                OperatorVehiclePeriod.objects.create(
+                    application=profile, vehicle=vehicle,
+                    vehicle_registration=vehicle.vehicle_number,
+                    vehicle_make=vehicle.make, vehicle_model=vehicle.model,
+                    vehicle_colour=vehicle.color, vehicle_class_code=profile.vehicle_class_code,
+                    vehicle_year=vehicle.year_of_manufacture,
+                    ownership=onboarding.vehicle_ownership,
+                    registered_keeper_name=profile.registered_keeper_name,
+                    registered_keeper_address=profile.registered_keeper_address,
+                    available_from=now, reviewed_by=request.user,
+                )
                 transaction.on_commit(
                     lambda pk=profile.pk: _notify_review(pk, True), robust=True,
                 )
