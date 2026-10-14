@@ -193,7 +193,7 @@ export default function UnifiedDriverLifecycle({
           I have reviewed all current assignments and acknowledge the trip safety check.
         </label>
         <button type="button" disabled={busy || !ceaseConfirmed || ceaseReason.trim().length < 8}
-          onClick={cease}
+          onClick={ceaseAvailability}
           className="rounded border border-red-600 px-3 py-2 font-semibold text-red-700 disabled:opacity-40">
           End ACT availability
         </button>
