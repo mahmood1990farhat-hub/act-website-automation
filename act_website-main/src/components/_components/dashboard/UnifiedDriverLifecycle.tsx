@@ -34,6 +34,8 @@ export default function UnifiedDriverLifecycle({
   const control = "mt-1 w-full rounded-lg border border-gray-300 p-2 font-normal text-gray-900";
   const acceptedFiles = "application/pdf,image/jpeg,image/png";
   const formatDate = (v: string | null | undefined) => v ? new Date(v).toLocaleDateString("en-GB") : "—";
+  // Temporary account suspension is not a permanent end to the operator period.
+  const canCease = !!operatorRecord.driver_available_from && !operatorRecord.driver_ceased_available_on;
 
   const submit = async (endpoint: string, body: BodyInit, type?: string) => {
     const headers: Record<string, string> = { Authorization: "Bearer " + token };
@@ -65,7 +67,7 @@ export default function UnifiedDriverLifecycle({
   };
 
   const ceaseAvailability = async () => {
-    if (busy || !token || !operatorRecord.is_currently_available ||
+    if (busy || !token || !canCease ||
         !ceaseConfirmed || ceaseReason.trim().length < 8) {
       setError("Confirm assignment review and provide a reason.");
       return;
@@ -103,13 +105,17 @@ export default function UnifiedDriverLifecycle({
       </div>)}
     </div>
 
-    {operatorRecord.is_currently_available && <>
+    {canCease && <>
       <div className="mt-4 border-t pt-3">
-        <button type="button" className="rounded border px-3 py-2 font-semibold"
+        {!operatorRecord.is_currently_available && <p className="mb-2 text-gray-600">
+          Vehicle replacement is disabled while this account is unavailable. Permanent cessation remains available.
+        </p>}
+        <button type="button" className="rounded border px-3 py-2 font-semibold disabled:opacity-40"
+          disabled={!operatorRecord.is_currently_available || busy}
           onClick={() => setShowReplacement(v => !v)}>
           {showReplacement ? "Close vehicle replacement" : "Replace verified vehicle"}
         </button>
-        {showReplacement && <form onSubmit={replaceVehicle}
+        {showReplacement && operatorRecord.is_currently_available && <form onSubmit={replaceVehicle}
           className="mt-3 grid gap-3 rounded border p-3 sm:grid-cols-2">
           <p className="sm:col-span-2">
             Inspect genuine vehicle and keeper evidence. The old vehicle and documents remain in the history.
@@ -186,7 +192,7 @@ export default function UnifiedDriverLifecycle({
         <p>Ending availability is refused while trips are assigned. No automatic cancellations or reassignments occur.</p>
         <textarea aria-label="Reason for ceasing driver availability" className={control}
           value={ceaseReason} onChange={event => setCeaseReason(event.target.value)}
-          placeholder="Reason (at least 8 characters)" minLength={8} />
+          placeholder="Reason (at least 8 characters)" minLength={8} maxLength={450} />
         <label className="flex gap-2">
           <input type="checkbox" checked={ceaseConfirmed}
             onChange={event => setCeaseConfirmed(event.target.checked)} />
