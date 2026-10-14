@@ -131,6 +131,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # deployment must set this to a writable private shared volume. Fail closed
 # on uploads if it has not been configured.
 ACT_DRIVER_PRIVATE_UPLOAD_ROOT = env('ACT_DRIVER_PRIVATE_UPLOAD_ROOT', default='')
+# An independently backed up Fernet encryption key is mandatory for newly
+# approved operator NI records; no production fallback to the Django secret.
+ACT_NI_ENCRYPTION_KEY = env('ACT_NI_ENCRYPTION_KEY', default='')
 # One-time password links must point to the real ACT website, or a wholly
 # isolated staging host during acceptance; never take this from user input.
 ACT_PUBLIC_WEBSITE_URL = env('ACT_PUBLIC_WEBSITE_URL', default='https://airportandcitytransfer.com').rstrip('/')

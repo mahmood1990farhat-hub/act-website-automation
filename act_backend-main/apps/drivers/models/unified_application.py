@@ -83,6 +83,16 @@ class UnifiedDriverApplication(models.Model):
     ownership_explanation = models.CharField(max_length=500, blank=True, default="")
     awaiting_vehicle = models.BooleanField(default=False)
     passenger_photo_disclosure_consent = models.BooleanField(default=False)
+    # Restricted TfL operator records for newly approved unified applicants.
+    # NI is encrypted; driver and vehicle periods are independent.
+    national_insurance_ciphertext = models.CharField(max_length=255, blank=True, default="")
+    registered_keeper_name = models.CharField(max_length=150, blank=True, default="")
+    registered_keeper_address = models.CharField(max_length=500, blank=True, default="")
+    driver_available_from = models.DateField(null=True, blank=True)
+    driver_ceased_available_on = models.DateField(null=True, blank=True)
+    vehicle_available_from = models.DateField(null=True, blank=True)
+    vehicle_ceased_available_on = models.DateField(null=True, blank=True)
+    operator_record_verified_at = models.DateTimeField(null=True, blank=True)
     setup_token_hash = models.CharField(max_length=64, blank=True, default="")
     setup_token_expires_at = models.DateTimeField(null=True, blank=True)
     setup_token_used_at = models.DateTimeField(null=True, blank=True)
