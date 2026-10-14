@@ -14,6 +14,10 @@ from .views.unified_application import (
 from .views.unified_admin import (
     AdminUnifiedApplicationDetailView, AdminUnifiedApplicationDecisionView,
 )
+from .views.operator_lifecycle import (
+    AdminUnifiedDriverCeaseView, AdminUnifiedVehicleReplaceView,
+    AdminUnifiedVehicleEvidenceView, AdminOperatorNIInspectionView,
+)
 
 urlpatterns = [
     # Legacy endpoints (deprecated)
@@ -36,6 +40,16 @@ urlpatterns = [
          name='admin_unified_application_detail'),
     path('admin/unified-applications/<int:request_id>/decision/', AdminUnifiedApplicationDecisionView.as_view(),
          name='admin_unified_application_decision'),
+
+    # Approved unified driver and vehicle lifecycle (admin only).
+    path('admin/unified-applications/<int:request_id>/cease/', AdminUnifiedDriverCeaseView.as_view(),
+         name='admin_unified_cease_availability'),
+    path('admin/unified-applications/<int:request_id>/replace-vehicle/', AdminUnifiedVehicleReplaceView.as_view(),
+         name='admin_unified_vehicle_replace'),
+    path('admin/unified-vehicle-evidence/<int:document_id>/', AdminUnifiedVehicleEvidenceView.as_view(),
+         name='admin_unified_vehicle_evidence'),
+    path('admin/unified-applications/<int:request_id>/ni-inspection/', AdminOperatorNIInspectionView.as_view(),
+         name='admin_unified_ni_inspection'),
 
     # New three-step onboarding flow
     path('onboarding/step1/', DriverOnboardingStep1View.as_view(), name='driver_onboarding_step1'),

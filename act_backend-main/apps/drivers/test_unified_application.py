@@ -1,4 +1,5 @@
 """Bounded tests of a one-form driver application without real drivers/emails."""
+import base64
 from datetime import date, timedelta
 from io import BytesIO
 from tempfile import TemporaryDirectory
@@ -15,11 +16,13 @@ from rest_framework.test import APIClient
 from apps.drivers.models import (
     BaseDriver, NormalDriver, DriverOnboardingRequest,
     DriverApplicationDocument, UnifiedDriverApplication,
+    OperatorVehiclePeriod, OperatorVehicleEvidence, OperatorRecordAccessAudit,
 )
 from apps.vehicle.models import VehicleType
 
 User = get_user_model()
 TOKEN = "A" * 48
+TEST_OPERATOR_KEY = base64.urlsafe_b64encode(bytes([7]) * 32).decode("ascii")
 
 
 def pdf(name):
@@ -43,6 +46,7 @@ class UnifiedOnboardingTests(TestCase):
         self.addCleanup(public.cleanup)
         self.private_override = override_settings(
             ACT_DRIVER_PRIVATE_UPLOAD_ROOT=private.name,
+            ACT_NI_ENCRYPTION_KEY=TEST_OPERATOR_KEY,
             MEDIA_ROOT=public.name,
             DEFAULT_FROM_EMAIL="info@example.invalid",
         )
@@ -102,6 +106,14 @@ class UnifiedOnboardingTests(TestCase):
                 "v5c": pdf("v5c.pdf"),
             })
         return values
+
+    def operator_approval_fields(self):
+        return {
+            "national_insurance_number": "AB 12 34 56 C",
+            "registered_keeper_name": "Synthetic Registered Keeper",
+            "registered_keeper_address": "12 Example Road, London",
+            "operator_records_checked": True,
+        }
 
     def apply(self, with_vehicle=False, values=None):
         raw = values or self.payload(with_vehicle)
@@ -211,6 +223,7 @@ class UnifiedOnboardingTests(TestCase):
                     {
                         "action": "approve", "documents_reviewed": True,
                         "dbs_cleared": True, "photo_disclosure_consent": True,
+                        **self.operator_approval_fields(),
                     }, format="json",
                 )
         self.assertEqual(approval.status_code, 200, approval.data)
@@ -450,10 +463,59 @@ class UnifiedOnboardingTests(TestCase):
                     "documents_reviewed": True,
                     "dbs_cleared": True,
                     "photo_disclosure_consent": True,
+                    **self.operator_approval_fields(),
                 }, format="json")
         self.assertEqual(decision.status_code, 200, decision.data)
         driver = BaseDriver.objects.get(user__email="newdriver@example.invalid")
         self.assertEqual(NormalDriver.objects.get(driver=driver).vehicle.vehicle_type, first_class)
+
+    def test_operator_records_must_be_complete_and_encrypted_before_approval(self):
+        response, _ = self.apply(with_vehicle=True)
+        self.assertEqual(response.status_code, 201)
+        cache.clear()
+        password = "SomeVeryStrongPassword+2026"
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN, "password": password,
+            "confirm_password": password,
+        }, format="json")
+        self.assertEqual(activated.status_code, 200)
+        self.client.force_authenticate(user=self.admin)
+        endpoint = f"/api/drivers/admin/unified-applications/{response.data['application_id']}/decision/"
+        minimal = {
+            "action": "approve", "documents_reviewed": True,
+            "dbs_cleared": True, "photo_disclosure_consent": True,
+        }
+        missing = self.client.post(endpoint, minimal, format="json")
+        self.assertEqual(missing.status_code, 400)
+        self.assertFalse(BaseDriver.objects.filter(user__email="newdriver@example.invalid").exists())
+        with override_settings(ACT_NI_ENCRYPTION_KEY=""):
+            unconfigured = self.client.post(endpoint, {
+                **minimal, **self.operator_approval_fields(),
+            }, format="json")
+        self.assertEqual(unconfigured.status_code, 503)
+        self.assertFalse(BaseDriver.objects.filter(user__email="newdriver@example.invalid").exists())
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                approved = self.client.post(endpoint, {
+                    **minimal, **self.operator_approval_fields(),
+                }, format="json")
+        self.assertEqual(approved.status_code, 200, approved.data)
+        profile = UnifiedDriverApplication.objects.get(
+            onboarding_request_id=response.data["application_id"]
+        )
+        self.assertTrue(profile.national_insurance_ciphertext.startswith("fernet:v1:"))
+        self.assertNotIn("AB123456C", profile.national_insurance_ciphertext)
+        from apps.drivers.operator_records import decrypt_operator_ni
+        self.assertEqual(decrypt_operator_ni(profile.national_insurance_ciphertext), "AB123456C")
+        self.assertEqual(profile.registered_keeper_name, "Synthetic Registered Keeper")
+        self.assertEqual(profile.driver_available_from, date.today())
+        self.assertEqual(profile.vehicle_available_from, date.today())
+        details = self.client.get(
+            f"/api/drivers/admin/unified-applications/{response.data['application_id']}/"
+        )
+        self.assertEqual(details.status_code, 200)
+        self.assertTrue(details.data["operator_record"]["national_insurance_recorded"])
+        self.assertNotIn("AB123456C", str(details.data))
 
     def test_full_evidence_approval_creates_only_one_eligible_driver(self):
         response, _ = self.apply(with_vehicle=True)
@@ -473,6 +535,7 @@ class UnifiedOnboardingTests(TestCase):
                 decision = self.client.post(endpoint, {
                     "action": "approve", "documents_reviewed": True,
                     "dbs_cleared": True, "photo_disclosure_consent": True,
+                    **self.operator_approval_fields(),
                 }, format="json")
         self.assertEqual(decision.status_code, 200, decision.data)
         user = User.objects.get(email="newdriver@example.invalid")
@@ -492,3 +555,167 @@ class UnifiedOnboardingTests(TestCase):
         }, format="json")
         self.assertEqual(again.status_code, 400)
         self.assertEqual(NormalDriver.objects.count(), 1)
+
+
+    def approved_unified_for_lifecycle(self):
+        """Use the existing synthetic onboarding path; never create a paid trip."""
+        response, _ = self.apply(with_vehicle=True)
+        self.assertEqual(response.status_code, 201)
+        cache.clear()
+        password = "SomeVeryStrongPassword+2026"
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN, "password": password, "confirm_password": password,
+        }, format="json")
+        self.assertEqual(activated.status_code, 200)
+        self.client.force_authenticate(user=self.admin)
+        decision = f"/api/drivers/admin/unified-applications/{response.data['application_id']}/decision/"
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                approved = self.client.post(decision, {
+                    "action": "approve", "documents_reviewed": True,
+                    "dbs_cleared": True, "photo_disclosure_consent": True,
+                    **self.operator_approval_fields(),
+                }, format="json")
+        self.assertEqual(approved.status_code, 200, approved.data)
+        return response.data["application_id"]
+
+    def new_vehicle_evidence(self):
+        return {
+            "vehicle_ownership": "phv_owner",
+            "vehicle_class_code": "comfort",
+            "vehicle_make": "Mercedes",
+            "vehicle_model": "E Class",
+            "vehicle_year": "2025",
+            "vehicle_registration": "XY25 ABC",
+            "vehicle_colour": "Silver",
+            "mot_expiry": str(date.today() + timedelta(days=300)),
+            "insurance_expiry": str(date.today() + timedelta(days=200)),
+            "accepts_pets": "false",
+            "registered_keeper_name": "Second Synthetic Keeper",
+            "registered_keeper_address": "45 Synthetic Lane, London",
+            "replacement_reason": "Owner approved new vehicle",
+            "documents_reviewed": "true",
+            "operator_records_checked": "true",
+            "mot": pdf("replacement_mot.pdf"),
+            "insurance": pdf("replacement_insurance.pdf"),
+            "vehicle_phv": pdf("replacement_phv.pdf"),
+            "v5c": pdf("replacement_v5c.pdf"),
+        }
+
+    def test_vehicle_replacement_preserves_original_vehicle_history_and_private_evidence(self):
+        app_id = self.approved_unified_for_lifecycle()
+        profile = UnifiedDriverApplication.objects.get(onboarding_request_id=app_id)
+        original_period = OperatorVehiclePeriod.objects.get(application=profile)
+        old_vehicle_id = original_period.vehicle_id
+        self.assertIsNone(original_period.ceased_at)
+        self.assertEqual(original_period.registered_keeper_name, "Synthetic Registered Keeper")
+
+        endpoint = f"/api/drivers/admin/unified-applications/{app_id}/replace-vehicle/"
+        changed = self.client.post(endpoint, self.new_vehicle_evidence(), format="multipart")
+        self.assertEqual(changed.status_code, 200, changed.data)
+        old_period = OperatorVehiclePeriod.objects.get(pk=original_period.pk)
+        self.assertIsNotNone(old_period.ceased_at)
+        self.assertEqual(old_period.vehicle_id, old_vehicle_id)
+        self.assertEqual(old_period.registered_keeper_name, "Synthetic Registered Keeper")
+        current = OperatorVehiclePeriod.objects.get(application=profile, ceased_at__isnull=True)
+        self.assertNotEqual(current.vehicle_id, old_vehicle_id)
+        self.assertEqual(current.vehicle_registration, "XY25 ABC")
+        self.assertEqual(current.registered_keeper_name, "Second Synthetic Keeper")
+        self.assertEqual(current.evidence.count(), 4)
+        self.assertEqual(OperatorVehicleEvidence.objects.count(), 4)
+        self.assertEqual(DriverApplicationDocument.objects.filter(application=profile).count(), 9)
+        normal = NormalDriver.objects.get(driver__user__email="newdriver@example.invalid")
+        self.assertEqual(normal.vehicle_id, current.vehicle_id)
+        self.assertEqual(BaseDriver.objects.filter(user__email="newdriver@example.invalid").count(), 1)
+        detail = self.client.get(f"/api/drivers/admin/unified-applications/{app_id}/")
+        self.assertEqual(detail.status_code, 200)
+        self.assertEqual(len(detail.data["vehicle_history"]), 2)
+        evidence = current.evidence.first()
+        self.client.force_authenticate(user=None)
+        denied = self.client.get(f"/api/drivers/admin/unified-vehicle-evidence/{evidence.pk}/")
+        self.assertIn(denied.status_code, (401, 403))
+        self.client.force_authenticate(user=self.admin)
+        private = self.client.get(f"/api/drivers/admin/unified-vehicle-evidence/{evidence.pk}/")
+        self.assertEqual(private.status_code, 200)
+        self.assertEqual(private["Cache-Control"], "private, no-store")
+
+    def test_outstanding_assignment_blocks_vehicle_swap_and_driver_cessation_without_touching_trips(self):
+        app_id = self.approved_unified_for_lifecycle()
+        profile = UnifiedDriverApplication.objects.get(onboarding_request_id=app_id)
+        original_period = OperatorVehiclePeriod.objects.get(application=profile)
+        replace_url = f"/api/drivers/admin/unified-applications/{app_id}/replace-vehicle/"
+        cease_url = f"/api/drivers/admin/unified-applications/{app_id}/cease/"
+        with patch("apps.drivers.views.operator_lifecycle._outstanding_assignment", return_value=True):
+            swap = self.client.post(replace_url, self.new_vehicle_evidence(), format="multipart")
+            stop = self.client.post(cease_url, {
+                "reason": "Driver leaves ACT coverage",
+                "confirmed_no_outstanding_trips": True,
+            }, format="json")
+        self.assertEqual(swap.status_code, 409)
+        self.assertEqual(stop.status_code, 409)
+        self.assertEqual(OperatorVehiclePeriod.objects.count(), 1)
+        original_period.refresh_from_db()
+        self.assertIsNone(original_period.ceased_at)
+        self.assertTrue(User.objects.get(email="newdriver@example.invalid").is_admin_verified)
+
+    def test_driver_cessation_closes_records_and_revokes_trip_permission(self):
+        app_id = self.approved_unified_for_lifecycle()
+        endpoint = f"/api/drivers/admin/unified-applications/{app_id}/cease/"
+        result = self.client.post(endpoint, {
+            "reason": "Driver is leaving the ACT operator",
+            "confirmed_no_outstanding_trips": True,
+        }, format="json")
+        self.assertEqual(result.status_code, 200, result.data)
+        profile = UnifiedDriverApplication.objects.get(onboarding_request_id=app_id)
+        self.assertEqual(profile.driver_ceased_available_on, date.today())
+        self.assertEqual(profile.vehicle_ceased_available_on, date.today())
+        period = OperatorVehiclePeriod.objects.get(application=profile)
+        self.assertIsNotNone(period.ceased_at)
+        driver = User.objects.get(email="newdriver@example.invalid")
+        self.assertFalse(driver.is_admin_verified)
+        self.assertFalse(driver.is_profile_completed)
+        self.assertTrue(driver.is_active)  # Account history still accessible.
+        self.assertEqual(DriverOnboardingRequest.objects.get(user=driver).status, "final_approved")
+        repeat = self.client.post(endpoint, {
+            "reason": "Second attempt would overwrite the audit",
+            "confirmed_no_outstanding_trips": True,
+        }, format="json")
+        self.assertEqual(repeat.status_code, 409)
+        self.assertEqual(OperatorRecordAccessAudit.objects.filter(action="availability_ceased").count(), 1)
+
+    def test_legacy_vehicle_editor_fails_closed_only_for_approved_unified_driver(self):
+        app_id = self.approved_unified_for_lifecycle()
+        normal = NormalDriver.objects.get(driver__user__email="newdriver@example.invalid")
+        endpoint = f"/api/admin-panel/drivers/{normal.pk}/update/"
+        original = normal.vehicle.make
+        result = self.client.patch(endpoint, {"vehicle_make": "Unreviewed swap"}, format="multipart")
+        self.assertEqual(result.status_code, 409, getattr(result, "data", None))
+        normal.refresh_from_db()
+        self.assertEqual(normal.vehicle.make, original)
+        self.assertTrue(OperatorVehiclePeriod.objects.filter(
+            application__onboarding_request_id=app_id, ceased_at__isnull=True,
+        ).exists())
+
+    def test_superuser_ni_inspection_requires_reason_and_is_audited(self):
+        app_id = self.approved_unified_for_lifecycle()
+        endpoint = f"/api/drivers/admin/unified-applications/{app_id}/ni-inspection/"
+        missing = self.client.post(endpoint, {}, format="json")
+        self.assertEqual(missing.status_code, 400)
+        staff = User.objects.create_user(
+            username="staff", email="staff@example.invalid",
+            password="synthetic-admin-password", account_type="normal",
+        )
+        staff.is_staff = True
+        staff.save()
+        self.client.force_authenticate(user=staff)
+        denied = self.client.post(endpoint, {"reason": "TfL regulatory inspection"}, format="json")
+        self.assertEqual(denied.status_code, 403)
+        self.client.force_authenticate(user=self.admin)
+        readback = self.client.post(endpoint, {"reason": "TfL regulatory inspection"}, format="json")
+        self.assertEqual(readback.status_code, 200)
+        self.assertEqual(readback.data["national_insurance_number"], "AB123456C")
+        self.assertEqual(readback["Cache-Control"], "private, no-store")
+        audits = OperatorRecordAccessAudit.objects.filter(action="ni_inspection")
+        self.assertEqual(audits.count(), 1)
+        self.assertEqual(audits.first().actor_id, self.admin.pk)
+        self.assertNotIn("AB123456C", audits.first().reason)
