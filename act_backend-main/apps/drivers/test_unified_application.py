@@ -503,6 +503,8 @@ class UnifiedOnboardingTests(TestCase):
         )
         self.assertTrue(profile.national_insurance_ciphertext.startswith("fernet:v1:"))
         self.assertNotIn("AB123456C", profile.national_insurance_ciphertext)
+        from apps.drivers.operator_records import decrypt_operator_ni
+        self.assertEqual(decrypt_operator_ni(profile.national_insurance_ciphertext), "AB123456C")
         self.assertEqual(profile.registered_keeper_name, "Synthetic Registered Keeper")
         self.assertEqual(profile.driver_available_from, date.today())
         self.assertEqual(profile.vehicle_available_from, date.today())
