@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import UnifiedDriverLifecycle, { OperatorRecord, VehicleHistory } from "./UnifiedDriverLifecycle";
 
 type Review = {
   application_id: number;
@@ -10,6 +11,8 @@ type Review = {
   personal: Record<string, string>;
   licence: Record<string, string>;
   vehicle: Record<string, string | number | boolean | null>;
+  operator_record?: OperatorRecord;
+  vehicle_history?: VehicleHistory[];
   documents: {
     id: number; kind: string; name: string; size: number;
     download_endpoint: string;
@@ -38,12 +41,21 @@ export default function UnifiedDriverReview({
   const [docsReviewed, setDocsReviewed] = useState(false);
   const [dbsCleared, setDbsCleared] = useState(false);
   const [photoConsent, setPhotoConsent] = useState(false);
+  const [nationalInsurance, setNationalInsurance] = useState("");
+  const [keeperName, setKeeperName] = useState("");
+  const [keeperAddress, setKeeperAddress] = useState("");
+  const [operatorRecordsChecked, setOperatorRecordsChecked] = useState(false);
   const [reason, setReason] = useState("");
   const [requestedCorrections, setRequestedCorrections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const api = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   useEffect(() => {
+    // Never carry a previously entered NI/keeper record into another applicant.
+    setNationalInsurance("");
+    setKeeperName("");
+    setKeeperAddress("");
+    setOperatorRecordsChecked(false);
     const controller = new AbortController();
     const load = async () => {
       setLoading(true);
@@ -67,7 +79,7 @@ export default function UnifiedDriverReview({
     return () => controller.abort();
   }, [api, applicationId, token]);
 
-  const download = async (fileItem: Review["documents"][number]) => {
+  const download = async (fileItem: { name: string; download_endpoint: string }) => {
     if (!token || busy) return;
     setBusy(true); setError("");
     try {
@@ -99,6 +111,11 @@ export default function UnifiedDriverReview({
       setError("Verify all documents, actual DBS clearance and permission to disclose the driver photo.");
       return;
     }
+    if (action === "approve" &&
+      (!nationalInsurance.trim() || !keeperName.trim() || !keeperAddress.trim() || !operatorRecordsChecked)) {
+      setError("Enter and verify the TfL National Insurance and registered keeper records before approval.");
+      return;
+    }
     if (action !== "approve" && reason.trim().length < 8) {
       setError("Give a specific reason for rejection or required corrections.");
       return;
@@ -124,6 +141,10 @@ export default function UnifiedDriverReview({
             documents_reviewed: docsReviewed,
             dbs_cleared: dbsCleared,
             photo_disclosure_consent: photoConsent,
+            national_insurance_number: action === "approve" ? nationalInsurance : undefined,
+            registered_keeper_name: action === "approve" ? keeperName : undefined,
+            registered_keeper_address: action === "approve" ? keeperAddress : undefined,
+            operator_records_checked: action === "approve" ? operatorRecordsChecked : undefined,
           }),
         },
       );
@@ -165,6 +186,14 @@ export default function UnifiedDriverReview({
             </dl>
           </section>,
         )}
+        {details.operator_record?.national_insurance_recorded && <section className="mt-4 rounded-lg border p-4 text-sm">
+          <h3 className="mb-2 font-bold">TfL operator register (restricted)</h3>
+          <p>NI number: securely recorded (not displayed).</p>
+          <p>Registered keeper: {details.operator_record.registered_keeper_name || "—"}</p>
+          <p>Keeper address: {details.operator_record.registered_keeper_address || "—"}</p>
+          <p>Driver available from: {details.operator_record.driver_available_from || "—"}</p>
+          <p>Vehicle available from: {details.operator_record.vehicle_available_from || "—"}</p>
+        </section>}
         <section className="mt-4 rounded-lg border p-4">
           <h3 className="font-bold">Private uploaded evidence</h3>
           <p className="my-2 text-xs text-gray-600">
@@ -179,6 +208,15 @@ export default function UnifiedDriverReview({
               </div>)}
           </div>
         </section>
+        {details.status === "final_approved" && details.operator_record &&
+          <UnifiedDriverLifecycle
+            applicationId={applicationId}
+            token={token || ""}
+            operatorRecord={details.operator_record}
+            vehicleHistory={details.vehicle_history || []}
+            onDownload={download}
+            onChanged={onDecision}
+          />}
         {details.status === "pending" && <section className="mt-4 space-y-3 border-t pt-4 text-sm">
           <h3 className="font-bold">Final ACT verification</h3>
           <label className="flex gap-3">
@@ -193,6 +231,32 @@ export default function UnifiedDriverReview({
             <input type="checkbox" checked={photoConsent} onChange={e => setPhotoConsent(e.target.checked)} />
             I confirmed consent to disclose this verified driver photo to ACT passengers.
           </label>
+          <div className="space-y-3 rounded-lg border border-gray-300 p-3">
+            <h4 className="font-semibold">TfL operator records — required before approval</h4>
+            <p className="text-xs text-gray-600">
+              Enter these only after inspecting genuine driver and keeper evidence.
+              NI is encrypted in ACT records, never displayed to passengers.
+            </p>
+            <label className="block font-semibold">Driver National Insurance number
+              <input type="text" autoComplete="off" autoCapitalize="characters"
+                value={nationalInsurance} onChange={event => setNationalInsurance(event.target.value)}
+                className="mt-1 w-full rounded-lg border p-2 font-normal" />
+            </label>
+            <label className="block font-semibold">Vehicle registered keeper name
+              <input type="text" autoComplete="off" value={keeperName}
+                onChange={event => setKeeperName(event.target.value)}
+                className="mt-1 w-full rounded-lg border p-2 font-normal" />
+            </label>
+            <label className="block font-semibold">Vehicle registered keeper address
+              <textarea value={keeperAddress} onChange={event => setKeeperAddress(event.target.value)}
+                className="mt-1 w-full rounded-lg border p-2 font-normal" />
+            </label>
+            <label className="flex gap-3">
+              <input type="checkbox" checked={operatorRecordsChecked}
+                onChange={event => setOperatorRecordsChecked(event.target.checked)} />
+              I verified the NI number and registered keeper details against their evidence.
+            </label>
+          </div>
           <button type="button" onClick={() => decide("approve")}
             disabled={busy || details.awaiting_vehicle || !details.password_is_set}
             className="w-full rounded-lg bg-green-700 p-3 font-semibold text-white disabled:opacity-40">

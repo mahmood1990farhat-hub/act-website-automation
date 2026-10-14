@@ -65,4 +65,22 @@ check(review.includes("request_changes") &&
   review.includes("files_to_modify: action ===") &&
   review.includes("requestedCorrections"),
   "ACT admin must be able to request targeted corrections rather than reject/restart");
+for (const field of ["national_insurance_number", "registered_keeper_name",
+  "registered_keeper_address", "operator_records_checked"]) {
+  check(review.includes(field + ': action === "approve" ?'),
+    "TfL operator record is required in restricted final-approval payload: " + field);
+}
+check(review.includes("setOperatorRecordsChecked") && review.includes("keeperAddress"),
+  "ACT admin must verify NI and keeper details without changing the public applicant form");
+const lifecycle = read("src/components/_components/dashboard/UnifiedDriverLifecycle.tsx");
+check(review.includes("<UnifiedDriverLifecycle") && review.includes("vehicleHistory={details.vehicle_history"),
+  "ACT admin must have historical TfL vehicle periods and safe lifecycle actions");
+check(lifecycle.includes("/replace-vehicle/") && lifecycle.includes("/cease/") &&
+  lifecycle.includes("confirmed_no_outstanding_trips: true"),
+  "Operator lifecycle must be admin-only and never silently change assigned trips");
+check(lifecycle.includes("registered_keeper_name") && lifecycle.includes("vehicle_phv") &&
+  lifecycle.includes("documents_reviewed") && lifecycle.includes("operator_records_checked"),
+  "Vehicle replacement requires fresh keeper proof and verified private documents");
+check(!lifecycle.includes("national_insurance_number"),
+  "The vehicle and cessation UI must never read or transmit an NI number");
 console.log("ACT unified driver application UI and approval wiring checks passed.");
