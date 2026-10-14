@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import UnifiedDriverLifecycle, { OperatorRecord, VehicleHistory } from "./UnifiedDriverLifecycle";
 
 type Review = {
   application_id: number;
@@ -10,15 +11,8 @@ type Review = {
   personal: Record<string, string>;
   licence: Record<string, string>;
   vehicle: Record<string, string | number | boolean | null>;
-  operator_record?: {
-    national_insurance_recorded: boolean;
-    registered_keeper_name: string;
-    registered_keeper_address: string;
-    driver_available_from: string | null;
-    driver_ceased_available_on: string | null;
-    vehicle_available_from: string | null;
-    vehicle_ceased_available_on: string | null;
-  };
+  operator_record?: OperatorRecord;
+  vehicle_history?: VehicleHistory[];
   documents: {
     id: number; kind: string; name: string; size: number;
     download_endpoint: string;
@@ -85,7 +79,7 @@ export default function UnifiedDriverReview({
     return () => controller.abort();
   }, [api, applicationId, token]);
 
-  const download = async (fileItem: Review["documents"][number]) => {
+  const download = async (fileItem: { name: string; download_endpoint: string }) => {
     if (!token || busy) return;
     setBusy(true); setError("");
     try {
@@ -214,6 +208,15 @@ export default function UnifiedDriverReview({
               </div>)}
           </div>
         </section>
+        {details.status === "final_approved" && details.operator_record &&
+          <UnifiedDriverLifecycle
+            applicationId={applicationId}
+            token={token || ""}
+            operatorRecord={details.operator_record}
+            vehicleHistory={details.vehicle_history || []}
+            onDownload={download}
+            onChanged={onDecision}
+          />}
         {details.status === "pending" && <section className="mt-4 space-y-3 border-t pt-4 text-sm">
           <h3 className="font-bold">Final ACT verification</h3>
           <label className="flex gap-3">
