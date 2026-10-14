@@ -27,6 +27,14 @@ class Vehicle(models.Model):
     phv = models.FileField(upload_to="vehicles/phv/")
     vehicle_type = models.ForeignKey('VehicleType', on_delete=models.SET_NULL, null=True, blank=True, related_name="vehicles")
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        from django.db import router
+        from apps.drivers.operational_safety import guard_historical_vehicle_edit
+        database = using or router.db_for_write(type(self), instance=self)
+        guard_historical_vehicle_edit(self, update_fields=update_fields, using=database)
+        return super().save(force_insert=force_insert, force_update=force_update,
+                            using=database, update_fields=update_fields)
+
     def __str__(self):
         return self.vehicle_number
 
@@ -37,7 +45,7 @@ class VehicleImage(models.Model):
 
 
 class OfficeVehicle(models.Model):
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="office_vehicles")
+    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, related_name="office_vehicles")
     office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name="office_vehicles")
 
 

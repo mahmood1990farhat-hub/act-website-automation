@@ -24,6 +24,7 @@ from apps.drivers.models import (
 )
 from apps.drivers.models.unified_application import PrivateDriverDocumentStorage
 from apps.drivers.operator_records import decrypt_operator_ni
+from apps.drivers.operational_safety import lock_driver_record
 from apps.drivers.serializers.unified_application import (
     UnifiedVehicleSupplementSerializer, private_document_content_type,
 )
@@ -43,23 +44,26 @@ def _outstanding_assignment(base_driver):
     ).exists()
 
 
-def _active_record(request_id):
-    """Lock the unified applicant and vehicle; fail closed on inconsistent history."""
-    profile = get_object_or_404(
-        UnifiedDriverApplication.objects.select_for_update().select_related(
-            "onboarding_request__user",
-        ),
-        onboarding_request_id=request_id,
-    )
-    user = profile.onboarding_request.user
+def _active_record(request_id, allow_suspended=False):
+    """Share the assignment lock BEFORE reading profile/account/vehicle state."""
+    initial = get_object_or_404(UnifiedDriverApplication, onboarding_request_id=request_id)
+    driver_id = BaseDriver.objects.filter(
+        user_id=initial.onboarding_request.user_id,
+    ).values_list("id", flat=True).first()
+    if driver_id is None:
+        return initial, None, None, "Driver vehicle/operator records differ; manual review required."
+    driver, profile = lock_driver_record(driver_id)
+    if profile is None or profile.pk != initial.pk:
+        return initial, None, None, "Operator record changed; refresh the application."
+    user = driver.user
+    profile.onboarding_request.user = user
     if (profile.onboarding_request.status != "final_approved"
             or not profile.driver_available_from
             or profile.driver_ceased_available_on is not None
-            or not user.is_active or not user.is_admin_verified
-            or not user.is_profile_completed):
+            or (not user.is_active and not allow_suspended)
+            or not user.is_admin_verified or not user.is_profile_completed):
         return profile, None, None, "Driver is not currently available for ACT work."
-    driver = BaseDriver.objects.select_for_update().filter(user=user).first()
-    normal = NormalDriver.objects.select_for_update().filter(driver=driver).first() if driver else None
+    normal = NormalDriver.objects.select_for_update().filter(driver=driver).first()
     period = OperatorVehiclePeriod.objects.select_for_update().filter(
         application=profile, ceased_at__isnull=True,
     ).first()
@@ -226,7 +230,7 @@ class AdminUnifiedDriverCeaseView(APIView):
             return Response({"detail": "Provide a reason and confirm assignment review."}, status=400)
 
         with transaction.atomic():
-            profile, normal, period, problem = _active_record(request_id)
+            profile, normal, period, problem = _active_record(request_id, allow_suspended=True)
             if problem:
                 return Response({"detail": problem}, status=409)
             if _outstanding_assignment(normal.driver):

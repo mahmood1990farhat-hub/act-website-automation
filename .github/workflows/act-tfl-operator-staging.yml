@@ -94,14 +94,14 @@ jobs:
       - name: Checkout pinned production-baseline frontend candidate
         uses: actions/checkout@v4
         with:
-          ref: 73b704efd2cd5f5907791685a3247d01ad8717da
+          ref: 892317fcf938fad5fa6cd9a833a79e900dcc4d8f
           path: release-frontend
           persist-credentials: false
 
       - name: Assemble exactly the backend/frontend candidates under test
         run: |
           test "$(git -C release-backend rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C release-frontend rev-parse HEAD)" = 73b704efd2cd5f5907791685a3247d01ad8717da
+          test "$(git -C release-frontend rev-parse HEAD)" = 892317fcf938fad5fa6cd9a833a79e900dcc4d8f
           cp act_website-main/tests/staging_tfl_operator_journey.py "${RUNNER_TEMP}/act-driver-staging-acceptance.py"
           rm -rf act_backend-main act_website-main
           cp -a release-backend/act_backend-main act_backend-main
@@ -110,7 +110,7 @@ jobs:
           cp "${RUNNER_TEMP}/act-driver-staging-acceptance.py" act_website-main/tests/staging_tfl_operator_journey.py
           test -f act_backend-main/apps/drivers/views/unified_application.py
           test -f act_website-main/src/components/_components/auth/captain/UnifiedDriverApplication.tsx
-          echo "TESTING DRAFT BACKEND $GITHUB_SHA + EXACT FRONTEND 67a3c02; NOT MAIN OR PRODUCTION."
+          echo "TESTING BACKEND $GITHUB_SHA + FRONTEND 892317fcf938fad5fa6cd9a833a79e900dcc4d8f; NOT PRODUCTION."
 
       - name: Assert this job cannot access ACT production services
         run: |
@@ -170,25 +170,20 @@ jobs:
           admin.is_staff = True
           admin.is_superuser = True
           admin.save()
-          # Production seeds ACT VehicleType rows separately; the isolated
-          # fresh staging database needs a synthetic approved Comfort class.
           from apps.vehicle.models import VehicleType
           VehicleType.objects.get_or_create(
               code="comfort",
-              defaults={
-                  "name_en": "Comfort Class", "name_ar": "Comfort Class",
-                  "icon": "vehicle_types/icons/comfort.png",
-                  "max_passengers_count": 4,
-              },
+              defaults={"name_en": "Comfort Class", "name_ar": "Comfort Class",
+                        "icon": "vehicle_types/icons/comfort.png", "max_passengers_count": 4},
           )
           print("SYNTHETIC ADMIN AND VEHICLE CLASS CREATED")
           '
 
-      - name: Focused backend operator-register and private evidence regression
+      - name: Focused backend operator-register and assignment-safety regression
         working-directory: act_backend-main
         run: |
           python manage.py makemigrations --check --dry-run
-          python manage.py test apps.drivers.test_unified_application --noinput --verbosity 1
+          python manage.py test apps.drivers.test_unified_application apps.drivers.test_operational_safety apps.trips.tests.test_driver_assignment_lifecycle apps.admin_panel.test_driver_passenger_identity --noinput --verbosity 2
 
       - name: Build ACT website with localhost-only API
         working-directory: act_website-main
@@ -199,34 +194,26 @@ jobs:
 
       - name: Start isolated Django API and Next.js
         run: |
-          (cd act_backend-main &&
-            python manage.py runserver 127.0.0.1:8000 --noreload
-          ) >/tmp/act-staging-django.log 2>&1 &
+          (cd act_backend-main && python manage.py runserver 127.0.0.1:8000 --noreload) >/tmp/act-staging-django.log 2>&1 &
           echo $! >/tmp/act-staging-django.pid
-          (cd act_website-main &&
-            npm run start
-          ) >/tmp/act-staging-next.log 2>&1 &
+          (cd act_website-main && npm run start) >/tmp/act-staging-next.log 2>&1 &
           echo $! >/tmp/act-staging-next.pid
           ready=0
           for i in {1..40}; do
             backend="$(curl --connect-timeout 2 -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/drivers/onboarding/apply/ || true)"
             frontend="$(curl --connect-timeout 2 -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/en/auth?captain=true || true)"
-            if [[ "$backend" == 405 && "$frontend" == 200 ]]; then
-              ready=1
-              break
-            fi
+            if [[ "$backend" == 405 && "$frontend" == 200 ]]; then ready=1; break; fi
             sleep 2
           done
           if [[ "$ready" != 1 ]]; then
-            echo "Isolated staging services did not become healthy."
             tail -n 65 /tmp/act-staging-django.log
             tail -n 65 /tmp/act-staging-next.log
             exit 1
           fi
           echo "ISOLATED SERVERS READY"
 
-      - name: Exact paired mobile-browser → email → TfL admin approval
-        run: python act_website-main/tests/staging_tfl_operator_journey.py
+      - name: Exact paired mobile-browser email admin approval and safe cessation
+        run: python server/tests/staging_driver_safety_extension.py
 
       - name: Clean ephemeral processes and private evidence
         if: always()
