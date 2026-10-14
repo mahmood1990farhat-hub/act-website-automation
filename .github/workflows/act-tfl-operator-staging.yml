@@ -94,14 +94,14 @@ jobs:
       - name: Checkout pinned production-baseline frontend candidate
         uses: actions/checkout@v4
         with:
-          ref: 67a3c02dab78595c0189c677daf8c2e83057ff66
+          ref: 73b704efd2cd5f5907791685a3247d01ad8717da
           path: release-frontend
           persist-credentials: false
 
       - name: Assemble exactly the backend/frontend candidates under test
         run: |
           test "$(git -C release-backend rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C release-frontend rev-parse HEAD)" = 67a3c02dab78595c0189c677daf8c2e83057ff66
+          test "$(git -C release-frontend rev-parse HEAD)" = 73b704efd2cd5f5907791685a3247d01ad8717da
           cp act_website-main/tests/staging_tfl_operator_journey.py "${RUNNER_TEMP}/act-driver-staging-acceptance.py"
           rm -rf act_backend-main act_website-main
           cp -a release-backend/act_backend-main act_backend-main
