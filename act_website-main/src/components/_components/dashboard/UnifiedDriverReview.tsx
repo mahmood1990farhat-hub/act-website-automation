@@ -57,6 +57,11 @@ export default function UnifiedDriverReview({
   const api = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   useEffect(() => {
+    // Never carry a previously entered NI/keeper record into another applicant.
+    setNationalInsurance("");
+    setKeeperName("");
+    setKeeperAddress("");
+    setOperatorRecordsChecked(false);
     const controller = new AbortController();
     const load = async () => {
       setLoading(true);
