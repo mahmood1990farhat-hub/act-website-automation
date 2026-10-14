@@ -18,7 +18,7 @@ from ..serializers.user_update import (
     AdminUpdateDriverSerializer,
     AdminUpdatePassengerSerializer
 )
-from apps.drivers.models import NormalDriver
+from apps.drivers.models import NormalDriver, UnifiedDriverApplication
 from apps.passengers.models import Passenger
 import logging
 
@@ -61,6 +61,25 @@ class UpdateDriverInfoView(EMADBaseView):
             )
             return create_not_found_response(message, locale)
         
+        # Unified driver vehicle changes must use the verified replacement
+        # path so historical keeper/vehicle periods cannot be overwritten.
+        # Legacy drivers and passenger/driver identity edits are unaffected.
+        unified_approved = UnifiedDriverApplication.objects.filter(
+            onboarding_request__user_id=driver.driver.user_id,
+            driver_available_from__isnull=False,
+        ).exists()
+        nested_vehicle = request.data.get('vehicle_data')
+        vehicle_requested = bool(
+            nested_vehicle not in (None, "", {}, "{}", "null")
+            or any(key in request.data for key in (
+                'vehicle_make', 'vehicle_model', 'vehicle_color',
+            ))
+        )
+        if unified_approved and vehicle_requested:
+            return Response({
+                "detail": "Verified unified drivers must replace vehicles through the protected ACT review."
+            }, status=status.HTTP_409_CONFLICT)
+
         # Prepare data for serializer
         data = {
             'user_data': request.data.get('user_data', {}),
