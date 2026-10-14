@@ -1,0 +1,239 @@
+name: ACT TfL operator record isolated paired acceptance
+
+"on":
+  push:
+    branches: [draft/act-tfl-operator-records-backend-20261014]
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-tfl-driver-journey:
+    # Restricted to the draft branch, an ephemeral runner, synthetic data only.
+    # Zero production env, mail recipients, payments, n8n or deployments.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: act_staging_driver
+          POSTGRES_USER: act
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U act -d act_staging_driver"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      mailhog:
+        image: mailhog/mailhog:v1.0.1
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    env:
+      ACT_E2E_ISOLATED: "1"
+      SECRET_KEY: "act-ci-never-production-unified-driver-staging"
+      DEBUG: "False"
+      ALLOWED_HOSTS: "127.0.0.1,localhost"
+      CORS_ALLOWED_ORIGINS: "http://127.0.0.1:3001"
+      CSRF_TRUSTED_ORIGINS: "http://127.0.0.1:3001"
+      DB_NAME: act_staging_driver
+      DB_USER: act
+      DB_PASSWORD: isolated_ci_only
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: ci-not-production
+      TWILIO_VERIFY_SERVICE_SID: VA00000000000000000000000000000000
+      GOOGLE_MAPS_API_KEY: ci-not-production
+      STRIPE_SECRET_KEY: sk_test_ci_not_a_real_key
+      STRIPE_WEBHOOK_SECRET: whsec_ci_not_a_real_secret
+      CELERY_BROKER_URL: "redis://127.0.0.1:6379/13"
+      N8N_ENABLED: "False"
+      NOTIFICATION_FORCE_SYNC: "True"
+      EMAIL_HOST: 127.0.0.1
+      EMAIL_PORT: "1025"
+      EMAIL_USE_TLS: "False"
+      EMAIL_SSL_VERIFY: "True"
+      EMAIL_HOST_USER: ci@example.invalid
+      EMAIL_HOST_PASSWORD: ci-not-production
+      ADMIN_EMAIL: admin@example.invalid
+      APP_BASE_URL: "http://127.0.0.1:8000"
+      ACT_PUBLIC_WEBSITE_URL: "http://127.0.0.1:3001"
+      ACT_EMAIL_ASSETS_BASE_URL: "http://127.0.0.1:8000/static/email-assets"
+      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: /tmp/act-private-driver-uploads-isolated-ci
+      ACT_NI_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+      NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8000"
+      NEXT_PUBLIC_GOOGLE_ADS_ID: ""
+
+    steps:
+      - name: Checkout isolated draft gate source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact draft backend commit under this acceptance run
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: release-backend
+          persist-credentials: false
+
+      - name: Checkout pinned production-baseline frontend candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 67a3c02dab78595c0189c677daf8c2e83057ff66
+          path: release-frontend
+          persist-credentials: false
+
+      - name: Assemble exactly the backend/frontend candidates under test
+        run: |
+          test "$(git -C release-backend rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C release-frontend rev-parse HEAD)" = 67a3c02dab78595c0189c677daf8c2e83057ff66
+          cp act_website-main/tests/staging_tfl_operator_journey.py "${RUNNER_TEMP}/act-driver-staging-acceptance.py"
+          rm -rf act_backend-main act_website-main
+          cp -a release-backend/act_backend-main act_backend-main
+          cp -a release-frontend/act_website-main act_website-main
+          mkdir -p act_website-main/tests
+          cp "${RUNNER_TEMP}/act-driver-staging-acceptance.py" act_website-main/tests/staging_unified_driver_journey.py
+          test -f act_backend-main/apps/drivers/views/unified_application.py
+          test -f act_website-main/src/components/_components/auth/captain/UnifiedDriverApplication.tsx
+          echo "TESTING DRAFT BACKEND $GITHUB_SHA + EXACT FRONTEND 67a3c02; NOT MAIN OR PRODUCTION."
+
+      - name: Assert this job cannot access ACT production services
+        run: |
+          test "$ACT_E2E_ISOLATED" = 1
+          test "$DB_NAME" = act_staging_driver
+          test "$DB_HOST" = 127.0.0.1
+          test "$EMAIL_HOST" = 127.0.0.1
+          test "$APP_BASE_URL" = http://127.0.0.1:8000
+          test "$ACT_PUBLIC_WEBSITE_URL" = http://127.0.0.1:3001
+          test "$N8N_ENABLED" = False
+          test "$NEXT_PUBLIC_API_BASE_URL" = http://127.0.0.1:8000
+          test "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT" = "/tmp/act-private-driver-uploads-isolated-ci"
+          mkdir -p "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"
+          chmod 700 "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"
+          echo "ISOLATED: fresh PostGIS + private uploads + MailHog. No ACT production connections."
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: act_backend-main/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: act_website-main/package-lock.json
+
+      - name: Install backend and browser dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdal-bin libgdal-dev libgeos-dev
+          python -m pip install -q -r act_backend-main/requirements.txt
+          python -m pip install -q playwright==1.56.0
+          python -m playwright install --with-deps chromium >/tmp/act-chromium-install.log 2>&1 || {
+            tail -n 80 /tmp/act-chromium-install.log
+            exit 1
+          }
+
+      - name: Create fresh isolated database and test-only admin
+        working-directory: act_backend-main
+        run: |
+          python manage.py migrate --noinput >/tmp/act-driver-staging-migrate.log 2>&1 || {
+            tail -n 80 /tmp/act-driver-staging-migrate.log
+            exit 1
+          }
+          python manage.py shell -c '
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+          admin = User.objects.create_user(
+              username="staging-admin@example.invalid",
+              email="staging-admin@example.invalid",
+              password="StagingAdminPassword+2026",
+              account_type="normal",
+          )
+          admin.is_active = True
+          admin.is_staff = True
+          admin.is_superuser = True
+          admin.save()
+          # Production seeds ACT VehicleType rows separately; the isolated
+          # fresh staging database needs a synthetic approved Comfort class.
+          from apps.vehicle.models import VehicleType
+          VehicleType.objects.get_or_create(
+              code="comfort",
+              defaults={
+                  "name_en": "Comfort Class", "name_ar": "Comfort Class",
+                  "icon": "vehicle_types/icons/comfort.png",
+                  "max_passengers_count": 4,
+              },
+          )
+          print("SYNTHETIC ADMIN AND VEHICLE CLASS CREATED")
+          '
+
+      - name: Focused backend operator-register and private evidence regression
+        working-directory: act_backend-main
+        run: |
+          python manage.py makemigrations --check --dry-run
+          python manage.py test apps.drivers.test_unified_application --noinput --verbosity 1
+
+      - name: Build ACT website with localhost-only API
+        working-directory: act_website-main
+        run: |
+          npm ci --no-audit --no-fund
+          node tests/check-unified-driver-application.cjs
+          npm run build
+
+      - name: Start isolated Django API and Next.js
+        run: |
+          (cd act_backend-main &&
+            python manage.py runserver 127.0.0.1:8000 --noreload
+          ) >/tmp/act-staging-django.log 2>&1 &
+          echo $! >/tmp/act-staging-django.pid
+          (cd act_website-main &&
+            npm run start
+          ) >/tmp/act-staging-next.log 2>&1 &
+          echo $! >/tmp/act-staging-next.pid
+          ready=0
+          for i in {1..40}; do
+            backend="$(curl --connect-timeout 2 -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/drivers/onboarding/apply/ || true)"
+            frontend="$(curl --connect-timeout 2 -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/en/auth?captain=true || true)"
+            if [[ "$backend" == 405 && "$frontend" == 200 ]]; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [[ "$ready" != 1 ]]; then
+            echo "Isolated staging services did not become healthy."
+            tail -n 65 /tmp/act-staging-django.log
+            tail -n 65 /tmp/act-staging-next.log
+            exit 1
+          fi
+          echo "ISOLATED SERVERS READY"
+
+      - name: Exact paired mobile-browser → email → TfL admin approval
+        run: python act_website-main/tests/staging_tfl_operator_journey.py
+
+      - name: Clean ephemeral processes and private evidence
+        if: always()
+        run: |
+          if test -f /tmp/act-staging-django.pid; then kill "$(cat /tmp/act-staging-django.pid)" 2>/dev/null || true; fi
+          if test -f /tmp/act-staging-next.pid; then kill "$(cat /tmp/act-staging-next.pid)" 2>/dev/null || true; fi
+          if test -n "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT" && test -d "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"; then
+            rm -rf -- "$ACT_DRIVER_PRIVATE_UPLOAD_ROOT"
+          fi
+          echo "Isolated acceptance cleanup completed; runner is disposable."
