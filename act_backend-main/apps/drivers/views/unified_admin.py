@@ -122,7 +122,9 @@ class AdminUnifiedApplicationDetailView(APIView):
 
     def get(self, request, request_id):
         profile = get_object_or_404(
-            UnifiedDriverApplication.objects.select_related("onboarding_request__user").prefetch_related("documents"),
+            UnifiedDriverApplication.objects.select_related("onboarding_request__user").prefetch_related(
+                "documents", "operator_vehicle_periods__evidence",
+            ),
             onboarding_request_id=request_id,
         )
         onboarding = profile.onboarding_request
@@ -165,7 +167,35 @@ class AdminUnifiedApplicationDetailView(APIView):
                 "driver_ceased_available_on": profile.driver_ceased_available_on,
                 "vehicle_available_from": profile.vehicle_available_from,
                 "vehicle_ceased_available_on": profile.vehicle_ceased_available_on,
+                "is_currently_available": (
+                    bool(profile.driver_available_from)
+                    and profile.driver_ceased_available_on is None
+                    and user.is_admin_verified and user.is_profile_completed
+                ),
             },
+            "vehicle_history": [
+                {
+                    "id": period.pk,
+                    "registration": period.vehicle_registration,
+                    "make": period.vehicle_make,
+                    "model": period.vehicle_model,
+                    "colour": period.vehicle_colour,
+                    "class_code": period.vehicle_class_code,
+                    "keeper_name": period.registered_keeper_name,
+                    "keeper_address": period.registered_keeper_address,
+                    "available_from": period.available_from,
+                    "ceased_at": period.ceased_at,
+                    "close_reason": period.close_reason,
+                    "evidence": [
+                        {
+                            "id": doc.pk, "kind": doc.kind, "name": doc.original_name,
+                            "download_endpoint": f"/api/drivers/admin/unified-vehicle-evidence/{doc.pk}/",
+                        }
+                        for doc in period.evidence.all()
+                    ],
+                }
+                for period in profile.operator_vehicle_periods.all()
+            ],
             "documents": [
                 {
                     "id": doc.pk, "kind": doc.kind, "name": doc.original_name,
