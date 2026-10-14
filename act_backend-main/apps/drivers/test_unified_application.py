@@ -1,4 +1,5 @@
 """Bounded tests of a one-form driver application without real drivers/emails."""
+import base64
 from datetime import date, timedelta
 from io import BytesIO
 from tempfile import TemporaryDirectory
@@ -20,6 +21,7 @@ from apps.vehicle.models import VehicleType
 
 User = get_user_model()
 TOKEN = "A" * 48
+TEST_OPERATOR_KEY = base64.urlsafe_b64encode(bytes([7]) * 32).decode("ascii")
 
 
 def pdf(name):
@@ -43,6 +45,7 @@ class UnifiedOnboardingTests(TestCase):
         self.addCleanup(public.cleanup)
         self.private_override = override_settings(
             ACT_DRIVER_PRIVATE_UPLOAD_ROOT=private.name,
+            ACT_NI_ENCRYPTION_KEY=TEST_OPERATOR_KEY,
             MEDIA_ROOT=public.name,
             DEFAULT_FROM_EMAIL="info@example.invalid",
         )
@@ -102,6 +105,14 @@ class UnifiedOnboardingTests(TestCase):
                 "v5c": pdf("v5c.pdf"),
             })
         return values
+
+    def operator_approval_fields(self):
+        return {
+            "national_insurance_number": "AB 12 34 56 C",
+            "registered_keeper_name": "Synthetic Registered Keeper",
+            "registered_keeper_address": "12 Example Road, London",
+            "operator_records_checked": True,
+        }
 
     def apply(self, with_vehicle=False, values=None):
         raw = values or self.payload(with_vehicle)
@@ -450,10 +461,57 @@ class UnifiedOnboardingTests(TestCase):
                     "documents_reviewed": True,
                     "dbs_cleared": True,
                     "photo_disclosure_consent": True,
+                    **self.operator_approval_fields(),
                 }, format="json")
         self.assertEqual(decision.status_code, 200, decision.data)
         driver = BaseDriver.objects.get(user__email="newdriver@example.invalid")
         self.assertEqual(NormalDriver.objects.get(driver=driver).vehicle.vehicle_type, first_class)
+
+    def test_operator_records_must_be_complete_and_encrypted_before_approval(self):
+        response, _ = self.apply(with_vehicle=True)
+        self.assertEqual(response.status_code, 201)
+        cache.clear()
+        password = "SomeVeryStrongPassword+2026"
+        activated = self.client.post(self.setup_url, {
+            "token": TOKEN, "password": password,
+            "confirm_password": password,
+        }, format="json")
+        self.assertEqual(activated.status_code, 200)
+        self.client.force_authenticate(user=self.admin)
+        endpoint = f"/api/drivers/admin/unified-applications/{response.data['application_id']}/decision/"
+        minimal = {
+            "action": "approve", "documents_reviewed": True,
+            "dbs_cleared": True, "photo_disclosure_consent": True,
+        }
+        missing = self.client.post(endpoint, minimal, format="json")
+        self.assertEqual(missing.status_code, 400)
+        self.assertFalse(BaseDriver.objects.filter(user__email="newdriver@example.invalid").exists())
+        with override_settings(ACT_NI_ENCRYPTION_KEY=""):
+            unconfigured = self.client.post(endpoint, {
+                **minimal, **self.operator_approval_fields(),
+            }, format="json")
+        self.assertEqual(unconfigured.status_code, 503)
+        self.assertFalse(BaseDriver.objects.filter(user__email="newdriver@example.invalid").exists())
+        with patch("apps.drivers.views.unified_admin.send_mail", return_value=1):
+            with self.captureOnCommitCallbacks(execute=True):
+                approved = self.client.post(endpoint, {
+                    **minimal, **self.operator_approval_fields(),
+                }, format="json")
+        self.assertEqual(approved.status_code, 200, approved.data)
+        profile = UnifiedDriverApplication.objects.get(
+            onboarding_request_id=response.data["application_id"]
+        )
+        self.assertTrue(profile.national_insurance_ciphertext.startswith("fernet:v1:"))
+        self.assertNotIn("AB123456C", profile.national_insurance_ciphertext)
+        self.assertEqual(profile.registered_keeper_name, "Synthetic Registered Keeper")
+        self.assertEqual(profile.driver_available_from, date.today())
+        self.assertEqual(profile.vehicle_available_from, date.today())
+        details = self.client.get(
+            f"/api/drivers/admin/unified-applications/{response.data['application_id']}/"
+        )
+        self.assertEqual(details.status_code, 200)
+        self.assertTrue(details.data["operator_record"]["national_insurance_recorded"])
+        self.assertNotIn("AB123456C", str(details.data))
 
     def test_full_evidence_approval_creates_only_one_eligible_driver(self):
         response, _ = self.apply(with_vehicle=True)
@@ -473,6 +531,7 @@ class UnifiedOnboardingTests(TestCase):
                 decision = self.client.post(endpoint, {
                     "action": "approve", "documents_reviewed": True,
                     "dbs_cleared": True, "photo_disclosure_consent": True,
+                    **self.operator_approval_fields(),
                 }, format="json")
         self.assertEqual(decision.status_code, 200, decision.data)
         user = User.objects.get(email="newdriver@example.invalid")

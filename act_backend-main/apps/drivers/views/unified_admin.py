@@ -3,17 +3,19 @@
 The existing legacy step1/step2 admin review routes remain intact.
 """
 import logging
+import re
 import uuid
 from datetime import date
 from pathlib import Path
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,6 +25,7 @@ from apps.drivers.models import (
     DriverApplicationDocument,
 )
 from apps.vehicle.models import Vehicle, VehicleType
+from apps.drivers.operator_records import encrypt_operator_ni
 
 logger = logging.getLogger(__name__)
 IDENTITY_DOCS = {"pco_front", "pco_back", "dvla_front", "dvla_back", "driver_photo"}
@@ -34,6 +37,26 @@ PROFILE_CORRECTION_FIELDS = {
     "vehicle_colour", "vehicle_make", "vehicle_model", "vehicle_year",
 }
 CORRECTION_KINDS = {key for key, _ in DriverApplicationDocument.KINDS} | PROFILE_CORRECTION_FIELDS
+
+
+class OperatorApprovalSerializer(serializers.Serializer):
+    """Sensitive compliance records are collected only by authorized ACT admin."""
+
+    national_insurance_number = serializers.CharField(max_length=18, trim_whitespace=True)
+    registered_keeper_name = serializers.CharField(max_length=150, trim_whitespace=True)
+    registered_keeper_address = serializers.CharField(max_length=500, trim_whitespace=True)
+    operator_records_checked = serializers.BooleanField()
+
+    def validate_national_insurance_number(self, value):
+        normalized = re.sub(r"[\s-]", "", value.upper())
+        if not re.fullmatch(r"[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]", normalized):
+            raise serializers.ValidationError("Enter a valid National Insurance number format.")
+        return normalized
+
+    def validate_operator_records_checked(self, value):
+        if value is not True:
+            raise serializers.ValidationError("Confirm that the operator record was inspected.")
+        return value
 
 
 def _notify_changes(profile_id):
@@ -132,6 +155,16 @@ class AdminUnifiedApplicationDetailView(APIView):
                 "insurance_expiry": profile.insurance_expiry,
                 "accepts_pets": profile.accepts_pets,
                 "explanation": profile.ownership_explanation,
+            },
+            "operator_record": {
+                # Admin-only display; NI is never returned to the browser.
+                "national_insurance_recorded": bool(profile.national_insurance_ciphertext),
+                "registered_keeper_name": profile.registered_keeper_name,
+                "registered_keeper_address": profile.registered_keeper_address,
+                "driver_available_from": profile.driver_available_from,
+                "driver_ceased_available_on": profile.driver_ceased_available_on,
+                "vehicle_available_from": profile.vehicle_available_from,
+                "vehicle_ceased_available_on": profile.vehicle_ceased_available_on,
             },
             "documents": [
                 {
@@ -241,6 +274,17 @@ class AdminUnifiedApplicationDecisionView(APIView):
                 if not vehicle_type:
                     return Response({"vehicle_class_code": "Vehicle class is no longer available."}, status=400)
 
+                operator_fields = OperatorApprovalSerializer(data=request.data)
+                if not operator_fields.is_valid():
+                    return Response(operator_fields.errors, status=400)
+                try:
+                    encrypted_ni = encrypt_operator_ni(
+                        operator_fields.validated_data["national_insurance_number"]
+                    )
+                except ImproperlyConfigured:
+                    # Fail closed when ACT's private encryption key is unavailable.
+                    return Response({"detail": "Secure operator record storage is not configured."}, status=503)
+
                 # The original regulated documents remain ONLY in private storage.
                 # Public BaseDriver/Vehicle legacy document fields are left empty;
                 # admin reviews real evidence through the private download route.
@@ -276,8 +320,22 @@ class AdminUnifiedApplicationDecisionView(APIView):
                 onboarding.reviewed_by = request.user
                 onboarding.reviewed_at = now
                 onboarding.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+                # Approval begins actual driver/vehicle availability to ACT;
+                # cessation and replacement dates need separate lifecycle hooks.
+                operator_data = operator_fields.validated_data
+                profile.national_insurance_ciphertext = encrypted_ni
+                profile.registered_keeper_name = operator_data["registered_keeper_name"]
+                profile.registered_keeper_address = operator_data["registered_keeper_address"]
+                profile.driver_available_from = timezone.localdate()
+                profile.vehicle_available_from = timezone.localdate()
+                profile.operator_record_verified_at = now
                 profile.reviewed_at = now
-                profile.save(update_fields=["reviewed_at"])
+                profile.save(update_fields=[
+                    "national_insurance_ciphertext", "registered_keeper_name",
+                    "registered_keeper_address", "driver_available_from",
+                    "vehicle_available_from", "operator_record_verified_at",
+                    "reviewed_at",
+                ])
                 transaction.on_commit(
                     lambda pk=profile.pk: _notify_review(pk, True), robust=True,
                 )
