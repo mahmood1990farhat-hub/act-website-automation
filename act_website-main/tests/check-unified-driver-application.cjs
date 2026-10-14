@@ -65,4 +65,11 @@ check(review.includes("request_changes") &&
   review.includes("files_to_modify: action ===") &&
   review.includes("requestedCorrections"),
   "ACT admin must be able to request targeted corrections rather than reject/restart");
+for (const field of ["national_insurance_number", "registered_keeper_name",
+  "registered_keeper_address", "operator_records_checked"]) {
+  check(review.includes(field + ': action === "approve" ?'),
+    "TfL operator record is required in restricted final-approval payload: " + field);
+}
+check(review.includes("setOperatorRecordsChecked") && review.includes("keeperAddress"),
+  "ACT admin must verify NI and keeper details without changing the public applicant form");
 console.log("ACT unified driver application UI and approval wiring checks passed.");
