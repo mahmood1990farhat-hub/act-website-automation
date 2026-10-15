@@ -15,6 +15,8 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -116,6 +118,7 @@ def _notify_review(profile_id, approved):
         logger.warning("Unified driver final-review notification failed; admin follow-up is needed.")
 
 
+@method_decorator(never_cache, name="dispatch")
 class AdminUnifiedApplicationDetailView(APIView):
     permission_classes = [IsAdminUser]
     http_method_names = ["get"]
@@ -170,6 +173,7 @@ class AdminUnifiedApplicationDetailView(APIView):
                 "is_currently_available": (
                     bool(profile.driver_available_from)
                     and profile.driver_ceased_available_on is None
+                    and user.is_active
                     and user.is_admin_verified and user.is_profile_completed
                 ),
             },
