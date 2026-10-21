@@ -34,21 +34,21 @@ async function driver(page, withFiles=true) {
   await personal(page); await next(page);
   await page.getByLabel('TfL PHV driver badge number *',{exact:true}).fill('SYNTHETIC-NOT-A-LICENCE');
   await page.getByLabel('TfL badge expiry *',{exact:true}).fill('2099-01-01');
-  await page.getByLabel('Years of driving experience *',{exact:true}).selectOption('1_to_3');
+  await page.getByRole('combobox',{name:'Years of driving experience *',exact:true}).selectOption('1_to_3');
   if(withFiles) for (const name of identity) await input(page,name).setInputFiles(file(`${name}.png`));
 }
 async function vehicle(page, ownership='phv_owner', withFiles=true) {
   await next(page);
-  await page.getByLabel('Vehicle ownership *',{exact:true}).selectOption(ownership);
+  await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).selectOption(ownership);
   if(ownership==='do_not_have_a_phv') return;
-  await page.getByLabel('Vehicle make *',{exact:true}).selectOption('Toyota');
-  await page.getByLabel('Vehicle model *',{exact:true}).selectOption('Prius');
-  await page.getByLabel('Vehicle year (2015–present) *',{exact:true}).selectOption('2018');
-  await page.getByLabel('ACT vehicle class *',{exact:true}).selectOption('comfort');
+  await page.getByRole('combobox',{name:'Vehicle make *',exact:true}).selectOption('Toyota');
+  await page.getByRole('combobox',{name:'Vehicle model *',exact:true}).selectOption('Prius');
+  await page.getByRole('combobox',{name:'Vehicle year (2015–present) *',exact:true}).selectOption('2018');
+  await page.getByRole('combobox',{name:'ACT vehicle class *',exact:true}).selectOption('comfort');
   for (const [label,value] of [['Vehicle registration (VRM)','TEST-ONLY'],['Vehicle colour','Black'],['MOT expiry','2099-01-01'],['Insurance expiry','2099-01-01']]) {
     await page.getByLabel(`${label} *`,{exact:true}).fill(value);
   }
-  await page.getByLabel('Accepts pets? *',{exact:true}).selectOption('true');
+  await page.getByRole('combobox',{name:'Accepts pets? *',exact:true}).selectOption('true');
   if(withFiles) for(const name of ['mot','insurance','vehicle_phv',ownership==='phv_owner'?'v5c':'hire_agreement']) await input(page,name).setInputFiles(file(`${name}.png`));
 }
 async function consents(page) {
@@ -65,7 +65,7 @@ const tests = [
     await message(page,'Select your TfL PHV badge — front.');
     for(const name of identity) await input(page,name).setInputFiles(file(`${name}.png`));
     assert.equal(await page.getByRole('alert').count(),0);
-    await next(page); await page.getByLabel('Vehicle ownership *',{exact:true}).waitFor();
+    await next(page); await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).waitFor();
     assert.equal(await page.evaluate(()=>window.__submissions.length),0);
   }],
   ['upload opens picker; selection is single; cancel, replace, remove and same-file reselect', async page => {
@@ -91,14 +91,14 @@ const tests = [
       [file('huge.png','image/png',Buffer.alloc(10*1024*1024+1)), 'no larger than 10 MB'],
       [file('wrong.txt','text/plain',Buffer.from('synthetic')),'Choose a PDF, JPG or PNG document.']]) {
       await input(page,'pco_front').setInputFiles(f); await message(page,text); await next(page);
-      assert.equal(await page.getByLabel('Vehicle ownership *',{exact:true}).count(),0);
+      assert.equal(await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).count(),0);
     }
     await input(page,'pco_front').setInputFiles(file('pco_front.png'));
     await input(page,'driver_photo').setInputFiles(file('photo.pdf','application/pdf',Buffer.from('%PDF-synthetic')));
     await message(page,'Choose a JPG or PNG photograph.'); await next(page);
-    assert.equal(await page.getByLabel('Vehicle ownership *',{exact:true}).count(),0);
+    assert.equal(await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).count(),0);
     await input(page,'driver_photo').setInputFiles(file('driver_photo.png')); await next(page);
-    await page.getByLabel('Vehicle ownership *',{exact:true}).waitFor();
+    await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).waitFor();
   }],
   ['Back/Continue retains exact files and final multipart uses the same state', async page => {
     await driver(page); await vehicle(page);
@@ -116,17 +116,17 @@ const tests = [
   }],
   ['make/model dependency, year range and not-listed fallback', async page => {
     await driver(page); await vehicle(page);
-    await page.getByLabel('Vehicle make *',{exact:true}).selectOption('BMW');
-    assert.equal(await page.getByLabel('Vehicle model *',{exact:true}).inputValue(),'');
-    assert.equal(await page.getByLabel('Vehicle model *',{exact:true}).getByRole('option',{name:'Prius',exact:true}).count(),0);
-    const years=await page.getByLabel('Vehicle year (2015–present) *',{exact:true}).locator('option').evaluateAll(xs=>xs.map(x=>x.value).filter(Boolean));
+    await page.getByRole('combobox',{name:'Vehicle make *',exact:true}).selectOption('BMW');
+    assert.equal(await page.getByRole('combobox',{name:'Vehicle model *',exact:true}).inputValue(),'');
+    assert.equal(await page.getByRole('combobox',{name:'Vehicle model *',exact:true}).getByRole('option',{name:'Prius',exact:true}).count(),0);
+    const years=await page.getByRole('combobox',{name:'Vehicle year (2015–present) *',exact:true}).locator('option').evaluateAll(xs=>xs.map(x=>x.value).filter(Boolean));
     const year=await page.evaluate(()=>new Date().getFullYear());
     assert.equal(years[0],String(year)); assert.equal(years.at(-1),'2015'); assert.equal(years.length,year-2014);
-    await page.getByLabel('Vehicle model *',{exact:true}).selectOption('__other__');
+    await page.getByRole('combobox',{name:'Vehicle model *',exact:true}).selectOption('__other__');
     await page.getByLabel('Enter vehicle model *',{exact:true}).fill('Unlisted model');
     await back(page); await next(page);
     assert.equal(await page.getByLabel('Enter vehicle model *',{exact:true}).inputValue(),'Unlisted model');
-    await page.getByLabel('Vehicle make *',{exact:true}).selectOption('__other__');
+    await page.getByRole('combobox',{name:'Vehicle make *',exact:true}).selectOption('__other__');
     await page.getByLabel('Enter vehicle make *',{exact:true}).fill('Unlisted make');
     await page.getByLabel('Enter vehicle model *',{exact:true}).fill('Unlisted model');
     await next(page); await consents(page); const rows=await submitted(page);
@@ -135,7 +135,7 @@ const tests = [
   }],
   ['rental path uses hire agreement, not hidden owner evidence', async page => {
     await driver(page); await vehicle(page);
-    await page.getByLabel('Vehicle ownership *',{exact:true}).selectOption('hiring_a_phv');
+    await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).selectOption('hiring_a_phv');
     assert.equal(await card(page,'v5c').count(),0); await next(page);
     await message(page,'Select your rental / hire / lease agreement.');
     await input(page,'hire_agreement').setInputFiles(file('hire-agreement.png'));
@@ -147,7 +147,7 @@ const tests = [
   ['no-vehicle application excludes retained vehicle details and files', async page => {
     await driver(page); await vehicle(page);
     await input(page,'v5c').setInputFiles(file('bad.txt','text/plain',Buffer.from('invalid')));
-    await page.getByLabel('Vehicle ownership *',{exact:true}).selectOption('do_not_have_a_phv');
+    await page.getByRole('combobox',{name:'Vehicle ownership *',exact:true}).selectOption('do_not_have_a_phv');
     await next(page); await consents(page); const rows=await submitted(page);
     for(const key of ['vehicle_make','vehicle_model','vehicle_year',...carDocs]) assert.equal(key in rows[0],false);
     assert.equal(rows[0].vehicle_ownership,'do_not_have_a_phv');
@@ -171,7 +171,7 @@ const tests = [
     // Browser-generated form submission without the final submit button is ignored at review.
     await page.getByLabel('TfL PHV driver badge number *',{exact:true}).fill('SYNTHETIC');
     await page.getByLabel('TfL badge expiry *',{exact:true}).fill('2099-01-01');
-    await page.getByLabel('Years of driving experience *',{exact:true}).selectOption('1_to_3');
+    await page.getByRole('combobox',{name:'Years of driving experience *',exact:true}).selectOption('1_to_3');
     for(const name of identity) await input(page,name).setInputFiles(file(`${name}.png`));
     await vehicle(page,'do_not_have_a_phv'); await next(page); await consents(page);
     await page.locator('form').evaluate(form=>form.requestSubmit());
