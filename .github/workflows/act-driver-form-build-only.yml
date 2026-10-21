@@ -1,0 +1,103 @@
+name: ACT driver form production build only
+"on":
+  push:
+    branches: [audit/act-driver-form-build-20261021]
+permissions:
+  contents: read
+concurrency:
+  group: act-driver-form-build-only
+  cancel-in-progress: false
+jobs:
+  isolated-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: 98fc47172c2054e2a059506a6cef717e5b8f3dcf
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out the already browser-tested frontend revision
+        uses: actions/checkout@v4
+        with:
+          ref: 98fc47172c2054e2a059506a6cef717e5b8f3dcf
+          persist-credentials: false
+      - name: Guard exact source and prepare build context
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/audit/act-driver-form-build-20261021
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain)"
+          mkdir -p build-evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('act_website-main')
+          unexpected = [p.name for p in root.glob('.env*') if p.is_file() and p.name not in ('.env.example', '.env.sample')]
+          if unexpected:
+              raise SystemExit('STOP: Environment files must not enter isolated build context')
+          for name in ('package.json', 'package-lock.json', 'next.config.ts'):
+              if not (root / name).is_file():
+                  raise SystemExit('STOP: Required frontend source missing')
+          PY
+          git rev-parse HEAD:act_website-main > build-evidence/frontend-tree.txt
+          sha256sum act_website-main/package-lock.json > build-evidence/lockfile-sha256.txt
+          cat > "$RUNNER_TEMP/ACT-build-only.Dockerfile" <<'DOCKER'
+          FROM node:24.13.0-bookworm-slim
+          WORKDIR /app
+          ENV NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=synthetic-not-a-real-key NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:9
+          COPY package.json package-lock.json ./
+          RUN npm ci --ignore-scripts --no-audit --no-fund
+          COPY . .
+          RUN --network=none npm run build
+          DOCKER
+      - name: Compile full frontend with external networking disabled
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker build --progress plain \
+            -f "$RUNNER_TEMP/ACT-build-only.Dockerfile" \
+            -t act-driver-form-build-only act_website-main \
+            2>&1 | tee build-evidence/next-production-build.log
+      - name: Verify compiled routes and record exact evidence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker run --rm -i --network none --cap-drop ALL \
+            --security-opt no-new-privileges act-driver-form-build-only node - \
+            > build-evidence/build-receipt.json <<'JS'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const id = fs.readFileSync('.next/BUILD_ID', 'utf8').trim();
+          if (!id) throw new Error('Missing Next production build ID');
+          const routes = Object.keys(JSON.parse(fs.readFileSync('.next/server/app-paths-manifest.json', 'utf8')));
+          const required = ['/auth/page', '/driver-password-setup/page', '/driver-application-status/page'];
+          const matched = Object.fromEntries(required.map(suffix => [suffix, routes.filter(route => route.endsWith(suffix))]));
+          if (Object.values(matched).some(found => found.length === 0)) throw new Error('Required compiled driver route absent');
+          const sha256 = path => crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+          console.log(JSON.stringify({
+            source_sha: '98fc47172c2054e2a059506a6cef717e5b8f3dcf',
+            status: 'PRODUCTION_BUILD_PASSED',
+            node: process.version,
+            next: require('next/package.json').version,
+            react: require('react/package.json').version,
+            build_id: id,
+            package_lock_sha256: sha256('package-lock.json'),
+            required_compiled_routes: matched,
+            build_network: 'none',
+            build_configuration: 'synthetic Maps key; loopback-only unavailable API URL',
+            deployable_artifact: false,
+            repeated_ui_tests: false,
+            deployed: false
+          }, null, 2));
+          JS
+          docker image inspect act-driver-form-build-only --format '{{.Id}}' > build-evidence/build-image-id.txt
+          docker image inspect node:24.13.0-bookworm-slim --format '{{json .RepoDigests}}' > build-evidence/node-image-digests.json
+          cat build-evidence/build-receipt.json
+          echo 'FULL FRONTEND PRODUCTION BUILD PASSED - NO LIVE SITE CHANGES'
+      - name: Retain build evidence only, never publish a site or application bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: act-driver-form-build-98fc471-${{ github.run_id }}
+          path: build-evidence/
+          if-no-files-found: error
+          retention-days: 14
