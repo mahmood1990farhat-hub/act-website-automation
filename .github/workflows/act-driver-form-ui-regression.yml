@@ -41,6 +41,7 @@ jobs:
         working-directory: act_website-main
         run: |
           node tests/check-unified-driver-application.cjs
+          npx next typegen
           npx tsc --noEmit --incremental false
       - name: Install isolated test tools (not application dependencies)
         run: |
@@ -58,4 +59,5 @@ jobs:
             act_website-main/.driver-form-ui-test/*.png
             act_website-main/.driver-form-ui-test/RESULT.txt
           if-no-files-found: ignore
+          include-hidden-files: true
           retention-days: 14
