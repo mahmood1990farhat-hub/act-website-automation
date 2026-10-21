@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Locale } from "../../../../../i18n.config";
+import { useEffect, useRef, useState } from "react";
+import type { Locale } from "../../../../../i18n.config";
+import DriverDocumentUpload, { documentError } from "./DriverDocumentUpload";
+import DriverVehicleFields, { VEHICLE_OWNERSHIP_LABELS } from "./DriverVehicleFields";
 
 type Draft = {
   first_name: string; last_name: string; date_of_birth: string;
@@ -48,12 +50,22 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
   const [form, setForm] = useState<Draft>(initial);
   const [files, setFiles] = useState<Partial<Record<DocKind, File>>>({});
   const [options, setOptions] = useState<{ description: string; place_id: string }[]>([]);
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [validationStep, setValidationStep] = useState<number | null>(null);
+  const submitting = useRef(false);
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState<{ application_id: number; status: string } | null>(null);
   const hasVehicle = form.vehicle_ownership !== "do_not_have_a_phv";
-  const put = (name: keyof Draft, value: string | boolean) =>
+  const put = (name: keyof Draft, value: string | boolean) => {
+    setServerError("");
     setForm(previous => ({ ...previous, [name]: value }));
+  };
+  const includesDocument = (name: DocKind) =>
+    identityDocs.some(doc => doc.name === name) || name === "dbs" || (hasVehicle && (
+      vehicleDocs.some(doc => doc.name === name) ||
+      (name === "v5c" && ["phv_owner", "other"].includes(form.vehicle_ownership)) ||
+      (name === "hire_agreement" && ["hiring_a_phv", "other"].includes(form.vehicle_ownership))
+    ));
 
   // Reuse ACT's existing Google Places proxy; the free-text input remains
   // editable when Places is offline, so applicants are not locked out.
@@ -99,7 +111,7 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
       if (!form.pco_badge_number.trim() || !form.pco_badge_expiry ||
           form.pco_badge_expiry <= new Date().toISOString().slice(0, 10) ||
           !form.years_experience) return "Provide your real TfL badge number, valid expiry and experience.";
-      for (const { name } of identityDocs) if (!files[name]) return "Upload the TfL/DVLA front and back and your photograph.";
+      for (const { name, label } of identityDocs) if (!files[name]) return "Select your " + label + ".";
     }
     if (which === 3) {
       if (!form.vehicle_ownership) return "Select your vehicle ownership status.";
@@ -109,18 +121,18 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
           "vehicle_registration", "vehicle_colour", "mot_expiry",
           "insurance_expiry", "accepts_pets",
         ];
-        if (required.some(name => !form[name])) return "Complete all vehicle, expiry, class and pet fields.";
-        if (Number(form.vehicle_year) < 2015 ||
+        if (required.some(name => !String(form[name]).trim())) return "Complete all vehicle, expiry, class and pet fields.";
+        if (!Number.isInteger(Number(form.vehicle_year)) || Number(form.vehicle_year) < 2015 ||
             Number(form.vehicle_year) > new Date().getFullYear())
           return "Enter a valid vehicle year (2015–present).";
         if (form.mot_expiry <= new Date().toISOString().slice(0, 10) ||
             form.insurance_expiry <= new Date().toISOString().slice(0, 10))
           return "MOT and insurance expiry dates must be in the future.";
-        for (const { name } of vehicleDocs) if (!files[name]) return "Upload MOT, insurance and PHV vehicle documents.";
+        for (const { name, label } of vehicleDocs) if (!files[name]) return "Select your " + label + ".";
         if (form.vehicle_ownership === "phv_owner" && !files.v5c)
           return "Vehicle owners must upload the V5C logbook.";
         if (form.vehicle_ownership === "hiring_a_phv" && !files.hire_agreement)
-          return "Upload proof that you may legally use the hired vehicle.";
+          return "Select your rental / hire / lease agreement.";
         if (form.vehicle_ownership === "other" &&
             (!form.ownership_explanation.trim() || (!files.v5c && !files.hire_agreement)))
           return "Explain the ownership arrangement and upload proof of lawful use.";
@@ -130,27 +142,42 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
         !form.passenger_photo_disclosure_consent)) {
       return "You must agree to the ACT policies and DBS verification requirement.";
     }
-    for (const [kind, file] of Object.entries(files)) {
-      if (file && (file.size === 0 || file.size > 10 * 1024 * 1024 ||
-          !["application/pdf", "image/png", "image/jpeg"].includes(file.type))) {
-        return "Upload valid PDF, PNG or JPEG evidence up to 10 MB per file (" + kind + ").";
+    // Validate only the documents belonging to this step and ownership path.
+    // Stored File objects, not a remounted native input, are authoritative.
+    const documents = which === 2 ? [...identityDocs, { name: "dbs" as DocKind, label: "DBS certificate" }]
+      : which === 3 ? [...vehicleDocs, { name: "v5c" as DocKind, label: "V5C logbook" },
+        { name: "hire_agreement" as DocKind, label: "Rental / hire / lease agreement" }] : [];
+    for (const { name, label } of documents) {
+      const file = files[name];
+      if (file && includesDocument(name)) {
+        const issue = documentError(file, name === "driver_photo");
+        if (issue) return label + ": " + issue;
       }
     }
     return "";
   };
+  // Recompute a shown client error when its fields/files change; never keep a
+  // stale missing-document or consent warning after the relevant fix.
+  const error = serverError || (validationStep !== null ? checkStep(validationStep) : "");
   const next = () => {
-    const issue = checkStep(step);
-    if (issue) { setError(issue); return; }
-    setError(""); setStep(current => Math.min(4, current + 1));
+    setServerError("");
+    setValidationStep(step);
+    if (checkStep(step)) return;
+    setValidationStep(null); setStep(current => Math.min(4, current + 1));
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (pending) return;
+    if (submitting.current) return;
+    if (step !== 4) { next(); return; }
+    // Only deliberate activation of the final button can POST the application.
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    if (submitter?.getAttribute("data-act-submit") !== "true") return;
     for (let section = 1; section <= 4; section++) {
       const issue = checkStep(section);
-      if (issue) { setStep(section); setError(issue); return; }
+      if (issue) { setStep(section); setServerError(""); setValidationStep(section); return; }
     }
-    setPending(true); setError("");
+    submitting.current = true;
+    setPending(true); setServerError(""); setValidationStep(null);
     try {
       const body = new FormData();
       for (const [key, value] of Object.entries(form)) {
@@ -162,7 +189,7 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
         if (value !== "") body.append(key, String(value));
       }
       for (const [key, file] of Object.entries(files)) {
-        if (file && (hasVehicle || identityDocs.some(item => item.name === key) || key === "dbs"))
+        if (file && includesDocument(key as DocKind))
           body.append(key, file);
       }
       const response = await fetch(
@@ -177,8 +204,9 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
       }
       setSuccess({ application_id: payload.application_id, status: payload.status });
     } catch (caught: any) {
-      setError(caught?.message || "Application could not be submitted.");
+      setServerError(caught?.message || "Application could not be submitted.");
     } finally {
+      submitting.current = false;
       setPending(false);
     }
   };
@@ -201,17 +229,16 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
     </label>
   );
   const fileInput = (name: DocKind, label: string, required = true) => (
-    <label className={labelClass} key={name}>
-      {label} {required ? "*" : "(optional)"}
-      <input type="file" className="mt-2 block w-full text-sm text-white"
-        accept={name === "driver_photo" ? "image/jpeg,image/png" : ".pdf,image/jpeg,image/png"}
-        onChange={event => setFiles(old => {
-          const updated = { ...old }; const file = event.target.files?.[0];
+    <DriverDocumentUpload key={name} name={name} label={label} required={required}
+      file={files[name]} imageOnly={name === "driver_photo"} disabled={pending}
+      onChange={file => {
+        setServerError("");
+        setFiles(old => {
+          const updated = { ...old };
           if (file) updated[name] = file; else delete updated[name];
           return updated;
-        })} />
-      {files[name] && <span className="block text-xs text-yellow-400 mt-1">{files[name]!.name}</span>}
-    </label>
+        });
+      }} />
   );
 
   if (success) return (
@@ -224,7 +251,9 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
   );
 
   return (
-    <form onSubmit={submit} className="mx-auto w-full max-w-3xl space-y-5 rounded-2xl border border-gray-700 bg-gray-900 p-4 text-white sm:p-8">
+    <form onSubmit={submit} noValidate aria-label="ACT driver application"
+      style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}
+      className="mx-auto w-full min-w-0 max-w-3xl space-y-5 rounded-2xl border border-gray-700 bg-gray-900 p-4 text-white sm:p-8">
       <h1 className="text-2xl font-bold text-yellow-400">Apply to drive with ACT</h1>
       <p className="text-sm text-gray-200">One application. Secure documents. ACT verifies every driver before allocating work.</p>
       <ol className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
@@ -265,22 +294,27 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
         ])}
         <div className="grid gap-4 sm:grid-cols-2">
           {identityDocs.map(d => fileInput(d.name, d.label))}
-          {fileInput("dbs", "DBS certificate (if available)", false)}
+          {fileInput("dbs", "DBS certificate", false)}
+        </div>
+        <div className="rounded-lg border border-yellow-400/40 bg-gray-800 p-4 text-sm leading-6 text-gray-200">
+          <strong className="block text-yellow-300">DBS evidence is needed before final approval</strong>
+          You can submit this application without a DBS certificate. If ACT accepts your application in principle
+          and you have not provided it, ACT will request it through the secure application portal.
+          You cannot receive trips until ACT has completed the required DBS, driver and vehicle checks.
         </div>
       </div>}
       {step === 3 && <div className="space-y-4">
         {input("vehicle_ownership", "Vehicle ownership", "text", [
           { value: "phv_owner", label: "I own a licensed PHV" },
-          { value: "hiring_a_phv", label: "I hire a licensed PHV" },
+          { value: "hiring_a_phv", label: VEHICLE_OWNERSHIP_LABELS.hiring_a_phv },
           { value: "do_not_have_a_phv", label: "I do not have a vehicle yet" },
           { value: "other", label: "Other lawful arrangement" },
         ])}
         {!hasVehicle ? <p className="rounded-lg bg-yellow-500/15 p-4 text-yellow-100">
           You can apply without a vehicle. You cannot receive bookings until ACT has verified a suitable licensed vehicle and documents.
         </p> : <div className="grid gap-4 sm:grid-cols-2">
-          {input("vehicle_make", "Vehicle make")}
-          {input("vehicle_model", "Vehicle model")}
-          {input("vehicle_year", "Vehicle year (2015–present)", "number")}
+          <DriverVehicleFields value={form} fieldClass={fieldClass} labelClass={labelClass}
+            onChange={patch => { setServerError(""); setForm(previous => ({ ...previous, ...patch })); }} />
           {input("vehicle_class_code", "ACT vehicle class", "text", [
             { value: "comfort", label: "Comfort Class (5 seater)" },
             { value: "comfort_xl", label: "Comfort XL (MPV)" },
@@ -302,48 +336,71 @@ export default function UnifiedDriverApplication({ locale }: { locale: Locale })
             {(form.vehicle_ownership === "phv_owner" || form.vehicle_ownership === "other") &&
               fileInput("v5c", "V5C logbook", form.vehicle_ownership === "phv_owner")}
             {(form.vehicle_ownership === "hiring_a_phv" || form.vehicle_ownership === "other") &&
-              fileInput("hire_agreement", "Vehicle hire/right-to-use agreement", form.vehicle_ownership === "hiring_a_phv")}
+              fileInput("hire_agreement", "Rental / hire / lease agreement", form.vehicle_ownership === "hiring_a_phv")}
           </div>
         </div>}
       </div>}
       {step === 4 && <div className="space-y-4 text-sm">
         <p>Review your application before submitting. A password is not required now.</p>
-        <div className="rounded-lg bg-gray-800 p-4">
+        <div className="space-y-2 break-words rounded-lg bg-gray-800 p-4">
           <p><strong>Applicant:</strong> {form.first_name} {form.last_name}</p>
           <p><strong>Email:</strong> {form.email}</p>
-          <p><strong>Ownership:</strong> {form.vehicle_ownership.replace(/_/g, " ")}</p>
-          {hasVehicle && <p><strong>Vehicle:</strong> {form.vehicle_make} {form.vehicle_model} — {form.vehicle_registration}</p>}
+          <p><strong>Phone:</strong> {form.phone_number}</p>
+          <p><strong>Date of birth:</strong> {form.date_of_birth}</p>
+          <p><strong>Address:</strong> {form.address}, {form.postcode}</p>
+          <p><strong>TfL badge:</strong> {form.pco_badge_number} · Expires {form.pco_badge_expiry}</p>
+          <p><strong>Vehicle arrangement:</strong> {VEHICLE_OWNERSHIP_LABELS[form.vehicle_ownership] || "Not selected"}</p>
+          {hasVehicle && <>
+            <p><strong>Vehicle:</strong> {form.vehicle_make} {form.vehicle_model} — {form.vehicle_registration}</p>
+            <p><strong>Year / colour:</strong> {form.vehicle_year} / {form.vehicle_colour}</p>
+            <p><strong>Expiry dates:</strong> MOT {form.mot_expiry}; insurance {form.insurance_expiry}</p>
+          </>}
+          <p className="pt-2 font-semibold">Selected documents — sent only when you submit:</p>
+          <ul className="list-inside list-disc space-y-1">
+            {[...identityDocs, ...vehicleDocs, { name: "v5c" as DocKind, label: "V5C logbook" },
+              { name: "hire_agreement" as DocKind, label: "Rental / hire / lease agreement" },
+              { name: "dbs" as DocKind, label: "DBS certificate" }]
+              .filter(doc => includesDocument(doc.name) && files[doc.name])
+              .map(doc => <li key={doc.name}>{doc.label}: <span className="break-all">{files[doc.name]!.name}</span></li>)}
+          </ul>
+          <div className="flex flex-wrap gap-2 pt-3">
+            {[1, 2, 3].map(section => <button type="button" key={section}
+              className="min-h-12 rounded-lg border border-gray-500 px-3 py-2 text-yellow-300"
+              onClick={() => { setStep(section); setValidationStep(null); setServerError(""); }}>
+              Edit {steps[section - 1]}
+            </button>)}
+          </div>
         </div>
-        <label className="flex gap-3">
-          <input type="checkbox" checked={form.agrees_policies}
+        <label className="flex min-h-12 items-start gap-3 py-2">
+          <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-yellow-400" checked={form.agrees_policies}
             onChange={event => put("agrees_policies", event.target.checked)} />
-          I confirm the information is genuine and agree to ACT's{" "}
+          <span>I confirm the information is genuine and agree to ACT's{" "}
           <a href={`/documents/${locale}/terms-and-conditions.pdf`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">driver terms</a>
           {" "}and{" "}
-          <a href={`/documents/${locale}/privacy-policy.pdf`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">privacy policy</a>.
+          <a href={`/documents/${locale}/privacy-policy.pdf`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">privacy policy</a>.</span>
         </label>
-        <label className="flex gap-3">
-          <input type="checkbox" checked={form.dbs_consent}
+        <label className="flex min-h-12 items-start gap-3 py-2">
+          <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-yellow-400" checked={form.dbs_consent}
             onChange={event => put("dbs_consent", event.target.checked)} />
           I understand ACT must check my DBS status and all necessary licences before allowing trips.
         </label>
-        <label className="flex gap-3">
-          <input type="checkbox" checked={form.passenger_photo_disclosure_consent}
+        <label className="flex min-h-12 items-start gap-3 py-2">
+          <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-yellow-400" checked={form.passenger_photo_disclosure_consent}
             onChange={event => put("passenger_photo_disclosure_consent", event.target.checked)} />
           I understand my verified first name, PHV driver licence number, photograph and vehicle details will be shared with passengers when I am assigned a journey.
         </label>
         <p className="text-xs text-gray-300">Your original identity documents are stored privately and reviewed only by authorized ACT staff.</p>
       </div>}
       {error && <p role="alert" className="rounded-lg border border-red-500 bg-red-900/30 p-3 text-sm text-red-200">{error}</p>}
-      <div className="flex gap-3 border-t border-gray-700 pt-4">
+      <div className="flex flex-wrap gap-3 border-t border-gray-700 pb-6 pt-4">
         {step > 1 && <button type="button" disabled={pending}
-          className="rounded-lg border border-gray-500 px-5 py-3" onClick={() => { setStep(step - 1); setError(""); }}>
+          className="min-h-12 rounded-lg border border-gray-500 px-5 py-3" onClick={() => { setStep(step - 1); setValidationStep(null); setServerError(""); }}>
           Back
         </button>}
-        {step < 4 ? <button type="button" onClick={next} className="ml-auto rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black">
+        {step < 4 ? <button key="continue" type="button" onClick={next} className="ml-auto min-h-12 rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black">
           Continue
-        </button> : <button type="submit" disabled={pending}
-          className="ml-auto rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black disabled:opacity-50">
+        </button> : <button key="submit" data-act-submit="true" type="submit" disabled={pending}
+          className="ml-auto min-h-12 rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black disabled:opacity-50">
           {pending ? "Submitting securely..." : "Submit application"}
         </button>}
       </div>

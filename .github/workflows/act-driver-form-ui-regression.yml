@@ -1,0 +1,63 @@
+name: ACT driver form UI focused regression
+"on":
+  push:
+    branches: [draft/act-driver-form-ui-20261021]
+permissions:
+  contents: read
+concurrency:
+  group: act-driver-form-ui-isolated
+  cancel-in-progress: false
+jobs:
+  shared-form:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify narrow frontend-only patch
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-driver-form-ui-20261021
+          git diff --name-only HEAD^ HEAD | while read -r file; do
+            case "$file" in
+              act_website-main/src/components/_components/auth/captain/UnifiedDriverApplication.tsx|act_website-main/src/components/_components/auth/captain/DriverDocumentUpload.tsx|act_website-main/src/components/_components/auth/captain/DriverVehicleFields.tsx|act_website-main/tests/driver-form-ui/*|.github/workflows/act-driver-form-ui-regression.yml|docs/ACT_DRIVER_FORM_UI_2026-10-21.md) ;;
+              *) echo "Unexpected file: $file"; exit 1 ;;
+            esac
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: act_website-main/package-lock.json
+      - name: Install existing locked frontend dependencies
+        working-directory: act_website-main
+        run: npm ci --no-audit --no-fund
+      - name: Source guard and TypeScript
+        working-directory: act_website-main
+        run: |
+          node tests/check-unified-driver-application.cjs
+          npx next typegen
+          npx tsc --noEmit --incremental false
+      - name: Install isolated test tools (not application dependencies)
+        run: |
+          npm install --prefix "$RUNNER_TEMP/act-ui-tools" --no-package-lock --no-audit --no-fund esbuild@0.25.11 playwright@1.56.1
+          "$RUNNER_TEMP/act-ui-tools/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Shared desktop and mobile-WebKit form regressions
+        working-directory: act_website-main
+        run: NODE_PATH="$RUNNER_TEMP/act-ui-tools/node_modules" node tests/driver-form-ui/run.cjs
+      - name: Preserve synthetic screenshots and exact run result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: act-driver-form-ui-${{ github.sha }}
+          path: |
+            act_website-main/.driver-form-ui-test/*.png
+            act_website-main/.driver-form-ui-test/RESULT.txt
+          if-no-files-found: ignore
+          include-hidden-files: true
+          retention-days: 14
