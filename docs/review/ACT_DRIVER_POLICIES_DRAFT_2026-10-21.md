@@ -1,6 +1,6 @@
 # ACT driver-application policy review
 
-**REVIEW DRAFT v0.1 | 21 October 2026 | NOT EFFECTIVE OR APPROVED FOR PUBLICATION**
+**REVIEW DRAFT v0.2 | 21 October 2026 | NOT EFFECTIVE OR APPROVED FOR PUBLICATION**
 
 Prepared for Airport & City Transfer (ACT), a trading name of Farhat Trading Solutions Ltd. This pack separates driver-application terms from passenger booking terms. It does not replace a signed driver services agreement, certify legal compliance, or authorise publication, deployment, driver approval or deletion of records.
 
@@ -11,7 +11,16 @@ Prepared for Airport & City Transfer (ACT), a trading name of Farhat Trading Sol
 ### 1. Purpose and contact
 These terms explain how you apply to drive with ACT through its website. They cover application, verification and access to the application portal. Passenger bookings remain subject to ACT's separate passenger terms. Contact ACT about your application at **info@airportandcitytransfer.com** or **+44 20 8153 0303**.
 
-Submitting an application does not guarantee approval, work, a particular number of journeys or earnings. Application terms do not set commission rates, deductions, pay arrangements or employment status. Any terms governing actual driving work must be provided separately, without limiting rights that apply by law.
+Submitting an application does not guarantee approval, work, a particular number of journeys or earnings. Application terms do not set commission rates, deductions or pay arrangements. The intended self-employed basis and applicable tax responsibilities are described in section 1.1. Any terms governing actual driving work must be provided separately, without limiting rights that apply by law.
+
+### 1.1 Self-employed basis and tax responsibilities
+ACT's intended engagement model is exclusively self-employed: drivers apply to provide services as independent contractors, rather than for salaried employment.
+
+Where a driver is self-employed for tax purposes, the driver is responsible for managing their own tax affairs. This includes registering with HMRC for Self Assessment where required; keeping accurate income, expense and supporting records; declaring all taxable earnings; submitting Self Assessment tax returns and any other required returns or digital updates by the applicable deadlines; and paying their own Income Tax and National Insurance contributions due. VAT registration, returns and payments, and Making Tax Digital obligations, are also the driver's responsibility where applicable.
+
+ACT does not undertake to prepare or submit a driver's personal tax returns or pay the driver's personal tax liabilities on their behalf. Drivers should obtain independent accounting or tax advice where needed.
+
+Nothing in these terms determines employment or tax status by label alone, excludes statutory rights, or removes any tax, PAYE, National Insurance, withholding or reporting obligation that the law places on ACT. Employment-rights status and tax status may differ; each is determined by the actual working arrangements and applicable law.
 
 ### 2. Accurate information and eligibility
 Provide genuine, current information and readable copies of the documents requested. Apply in your own name and do not use another person's documents or account. ACT's application currently requires applicants to be at least 21. Contact ACT promptly when information changes or a licence, insurance policy or other required permission expires, is suspended, is revoked or becomes restricted.
@@ -53,7 +62,7 @@ The Driver Application and Verification Privacy Notice explains processing and r
 ### 9. Withdrawal, concerns and changes
 You may withdraw an application or report an error by contacting ACT and identifying the relevant application without including unnecessary sensitive documents. Withdrawal does not automatically erase records that ACT must lawfully retain. ACT should tell you about material changes affecting your application; revised terms must not silently rewrite previously agreed passenger or driver contracts.
 
-**Proposed review declaration:** I confirm that the information I have supplied is accurate, accept the Driver Application Terms, and acknowledge that I have read the Driver Application and Verification Privacy Notice. I understand that receipt of my application and password setup do not constitute final approval to receive journeys.
+**Proposed review declaration:** I confirm that the information I have supplied is accurate, accept the Driver Application Terms, and acknowledge that I have read the Driver Application and Verification Privacy Notice. I understand that receipt of my application and password setup do not constitute final approval to receive journeys. I acknowledge the intended self-employed basis and my applicable tax responsibilities set out in section 1.1, without waiving any statutory rights.
 
 ## B. Driver Application and Verification Privacy Notice - proposed applicant-facing text
 
@@ -117,6 +126,11 @@ The base is PR #100 head `98fc47172c2054e2a059506a6cef717e5b8f3dcf`, with the ea
 
 Owner retention instruction recovered from 16 October 2026: Mahmood Farhat is responsible for monthly manual review; the schedule was approved without authorising deletion or deployment. Six-month unsuccessful-application and 30-day recovery-review periods are ACT policy choices. Do not reset the already approved schedule or automate disposal.
 
+### Version 0.2 - owner's self-employment and HMRC clarification
+The owner requested a purely self-employed driver model with each driver responsible for their own Self Assessment, tax returns and applicable HMRC requirements. Section 1.1 records that intended model and the driver's applicable responsibilities, while preserving statutory rights and obligations imposed on ACT. Part B's privacy wording and the existing retention schedule are unchanged.
+
+The tax and employment-status qualifications are based on current GOV.UK/HMRC guidance [S7-S10], not a finding that ACT's actual working arrangements have been assessed and meet the self-employed tests. Within the existing content-review check, verify that the driver services agreement and real working practices support the intended model. Self-employed tax treatment does not by itself exclude worker rights. No blanket tax indemnity, new tax-data collection, public policy publication or deployment is authorised by this amendment.
+
 ### Four finite publication checks
 1. **DBS processing and workflow:** establish the actual level/purpose and legal condition for ACT's own DBS handling; complete any required appropriate-policy document/DPIA. Preserve TfL's separate licensing role. Current backend final approval requires `dbs_cleared` attestation, not a newly implemented mandatory certificate-presence gate. Where a certificate is required operationally, use the private requested-evidence path and confirm reviewer procedure or add a separately tested backend gate. Do not claim front-end wording alone enforces this.
 2. **Identity, suppliers and retention execution:** confirm company correspondence details, actual recipients/processors, international access/transfers and documented safeguards; confirm that monthly review and recovery-copy handling can be operated as described. This document does not claim those checks have already passed.
@@ -134,6 +148,11 @@ These references support the legal/privacy review; they do not establish ACT-spe
 - **S4 - ICO, pre-employment vetting:** https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/employment/recruitment-and-selection/pre-employment-vetting-of-candidates/
 - **S5 - ICO, international transfers:** https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/a-guide-to-international-transfers/what-is-an-international-transfer-of-personal-information/
 - **S6 - ICO, storage limitation:** https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-protection-principles/a-guide-to-the-data-protection-principles/storage-limitation/
+
+- **S7 - GOV.UK, employment status and rights checklist for employers and other engagers; self-employed and contractor:** https://www.gov.uk/government/publications/employment-status-and-employment-rights/employment-status-and-rights-checklist-for-employers-and-other-engagers and https://www.gov.uk/employment-status/selfemployed-contractor
+- **S8 - GOV.UK, sole-trader responsibilities, Self Assessment, Income Tax, National Insurance and VAT:** https://www.gov.uk/become-sole-trader
+- **S9 - GOV.UK, self-employed business records:** https://www.gov.uk/self-employed-records/what-records-to-keep
+- **S10 - HMRC, Making Tax Digital for Income Tax applicability:** https://www.gov.uk/guidance/find-out-if-and-when-you-need-to-use-making-tax-digital-for-income-tax
 
 ### Source-to-draft review record
 Existing deployed `UnifiedDriverApplication.tsx` links its 'driver terms' to the general `/documents/{locale}/terms-and-conditions.pdf`. The versioned English dictionary predominantly describes passenger bookings; the existing PDF generator reads those dictionaries and produces a content-hash manifest. PR #100 intentionally retains those links. This draft proposes dedicated driver text rather than replacing passenger terms. No independent live-PDF comparison, complete legal review or publication is claimed by this documentation commit.
