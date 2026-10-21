@@ -90,7 +90,18 @@ jobs:
           }, null, 2));
           JS
           docker image inspect act-driver-form-build-only --format '{{.Id}}' > build-evidence/build-image-id.txt
-          docker image inspect node:24.13.0-bookworm-slim --format '{{json .RepoDigests}}' > build-evidence/node-image-digests.json
+          # Record the FROM digest actually resolved in this build, not a local
+          # base-image tag which need not exist in the Docker daemon image store.
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          log = Path('build-evidence/next-production-build.log').read_text()
+          pattern = r'FROM (docker\.io/library/node:24\.13\.0-bookworm-slim@sha256:[0-9a-f]{64})(?=\s|$)'
+          images = sorted(set(re.findall(pattern, log)))
+          if len(images) != 1:
+              raise SystemExit('STOP: Expected one resolved Node base-image digest in build log')
+          Path('build-evidence/node-image-digests.json').write_text(json.dumps(images) + '\n')
+          PY
           cat build-evidence/build-receipt.json
           echo 'FULL FRONTEND PRODUCTION BUILD PASSED - NO LIVE SITE CHANGES'
       - name: Retain build evidence only, never publish a site or application bundle
