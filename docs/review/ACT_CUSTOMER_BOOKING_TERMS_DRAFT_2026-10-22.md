@@ -1,18 +1,20 @@
 # ACT Customer Booking Terms & Conditions
 
-**REVIEW DRAFT v0.1 | 22 October 2026 | NOT APPROVED, PUBLISHED OR EFFECTIVE**
+**REVIEW DRAFT v0.2 | 23 October 2026 | NOT APPROVED FOR PUBLICATION, PUBLISHED OR EFFECTIVE**
 
 Prepared for Airport & City Transfer (ACT), trading name of Farhat Trading Solutions Ltd. This is a proposed revision of ACT's existing passenger booking terms, not a replacement for the driver-application policy or a driver services agreement. It requires owner and appropriate UK legal review before publication.
 
 ## Review basis and change summary
 
-**Source-derived baseline.** The existing English website dictionary was read at deployed frontend revision `892317f` and candidate revision `98fc471`. Both returned Git blob `54b1952507311d34e7a27129e5499be691b397a7`. Its `policy_and_terms.terms` object contains 18 headings. Sections 1-18 below retain their order; sections 3-11 reproduce the existing policy text without changing the commercial rules. Additional paragraphs and sections are proposals, not already approved or implemented policies.
+**Source-derived baseline.** The existing English website dictionary was read at deployed frontend revision `892317f` and candidate revision `98fc471`. Both returned Git blob `54b1952507311d34e7a27129e5499be691b397a7`. Its `policy_and_terms.terms` object contains 18 headings. Sections 1-18 below retain their order. In v0.2, sections 3-4 replace the earlier three-hour customer-cancellation rule with the owner-requested 24-hour/12-hour standard refund bands. Section 5 removes its obsolete three-hour cross-reference without introducing an automatic no-show penalty. Sections 6-11 and the other unrelated terms remain unchanged. The new bands are draft commercial instructions, not an implemented refund rule or a finding of legal enforceability.
 
-**Already present and preserved:** full refund where cancellation is received at least three hours before confirmed pickup, including exactly three hours; reasonable evidenced losses rather than an automatic forfeiture for later cancellation; no-show assessment after waiting and contact attempts; 15-minute ordinary / 60-minute airport waiting periods; agreed handling of flight delays; and refund initiation within five working days after confirming the amount.
+**Owner-requested cancellation schedule - 23 October 2026:** more than 24 hours before confirmed pickup: 100% refund; more than 12 hours and up to and including 24 hours: 50% refund; 12 hours or less: no refund under the standard schedule. For an unambiguous draft, exactly 24 hours is placed in the 50% band and exactly 12 hours in the no-refund band. This is the drafting interpretation of "within", not a separately confirmed boundary instruction. These bands replace the previous three-hour cancellation proposal, subject to the consumer-rights safeguard and publication review below.
 
-**Proposed improvements:** identify the contracting company and its responsibility for the journey; explain booking acceptance and complete pricing; replace the blanket liability exclusion/fare-only cap; clarify luggage, vehicle substitutions, accessibility and assistance dogs; and make acceptance/versioning clearer. No new waiting tariff, damage penalty, commission rate or automatic non-refundable fee is introduced.
+**Unchanged:** the separate three-hour online-booking lead time; no-show assessment after waiting and contact attempts; 15-minute ordinary / 60-minute airport waiting periods; agreed handling of flight delays; full refund or an accepted alternative when ACT cannot provide the journey; and refund initiation within five working days after confirming the amount. Existing bookings are not retrospectively moved onto a less favourable cancellation policy.
 
-**Verification limit:** this review is grounded in version-controlled text, not an independently downloaded live PDF. The public PDF could not be retrieved in this session. The existing source-to-PDF generator was inspected; live document hashes, published translations and checkout behaviour remain release checks. External legal guidance is identified separately in Part C and is not evidence of ACT's actual operations.
+**Proposed improvements:** identify the contracting company and its responsibility for the journey; explain booking acceptance and complete pricing; replace the blanket liability exclusion/fare-only cap; clarify luggage, vehicle substitutions, accessibility and assistance dogs; and make acceptance/versioning clearer. No new waiting tariff, damage penalty or commission rate is introduced. The newly requested cancellation bands are stated expressly rather than presented as an unchanged existing policy. A blanket no-refund rule is not represented as legally guaranteed.
+
+**Verification limit:** this review is grounded in version-controlled text, not an independently downloaded live PDF. The public PDF could not be retrieved during the original v0.1 review; it has not been independently verified for this amendment. The existing source-to-PDF generator was inspected; live document hashes, published translations and checkout behaviour remain release checks. External legal guidance is identified separately in Part C and is not evidence of ACT's actual operations.
 
 ## Part A - Proposed customer-facing terms
 
@@ -34,17 +36,24 @@ All fares are quoted in GBP (£). Payment is due at booking unless ACT has expre
 
 Extra stops, additional waiting or other requested changes may affect the price. Their basis and any additional amount must be disclosed and agreed before the extra service is accepted. ACT will not rely on a general statement that 'additional fees may apply' to introduce an undisclosed mandatory charge. The accepted price will not be increased simply because a different driver is allocated.
 
-### 3. Cancellation at least 3 hours before pickup
+### 3. Customer cancellation more than 24 hours before pickup
 
-If ACT receives your cancellation at least 3 hours before the confirmed pickup time, including exactly 3 hours beforehand, you receive a full refund.
+If ACT receives your cancellation more than 24 hours before the confirmed pickup time, you receive a full refund (100%) of the amount paid for the cancelled trip.
 
-### 4. Cancellation within 3 hours
+### 4. Customer cancellation within 24 hours of pickup
 
-ACT may deduct reasonable, evidenced losses directly caused by your cancellation, up to the booking price. We take reasonable steps to reduce these losses and account for costs saved or replacement work. Any remaining balance is refunded.
+The following standard refund bands apply to a customer cancellation, subject to the safeguards below:
+
+- **More than 12 hours and up to and including 24 hours before pickup:** 50% of the amount paid for the cancelled trip is refunded.
+- **12 hours or less before pickup:** no refund under the standard schedule.
+
+**Exact cut-offs:** cancellation received exactly 24 hours before pickup falls in the 50% refund band; exactly 12 hours before pickup falls in the no-refund band. Notice is measured in elapsed hours from ACT's receipt of the cancellation to the confirmed pickup time, not from the booking date or the time staff reply.
+
+**Consumer-rights safeguard:** these bands apply when the customer cancels, not where ACT cannot provide the agreed journey or a refund is due because ACT has failed to meet its obligations. ACT will not retain more than a fair and reasonable amount reflecting losses directly caused by the cancellation, taking reasonable steps to reduce those losses and accounting for costs saved or replacement work. If applying a band would retain more than that amount, ACT will refund the excess. The bands do not remove any right to a greater refund or other remedy under applicable consumer law. [L8, L9]
 
 ### 5. Passenger no-show
 
-A no-show is assessed only after the agreed waiting period and documented attempts to contact the passenger. Any deduction follows the same loss-based rule as a cancellation within 3 hours and is capped at the booking price.
+A no-show is assessed only after the agreed waiting period and documented attempts to contact the passenger. Any deduction must reflect reasonable, evidenced losses directly caused by the no-show, accounting for costs saved or replacement work, and is capped at the booking price. The new customer-cancellation bands do not remove these assessment requirements.
 
 ### 6. Waiting periods
 
@@ -152,7 +161,11 @@ The applicable terms must be available before a customer commits to the booking,
 
 **1. Content and identity.** Owner reviews the proposed additions; legal review covers liability, operator responsibility and any business-account variants. Confirm the registered company number, company/correspondence details, licensed operator identity and licence details. The website currently shows a Bath Road address, but this session did not independently verify Companies House/operator records. Do not publish invented licence details or assert this draft is legally certified.
 
-**2. Operational consistency.** Check the acceptance/confirmation event, complete quoted price, amendments, refund handling and operator substitution against the actual website/backend. Preserve cancellation at exactly three hours. A need for manual late-cancellation review is not an automatic no-refund entitlement. A hidden or disabled self-service button must not defeat the published email/telephone cancellation route. Verify existing waiting, complaints and lost-property commitments without rerunning unrelated tests or creating live bookings.
+**2. Operational consistency and the revised cancellation schedule.** The owner's latest 24-hour/12-hour instruction supersedes the earlier three-hour cancellation policy for this draft, not the independent three-hour booking lead time. Before publication, align the website terms, FAQs, checkout, confirmation emails/PDFs, customer cancellation screen, backend/admin calculation and any automation relying on the old cancellation rule. Coordinate automation dependencies in the ACT automation workstream; this draft does not change n8n. Do not publish new promises while the backend applies a conflicting policy.
+
+Check the boundaries once using elapsed time: more than 24 hours -> 100%; exactly 24 hours -> 50%; more than 12 through 24 hours -> 50%; exactly 12 hours or less -> 0% under the standard schedule. Use the confirmed pickup timestamp and ACT's cancellation-receipt timestamp with their time zones; avoid rounding a notice into a worse band. Define and disclose an effective version/date for new bookings. Preserve the terms accepted for existing bookings; do not silently apply a less favourable new rule retrospectively. A hidden or disabled self-service button must not defeat the published cancellation route.
+
+**Fairness review before release:** the 50% and 100% deductions need a defensible basis in ACT's likely direct cancellation losses, including costs saved and replacement work. No such loss evidence has been established by this documentation edit. A disclaimer alone cannot make an unfair fixed deduction enforceable. Preserve the substantive excess-refund safeguard in section 4 and obtain appropriate review before publishing or automating the bands. A lower standard refund does not displace rights where ACT is at fault. [L8, L9] Verify unchanged waiting, complaints and lost-property commitments without repeating unrelated tests or creating live bookings.
 
 **3. Documents and language.** After wording approval, update the appropriate locale source, downloadable passenger terms PDF, hash manifest, checkout link and confirmation reference together. Reuse `scripts/build-customer-documents.py`; do not overwrite passenger terms with driver terms. Keep the current 18-heading lineage and a reviewable version/date. The English review is not a claim that Arabic or other translations have been reviewed. The existing passenger Privacy Notice remains a separate unresolved review item; the new driver notice is not its replacement.
 
@@ -160,13 +173,14 @@ The applicable terms must be available before a customer commits to the booking,
 
 ## Part C - Evidence and legal reference register
 
-**Repository sources inspected, 22 October 2026**
+**Repository baseline reviewed on 22 October; amendment checked on 23 October 2026**
 
 - English baseline: `act_website-main/src/dictionaries/en/home.json`, revisions `892317fcf938fad5fa6cd9a833a79e900dcc4d8f` and `98fc47172c2054e2a059506a6cef717e5b8f3dcf`, identical blob `54b1952507311d34e7a27129e5499be691b397a7`.
 - Existing PDF generator: `act_website-main/scripts/build-customer-documents.py`, blob `e827bc25d332e7b227d5c434efcb2b79d57cebf3`. It generates matching locale PDFs and records source/PDF SHA-256 values in the document manifest.
-- Existing work checked before drafting: PR #100 UI revision `98fc471`; PR #101 driver policy v0.2 revision `aecc6df`; PR #102 successful build-evidence record. No code, build, migration or deployment was repeated for this review.
+- Existing work checked before drafting: PR #100 UI revision `98fc471`; PR #101 driver policy v0.2 revision `aecc6df`; PR #102 successful build-evidence record. For v0.2, PR #101's current head `d03f387d9207561b12a239a026a2373c2ad17bf0` and customer source blob `5df7efc41fc6c74bb1fc781bac52d81ed1cc8522` were read before amendment. The local original matched that Git blob. No code, build, migration or deployment was repeated.
+- The new 24-hour/12-hour schedule comes from the owner's latest instruction, not from the existing website source or external legal guidance. Boundary inclusion is expressly identified as a drafting interpretation. Original v0.1 and the separate driver v0.2 remain preserved.
 
-**External research, separate from ACT source facts**
+**External research, separate from ACT source facts; L1-L7 carried forward, L8-L9 checked for this amendment**
 
 - **L1 - TfL Notice 06/22, operator contracts with passengers.** London private-hire operators must contract as principal for the accepted journey. The notice remains linked from TfL's notices index; page 1 was rendered and inspected. [Official notice](https://tfl.gov.uk/cdn/static/cms/documents/tph-notice-06-22-private-hire-operators-contracts-with-passengers.pdf).
 - **L2 - CMA, clear and accurate prices.** Official guidance updated 7 January 2026 addresses complete upfront totals and mandatory charges. [Price-transparency guidance](https://www.gov.uk/government/publications/price-transparency-cma209/providing-clear-and-accurate-information-about-prices-summary).
@@ -176,6 +190,9 @@ The applicable terms must be available before a customer commits to the booking,
 - **L6 - GOV.UK, employment status.** Self-employed tax status and employment-rights status can differ; actual arrangements matter. [Self-employed and contractor status](https://www.gov.uk/employment-status/selfemployed-contractor).
 - **L7 - Consumer Rights Act 2015, section 65.** Restricts exclusion of death or personal-injury liability arising from negligence. [Legislation](https://www.legislation.gov.uk/ukpga/2015/15/section/65).
 
+- **L8 - CMA, cancelling goods or services.** Cancellation deductions must be fair and generally reflect direct loss, with reasonable mitigation; inclusion in terms is not sufficient by itself. [Cancellation guidance](https://www.gov.uk/government/publications/cancelling-goods-or-services-guide-for-consumers/cancelling-goods-or-services).
+- **L9 - CMA, writing a fair contract for customers**, updated 22 July 2026. Fairness, transparency, disproportionate cancellation charges and changes to existing contracts must be assessed; a statutory-rights disclaimer does not repair an unfair term. [Current business guidance](https://www.gov.uk/guidance/writing-a-fair-contract-for-customers).
+
 These sources inform proposed drafting, not a legal certification of ACT's business. No legal claim is made that every required notice, licence condition or operational control has been exhaustively checked. Existing owner-approved rules are distinguished above from source statements, new proposals and unresolved facts.
 
-**Status: customer source reviewed and proposed revision drafted; not approved for publication. Driver v0.2 preserved. No live website change.**
+**Status: customer review draft v0.2 records the owner-requested cancellation bands and explicit cut-offs, with consumer safeguards and a fairness/publication hold. Not approved for publication, merged or deployed. Driver v0.2 preserved. No live website or refund calculation changed.**
