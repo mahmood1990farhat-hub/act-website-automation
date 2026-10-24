@@ -1,0 +1,45 @@
+name: ACT cancellation policy calculation only
+"on":
+  push:
+    branches: [draft/act-cancellation-policy-20261024]
+permissions:
+  contents: read
+jobs:
+  pure-calculation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Check exact backend baseline and changed paths
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-cancellation-policy-20261024
+          test "$(git rev-parse HEAD^)" = 82c0b14ad2a71e1ce3d8d1df3527431b698ac461
+          git diff --name-only HEAD^ HEAD | while read -r file; do
+            case "$file" in
+              act_backend-main/apps/trips/services/cancellation_policy.py|act_backend-main/apps/trips/tests/test_cancellation_policy_preview.py|docs/review/ACT_CANCELLATION_INTEGRATION_2026-10-24.md|.github/workflows/act-cancellation-policy-preview.yml) ;;
+              *) echo "Unexpected change: $file"; exit 1 ;;
+            esac
+          done
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run only the new pure calculation tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p calculation-evidence
+          git rev-parse HEAD > calculation-evidence/source-sha.txt
+          python --version > calculation-evidence/python-version.txt
+          python -B act_backend-main/apps/trips/tests/test_cancellation_policy_preview.py 2>&1 | tee calculation-evidence/tests.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-cancellation-calculation-${{ github.sha }}
+          path: calculation-evidence/
+          if-no-files-found: error
+          retention-days: 14
