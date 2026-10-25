@@ -83,6 +83,10 @@ def stripe_webhook_view(request):
 
         elif event_type == 'payment_intent.payment_failed':
             handle_payment_failed(event)
+
+        elif event_type in ('refund.created', 'refund.updated', 'refund.failed'):
+            from apps.payments.refund_provider import handle_verified_refund_event
+            handle_verified_refund_event(event)
     except Exception as processing_error:
         # Return non-2xx so Stripe retries a verified event ACT could not persist/process.
         logger.exception(
