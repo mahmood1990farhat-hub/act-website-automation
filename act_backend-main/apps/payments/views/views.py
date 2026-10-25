@@ -7,6 +7,7 @@ import stripe
 from django.conf import settings
 from apps.trips.models import Trip, StopPoint, Airport
 from apps.payments.models import PendingPayment
+from apps.payments.checkout_terms import bind_before_pending_delete, verify_duplicate_terms
 from apps.passengers.models import Passenger
 from apps.vehicle.models import VehicleType
 from utils.common.notifications import (
@@ -141,6 +142,7 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
     ).first()
 
     if existing_trip:
+        verify_duplicate_terms(existing_trip, payment_intent)
         logger.info(f"[WEBHOOK] Trip already exists: {existing_trip.id}")
         return existing_trip, False
 
@@ -156,6 +158,7 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
             stripe_payment_intent=payment_intent_id
         ).first()
         if existing_trip:
+            verify_duplicate_terms(existing_trip, payment_intent)
             return existing_trip, False
         raise Exception(f"PendingPayment not found for PI={payment_intent_id}")
 
@@ -226,6 +229,7 @@ def create_trip_from_payment(payment_intent, pending_payment_id):
 
     create_stop_points(trip, trip_data.get('stop_points', []))
 
+    bind_before_pending_delete(pending_payment, trip, payment_intent)
     pending_payment.delete()
     logger.info(f"[WEBHOOK] Trip created: {trip.id}")
 
