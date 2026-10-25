@@ -20,6 +20,7 @@ from apps.pricing.services.extra_service_resolver import (
     persist_authoritative_meet_and_greet,
 )
 from apps.payments.models import PendingPayment
+from apps.payments.checkout_terms import checkout_booking_details, capture_before_payment
 from apps.vehicle.models import VehicleType
 from apps.vehicle.catalog import vehicle_accepts_luggage
 import stripe
@@ -104,6 +105,7 @@ class InitiatePaymentView(EMADBaseView):
     http_method_names = ['post']
 
     def handle_post(self, request):
+        terms_received_at = timezone.now()
         locale = get_locale(request=request)
         activate(locale)
 
@@ -140,7 +142,7 @@ class InitiatePaymentView(EMADBaseView):
             )
         )
 
-        booking_details = details_with_language(booking_details, locale)
+        booking_details = checkout_booking_details(details_with_language(booking_details, locale))
 
         meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
@@ -184,6 +186,13 @@ class InitiatePaymentView(EMADBaseView):
             booking_details=booking_details,
             currency='GBP',
             expires_at=timezone.now() + timedelta(minutes=15)
+        )
+
+        capture_before_payment(
+            pending_payment,
+            acknowledgement=request.data.get('booking_terms_acknowledgement'),
+            locale=locale,
+            received_at=terms_received_at,
         )
 
         idempotency_key = f"payment_{pending_payment.id}"
@@ -300,6 +309,7 @@ class InitiateGuestPaymentView(EMADBaseView):
         return str(value)[:max_length]
 
     def handle_post(self, request):
+        terms_received_at = timezone.now()
         locale = get_locale(request=request)
         activate(locale)
 
@@ -337,7 +347,7 @@ class InitiateGuestPaymentView(EMADBaseView):
                 booking_details,
             )
         )
-        booking_details = details_with_language(booking_details, locale)
+        booking_details = checkout_booking_details(details_with_language(booking_details, locale))
 
         meet_and_greet_total = price_breakdown['meet_and_greet_total']
 
@@ -381,6 +391,13 @@ class InitiateGuestPaymentView(EMADBaseView):
             booking_details=booking_details,
             currency='GBP',
             expires_at=timezone.now() + timedelta(minutes=15)
+        )
+
+        capture_before_payment(
+            pending_payment,
+            acknowledgement=request.data.get('booking_terms_acknowledgement'),
+            locale=locale,
+            received_at=terms_received_at,
         )
 
         idempotency_key = f"guest_payment_{pending_payment.id}"

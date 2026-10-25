@@ -1,0 +1,107 @@
+name: ACT checkout terms integration
+"on":
+  push:
+    branches: [draft/act-checkout-terms-20261025]
+permissions:
+  contents: read
+concurrency:
+  group: act-checkout-terms-isolated
+  cancel-in-progress: false
+jobs:
+  checkout-terms:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: act_checkout_ci
+          POSTGRES_USER: act
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U act -d act_checkout_ci"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: [6379:6379]
+    env:
+      ACT_E2E_ISOLATED: "1"
+      SECRET_KEY: act-ci-checkout-never-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DB_NAME: act_checkout_ci
+      DB_USER: act
+      DB_PASSWORD: isolated_ci_only
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: ci-not-production
+      TWILIO_VERIFY_SERVICE_SID: VA00000000000000000000000000000000
+      GOOGLE_MAPS_API_KEY: ci-not-production
+      STRIPE_SECRET_KEY: sk_test_ci_not_a_real_key
+      STRIPE_WEBHOOK_SECRET: whsec_synthetic_checkout_not_a_real_secret
+      CELERY_BROKER_URL: redis://127.0.0.1:6379/13
+      N8N_ENABLED: "False"
+      NOTIFICATION_FORCE_SYNC: "True"
+      EMAIL_HOST: 127.0.0.1
+      EMAIL_PORT: "1025"
+      EMAIL_USE_TLS: "False"
+      EMAIL_HOST_USER: ci@example.invalid
+      EMAIL_HOST_PASSWORD: ci-not-production
+      ADMIN_EMAIL: admin@example.invalid
+      APP_BASE_URL: http://127.0.0.1:8000
+      ACT_PUBLIC_WEBSITE_URL: http://127.0.0.1:3001
+      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: /tmp/act-checkout-ci
+      ACT_NI_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Guard exact parent and six-path scope
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-checkout-terms-20261025
+          git merge-base --is-ancestor 4c2bf2447463dffe85ba6f30183a68ec71e5d981 HEAD
+          test "$DB_NAME" = act_checkout_ci
+          test "$DB_HOST" = 127.0.0.1
+          test "$N8N_ENABLED" = False
+          mkdir -p checkout-evidence
+          git diff --name-only 4c2bf2447463dffe85ba6f30183a68ec71e5d981 HEAD > checkout-evidence/changed-paths.txt
+          while read -r p; do
+            case "$p" in
+              act_backend-main/apps/payments/checkout_terms.py|act_backend-main/apps/payments/test_checkout_terms.py|act_backend-main/apps/trips/views/initiate_payment.py|act_backend-main/apps/payments/views/views.py|docs/review/ACT_CHECKOUT_TERMS_2026-10-25.md|.github/workflows/act-checkout-terms.yml) ;;
+              *) echo "STOP: Unexpected path $p"; exit 1 ;;
+            esac
+          done < checkout-evidence/changed-paths.txt
+          test "$(git rev-parse HEAD:act_backend-main/apps/payments/booking_contracts.py)" = bf8e7c6fc2ded2c8e2c5ba68a9a8769addff5daa
+          test "$(git rev-parse HEAD:act_backend-main/apps/trips/services/cancellation_policy.py)" = 631eef05f96e4a4885540e937b42e7f9fa85f1ee
+          git rev-parse HEAD > checkout-evidence/source-sha.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: act_backend-main/requirements.txt
+      - name: Install existing dependency constraints in disposable runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdal-bin libgdal-dev libgeos-dev
+          python -m pip install -q -r act_backend-main/requirements.txt
+          python --version > checkout-evidence/python-version.txt
+          python -m pip freeze > checkout-evidence/installed-versions.txt
+      - name: Test only changed checkout and signed fulfillment paths
+        working-directory: act_backend-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python manage.py test apps.payments.test_checkout_terms --noinput --verbosity 2 2>&1 | tee ../checkout-evidence/tests.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-checkout-terms-${{ github.sha }}
+          path: checkout-evidence/
+          if-no-files-found: error
+          retention-days: 14
