@@ -1,0 +1,106 @@
+name: ACT refund provider boundary
+"on":
+  push:
+    branches: [draft/act-refund-provider-20261025]
+permissions:
+  contents: read
+concurrency:
+  group: act-refund-provider-isolated
+  cancel-in-progress: false
+jobs:
+  provider-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: act_refund_provider_ci
+          POSTGRES_USER: act
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U act -d act_refund_provider_ci"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: [6379:6379]
+    env:
+      ACT_E2E_ISOLATED: "1"
+      SECRET_KEY: act-ci-refund-provider-never-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DB_NAME: act_refund_provider_ci
+      DB_USER: act
+      DB_PASSWORD: isolated_ci_only
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: ci-not-production
+      TWILIO_VERIFY_SERVICE_SID: VA00000000000000000000000000000000
+      GOOGLE_MAPS_API_KEY: ci-not-production
+      STRIPE_SECRET_KEY: sk_test_ci_not_a_real_key
+      STRIPE_WEBHOOK_SECRET: whsec_ci_not_a_real_secret
+      CELERY_BROKER_URL: redis://127.0.0.1:6379/13
+      N8N_ENABLED: "False"
+      NOTIFICATION_FORCE_SYNC: "True"
+      EMAIL_HOST: 127.0.0.1
+      EMAIL_PORT: "1025"
+      EMAIL_USE_TLS: "False"
+      EMAIL_HOST_USER: ci@example.invalid
+      EMAIL_HOST_PASSWORD: ci-not-production
+      ADMIN_EMAIL: admin@example.invalid
+      APP_BASE_URL: http://127.0.0.1:8000
+      ACT_PUBLIC_WEBSITE_URL: http://127.0.0.1:3001
+      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: /tmp/act-refund-provider-ci
+      ACT_NI_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Guard exact base and provider-only paths
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-refund-provider-20261025
+          git merge-base --is-ancestor da7675033df54a2c0f13fa751ef931d3e059f547 HEAD
+          test "$DB_NAME" = act_refund_provider_ci
+          test "$DB_HOST" = 127.0.0.1
+          mkdir -p provider-evidence
+          git diff --name-only da7675033df54a2c0f13fa751ef931d3e059f547 HEAD > provider-evidence/changed-paths.txt
+          while read -r p; do
+            case "$p" in
+              act_backend-main/apps/payments/refund_provider.py|act_backend-main/apps/payments/test_refund_provider.py|act_backend-main/apps/payments/views/views.py|.github/workflows/act-refund-provider.yml|docs/review/ACT_REFUND_PROVIDER_2026-10-25.md) ;;
+              *) echo "STOP: Unexpected path $p"; exit 1 ;;
+            esac
+          done < provider-evidence/changed-paths.txt
+          git rev-parse HEAD > provider-evidence/source-sha.txt
+          test "$(git rev-parse HEAD:act_backend-main/apps/payments/booking_contracts.py)" = bf8e7c6fc2ded2c8e2c5ba68a9a8769addff5daa
+          test "$(git rev-parse HEAD:act_backend-main/apps/payments/checkout_terms.py)" = faff1311475432a68eaeba93beba9d3b989b20e7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: act_backend-main/requirements.txt
+      - name: Install unchanged dependency constraints in disposable runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdal-bin libgdal-dev libgeos-dev
+          python -m pip install -q -r act_backend-main/requirements.txt
+          python --version > provider-evidence/python-version.txt
+          python -m pip freeze > provider-evidence/installed-versions.txt
+      - name: Test provider boundary and signed refund events only
+        working-directory: act_backend-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python manage.py test apps.payments.test_refund_provider --noinput --verbosity 2 2>&1 | tee ../provider-evidence/tests.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-refund-provider-${{ github.sha }}
+          path: provider-evidence/
+          if-no-files-found: error
+          retention-days: 14
