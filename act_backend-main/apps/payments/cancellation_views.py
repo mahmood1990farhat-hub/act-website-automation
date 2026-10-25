@@ -70,6 +70,14 @@ class PassengerCancelTripView(LegacyCancelView):
             # Cancellation was committed independently. Never turn a provider
             # outage into a failed cancellation, or leak provider error details.
             logger.warning('Managed refund follow-up needed for cancellation %s', case.pk)
+        if created:
+            try:
+                from apps.payments.cancellation_assets import request_existing_cancellation_assets
+                request_existing_cancellation_assets(case.pk)
+            except Exception:
+                # Never reinterpret a committed cancellation as failed because
+                # document/email follow-up needs attention. No automatic resend.
+                logger.warning('Existing cancellation assets need follow-up for case %s', case.pk)
         outcome = public_outcome(case.pk)
         return Response({'success': True, 'message': _message(outcome, get_locale(request=request)),
                          'data': outcome, 'pagination': None})

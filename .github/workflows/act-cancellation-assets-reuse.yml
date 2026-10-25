@@ -1,0 +1,108 @@
+name: ACT existing cancellation assets reuse
+"on":
+  push:
+    branches: [draft/act-cancellation-assets-reuse-20261025]
+permissions:
+  contents: read
+concurrency:
+  group: act-cancellation-assets-isolated
+  cancel-in-progress: false
+jobs:
+  existing-assets-bridge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: act_assets_ci
+          POSTGRES_USER: act
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U act -d act_assets_ci"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: [6379:6379]
+    env:
+      ACT_E2E_ISOLATED: "1"
+      SECRET_KEY: act-ci-assets-never-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DB_NAME: act_assets_ci
+      DB_USER: act
+      DB_PASSWORD: isolated_ci_only
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: ci-not-production
+      TWILIO_VERIFY_SERVICE_SID: VA00000000000000000000000000000000
+      GOOGLE_MAPS_API_KEY: ci-not-production
+      STRIPE_SECRET_KEY: sk_test_ci_not_a_real_key
+      STRIPE_WEBHOOK_SECRET: whsec_ci_not_a_real_secret
+      CELERY_BROKER_URL: redis://127.0.0.1:6379/13
+      N8N_ENABLED: "False"
+      NOTIFICATION_FORCE_SYNC: "True"
+      EMAIL_HOST: 127.0.0.1
+      EMAIL_PORT: "1025"
+      EMAIL_USE_TLS: "False"
+      EMAIL_HOST_USER: ci@example.invalid
+      EMAIL_HOST_PASSWORD: ci-not-production
+      ADMIN_EMAIL: admin@example.invalid
+      APP_BASE_URL: http://127.0.0.1:8000
+      ACT_PUBLIC_WEBSITE_URL: http://127.0.0.1:3001
+      ACT_DRIVER_PRIVATE_UPLOAD_ROOT: /tmp/act-assets-ci
+      ACT_NI_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve existing email, PDF, language and payment code
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-cancellation-assets-reuse-20261025
+          BASE=1e0516589a50a1adae901216186da626b32d8cd1
+          git merge-base --is-ancestor "$BASE" HEAD
+          test "$DB_NAME" = act_assets_ci
+          test "$DB_HOST" = 127.0.0.1
+          test "$N8N_ENABLED" = False
+          mkdir -p reuse-evidence
+          git diff --name-only "$BASE" HEAD > reuse-evidence/changed-paths.txt
+          while read -r p; do
+            case "$p" in
+              act_backend-main/apps/payments/cancellation_assets.py|act_backend-main/apps/payments/cancellation_views.py|act_backend-main/apps/payments/test_cancellation_assets.py|.github/workflows/act-cancellation-assets-reuse.yml|docs/review/ACT_CANCELLATION_ASSETS_REUSE_2026-10-25.md) ;;
+              *) echo "STOP: Unexpected path $p"; exit 1 ;;
+            esac
+          done < reuse-evidence/changed-paths.txt
+          git diff --exit-code "$BASE" HEAD -- act_backend-main/utils/common/email.py act_backend-main/apps/trips/services/booking_confirmation.py act_backend-main/apps/trips/services/pdf_generator.py act_backend-main/apps/trips/templates act_backend-main/apps/trips/services/document_locales act_backend-main/apps/payments/tasks.py
+          git rev-parse HEAD > reuse-evidence/source-sha.txt
+          printf '%s\n' 'EXISTING EMAIL/PDF/TEMPLATE/LOCALE/BOOKING-TASK SOURCES UNCHANGED' > reuse-evidence/preservation.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: act_backend-main/requirements.txt
+      - name: Install unchanged dependency constraints in disposable runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdal-bin libgdal-dev libgeos-dev
+          python -m pip install -q -r act_backend-main/requirements.txt
+          python --version > reuse-evidence/python-version.txt
+          python -m pip freeze > reuse-evidence/installed-versions.txt
+      - name: Test only the new connection to existing helpers
+        working-directory: act_backend-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python manage.py test apps.payments.test_cancellation_assets --noinput --verbosity 2 2>&1 | tee ../reuse-evidence/tests.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-cancellation-assets-reuse-${{ github.sha }}
+          path: reuse-evidence/
+          if-no-files-found: error
+          retention-days: 14
