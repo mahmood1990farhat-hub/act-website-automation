@@ -23,14 +23,14 @@ function detail(i=0){return {operator_schema:1,cancellation_id:ids[i],trip_id:41
 const row=d=>({cancellation_id:d.cancellation_id,trip_id:d.trip_id,booking_reference:d.booking_reference,journey_status:d.status,cancellation_received_at:d.cancellation_received_at,refund_status:d.refund_status,has_hold:!!d.hold_reason});
 function state(d,status='pending') {d.refund_status=status;d.accounting_status=status==='succeeded'?'processed':status;d.actions={review:false,reconcile:true,reason:'An operation already exists. Do not send another refund.'};d.operation={status,amount_pence:5001,first_attempt_at:'2026-11-03T12:00:03Z',updated_at:'2026-11-03T12:00:04Z',accounting_posted:status==='succeeded'};}
 async function waitText(page,text){await page.getByText(text,{exact:true}).first().waitFor();}
-const results=[];
+const results=[], browsers=[];
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const origin=`http://127.0.0.1:${server.address().port}`;
  for(const [name,engine,viewport] of [['desktop',chromium,{width:1440,height:1100}],['mobile-webkit',webkit,{width:390,height:844}]]){
-  const browser=await engine.launch({headless:true});
+  const browser=await engine.launch({headless:true}); browsers.push(browser);
   async function test(title,fn,setup=()=>{}){
-   const context=await browser.newContext({viewport}); const page=await context.newPage();
+   const context=await browser.newContext({viewport}); const page=await context.newPage(); page.setDefaultTimeout(10000);
    const s={details:[detail(),detail(1)],posts:[],gets:[],denied:false,empty:false,uncertain:false,slowFirst:false}; setup(s);
    await page.route('**/*',async route=>{
     const req=route.request(),url=new URL(req.url());
@@ -54,7 +54,8 @@ const results=[];
     }else{assert.ok(url.pathname.endsWith('/reconcile/'));assert.deepEqual(payload,{});state(d,'succeeded');}
     return body({success:true,data:{refund_status:d.refund_status}});
    });
-   try{await page.goto(origin);await fn(page,s);results.push(`${name}: PASS ${title}`);}
+   try{await page.goto(origin);await fn(page,s);results.push(`${name}: PASS ${title}`);console.log(results.at(-1));}
+   catch(err){await page.screenshot({path:path.join(out,`${name}-failure.png`),fullPage:true}).catch(()=>{});throw err;}
    finally{await context.close();}
   }
   const select=async p=>{await p.getByRole('button',{name:/ACT-000041/}).click();await p.getByRole('heading',{name:'ACT-000041'}).waitFor();};
@@ -65,6 +66,7 @@ const results=[];
     await p.getByText('View the recorded terms',{exact:true}).click();
     assert.equal(await p.evaluate(()=>window.BAD),undefined);
     await p.getByLabel('Trip ID (optional)').fill('41');await p.getByRole('button',{name:'Find cases'}).click();
+    await p.getByRole('button',{name:/ACT-000042/}).waitFor({state:'detached'});
     await p.getByRole('button',{name:/ACT-000041/}).waitFor();assert.equal(await p.getByRole('button',{name:/ACT-000042/}).count(),0);
     await select(p);await p.screenshot({path:path.join(out,`${name}-review.png`),fullPage:true});
     assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
@@ -113,5 +115,5 @@ const results=[];
   await browser.close();
  }
  fs.writeFileSync(path.join(out,'RESULT.txt'),`Source: ${process.env.GITHUB_SHA||'local'}\n${results.join('\n')}\n${results.length} focused browser cases PASSED; mocked API only; no deployment.\n`);
- console.log(results.join('\n'));console.log(`${results.length} focused browser cases PASSED`);
-})().catch(err=>{fs.writeFileSync(path.join(out,'RESULT.txt'),results.join('\n')+'\nFAILED: '+err.stack);console.error(err);process.exitCode=1;}).finally(()=>server.close());
+ console.log(`${results.length} focused browser cases PASSED`);
+})().catch(err=>{fs.writeFileSync(path.join(out,'RESULT.txt'),results.join('\n')+'\nFAILED: '+err.stack);console.error(err);process.exitCode=1;}).finally(async()=>{await Promise.allSettled(browsers.map(browser=>browser.close()));server.closeAllConnections();server.close();});
