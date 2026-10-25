@@ -2,6 +2,7 @@ from django.urls import path
 from .views import * 
 from .views.initiate_payment import InitiateGuestPaymentView
 from .views.download_confirmation import download_booking_confirmation
+from apps.payments.cancellation_views import PassengerCancelTripView
 
 
 urlpatterns = [

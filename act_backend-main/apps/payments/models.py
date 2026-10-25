@@ -84,3 +84,28 @@ class RefundReservation(models.Model):
     @property
     def idempotency_key(self):
         return f'act-refund-{self.pk}'
+
+
+class CancellationCase(models.Model):
+    """A committed journey stop, separate from a refund or a driver's withdrawal."""
+    receipt = models.OneToOneField(CancellationReceipt, primary_key=True,
+                                  on_delete=models.PROTECT, related_name='managed_case')
+    original_status = models.CharField(max_length=20)
+    pickup_at = models.DateTimeField(null=True, blank=True)
+    stopped_at = models.DateTimeField()
+    requested_by = models.ForeignKey('accounts.CustomUser', null=True, blank=True,
+                                    on_delete=models.SET_NULL, related_name='+')
+    hold_reason = models.CharField(max_length=80, blank=True, default='')
+    decision = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        permissions = [('review_cancellationcase', 'Review ACT cancellation and refund cases')]
+
+
+class RefundPosting(models.Model):
+    """One accounting posting for one positively reconciled provider refund."""
+    reservation = models.OneToOneField(RefundReservation, primary_key=True,
+                                      on_delete=models.PROTECT, related_name='accounting_posting')
+    company_refund = models.OneToOneField('earnings.CompanyRefundLedger',
+                                         on_delete=models.PROTECT, related_name='+')
+    recorded_at = models.DateTimeField(auto_now_add=True)

@@ -217,11 +217,12 @@ def prepare_refund_reservation(receipt_id, *, evidence, assessed_at,
             raise ContractConflict('Active staff loss review required')
     elif reviewer_id is not None or review_reference is not None:
         raise ContractConflict('Incomplete loss review')
+    from apps.payments.cancellation_flow import assessment_status
     result = asdict(preview_cancellation_refund(
         accepted_policy_version=s['policy_version'], confirmed_pickup_at=pickup,
         cancellation_received_at=receipt.received_at,
         captured_amount_pence=evidence.captured_pence, already_refunded_pence=evidence.refunded_pence,
-        currency=evidence.currency, cancellation_kind=receipt.kind, journey_status=trip.status,
+        currency=evidence.currency, cancellation_kind=receipt.kind, journey_status=assessment_status(trip, receipt),
         reviewed_net_loss_pence=reviewed_loss_pence, loss_review_reference=review_reference))
     if result['review_required'] or not result['additional_refund_pence']:
         return result, None
@@ -252,7 +253,8 @@ def claim_refund_dispatch(operation_id, *, evidence, claimed_at):
     record = BookingTermsAcceptance.objects.get(trip=trip)
     s = checked_snapshot(record)
     pickup = datetime.fromisoformat(s['pickup_at']).astimezone(ZoneInfo('Europe/London'))
-    if (trip.status not in ('pending', 'accepted') or trip.trip_date != pickup.date()
+    from apps.payments.cancellation_flow import assessment_status
+    if (assessment_status(trip, operation.receipt) not in ('pending', 'accepted') or trip.trip_date != pickup.date()
             or trip.trip_time != pickup.time().replace(tzinfo=None)):
         raise ContractConflict('Journey changed since assessment; review before dispatch')
     if record.captured_pence != evidence.captured_pence or record.payment_intent_id != evidence.payment_intent_id:

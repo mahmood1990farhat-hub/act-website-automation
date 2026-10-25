@@ -2,8 +2,8 @@ from django.urls import path
 from .views import (
     PassengerTripsListView,
     PassengerTripDetailView,
-    PassengerCancelTripView
 )
+from apps.payments.cancellation_views import PassengerCancelTripView
 
 urlpatterns = [
     path('trips/', PassengerTripsListView.as_view(), name='passenger-trips-list'),
