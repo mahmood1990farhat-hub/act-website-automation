@@ -148,6 +148,10 @@ def _hold(operation_id):
 
 
 def _result(operation):
+    # Posting is downstream of reconciled provider state, never the HTTP request.
+    # Its transaction can be retried without issuing another payment.
+    from apps.payments.cancellation_flow import finalize_managed_refund
+    finalize_managed_refund(operation.pk)
     return {'operation_id': str(operation.pk), 'status': operation.status,
             'provider_refund_id': operation.provider_refund_id,
             'amount_pence': operation.amount_pence,
