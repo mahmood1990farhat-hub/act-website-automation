@@ -1,0 +1,69 @@
+name: ACT refund review dashboard
+"on":
+  push:
+    branches: [draft/act-refund-review-ui-20261025]
+permissions:
+  contents: read
+jobs:
+  operator-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: synthetic-not-a-real-key
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Guard frontend-only scope and preserve driver form
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-refund-review-ui-20261025
+          BASE=98fc47172c2054e2a059506a6cef717e5b8f3dcf
+          git merge-base --is-ancestor "$BASE" HEAD
+          mkdir -p act_website-main/.refund-review-test
+          git diff --name-only "$BASE" HEAD > act_website-main/.refund-review-test/changed-paths.txt
+          while read -r p; do
+            case "$p" in
+              'act_website-main/src/app/[locale]/dashboard/cancellations/page.tsx'|'act_website-main/src/app/[locale]/dashboard/trips/page.tsx'|act_website-main/src/components/_components/dashboard/CancellationReviewDashboard.tsx|act_website-main/tests/refund-review/run.cjs|.github/workflows/act-refund-review-ui.yml|docs/review/ACT_REFUND_REVIEW_UI_2026-10-25.md) ;;
+              *) echo "Unexpected changed path: $p"; exit 1 ;;
+            esac
+          done < act_website-main/.refund-review-test/changed-paths.txt
+          git diff --exit-code "$BASE" HEAD -- act_backend-main act_website-main/src/components/_components/auth/captain act_website-main/package-lock.json
+          git rev-parse HEAD > act_website-main/.refund-review-test/source-sha.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.13.0"
+          cache: npm
+          cache-dependency-path: act_website-main/package-lock.json
+      - name: Install unchanged application lockfile
+        working-directory: act_website-main
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Type-check the new route and component in the existing app
+        working-directory: act_website-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npx next typegen 2>&1 | tee .refund-review-test/typegen.txt
+          npx tsc --noEmit --incremental false 2>&1 | tee .refund-review-test/typecheck.txt
+      - name: Install existing isolated browser-test tool versions
+        run: |
+          npm install --prefix "$RUNNER_TEMP/act-review-tools" --no-package-lock --no-audit --no-fund esbuild@0.25.11 playwright@1.56.1
+          "$RUNNER_TEMP/act-review-tools/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Test only new review UI with local synthetic responses
+        working-directory: act_website-main
+        run: NODE_PATH="$RUNNER_TEMP/act-review-tools/node_modules" node tests/refund-review/run.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-refund-review-ui-${{ github.sha }}
+          path: |
+            act_website-main/.refund-review-test/*.png
+            act_website-main/.refund-review-test/*.txt
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
