@@ -227,6 +227,17 @@ class BookingContractStorageTests(TransactionTestCase):
             claim_refund_dispatch(op.pk, evidence=replace(evidence, refunded_pence=1), claimed_at=at)
         op.refresh_from_db(); self.assertEqual(op.status, 'prepared')
 
+    def test_changed_journey_blocks_prepared_dispatch(self):
+        trip, receipt, evidence, at, op = self.prepared()
+        for state in ('active', 'completed', 'cancelled'):
+            Trip.objects.filter(pk=trip.pk).update(status=state)
+            with self.subTest(state=state), self.assertRaises(ContractConflict):
+                claim_refund_dispatch(op.pk, evidence=evidence, claimed_at=at)
+        Trip.objects.filter(pk=trip.pk).update(status='pending', trip_date=trip.trip_date + timedelta(days=1))
+        with self.assertRaises(ContractConflict):
+            claim_refund_dispatch(op.pk, evidence=evidence, claimed_at=at)
+        op.refresh_from_db(); self.assertEqual(op.status, 'prepared')
+
     def test_claim_commits_once_and_does_not_auto_retry_after_timeout(self):
         trip, receipt, evidence, at, op = self.prepared()
         first = claim_refund_dispatch(op.pk, evidence=evidence, claimed_at=at)

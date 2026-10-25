@@ -250,7 +250,11 @@ def claim_refund_dispatch(operation_id, *, evidence, claimed_at):
             or operation.amount_pence > evidence.captured_pence - evidence.refunded_pence):
         raise ContractConflict('Refund balance changed; reconcile the reservation')
     record = BookingTermsAcceptance.objects.get(trip=trip)
-    checked_snapshot(record)
+    s = checked_snapshot(record)
+    pickup = datetime.fromisoformat(s['pickup_at']).astimezone(ZoneInfo('Europe/London'))
+    if (trip.status not in ('pending', 'accepted') or trip.trip_date != pickup.date()
+            or trip.trip_time != pickup.time().replace(tzinfo=None)):
+        raise ContractConflict('Journey changed since assessment; review before dispatch')
     if record.captured_pence != evidence.captured_pence or record.payment_intent_id != evidence.payment_intent_id:
         raise ContractConflict('Bound payment changed')
     operation.status = 'in_flight'

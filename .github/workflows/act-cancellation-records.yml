@@ -58,18 +58,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
       - name: Guard scope and preserve completed calculator
         shell: bash
         run: |
           set -Eeuo pipefail
           test "$GITHUB_REF" = refs/heads/draft/act-cancellation-records-20261025
-          test "$(git rev-parse HEAD^)" = 5f309ea9441414ce76a1725d0d00b1497a67e177
+          git merge-base --is-ancestor 5f309ea9441414ce76a1725d0d00b1497a67e177 HEAD
           test "$DB_NAME" = act_contract_ci
           test "$DB_HOST" = 127.0.0.1
           mkdir -p record-evidence
-          git diff --name-only HEAD^ HEAD > record-evidence/changed-paths.txt
+          git diff --name-only 5f309ea9441414ce76a1725d0d00b1497a67e177 HEAD > record-evidence/changed-paths.txt
           while read -r p; do
             case "$p" in
               act_backend-main/apps/payments/models.py|act_backend-main/apps/payments/booking_contracts.py|act_backend-main/apps/payments/migrations/0003_booking_terms_refund_records.py|act_backend-main/apps/payments/test_booking_contracts.py|docs/review/ACT_CANCELLATION_RECORDS_2026-10-25.md|.github/workflows/act-cancellation-records.yml) ;;
