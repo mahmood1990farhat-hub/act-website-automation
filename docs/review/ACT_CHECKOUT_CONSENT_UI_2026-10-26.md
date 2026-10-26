@@ -1,0 +1,34 @@
+# Checkout acknowledgement and retained payment terms
+
+## Scope / source basis
+Frontend-only follow-on to PR #110, exact base fb93e5534de15e25e3b45f1935f6a61b25c672e8. Backend dependency is tested PR #111 c317a27b8ca663d296c7b241ed701371c69e2c77. Latest PR/branch metadata, original review/card components, discovery and payment initiation contracts and completed test evidence were checked first. The previous UI, admin, refund and policy work is preserved. No production or default-branch write.
+
+The new UI asks for initially unchecked agreement to the exact server-described terms BEFORE calling either existing initiation route. It sends only the existing booking_terms_acknowledgement payload: accepted, terms_version, terms_sha256, locale. No client policy-selection, effective-date, acceptance-time or refund-amount field is added. The unchanged backend remains authoritative. PaymentIntent preparation is not a claim that a card was charged.
+
+## Visible integration
+- The original booking index is moved byte-for-byte to BookingFlow.tsx (blob adb3cf8e12e89c8a70d59ec21bca85c26c2ebfbf). A small index wrapper provides per-booking React context and re-exports the original types. Original steps and language-draft handling are not recreated.
+- ConfirmFlightDetails retains journey display, price calculation inputs and existing guest/registered payment routes. Its existing POST is wrapped by the terms check; only the acknowledgement field is added. Existing three-hour refund marketing text on THIS review screen is replaced with a neutral reference to the displayed booking terms, not a hard-coded new policy. Public site/FAQ/legal documents are still a separate coordinated release dependency.
+- Exact text and immutable PDF reference are visible before preparation. Client code checks the descriptor schema, locale, safe document path and actual text SHA-256. The PDF digest remains metadata; no claim of independent downloaded-PDF byte verification.
+- A second read before initiation detects a changed terms release. Agreement is cleared and a deliberate fresh check is needed. Missing/invalid/untranslated/error responses never silently become legacy mode. Only an explicit valid enabled:false response retains the old final consent flow.
+- Material review data, locale or account token changes invalidate the local choice. Late read responses are discarded. Consent is not put in browser storage or cookies.
+- The same descriptor is kept in per-booking memory alongside the prepared payment. The card screen shows that version rather than fetching a newer release or showing unrelated legacy booking terms. Existing Privacy control stays. An unmatched or absent payment/locale/session blocks card submission, including programmatic submit. Final agreement is initially unchecked; rapid submits have an in-flight guard.
+- Returning to the unchanged review can reuse the prepared PaymentIntent response and its accepted version rather than create a replacement. Material edits require fresh review. This is in-memory continuity, NOT a new persistent cross-tab/reload payment-recovery system.
+
+## Failures and preservation boundaries
+A failed/uncertain preparation response is held within this booking context; no automatic payment replay is introduced. The existing postData HTTP helper and its transport behavior are unchanged. This narrow UI change does not prove a timed-out server operation failed, cannot serialize another browser tab and does not replace provider/server idempotency. An operator can investigate using the existing backend evidence. Server-side publication or feature changes in flight still require the coordinated rollout procedures; this browser read is not an atomic release lock.
+
+Existing Stripe confirmation, booking-status polling and analytics segments are preserved exactly and checked in CI. Existing email/PDF templates/generators, driver forms, admin review component, financial backend, translations of legal documents, policies, lockfile and database schema are untouched. Only UI labels for the new controls are translated across existing supported locales; the legal text is supplied unchanged in the requested locale, without an invented fallback translation.
+
+## Finite tests / no production activity
+New harness renders the actual modified booking-review and card-payment components in one per-booking context. It uses the existing locked React/UI dependencies and Tailwind; maps, loading decorations, legacy policy modal and Stripe Elements boundaries are stubbed. Public discovery and initiation return synthetic loopback responses. External browser origins are blocked. No real payment, refund, message, PDF regeneration, customer data, n8n or native-app action.
+
+Fourteen targeted scenarios run in desktop Chromium and emulated mobile WebKit (28 total): unchecked agreement, exact text/escaping/path, both guest and registered acknowledgements, retained final terms and privacy control, implicit/double card submit, changed release, material booking change, invalid descriptors, unavailable discovery/retry, explicit disabled mode, repeated preparation clicks, unknown response hold, unchanged review reuse, delayed language/read races, and missing final session. Multiple assertions belong to those named scenarios; do not inflate counts. Source-preservation checks and full frontend TypeScript also run. Earlier completed refund/driver/admin/email/PDF suites are not repeated.
+
+This is not physical iPhone Safari, a full live-page shell test, a joint browser/backend acceptance run or a production Next build. Hosted result is pending until completed output/artifact is inspected. Do not treat test source or an in-progress workflow as success.
+
+## Deployment boundary
+No merge or deployment is authorised by Continue. No policy version is published, no effective date set and no runtime flag enabled. This frontend requires the backend discovery endpoint to exist even when its new policy feature is disabled: deploy only as a reviewed coordinated pair, not ahead of the backend dependency. The backend subtree in this frontend branch is not the backend release candidate.
+
+Still required: final approved legal/company/privacy facts, published locale texts/PDFs/hashes and links, consistent public policy/FAQ surfaces, historical and exception-support resolution, final combined build and acceptance, then exact-revision deployment approval. Working confirmation/cancellation communications remain reused, not a task to recreate.
+
+Primary technical references consulted 26 October 2026: React useEffect documentation (race cleanup), https://react.dev/reference/react/useEffect ; Stripe PaymentIntent documentation (creation, confirmation and reuse distinctions), https://docs.stripe.com/payments/payment-intents . No new API/library migration or provider setup follows from those references.

@@ -1,5 +1,6 @@
 "use client";
 import { customerPaymentError, runtimeText } from "@/lib/customer-runtime";
+import { checkoutTermsText, TermsDocumentView, useCheckoutTermsSession } from "../bookTaxi/CheckoutTerms";
 
 import {
   CardNumberElement,
@@ -9,7 +10,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { FaArrowLeft } from "react-icons/fa";
 import MoneyCountingHand from "../loading/MoneyCountingHand";
@@ -74,12 +75,19 @@ export default function CheckoutForm({
 }) {
   const stripe = useStripe();
   const elements = useElements();
+  const termsSession = useCheckoutTermsSession();
+  const termsReady = !termsSession.uncertain && termsSession.session?.locale === locale
+    && termsSession.session.response.client_secret === clientSecret;
+  const acceptedDocument = termsReady && termsSession.session?.document.enabled
+    ? termsSession.session.document : null;
+  const submitting = useRef(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [cardComplete, setCardComplete] = useState(false);
   const [expiryComplete, setExpiryComplete] = useState(false);
   const [cvcComplete, setCvcComplete] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  useEffect(() => { setAgreed(false); }, [clientSecret, locale]);
   const [paymentCaptured, setPaymentCaptured] = useState(false);
   const [fulfillmentMsg, setFulfillmentMsg] = useState("");
   const trackedPaymentIntentIds = useRef<Set<string>>(new Set());
@@ -252,7 +260,9 @@ export default function CheckoutForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements || paymentCaptured) return;
+    if (!stripe || !elements || paymentCaptured || loading || submitting.current
+      || !termsReady || !agreed || !cardComplete || !expiryComplete || !cvcComplete) return;
+    submitting.current = true;
 
     setLoading(true);
     setErrorMsg("");
@@ -298,11 +308,12 @@ export default function CheckoutForm({
         setErrorMsg(runtimeText(locale, "paymentUnknown"));
       }
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };
 
-  const isFormValid = cardComplete && expiryComplete && cvcComplete && agreed;
+  const isFormValid = cardComplete && expiryComplete && cvcComplete && agreed && termsReady;
 
   return (
     <div>
@@ -311,6 +322,8 @@ export default function CheckoutForm({
       </h1>
 
       <p className="text-sm text-center text-muted mb-5">{trans.subtitle}</p>
+      {!termsReady && <p role="alert" className="text-red-300 mb-4">{checkoutTermsText(locale, 9)}</p>}
+      {acceptedDocument && <div className="mb-4"><TermsDocumentView document={acceptedDocument} final /></div>}
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Card Number */}
@@ -374,6 +387,9 @@ export default function CheckoutForm({
           <div className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
+              checked={agreed}
+              disabled={!termsReady || loading || paymentCaptured}
+              aria-label={trans.form.check.Agree}
               className="accent-primary w-4 h-4 cursor-pointer"
               onChange={(e) => setAgreed(e.target.checked)}
             />
@@ -385,7 +401,8 @@ export default function CheckoutForm({
               </span>
               <span> & </span>
               <span className="text-primary">
-            <Terms trans={policy_and_terms.terms} locale={locale}/>
+            {acceptedDocument ? <a className="underline" href="#act-payment-terms">{checkoutTermsText(locale, 0)}</a>
+              : <Terms trans={policy_and_terms.terms} locale={locale}/>}
               </span>
             </div>
           </div>
