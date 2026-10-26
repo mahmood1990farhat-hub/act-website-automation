@@ -2,7 +2,7 @@ const fs=require('node:fs'),cp=require('node:child_process'),assert=require('nod
 const BASE='fb93e5534de15e25e3b45f1935f6a61b25c672e8';
 const before=p=>cp.execFileSync('git',['show',`${BASE}:act_website-main/${p}`],{encoding:'utf8'});
 const after=p=>fs.readFileSync(p,'utf8');
-const tokens=s=>{const scanner=ts.createScanner(ts.ScriptTarget.Latest,true,ts.LanguageVariant.JSX,s),result=[];let kind;while((kind=scanner.scan())!==ts.SyntaxKind.EndOfFileToken)result.push([kind,scanner.getTokenText()]);return result;};
+const tokens=s=>{const scanner=ts.createScanner(ts.ScriptTarget.Latest,true,ts.LanguageVariant.JSX,s.trimEnd()),result=[];let kind;while((kind=scanner.scan())!==ts.SyntaxKind.EndOfFileToken)result.push([kind,scanner.getTokenText()]);return result;};
 const path='src/components/_components/bookTaxi/ConfirmFlightDetails.tsx';
 const original=before(path);let restored=after(path);
 const edits=[

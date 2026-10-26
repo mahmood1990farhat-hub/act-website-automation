@@ -110,7 +110,10 @@ export function useCheckoutTerms(locale: Locale, booking: unknown, token?: strin
       return null;
     } finally { inFlight.current = false; }
   }
-  return { document, ready, agreed: agreed && view.key === key, choose, prepare,
+  // Read the guard synchronously: a second same-tick click must not return to
+  // the outer handler and clear its busy state while the first POST is pending.
+  return { document, get ready() { return ready && !inFlight.current; },
+    agreed: agreed && view.key === key, choose, prepare,
     error: view.key === key && view.error, notice, uncertain: context.uncertain,
     retry: () => { if (!inFlight.current) { choose(false); setReload(x => x + 1); } } };
 }
