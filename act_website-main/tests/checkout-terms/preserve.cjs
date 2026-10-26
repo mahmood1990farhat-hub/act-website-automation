@@ -13,8 +13,8 @@ const edits=[
  ['          ...(acknowledgement ? { booking_terms_acknowledgement: acknowledgement } : {}),\n',''],
  ['\t\t\t}));\n\t\t\tsetIsLoading(false);','\t\t\t});\n\t\t\tsetIsLoading(false);'],
  ['      if (!res) return;\n',''],
- ['          disabled={isLoading || terms.uncertain}\n',''],
- ['                  disabled={isLoading || terms.uncertain}\n',''],
+ ['\n          disabled={isLoading || terms.uncertain}\n','\n'],
+ ['\n                  disabled={isLoading || terms.uncertain}\n','\n'],
  ['          <CheckoutTermsConsent gate={terms} locale={locale} disabled={isLoading} />\n',''],
  ['disabled={isLoading || !terms.ready}','disabled={isLoading}'],
 ];
