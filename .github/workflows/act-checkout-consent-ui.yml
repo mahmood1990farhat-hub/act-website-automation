@@ -1,0 +1,76 @@
+name: ACT checkout consent UI
+"on":
+  push:
+    branches: [draft/act-checkout-consent-ui-20261026]
+permissions:
+  contents: read
+concurrency:
+  group: act-checkout-consent-ui-isolated
+  cancel-in-progress: false
+jobs:
+  consent-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve baseline and constrain frontend-only scope
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REF" = refs/heads/draft/act-checkout-consent-ui-20261026
+          BASE=fb93e5534de15e25e3b45f1935f6a61b25c672e8
+          git merge-base --is-ancestor "$BASE" HEAD
+          mkdir -p consent-evidence
+          git diff --name-only "$BASE" HEAD > consent-evidence/changed-paths.txt
+          while read -r file; do
+            case "$file" in
+              act_website-main/src/lib/checkout-terms.ts|act_website-main/src/components/_components/bookTaxi/CheckoutTerms.tsx|act_website-main/src/components/_components/bookTaxi/BookingFlow.tsx|act_website-main/src/components/_components/bookTaxi/index.tsx|act_website-main/src/components/_components/bookTaxi/ConfirmFlightDetails.tsx|act_website-main/src/components/_components/stripe/CheckoutForm.tsx|act_website-main/tests/checkout-terms/*|.github/workflows/act-checkout-consent-ui.yml|docs/review/ACT_CHECKOUT_CONSENT_UI_2026-10-26.md) ;;
+              *) echo "STOP: Unexpected changed path $file"; exit 1 ;;
+            esac
+          done < consent-evidence/changed-paths.txt
+          test "$(git rev-parse HEAD:act_website-main/src/components/_components/bookTaxi/BookingFlow.tsx)" = adb3cf8e12e89c8a70d59ec21bca85c26c2ebfbf
+          git diff --exit-code "$BASE" HEAD -- act_backend-main act_website-main/package-lock.json act_website-main/src/components/_components/auth/captain act_website-main/src/components/_components/dashboard act_website-main/public/documents
+          git rev-parse HEAD > consent-evidence/source-sha.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.13.0"
+          cache: npm
+          cache-dependency-path: act_website-main/package-lock.json
+      - name: Install unchanged locked application dependencies
+        working-directory: act_website-main
+        run: npm ci --no-audit --no-fund
+      - name: Type-check and verify unchanged payment segments
+        working-directory: act_website-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node tests/checkout-terms/preserve.cjs | tee ../consent-evidence/preservation.txt
+          npx next typegen 2>&1 | tee ../consent-evidence/typegen.txt
+          npx tsc --noEmit --incremental false 2>&1 | tee ../consent-evidence/typescript.txt
+      - name: Install existing isolated browser-test versions
+        run: |
+          npm install --prefix "$RUNNER_TEMP/act-consent-tools" --no-package-lock --no-audit --no-fund esbuild@0.25.11 playwright@1.56.1
+          "$RUNNER_TEMP/act-consent-tools/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Test real review and card components with simulated provider boundaries
+        working-directory: act_website-main
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          NODE_PATH="$RUNNER_TEMP/act-consent-tools/node_modules" node tests/checkout-terms/run.cjs 2>&1 | tee ../consent-evidence/browser.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: act-checkout-consent-ui-${{ github.sha }}
+          path: |
+            consent-evidence/
+            act_website-main/.checkout-terms-test/*.png
+            act_website-main/.checkout-terms-test/RESULT.txt
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

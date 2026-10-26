@@ -2,6 +2,7 @@ import { runtimeText } from "@/lib/customer-runtime";
 import { LANGUAGE_CHANGE_EVENT } from "@/lib/booking-language-draft";
 import { customerText } from "@/lib/customer-text";
 import React, { useEffect, useState } from "react";
+import { CheckoutTermsConsent, checkoutTermsText, useCheckoutTerms } from "./CheckoutTerms";
 import { bookingText } from "./booking-text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,6 +90,7 @@ export default function ModernConfirmFlightDetails({
 }: typeProps) {
 	const [token, setToken] = useState<string | undefined>();
 	const [isLoading, setIsLoading] = useState(false);
+  const terms = useCheckoutTerms(locale, data, token);
   const [paymentError, setPaymentError] = useState("");
   useEffect(() => {
     if (!isLoading) return;
@@ -150,6 +152,7 @@ export default function ModernConfirmFlightDetails({
 	};
 
 	const onSubmit = async () => {
+    if (isLoading || !terms.ready) return;
     setPaymentError("");
 		setIsLoading(true);
 		const stop_points = data.routePoints
@@ -240,16 +243,18 @@ export default function ModernConfirmFlightDetails({
 		}
 
 		try {
-			const res = await postData<any>({
+			const res = await terms.prepare(acknowledgement => postData<any>({
 				endpoint: token ? "/api/trips/initiate-payment/" : "/api/trips/initiate-guest-payment/",
 				queryParams: { locale },
         noToast: true,
 				token: token || undefined,
 				body: {
 					...bodyData,
+          ...(acknowledgement ? { booking_terms_acknowledgement: acknowledgement } : {}),
 				},
-			});
+			}));
 			setIsLoading(false);
+      if (!res) return;
 			// The API returns client_secret in the response
 			setClientSecret(res.client_secret);
 			setPaymentTotal(res.price_breakdown?.total_cost ?? data.total_cost ?? 0);
@@ -280,6 +285,7 @@ export default function ModernConfirmFlightDetails({
 			<div className="mb-6">
 				<Button
 					onClick={() => setStep(6)}
+          disabled={isLoading || terms.uncertain}
 					variant="outline"
 					size="lg"
 					className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 cursor-pointer hover:text-white"
@@ -308,6 +314,7 @@ export default function ModernConfirmFlightDetails({
 									variant="ghost"
 									size="sm"
 									onClick={editDatelis}
+                  disabled={isLoading || terms.uncertain}
 									className="text-[#22C822] hover:bg-[#22C822]/10 hover:text-white h-8 px-2 cursor-pointer"
 								>
 									<Edit2 className="w-4 h-4 mr-1" />
@@ -715,11 +722,12 @@ export default function ModernConfirmFlightDetails({
 						</CardContent>
 					</Card>
 
+          <CheckoutTermsConsent gate={terms} locale={locale} disabled={isLoading} />
 					{/* Action Buttons */}
 					<div className="space-y-4">
 						<Button
 							onClick={onSubmit}
-							disabled={isLoading}
+							disabled={isLoading || !terms.ready}
 							className="w-full bg-[#ffd100] hover:bg-[#ffd100]/90 text-[#2D2E2E] font-bold py-6 text-base sm:text-lg shadow-xl transition-all duration-300 cursor-pointer"
 						>
 							{isLoading ? (
@@ -741,11 +749,7 @@ export default function ModernConfirmFlightDetails({
 							
 							<div className="flex items-center justify-center gap-1 max-w-xs sm:max-w-none">
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-								<span>
-									{isRTL
-										? "استرداد كامل عند الإلغاء قبل موعد الاستلام المحدد بـ3 ساعات على الأقل"
-										: customerText(locale, "Full refund when cancelled at least 3 hours before your scheduled pickup")}
-								</span>
+								<span>{checkoutTermsText(locale, 10)}</span>
 							</div>
 									<div className="flex items-center justify-center gap-1 text-nowrap">
 								<CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
@@ -785,4 +789,3 @@ export default function ModernConfirmFlightDetails({
 		</div>
 	);
 }
-
