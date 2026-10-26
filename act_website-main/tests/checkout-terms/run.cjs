@@ -95,10 +95,11 @@ const cases=[
    assert.equal(await page.getByRole('checkbox',{name:'I agree'}).isChecked(),false);
    await completeCards(page);await forceSubmit(page);assert.equal(await page.evaluate(()=>window.confirmCalls.length),0);
  }],
- ['rapid repeat clicks initiate once',async({page,state,origin})=>{
-   state.postDelay=250;await page.goto(origin);await ready(page);await agree(page).check();
-   await proceed(page).evaluate(b=>{b.click();b.click();b.click();});await page.locator('#act-payment-terms').waitFor();
-   assert.equal(state.posts.length,1);
+ ['rapid repeat clicks initiate once and keep navigation locked while pending',async({page,state,origin})=>{
+   state.postDelay=600;await page.goto(origin);await ready(page);await agree(page).check();
+   await proceed(page).evaluate(b=>{b.click();b.click();b.click();});
+   assert.equal(await page.getByRole('button',{name:'Back',exact:true}).isDisabled(),true);
+   await page.locator('#act-payment-terms').waitFor();assert.equal(state.posts.length,1);
  }],
  ['uncertain initiation is held without automatic or repeat-click retries',async({page,state,origin})=>{
    state.postStatus=503;await page.goto(origin);await ready(page);await agree(page).check();await proceed(page).click();
@@ -161,7 +162,7 @@ async function main(){
      return {contents,loader:'tsx',resolveDir:root};
    });
  }};
- await build({entryPoints:[path.join(out,'entry.tsx')],bundle:true,outfile:path.join(out,'app.js'),platform:'browser',jsx:'automatic',tsconfig:path.join(root,'tsconfig.json'),define:{'process.env.NODE_ENV':'"test"','process.env.NEXT_PUBLIC_API_BASE_URL':'""'},plugins:[stub]});
+ await build({entryPoints:[path.join(out,'entry.tsx')],bundle:true,outfile:path.join(out,'app.js'),platform:'browser',jsx:'automatic',tsconfig:path.join(root,'tsconfig.json'),define:{'process.env':'{}','process.env.NODE_ENV':'"test"','process.env.NEXT_PUBLIC_API_BASE_URL':'""'},plugins:[stub]});
  const css=await postcss([tailwind({base:root})]).process('@import "tailwindcss";',{from:path.join(root,'src/app/globals.css')});
  await fs.writeFile(path.join(out,'app.css'),css.css);
  const server=http.createServer(async(req,res)=>{
@@ -175,6 +176,7 @@ async function main(){
    for(const[name,engine,options]of[['desktop',chromium,{viewport:{width:1280,height:900}}],['mobile-webkit',webkit,{...devices['iPhone 13']}]] ){
      const browser=await engine.launch();
      try{for(const[label,test]of cases){const context=await browser.newContext(options);const page=await context.newPage();page.setDefaultTimeout(7000);page.setDefaultNavigationTimeout(10000);
+       page.on('pageerror',error=>console.error('BROWSER ERROR:',error.message));
        const state={posts:[],gets:[],version:'synthetic-v1',override:{},getStatus:200,postStatus:200,getDelay:0,postDelay:0,disabled:false};
        await page.route('**/*',async route=>{
          const url=new URL(route.request().url());if(url.origin!==origin){await route.abort();return;}
