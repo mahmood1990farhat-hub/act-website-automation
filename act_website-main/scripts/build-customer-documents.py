@@ -3,6 +3,12 @@
 Requires WeasyPrint. Set ACT_CJK_FONT to a Noto Sans CJK SC font for Chinese.
 Output is committed with the dictionaries so deployments need no PDF build tool.
 """
+# Explicit review mode never writes website public paths or activates a release.
+import sys
+if "--review-bundle" in sys.argv or "--verify-review-bundle" in sys.argv:
+    from policy_review_bundle import main as review_main
+    raise SystemExit(review_main())
+
 import hashlib, html, json, os
 from pathlib import Path
 from weasyprint import HTML

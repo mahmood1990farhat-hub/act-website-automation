@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "state": "review_only",
+  "bundle_id": "act-policy-review-20261026",
+  "published": false,
+  "effective_at": null,
+  "source_revision": "5618d56e111510e7cd1e32ecf524f67c34bcd9b7",
+  "frontend_revision": "4e469cf93327d89d7e28a09cd8ef3cc96b011f8a",
+  "backend_revision": "c317a27b8ca663d296c7b241ed701371c69e2c77",
+  "policy_version": "act-cancellation-24h12h-v1",
+  "required_checkout_locales": [
+    "en",
+    "ar"
+  ],
+  "publication_holds": [
+    "Confirm company correspondence and licensed operator particulars in the final text; do not replace placeholders with guessed facts.",
+    "Complete customer cancellation fairness/loss and operating-procedure review already recorded in PR #101; owner schedule acceptance is not a legal certification.",
+    "Complete the recorded driver DBS-processing, supplier/transfer and manual-retention operational checks; do not remove existing privacy holds.",
+    "Prepare and review matching Arabic policy sources and a distinct customer privacy notice; no English fallback or driver-privacy substitution is authorised.",
+    "Align website dictionaries/FAQs, versioned public files and form links with final approved documents, then verify served hashes, combined release and separate deployment approval."
+  ],
+  "documents": [
+    {
+      "id": "customer-booking-terms",
+      "title": "ACT Customer Booking Terms & Conditions",
+      "version": "act-customer-booking-v02-review-20261023",
+      "locale": "en",
+      "source": "docs/review/ACT_CUSTOMER_BOOKING_TERMS_DRAFT_2026-10-22.md",
+      "source_sha256": "7ef8ade108d88d9e5f93a5edccab619f247fa7971055215be6cf697dbd4ea7be",
+      "start": "## Part A - Proposed customer-facing terms",
+      "end": "## Part B - Owner and implementation review, not for publication",
+      "required_phrases": [
+        "more than 24 hours",
+        "50% of the amount paid",
+        "12 hours or less",
+        "Consumer-rights safeguard",
+        "Online bookings require at least three hours"
+      ]
+    },
+    {
+      "id": "driver-application-terms",
+      "title": "ACT Driver Application Terms",
+      "version": "act-driver-application-v02-review-20261021",
+      "locale": "en",
+      "source": "docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md",
+      "source_sha256": "86e115d191a4ca97cf4787e81e406dd341b3755494ff42de8f90715011955da7",
+      "start": "## A. Driver Application Terms - proposed applicant-facing text",
+      "end": "## B. Driver Application and Verification Privacy Notice - proposed applicant-facing text",
+      "required_phrases": [
+        "exclusively self-employed",
+        "Self Assessment",
+        "HMRC",
+        "statutory rights",
+        "rental, hire or lease agreement"
+      ]
+    },
+    {
+      "id": "driver-privacy-notice",
+      "title": "ACT Driver Application and Verification Privacy Notice",
+      "version": "act-driver-privacy-v02-review-20261021",
+      "locale": "en",
+      "source": "docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md",
+      "source_sha256": "86e115d191a4ca97cf4787e81e406dd341b3755494ff42de8f90715011955da7",
+      "start": "## B. Driver Application and Verification Privacy Notice - proposed applicant-facing text",
+      "end": "## C. Owner/reviewer notes and implementation handoff - not applicant-facing",
+      "required_phrases": [
+        "DBS publication hold",
+        "Supplier and transfer publication hold",
+        "monthly manual retention review",
+        "six months",
+        "30 days"
+      ]
+    }
+  ]
+}
