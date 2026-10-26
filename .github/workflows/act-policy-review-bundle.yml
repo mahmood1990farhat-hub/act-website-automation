@@ -28,11 +28,16 @@ jobs:
           git diff --name-only "$BASE" HEAD > policy-evidence/changed-paths.txt
           while read -r file; do
             case "$file" in
-              act_website-main/scripts/build-customer-documents.py|act_website-main/scripts/policy_review_bundle.py|act_website-main/tests/policy-bundle/test_bundle.py|docs/policy-releases/act-policy-review-20261026.json|docs/review/ACT_CUSTOMER_BOOKING_TERMS_DRAFT_2026-10-22.md|docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md|docs/review/ACT_POLICY_BUNDLE_2026-10-26.md|.github/workflows/act-policy-review-bundle.yml) ;;
+              act_website-main/scripts/build-customer-documents.py|act_website-main/scripts/policy_review_bundle.py|act_website-main/tests/policy-bundle/test_bundle.py|act_website-main/tests/policy-bundle/test_bilingual.py|docs/policy-releases/act-policy-review-20261026.json|docs/policy-releases/act-policy-review-bilingual-20261026.json|docs/review/ACT_CUSTOMER_BOOKING_TERMS_DRAFT_2026-10-22.md|docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md|docs/review/ACT_POLICY_BUNDLE_2026-10-26.md|docs/review/ACT_BILINGUAL_POLICY_BINDING_2026-10-26.md|docs/review/ar/customer-booking-terms-sections.md|docs/review/ar/driver-application-terms-sections.md|docs/review/ar/driver-privacy-notice-sections.md|.github/workflows/act-policy-review-bundle.yml) ;;
               *) echo "STOP: Unexpected changed path $file"; exit 1 ;;
             esac
           done < policy-evidence/changed-paths.txt
           git diff --exit-code "$BASE" HEAD -- act_backend-main act_website-main/src act_website-main/public act_website-main/package-lock.json
+          test "$(git rev-parse HEAD:docs/review/ACT_CUSTOMER_BOOKING_TERMS_DRAFT_2026-10-22.md)" = 4d95d04461f948754f72e267bea362c04c6ed513
+          test "$(git rev-parse HEAD:docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md)" = 2fcdc33f07c358fd73f4191e1d2f56c431366825
+          test "$(git rev-parse HEAD:docs/review/ar/customer-booking-terms-sections.md)" = 30e1258f6107b2b23b587a2c4dd3b755d190e0f2
+          test "$(git rev-parse HEAD:docs/review/ar/driver-application-terms-sections.md)" = 9a95aa40f3aac2f2de5b620fa447a6ef77716579
+          test "$(git rev-parse HEAD:docs/review/ar/driver-privacy-notice-sections.md)" = 913f2cb1ccce15f0e616114fe4096e284b032c43
           python - <<'PY'
           import hashlib
           from pathlib import Path
@@ -54,19 +59,20 @@ jobs:
           python -m pip install -q WeasyPrint==68.0 PyMuPDF==1.26.7
           python --version > policy-evidence/python-version.txt
           python -m pip freeze > policy-evidence/tool-versions.txt
-      - name: Test source, document, disabled configuration and path consistency
+      - name: Test original English compatibility and new bilingual mappings only
         shell: bash
         run: |
           set -Eeuo pipefail
           python act_website-main/tests/policy-bundle/test_bundle.py 2>&1 | tee policy-evidence/tests.txt
+          python act_website-main/tests/policy-bundle/test_bilingual.py 2>&1 | tee policy-evidence/bilingual-tests.txt
           python act_website-main/scripts/build-customer-documents.py \
-            --review-bundle docs/policy-releases/act-policy-review-20261026.json \
+            --review-bundle docs/policy-releases/act-policy-review-bilingual-20261026.json \
             --output "$RUNNER_TEMP/act-policy-review"
           python act_website-main/scripts/build-customer-documents.py \
             --verify-review-bundle "$RUNNER_TEMP/act-policy-review"
           cp -a "$RUNNER_TEMP/act-policy-review" policy-evidence/review-bundle
           git diff --exit-code -- act_website-main/public act_website-main/src act_backend-main
-          echo 'REVIEW DOCUMENTS MATCH CHECKOUT TEXT - NO PUBLICATION OR DEPLOYMENT'
+          echo 'ENGLISH AND ARABIC DOCUMENT MAPPINGS MATCH - NO PUBLICATION OR DEPLOYMENT'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

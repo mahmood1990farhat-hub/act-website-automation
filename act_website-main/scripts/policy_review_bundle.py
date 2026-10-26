@@ -77,18 +77,27 @@ def load_spec(path: Path) -> dict:
         raise ValueError("Document list required")
     seen = set()
     for doc in docs:
-        if not SLUG.fullmatch(doc.get("id", "")) or doc["id"] in seen:
+        if not SLUG.fullmatch(doc.get("id", "")) or (doc["id"], doc.get("locale")) in seen:
             raise ValueError("Invalid or duplicate document ID")
-        seen.add(doc["id"])
-        if doc.get("locale") != "en":
-            raise ValueError("Only the actually reviewed English sources are supplied; do not invent translations")
+        seen.add((doc["id"], doc.get("locale")))
+        if doc.get("locale") not in ("en", "ar"):
+            raise ValueError("Only explicit English/Arabic review sources are supported")
         if not HASH.fullmatch(doc.get("source_sha256", "")):
             raise ValueError("Pinned source hash required")
         if not all(isinstance(doc.get(k), str) and doc[k].strip()
                    for k in ("title", "version", "source", "start", "end")):
             raise ValueError("Incomplete document source specification")
-    if seen != {"customer-booking-terms", "driver-application-terms", "driver-privacy-notice"}:
+    ids = {"customer-booking-terms", "driver-application-terms", "driver-privacy-notice"}
+    if {ident for ident, locale in seen if locale == "en"} != ids or any(ident not in ids for ident, _ in seen):
         raise ValueError("Keep customer terms, driver terms and driver privacy distinct")
+    for doc in docs:
+        if doc["locale"] == "ar":
+            counterpart = next(d for d in docs if d["id"] == doc["id"] and d["locale"] == "en")
+            if (doc["version"] != counterpart["version"]
+                    or not HASH.fullmatch(doc.get("translation_of_text_sha256", ""))):
+                raise ValueError("Translation must identify the same version and exact English text")
+    if spec.get("require_complete_pairs") is True and seen != {(ident, loc) for ident in ids for loc in ("en", "ar")}:
+        raise ValueError("Bilingual bundle requires all three explicit English/Arabic pairs")
     return spec
 
 
@@ -98,11 +107,17 @@ def selected_source(doc: dict, root: Path) -> tuple[bytes, str]:
         raise ValueError("Source changed since review: " + doc["source"])
     text = raw.decode("utf-8")
     start, end = doc["start"], doc["end"]
-    if text.count(start) != 1 or text.count(end) != 1:
-        raise ValueError("Section boundaries missing or duplicated")
-    a, b = text.index(start) + len(start), text.index(end)
-    if b <= a:
-        raise ValueError("Section order invalid")
+    if end == "__END_OF_PINNED_SECTION_FILE__":
+        # Already translated section files carry a single review-only header.
+        if doc["locale"] != "ar" or not text.startswith(start) or text.count(start) != 1:
+            raise ValueError("Invalid translated section header")
+        a, b = len(start), len(text)
+    else:
+        if text.count(start) != 1 or text.count(end) != 1:
+            raise ValueError("Section boundaries missing or duplicated")
+        a, b = text.index(start) + len(start), text.index(end)
+        if b <= a:
+            raise ValueError("Section order invalid")
     body = text[a:b].strip() + "\n"
     for marker in doc.get("required_phrases", []):
         if marker not in body:
@@ -141,6 +156,8 @@ def canonical(doc: dict, markdown: str) -> str:
 
 
 def markup(doc: dict, markdown: str) -> str:
+    if doc["locale"] == "ar":
+        return arabic_markup(doc, markdown)
     e = html.escape
     content = "".join(f"<{tag}>{e(value)}</{tag}>" for tag, value in blocks(markdown))
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -152,6 +169,67 @@ def markup(doc: dict, markdown: str) -> str:
 Reference markers refer to the complete review source included in this bundle.
 Unresolved publication notes remain visible; this is not a live customer contract.</p>
 </body></html>'''
+
+
+def document_key(ident: str, locale: str) -> str:
+    return ident if locale == "en" else f"{ident}@{locale}"
+
+
+def arabic_inline(text: str) -> str:
+    # Escape everything; isolate only literal Latin/numeric runs for RTL display.
+    pattern = r"\[[LS][0-9, LS-]+\]|\+44(?:[ ]\d+){2,4}|[A-Za-z0-9]+(?:[A-Za-z0-9@._:/%+ -]*[A-Za-z0-9%])?"
+    out, start = [], 0
+    for match in re.finditer(pattern, text):
+        out.extend((html.escape(text[start:match.start()]),
+                    '<span dir="ltr" class="ltr">' + html.escape(match.group()) + '</span>'))
+        start = match.end()
+    return "".join(out) + html.escape(text[start:])
+
+
+def arabic_markup(doc: dict, markdown: str) -> str:
+    css = CSS + '''html{direction:rtl;}body{text-align:right;font-size:10.5pt;line-height:1.65;}
+    header{direction:ltr;text-align:left;}h1{font-size:19pt;line-height:1.65;}
+    h2{font-size:11pt;line-height:1.65;}.flag{border-left:0;border-right:4px solid #b08b00;}
+    .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block;}
+    .version{direction:ltr;text-align:right;}@page{@bottom-right{direction:ltr;}}
+    '''
+    content = "".join(f"<{tag}>{arabic_inline(value)}</{tag}>" for tag, value in blocks(markdown))
+    return f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+    <title>{html.escape(doc["title"])} - review</title><style>{css}</style></head><body>
+    <header>Airport &amp; City Transfer | العربية</header>
+    <p class="flag">مسودة ترجمة عربية للمراجعة - غير منشورة وغير سارية</p>
+    <p class="version">{html.escape(doc["version"])}</p><h1>{arabic_inline(doc["title"])}</h1>{content}
+    <p class="note">نسخة مراجعة من أقسام الترجمة المثبّتة دون تغيير الصياغة.
+    تشير علامات المراجع إلى المصدر الإنجليزي الكامل المرفق. تبقى ملاحظات النشر غير المحسومة ظاهرة؛
+    ليست هذه الوثيقة عقداً سارياً أو ترجمة قانونية معتمدة.</p></body></html>'''
+
+
+def link_map(documents: dict, required: list[str]) -> dict:
+    locales = {}
+    names = {"checkout_customer_terms": "customer-booking-terms",
+             "driver_application_terms": "driver-application-terms",
+             "driver_application_privacy": "driver-privacy-notice"}
+    for locale in required:
+        if all(document_key(ident, locale) in documents for ident in names.values()):
+            group = {name: documents[document_key(ident, locale)]["proposed_document_url"]
+                     for name, ident in names.items()}
+            locales[locale] = {"locale": locale, **group, "customer_privacy": None}
+    return {"state": "review_only", "runtime_wired": False, "selection": "exact_page_locale",
+            "locales": locales, "customer_privacy": None,
+            "missing_checkout_locales": [loc for loc in required if loc not in locales]}
+
+
+def select_document_links(links: dict, locale: str) -> dict:
+    # Future UI integration must pass the page language explicitly, never guess.
+    if locale not in ("en", "ar") or locale not in links.get("locales", {}):
+        raise ValueError("No policy documents for this exact page language")
+    selected = links["locales"][locale]
+    if selected.get("locale") != locale:
+        raise ValueError("Policy document language mismatch")
+    for name in ("checkout_customer_terms", "driver_application_terms", "driver_application_privacy"):
+        if not selected[name].startswith(f"/documents/{locale}/"):
+            raise ValueError("Policy link must match the selected language")
+    return dict(selected)
 
 
 def render_pdf(source: str) -> bytes:
@@ -181,6 +259,11 @@ def build_bundle(spec_path: Path, output: Path, root: Path = REPO) -> dict:
     assert_output_safe(output, root)
     # Validate every source before generating or writing any result.
     inputs = [(doc, *selected_source(doc, root)) for doc in spec["documents"]]
+    english = {doc["id"]: sha(canonical(doc, body).encode())
+               for doc, raw, body in inputs if doc["locale"] == "en"}
+    for doc, raw, body in inputs:
+        if doc["locale"] == "ar" and doc["translation_of_text_sha256"] != english[doc["id"]]:
+            raise ValueError("Translation belongs to another English policy revision")
     with tempfile.TemporaryDirectory(prefix="act-policy-review-", dir=output.parent) as temp:
         stage = Path(temp) / "bundle"
         stage.mkdir()
@@ -196,55 +279,56 @@ def build_bundle(spec_path: Path, output: Path, root: Path = REPO) -> dict:
                 raise ValueError("Renderer did not return a PDF")
             text_hash, pdf_hash = sha(text.encode()), sha(pdf)
             filename = f"{text_hash[:16]}-{pdf_hash[:16]}.pdf"
-            target = f"documents/en/{doc['id']}/{filename}"
-            text_path = f"texts/en/{doc['id']}.txt"
-            html_path = f"previews/en/{doc['id']}.html"
+            target = f"documents/{doc['locale']}/{doc['id']}/{filename}"
+            text_path = f"texts/{doc['locale']}/{doc['id']}.txt"
+            html_path = f"previews/{doc['locale']}/{doc['id']}.html"
             write(target, pdf); write(text_path, text); write(html_path, rendered)
             write(f"sources/{Path(doc['source']).name}", raw)
-            write(f"sections/en/{doc['id']}.md", body)
-            documents[doc["id"]] = {
-                "title": doc["title"], "version": doc["version"], "locale": "en",
+            write(f"sections/{doc['locale']}/{doc['id']}.md", body)
+            documents[document_key(doc["id"], doc["locale"])] = {
+                "id": doc["id"], "title": doc["title"], "version": doc["version"], "locale": doc["locale"],
                 "source": doc["source"], "source_sha256": doc["source_sha256"],
                 "section_sha256": sha(body.encode()), "text_path": text_path,
                 "text_sha256": text_hash, "pdf_path": target, "pdf_sha256": pdf_hash,
                 "preview_path": html_path, "proposed_document_url": "/" + target,
                 "published": False,
+                "translation_of_text_sha256": doc.get("translation_of_text_sha256"),
             }
         customer = documents["customer-booking-terms"]
-        text = relative_file(stage, customer["text_path"]).read_text(encoding="utf-8")
         release = {"published": False, "effective_at": None,
-                   "terms_version": customer["version"], "policy_version": spec["policy_version"],
-                   "locales": {"en": {"text": text, "sha256": customer["text_sha256"],
-                       "url": customer["proposed_document_url"], "pdf_sha256": customer["pdf_sha256"]}}}
+                   "terms_version": customer["version"], "policy_version": spec["policy_version"], "locales": {}}
+        for locale in spec["required_checkout_locales"]:
+            localized = documents.get(document_key("customer-booking-terms", locale))
+            if localized:
+                text = relative_file(stage, localized["text_path"]).read_text(encoding="utf-8")
+                release["locales"][locale] = {"text": text, "sha256": localized["text_sha256"],
+                    "url": localized["proposed_document_url"], "pdf_sha256": localized["pdf_sha256"]}
         write("checkout-release.candidate.json", dump(release))
-        links = {"state": "review_only", "runtime_wired": False,
-                 "checkout_customer_terms": customer["proposed_document_url"],
-                 "driver_application_terms": documents["driver-application-terms"]["proposed_document_url"],
-                 "driver_application_privacy": documents["driver-privacy-notice"]["proposed_document_url"],
-                 "customer_privacy": None, "missing_checkout_locales": ["ar"]}
+        links = link_map(documents, spec["required_checkout_locales"])
         write("document-links.candidate.json", dump(links))
         write("review-input.json", dump(spec))
-        items = "".join(f'<li><b>{html.escape(d["title"])}</b>: '
+        items = "".join(f'<li lang="{d["locale"]}"><b>{html.escape(d["title"])}</b> ({d["locale"]}): '
                        f'<a href="{d["preview_path"]}">HTML review</a> | '
                        f'<a href="{d["pdf_path"]}">PDF review</a></li>' for d in documents.values())
         holds = "".join(f'<li>{html.escape(h)}</li>' for h in spec["publication_holds"])
         write("index.html", f'<!doctype html><html lang="en"><meta charset="utf-8"><title>ACT policy review</title>'
               f'<style>{CSS}</style><body><h1>ACT policy review bundle</h1><p class="flag">{WARNING}</p>'
               f'<ul>{items}</ul><h2>Publication holds</h2><ul>{holds}</ul>'
-              '<p>Arabic is not supplied; no silent English fallback. Customer privacy is separate and not replaced by driver privacy.</p></body></html>')
+              '<p>Only the explicitly supplied languages are available; no silent fallback. Customer privacy is separate and not replaced by driver privacy.</p></body></html>')
         write("README.txt", "ACT POLICY REVIEW BUNDLE - NOT A DEPLOYMENT PACKAGE\n\n"
               "All PDF, HTML and checkout-text outputs share pinned source sections.\n"
               "Only Markdown heading/bold presentation and paragraph whitespace are normalised.\n"
               "No substantive policy changes; original full sources and references are included.\n"
               "The checkout candidate is published=false with no effective date; do not load it as production settings.\n"
               "Proposed public URLs are mappings, not verified live links. HTML/PDF review links in index.html are local.\n"
-              "No Arabic translation or customer privacy finalisation is claimed.\n"
+              "Translations remain review drafts; customer privacy finalisation is not claimed.\n"
               "Hashes prove local artifact consistency, not legal approval, finality or live PDF hosting.\n"
               "No existing website dictionary, public PDF, confirmation/cancellation receipt or database is changed.\n")
         files = {str(p.relative_to(stage)): sha(p.read_bytes()) for p in sorted(stage.rglob("*")) if p.is_file()}
         receipt = {"format": FORMAT, "state": "review_only", "bundle_id": spec["bundle_id"],
                    "published": False, "effective_at": None, "runtime_wired": False,
                    "source_revision": spec["source_revision"], "documents": documents,
+                   "translation_revision": spec.get("translation_revision"),
                    "publication_holds": spec["publication_holds"], "files": files}
         write("bundle-manifest.json", dump(receipt))
         verify_bundle(stage)
@@ -271,18 +355,39 @@ def verify_bundle(root: Path) -> dict:
     release = json.loads(relative_file(root, "checkout-release.candidate.json").read_text(encoding="utf-8"))
     if release["published"] is not False or release["effective_at"] is not None:
         raise ValueError("Candidate checkout activation is forbidden")
-    for ident, doc in receipt["documents"].items():
+    documents = receipt["documents"]
+    customer_locales = {d["locale"] for key, d in documents.items()
+                        if key.split("@")[0] == "customer-booking-terms"}
+    if set(release["locales"]) != customer_locales:
+        raise ValueError("Checkout language inventory differs from its documents")
+    for ident, doc in documents.items():
+        locale = doc["locale"]
+        document_id = ident.split("@")[0]
+        if locale not in ("en", "ar") or ident != document_key(document_id, locale):
+            raise ValueError("Invalid document language identity")
         txt = relative_file(root, doc["text_path"]).read_bytes()
         pdf = relative_file(root, doc["pdf_path"]).read_bytes()
         if sha(txt) != doc["text_sha256"] or sha(pdf) != doc["pdf_sha256"] or not pdf.startswith(b"%PDF-"):
             raise ValueError("Document content/hash mismatch")
-        if doc["proposed_document_url"] != "/" + doc["pdf_path"] or doc["published"] is not False:
-            raise ValueError("Incorrect proposed document mapping")
-        if ident == "customer-booking-terms":
-            descriptor = release["locales"]["en"]
-            if descriptor != {"text": txt.decode(), "sha256": doc["text_sha256"],
-                              "url": doc["proposed_document_url"], "pdf_sha256": doc["pdf_sha256"]}:
+        if (doc["proposed_document_url"] != "/" + doc["pdf_path"] or doc["published"] is not False
+                or not doc["pdf_path"].startswith(f"documents/{locale}/{document_id}/")):
+            raise ValueError("Incorrect proposed language/document mapping")
+        if locale == "ar" and doc["translation_of_text_sha256"] != documents[document_id]["text_sha256"]:
+            raise ValueError("Translation source revision mismatch")
+        if document_id == "customer-booking-terms":
+            descriptor = release["locales"][locale]
+            if (doc["version"] != release["terms_version"] or descriptor != {
+                    "text": txt.decode(), "sha256": doc["text_sha256"],
+                    "url": doc["proposed_document_url"], "pdf_sha256": doc["pdf_sha256"]}):
                 raise ValueError("Checkout and downloadable terms differ")
+    links = json.loads(relative_file(root, "document-links.candidate.json").read_text(encoding="utf-8"))
+    # New bundles carry exact-locale link maps. Retain verification of the original
+    # English-only artifact format without silently using its old global links.
+    if "locales" in links:
+        if links != link_map(documents, ["en", "ar"]):
+            raise ValueError("Language-specific policy link map differs from documents")
+        for locale in links["locales"]:
+            select_document_links(links, locale)
     return receipt
 
 
@@ -302,7 +407,7 @@ def main() -> int:
             if not args.review_bundle or not args.output:
                 parser.error("--review-bundle and --output are both required")
             build_bundle(args.review_bundle, args.output)
-            print("THREE MATCHED POLICY REVIEW DOCUMENTS PREPARED - NOT PUBLISHED")
+            print("MATCHED POLICY REVIEW DOCUMENTS PREPARED - NOT PUBLISHED")
         return 0
     except (ValueError, OSError, KeyError, TypeError, UnicodeError) as exc:
         parser.exit(1, "STOP: " + str(exc) + "\n")

@@ -1,0 +1,110 @@
+{
+  "backend_revision": "c317a27b8ca663d296c7b241ed701371c69e2c77",
+  "bundle_id": "act-policy-bilingual-review-20261026",
+  "documents": [
+    {
+      "end": "## Part B - Owner and implementation review, not for publication",
+      "id": "customer-booking-terms",
+      "locale": "en",
+      "required_phrases": [
+        "more than 24 hours",
+        "50% of the amount paid",
+        "12 hours or less",
+        "Consumer-rights safeguard",
+        "Online bookings require at least three hours"
+      ],
+      "source": "docs/review/ACT_CUSTOMER_BOOKING_TERMS_DRAFT_2026-10-22.md",
+      "source_sha256": "7ef8ade108d88d9e5f93a5edccab619f247fa7971055215be6cf697dbd4ea7be",
+      "start": "## Part A - Proposed customer-facing terms",
+      "title": "ACT Customer Booking Terms & Conditions",
+      "version": "act-customer-booking-v02-review-20261023"
+    },
+    {
+      "end": "## B. Driver Application and Verification Privacy Notice - proposed applicant-facing text",
+      "id": "driver-application-terms",
+      "locale": "en",
+      "required_phrases": [
+        "exclusively self-employed",
+        "Self Assessment",
+        "HMRC",
+        "statutory rights",
+        "rental, hire or lease agreement"
+      ],
+      "source": "docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md",
+      "source_sha256": "86e115d191a4ca97cf4787e81e406dd341b3755494ff42de8f90715011955da7",
+      "start": "## A. Driver Application Terms - proposed applicant-facing text",
+      "title": "ACT Driver Application Terms",
+      "version": "act-driver-application-v02-review-20261021"
+    },
+    {
+      "end": "## C. Owner/reviewer notes and implementation handoff - not applicant-facing",
+      "id": "driver-privacy-notice",
+      "locale": "en",
+      "required_phrases": [
+        "DBS publication hold",
+        "Supplier and transfer publication hold",
+        "monthly manual retention review",
+        "six months",
+        "30 days"
+      ],
+      "source": "docs/review/ACT_DRIVER_POLICIES_DRAFT_2026-10-21.md",
+      "source_sha256": "86e115d191a4ca97cf4787e81e406dd341b3755494ff42de8f90715011955da7",
+      "start": "## B. Driver Application and Verification Privacy Notice - proposed applicant-facing text",
+      "title": "ACT Driver Application and Verification Privacy Notice",
+      "version": "act-driver-privacy-v02-review-20261021"
+    },
+    {
+      "end": "__END_OF_PINNED_SECTION_FILE__",
+      "id": "customer-booking-terms",
+      "locale": "ar",
+      "source": "docs/review/ar/customer-booking-terms-sections.md",
+      "source_sha256": "a1a0dc70a199f31f78c7b83fd9c31cc21c8d07b6ebb46e96950ac4ac82a3aedc",
+      "start": "<!-- TRANSLATION REVIEW DRAFT AR-01 | 2026-10-26 | NOT PUBLISHED OR EFFECTIVE -->",
+      "title": "شروط وأحكام حجز العملاء لدى ACT",
+      "translation_of_text_sha256": "abd1079a5304f69cc664f3f3841abdfe17f3545273367b20137ea8e291083327",
+      "version": "act-customer-booking-v02-review-20261023"
+    },
+    {
+      "end": "__END_OF_PINNED_SECTION_FILE__",
+      "id": "driver-application-terms",
+      "locale": "ar",
+      "source": "docs/review/ar/driver-application-terms-sections.md",
+      "source_sha256": "9703c37d382d5a5b07d4a297a2419f60af13ec06731bff87caed8d015deaec2e",
+      "start": "<!-- TRANSLATION REVIEW DRAFT AR-01 | 2026-10-26 | NOT PUBLISHED OR EFFECTIVE -->",
+      "title": "شروط تقديم طلب السائق لدى ACT",
+      "translation_of_text_sha256": "09afce2c8af0f8925bcf7252a57506f14ca7d9305a3f5c9d6d01d54d48c5e2cd",
+      "version": "act-driver-application-v02-review-20261021"
+    },
+    {
+      "end": "__END_OF_PINNED_SECTION_FILE__",
+      "id": "driver-privacy-notice",
+      "locale": "ar",
+      "source": "docs/review/ar/driver-privacy-notice-sections.md",
+      "source_sha256": "c66183ec6bffd50401f64c28b878d3c082aba01567ac17f8849feabc43a23726",
+      "start": "<!-- TRANSLATION REVIEW DRAFT AR-01 | 2026-10-26 | NOT PUBLISHED OR EFFECTIVE -->",
+      "title": "إشعار خصوصية طلبات السائقين والتحقق منها لدى ACT",
+      "translation_of_text_sha256": "4da269cb7545e6a2ae438e8530ec44f6c50113e5d054579292f33d67c2c6aee2",
+      "version": "act-driver-privacy-v02-review-20261021"
+    }
+  ],
+  "effective_at": null,
+  "frontend_revision": "4e469cf93327d89d7e28a09cd8ef3cc96b011f8a",
+  "policy_version": "act-cancellation-24h12h-v1",
+  "publication_holds": [
+    "Confirm company correspondence and licensed operator particulars in the final text; do not replace placeholders with guessed facts.",
+    "Complete customer cancellation fairness/loss and operating-procedure review already recorded in PR #101; owner schedule acceptance is not a legal certification.",
+    "Complete the recorded driver DBS-processing, supplier/transfer and manual-retention operational checks; do not remove existing privacy holds.",
+    "Complete bilingual content review of the supplied English/Arabic drafts and finalise the distinct customer privacy notice; no cross-language fallback or driver-privacy substitution is authorised.",
+    "Align website dictionaries/FAQs, versioned public files and form links with final approved documents, then verify served hashes, combined release and separate deployment approval."
+  ],
+  "published": false,
+  "require_complete_pairs": true,
+  "required_checkout_locales": [
+    "en",
+    "ar"
+  ],
+  "schema": 1,
+  "source_revision": "5618d56e111510e7cd1e32ecf524f67c34bcd9b7",
+  "state": "review_only",
+  "translation_revision": "103ca3fc09a249e8e566d2e8f1321f8bacc21972"
+}
