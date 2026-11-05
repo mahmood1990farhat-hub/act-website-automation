@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { decode } from "@googlemaps/polyline-codec";
+import { buildTripTrackingUrl } from "@/lib/trip-tracking-url";
 
 type Props = {
 	tripId: string;
@@ -9,7 +10,6 @@ type Props = {
 
 const MapViewtest = ({ tripId, routePolyline }: Props) => {
 	const mapRef = useRef<google.maps.Map | null>(null);
-	const wsRef = useRef<WebSocket | null>(null);
 
 	const [path, setPath] = useState<google.maps.LatLngLiteral[]>([]);
 	const [currentLocation, setCurrentLocation] =
@@ -33,6 +33,13 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 
 	// فك تشفير المسار الكامل
 	useEffect(() => {
+		targetLocationRef.current = null;
+		targetHeadingRef.current = null;
+		lastCenterRef.current = null;
+		setPath([]);
+		setCurrentLocation(null);
+		setTraveledPath([]);
+		setHeading(0);
 		if (routePolyline) {
 			const decoded = decode(routePolyline, 5);
 			const formattedPath = decoded.map(([lat, lng]) => ({ lat, lng }));
@@ -45,15 +52,20 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 				setTraveledPath([formattedPath[0]]);
 			}
 		}
-	}, [routePolyline]);
+	}, [routePolyline, tripId]);
 
 	// فتح WebSocket لتلقي تحديثات الموقع
 	useEffect(() => {
-		wsRef.current = new WebSocket(
-			`wss://act-backend.horizontechco.com/ws/trips/${tripId}/tracking/`,
+		const url = buildTripTrackingUrl(
+			process.env.NEXT_PUBLIC_API_BASE_URL,
+			tripId,
 		);
+		if (!url) return;
+		const socket = new WebSocket(url);
+		let disposed = false;
 
-		wsRef.current.onmessage = (event) => {
+		socket.onmessage = (event) => {
+			if (disposed) return;
 			try {
 				const data = JSON.parse(event.data);
 				if (data.location) {
@@ -71,10 +83,22 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 			}
 		};
 
-		wsRef.current.onclose = () => console.log("WebSocket closed");
-		wsRef.current.onerror = (err) => console.error("WebSocket error:", err);
+		socket.onclose = () => {
+			if (!disposed) console.log("WebSocket closed");
+		};
+		socket.onerror = (err) => {
+			if (!disposed) console.error("WebSocket error:", err);
+		};
 
-		return () => wsRef.current?.close();
+		return () => {
+			disposed = true;
+			socket.onmessage = null;
+			socket.onclose = null;
+			socket.onerror = null;
+			socket.close();
+			targetLocationRef.current = null;
+			targetHeadingRef.current = null;
+		};
 	}, [tripId]);
 
 	// حرك
