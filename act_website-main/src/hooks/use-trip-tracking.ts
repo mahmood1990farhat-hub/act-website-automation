@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { buildTripTrackingUrl } from "@/lib/trip-tracking-url"
 
 interface Location {
   lat: number
@@ -13,19 +14,24 @@ export function useTripTracking(tripId: string) {
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
-
-    if (!tripId) return
-
-    const socket = new WebSocket(
-      `wss://act-backend.horizontechco.com/ws/trips/${tripId}/tracking/`
+    setLocation(null)
+    setConnected(false)
+    const url = buildTripTrackingUrl(
+      process.env.NEXT_PUBLIC_API_BASE_URL,
+      tripId
     )
+    if (!url) return
+    const socket = new WebSocket(url)
+    let disposed = false
 
     socket.onopen = () => {
+      if (disposed) return
       console.log("Tracking connected")
       setConnected(true)
     }
 
     socket.onmessage = (event) => {
+      if (disposed) return
 
       const data = JSON.parse(event.data)
 
@@ -41,11 +47,16 @@ export function useTripTracking(tripId: string) {
     }
 
     socket.onclose = () => {
+      if (disposed) return
       console.log("Tracking disconnected")
       setConnected(false)
     }
 
     return () => {
+      disposed = true
+      socket.onopen = null
+      socket.onmessage = null
+      socket.onclose = null
       socket.close()
     }
 
