@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-05",
+  "application_source_commit": "fb34b518649212986168249ca65cf2cfa416df61",
+  "base_commit": "892317fcf938fad5fa6cd9a833a79e900dcc4d8f",
+  "remote_branch": "draft/act-existing-site-tracking-20261105",
+  "application_files_changed": 4,
+  "source_comparison": {
+    "base": "892317fcf938fad5fa6cd9a833a79e900dcc4d8f",
+    "preserved": "eac39979bbfd669feec5354e43c9f36912588050",
+    "changed_application_files": 4,
+    "unchanged_dependencies_and_typescript_configuration": true,
+    "files": [
+      {
+        "path": "act_website-main/src/lib/trip-tracking-url.ts",
+        "preimage_sha256": null,
+        "candidate_sha256": "77bd9c2f08318dc97e2eac70003f67f791294c204ee4cc9225ffb2bbf5327c56",
+        "matches_preserved_source": true
+      },
+      {
+        "path": "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-provider.tsx",
+        "preimage_sha256": "cecbdb13f4eb8a8dc59d48e6b8e887a0e597bb6690abe7310d5592328975e05e",
+        "candidate_sha256": "417d7f0deb09770863358c491d92a1dcbf5a053e5142fc7183af876235f1eef0",
+        "matches_preserved_source": true
+      },
+      {
+        "path": "act_website-main/src/hooks/use-trip-tracking.ts",
+        "preimage_sha256": "9fc22c77e5677c0820f124b3d3cc8fd5f16ed0dea8cbf16a1f9487cf1b8317ec",
+        "candidate_sha256": "28ed2eb8fa1fab9477c0fe05a1cad64cd6c90a9c99ac2dde75ee3edb1e479e74",
+        "matches_preserved_source": true
+      },
+      {
+        "path": "act_website-main/src/components/_components/dashboard/TripsDashboard.tsx",
+        "preimage_sha256": "02446b2a772eeaf4b5535b5cd682a7e784b85b885e09c61dc9c56365cbc0d377",
+        "candidate_sha256": "6df832db2bce8bec932111453202c5a61342d9df01b3a727e9d9c64e13c65714",
+        "matches_preserved_source": true
+      },
+      {
+        "path": "act_website-main/tests/tracking-environment/url.test.mjs",
+        "preimage_sha256": null,
+        "candidate_sha256": "58cdc925c46802bbbc504205016c5529d66ac1b7e2ff457e1c91e21a500d4a59",
+        "matches_preserved_source": true
+      },
+      {
+        "path": "act_website-main/tests/tracking-environment/effects.cjs",
+        "preimage_sha256": null,
+        "candidate_sha256": "64ef7d0680a7aac91bda8fe2abf6de693ee375bf41a030a365f7fdf270b6234e",
+        "matches_preserved_source": true
+      }
+    ]
+  },
+  "new_full_build": {
+    "check": "complete frontend build on deployed892317f plus four preserved tracking source files",
+    "exit_code": 0,
+    "duration_seconds": 20.56,
+    "api_origin": "https://airportandcitytransfer.com",
+    "provider_keys": "synthetic placeholders; not an installable connected release",
+    "browser_run": false,
+    "native_run": false,
+    "network_namespace_available": false,
+    "real_provider_credentials_supplied": false
+  },
+  "new_full_build_log": "\u25b2 Next.js 16.1.6 (Turbopack)\n- Experiments (use with caution):\n  \u00b7 serverActions\n\n\u26a0 The \"middleware\" file convention is deprecated. Please use \"proxy\" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy\n  Creating an optimized production build ...\n\u2713 Compiled successfully in 9.0s\n  Running TypeScript ...\n  Collecting page data using 8 workers ...\n  Generating static pages using 8 workers (0/8) ...\n  Generating static pages using 8 workers (2/8) \n  Generating static pages using 8 workers (4/8) \n  Generating static pages using 8 workers (6/8) \n\u2713 Generating static pages using 8 workers (8/8) in 105.5ms\n  Finalizing page optimization ...\n\nRoute (app)\n\u250c \u0192 /\n\u251c \u0192 /_not-found\n\u251c \u0192 /[locale]\n\u251c \u0192 /[locale]/about-us\n\u251c \u0192 /[locale]/admin\n\u251c \u0192 /[locale]/admin/login\n\u251c \u0192 /[locale]/auth\n\u251c \u0192 /[locale]/complaints\n\u251c \u0192 /[locale]/dashboard\n\u251c \u0192 /[locale]/dashboard/complaints\n\u251c \u0192 /[locale]/dashboard/driver-onboarding\n\u251c \u0192 /[locale]/dashboard/drivers\n\u251c \u0192 /[locale]/dashboard/earnings\n\u251c \u0192 /[locale]/dashboard/lost-luggage\n\u251c \u0192 /[locale]/dashboard/monitor-trip\n\u251c \u0192 /[locale]/dashboard/offices\n\u251c \u0192 /[locale]/dashboard/overview\n\u251c \u0192 /[locale]/dashboard/passengers\n\u251c \u0192 /[locale]/dashboard/pinned-trips\n\u251c \u0192 /[locale]/dashboard/pricing\n\u251c \u0192 /[locale]/dashboard/settings\n\u251c \u0192 /[locale]/dashboard/static-files\n\u251c \u0192 /[locale]/dashboard/trips\n\u251c \u0192 /[locale]/dashboard/trips-complaints\n\u251c \u0192 /[locale]/dashboard/vehicles\n\u251c \u0192 /[locale]/download-app\n\u251c \u0192 /[locale]/driver\n\u251c \u0192 /[locale]/driver-application-status\n\u251c \u0192 /[locale]/driver-password-setup\n\u251c \u0192 /[locale]/driver/acceptable-trips\n\u251c \u0192 /[locale]/driver/driver-settings\n\u251c \u0192 /[locale]/driver/monitor-trip\n\u251c \u0192 /[locale]/driver/new-requests\n\u251c \u0192 /[locale]/driver/profile\n\u251c \u0192 /[locale]/driver/upcoming-trips\n\u251c \u0192 /[locale]/gatwick-airport-transfer\n\u251c \u0192 /[locale]/heathrow-airport-transfer\n\u251c \u0192 /[locale]/london-city-airport-transfer\n\u251c \u0192 /[locale]/lost-property\n\u251c \u0192 /[locale]/luton-airport-transfer\n\u251c \u0192 /[locale]/my-trips\n\u251c \u0192 /[locale]/profile\n\u251c \u0192 /[locale]/stansted-airport-transfer\n\u251c \u0192 /[locale]/upload-documents\n\u251c \u0192 /api/place-details\n\u251c \u0192 /api/places\n\u251c \u25cb /robots.txt\n\u2514 \u25cb /sitemap.xml\n\n\n\u0192 Proxy (Middleware)\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n\n",
+  "retained_tracking_checks": {
+    "base_commit": "4e469cf93327d89d7e28a09cd8ef3cc96b011f8a",
+    "url_cases": 12,
+    "effect_cases": 17,
+    "results": [
+      {
+        "check": "url-tests",
+        "exit_code": 0
+      },
+      {
+        "check": "effect-tests",
+        "exit_code": 0
+      }
+    ],
+    "full_frontend_typecheck": "passed",
+    "type_generation": "passed",
+    "native_or_browser_run": false,
+    "real_websocket_created": false,
+    "provider_calls": false,
+    "hosted_ci_run": false,
+    "files": {
+      "src/lib/trip-tracking-url.ts": "77bd9c2f08318dc97e2eac70003f67f791294c204ee4cc9225ffb2bbf5327c56",
+      "src/components/_components/dashboard/tracking/trip-tracking-provider.tsx": "417d7f0deb09770863358c491d92a1dcbf5a053e5142fc7183af876235f1eef0",
+      "src/hooks/use-trip-tracking.ts": "28ed2eb8fa1fab9477c0fe05a1cad64cd6c90a9c99ac2dde75ee3edb1e479e74",
+      "tests/tracking-environment/url.test.mjs": "58cdc925c46802bbbc504205016c5529d66ac1b7e2ff457e1c91e21a500d4a59",
+      "tests/tracking-environment/effects.cjs": "64ef7d0680a7aac91bda8fe2abf6de693ee375bf41a030a365f7fdf270b6234e",
+      "package-lock.json": "5d1885fe1ce46c3c3f06bfb0c53b5647144d44c9fc2766e681d3ee335b77e05b"
+    }
+  },
+  "retained_checks_rerun": false,
+  "driver_source": "b673061e3c0ce47ee96689312c03bfa1c0ad5b22",
+  "driver_retained_checks": 39,
+  "driver_checks_rerun": false,
+  "owner_host_output": {
+    "source": "owner-pasted completed read-only Hostinger diagnostic",
+    "direct_assistant_host_access": false,
+    "backend_current_and_running_release": "82c0b14ad2a71e1ce3d8d1df3527431b698ac461",
+    "backend_current_and_running_path": "/var/www/atg/atg-backend/releases/20261016T-ready-82c0b14/backend",
+    "backend_base_settings_sha256": "7dbc5958cc191f8d50177a366ef43d0078954a370ef2cf3a636116abb0c4404d",
+    "backend_payment_views_sha256": "a533525574849395cdf88615265b7b6d87bbf2db497f6e445c4157a2aaafeb60",
+    "backend_configured_file_stripe_mode": "test",
+    "backend_loaded_key_mode_proven": false,
+    "frontend_3002_path": "/var/www/atg/front-end/releases/20261015-892317f",
+    "frontend_3002_pid": 24855,
+    "frontend_3002_build_id_sha256": "7e829c27388c892d02e4ba3846d1aa84ede880796fb67348fe0d39f106aa5e4a",
+    "frontend_3001_path": "/var/www/atg/front-end/airportandcitytransfer",
+    "frontend_3001_pid": 594,
+    "frontend_3001_build_id_sha256": "a257c5ed569b92fc8200c8fcc14c8ed7b60ea7a630f0879fb146c5d43c940cea",
+    "nginx_referenced_frontend_ports": [
+      3002
+    ],
+    "reported_read_only_complete": true,
+    "built_configuration_or_websocket_route_proven": false
+  },
+  "publication": {
+    "source_and_tests_remote_committed": true,
+    "merged": false,
+    "deployed": false
+  },
+  "acceptance": {
+    "connected_website_build": false,
+    "android_apk_built": false,
+    "phone_installed": false,
+    "journey_run": false,
+    "website_accepted": false,
+    "passenger_native_accepted": false,
+    "iphone_accepted": false
+  }
+}
