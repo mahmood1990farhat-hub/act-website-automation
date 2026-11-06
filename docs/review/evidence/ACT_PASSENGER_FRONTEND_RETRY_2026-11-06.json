@@ -1,0 +1,84 @@
+{
+  "recorded_on": "2026-11-06",
+  "purpose": "Correct post-reload readiness handling and safely reuse the already-approved passenger frontend after its recorded rollback",
+  "application_candidate_unchanged": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+  "required_private_record": "passenger-stage-eoszulb3",
+  "previous_attempt_helper": "936fffe5f0f9f6d2348d53434753bcda7f3a95aa",
+  "previous_attempt_outcome": "Owner reported build-identity verification failure and successful rollback to frontend3a82c16/port3003; backendd77e896 unchanged",
+  "confirmed_correction": "Restore three strict post-reload readiness attempts, with two-second intervals, for activation and rollback. The prior helper checked only once immediately.",
+  "host_failure_cause_limit": "The previous error did not identify the failed target or response class. Reload settling is plausible, not a proven diagnosis of that host response.",
+  "files": [
+    {
+      "path": "ops/first-journey/passenger_frontend_release.py",
+      "sha256": "2c880f9e116dad51b5acf973f49b992dbe8c8af4fca1883bd8f718b440151254",
+      "bytes": 55075
+    },
+    {
+      "path": "ops/first-journey/test_passenger_frontend_release.py",
+      "sha256": "93ba469fc2caba9ca379ad0a16dc953a4de1c257ec6291d0fb27898d8098dbd6",
+      "bytes": 27573
+    }
+  ],
+  "retry_safeguards": [
+    "Only --activate plus --retry-after-rollback with the exact eoszulb3 record and reviewed02e59f9 candidate is allowed.",
+    "Require original reload-start and completed rollback receipts; reject successful or incomplete-recovery records.",
+    "Require original restored PM2 dump, all retained process identities, backend identity/environment and original prepared source/build/asset/environment manifests.",
+    "Validate the three original routing configurations before substituting only the known rollback site hash as the comparison baseline.",
+    "Use the existing prepared build and candidate.conf; preserve original plan/configs/activation journal/console byte-for-byte.",
+    "Claim an exclusive activation-retry journal; do not assign the working journal before that directory is created.",
+    "Persistent identity or asset mismatches still stop activation and use the existing frontend-only rollback.",
+    "No rebuild, application edit, Android installation, backend restart, booking or payment mutation."
+  ],
+  "diagnostics": {
+    "nonce": "Fresh random request nonce for every readiness attempt",
+    "safe_fields": [
+      "direction",
+      "attempt",
+      "target",
+      "required build",
+      "observed expected/old/missing/mixed classification",
+      "failed check stage",
+      "result",
+      "HTTP status"
+    ],
+    "cache_hints": "Strict numeric/enumerated allowlist for Age, CF-Cache-Status, X-Nextjs-Cache and recognized Cache-Control directives",
+    "excluded": "No HTML, cookies, arbitrary headers, credentials or configuration values are printed; temporary header files are removed."
+  },
+  "verification": {
+    "command": "python3 -B -m unittest discover -s ops/first-journey -p test_passenger_frontend_release.py -v",
+    "passed": 13,
+    "failed": 0,
+    "exit_code": 0,
+    "reported_seconds": 0.441,
+    "scope": "Eight affected existing helper cases plus five new cases; actual capture_baseline exercised against local temporary fixtures.",
+    "cases": [
+      "Transient activation and rollback responses settle to the required build",
+      "Persistent mismatch still refuses and rolls back",
+      "Nonce changes and cache-header sanitization",
+      "Same prepared candidate reused with original records preserved",
+      "Tamper, incomplete recovery, baseline/build/configuration drift and duplicate retry refused"
+    ],
+    "additional_checks": [
+      "Python3.11 grammar parse of both files",
+      "git diff --check",
+      "Independent read-only retry/preflight/recovery and test-source review"
+    ],
+    "limits": "Local controlled host/process/network/root-ownership fixtures. No live PM2/Nginx action or phone acceptance was performed by these checks.",
+    "unrelated_suites": "Application, Maps, backend and native-driver suites were not repeated because their source is unchanged."
+  },
+  "owner_handoff": {
+    "approval": "Existing explicit approval for activation of the same prepared02e59f9 frontend remains applicable; no broader scope is introduced.",
+    "console": "Use a new exclusive private activation-retry-console.log; retain the first activation-console.log.",
+    "argv": [
+      "--activate",
+      "--frontend-sha",
+      "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+      "--record",
+      "/root/act-release-backup/passenger-stage-eoszulb3",
+      "--retry-after-rollback"
+    ],
+    "status": "Corrected helper ready for publication/handoff; host retry has not yet been executed or observed.",
+    "after_success": "Reopen Trip34 Details as the eligible passenger and continue the controlled Android-to-passenger-web journey test."
+  },
+  "primary_reference": "https://nginx.org/en/docs/control.html"
+}

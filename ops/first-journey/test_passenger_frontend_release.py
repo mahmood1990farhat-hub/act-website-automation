@@ -11,7 +11,7 @@ import tempfile
 import types
 import unittest
 from unittest import mock
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 SPEC = importlib.util.spec_from_file_location("passenger_frontend_release", Path(__file__).with_name("passenger_frontend_release.py"))
 release = importlib.util.module_from_spec(SPEC)
@@ -23,6 +23,7 @@ class Host:
     def __init__(self, root):
         self.root = root
         self.commands, self.rows, self.active_port = [], [], "3003"
+        self.requests, self.page_responses = [], {}
         self.failure, self.backend_pid, self.other_config = None, 901, "unchanged"
         self.public = {"NEXT_PUBLIC_API_BASE_URL": release.ORIGIN, "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY": "offline-fixture"}
         self.source = {path: (SOURCE_ROOT / path).read_bytes() for path in release.ALLOWED}
@@ -52,6 +53,17 @@ class Host:
         release.DUMP.write_bytes(release.encoded([copy.deepcopy(row["pm2_env"]) for row in self.rows]))
         self.original_site, self.original_dump = release.SITE.read_bytes(), release.DUMP.read_bytes()
         self.original_rows = copy.deepcopy(self.rows)
+        release.PRIOR_ACTIVATION.parent.mkdir(parents=True)
+        manifest = release.encoded(release.tree(release.OLD_ASSETS))
+        (release.PRIOR / "assets-manifest.json").write_bytes(manifest)
+        (release.PRIOR / "plan.json").write_bytes(release.encoded({
+            "frontend_sha": release.OLD_SHA, "backend_sha": release.BACK_SHA,
+            "frontend_release": str(release.OLD_FRONT), "backend_release": str(release.BACK_FRONT),
+            "public_assets": str(release.OLD_ASSETS), "live_site_resolved": str(release.SITE),
+            "candidate_sha256": release.sha(self.original_site), "frontend_build_id": "OLD_BUILD",
+            "asset_manifest_sha256": release.sha(manifest)}))
+        release.PRIOR_ACTIVATION.write_bytes(release.encoded({"state": "ACTIVATED",
+            "frontend_sha": release.OLD_SHA, "backend_sha": release.BACK_SHA}))
 
     def archive(self):
         output = io.BytesIO()
@@ -83,17 +95,6 @@ class FixtureRelease(release.Release):
 
     def public_environment(self, rows):
         return copy.deepcopy(self.host.public)
-
-    def capture_baseline(self):
-        self.site, self.daemon = release.SITE, 800
-        self.public = self.public_environment(self.rows())
-        self.baseline = {"backend": self.backend(), "retained": [release.identity(row) for row in self.host.original_rows],
-            "daemon": self.daemon, "dump_hash": release.sha(release.regular(release.DUMP)),
-            "master_hash": release.sha(release.regular(release.MASTER)), "entries": [str(release.SITE)],
-            "other_nginx_hash": self.other_nginx(), "old_site_hash": release.sha(release.regular(self.site)),
-            "old_build_id": "OLD_BUILD", "prior_plan_hash": "pinned", "prior_receipt_hash": "pinned",
-            "env_hashes": {".env": release.sha(release.regular(release.OLD_FRONT / ".env"))}}
-        self.retained(self.rows())
 
     def git(self, *args):
         if args[:2] == ("remote", "get-url"):
@@ -151,11 +152,21 @@ class FixtureRelease(release.Release):
             return b""
         if label == "frontend-integrity":
             url = urlsplit(str(args[-1]))
+            target = "origin" if "--resolve" in args else "public" if url.port is None else str(url.port)
+            self.host.requests.append((target, url))
+            if "--dump-header" in args:
+                Path(args[args.index("--dump-header") + 1]).write_bytes(
+                    b"HTTP/2 200\r\nCF-Cache-Status: DYNAMIC\r\nAge: 0\r\nX-Nextjs-Cache: HIT\r\n"
+                    b"Cache-Control: private, no-cache, max-age=0, secret=PRIVATE_HEADER_VALUE\r\n"
+                    b"Set-Cookie: session=PRIVATE_COOKIE_VALUE\r\nAuthorization: PRIVATE_AUTH_VALUE\r\n\r\n")
             port = str(url.port) if url.port else self.host.active_port
             if url.path == "/en":
                 new = port == "3004"
                 if not url.port and self.host.failure == "wrong_public_build" and new:
                     new = False
+                responses = self.host.page_responses.get((target, port), [])
+                if responses:
+                    new = responses.pop(0)
                 return self.host.html(new) + b"\n200"
             relative = url.path.removeprefix("/_next/static/")
             assets = self.assets if b"127.0.0.1:3004" in release.SITE.read_bytes() or self.reload_attempted else release.OLD_ASSETS
@@ -171,7 +182,9 @@ class PassengerReleaseTests(unittest.TestCase):
         front = root / "front"
         self.stack.enter_context(mock.patch.multiple(release, FRONT_ROOT=front, OLD_FRONT=front / "releases/old3a",
             OLD_ASSETS=front / "old-assets", BACKUP=root / "private", SITE=root / "nginx/sites-enabled/act",
-            MASTER=root / "nginx/nginx.conf", PM2_HOME=root / "pm2", DUMP=root / "pm2/dump.pm2"))
+            MASTER=root / "nginx/nginx.conf", PM2_HOME=root / "pm2", DUMP=root / "pm2/dump.pm2",
+            PRIOR=root / "private/tracking-stage", PRIOR_ACTIVATION=root / "private/tracking-stage/activation/ACTIVATED.json"))
+        self.sleep = self.stack.enter_context(mock.patch.object(release.time, "sleep"))
         self.stack.enter_context(mock.patch.object(release.pwd, "getpwnam", return_value=types.SimpleNamespace(pw_uid=os.getuid(), pw_gid=os.getgid())))
         # Private-path permission semantics are tested on the caller-owned temp tree.
         self.stack.enter_context(mock.patch.object(release, "private", side_effect=lambda path: self.assertFalse(path.is_symlink())))
@@ -184,16 +197,33 @@ class PassengerReleaseTests(unittest.TestCase):
                 return Path(next(row["pm2_env"]["pm_cwd"] for row in self.host.rows if row["pid"] == pid))
             return original_resolve(path, *args, **kwargs)
         self.stack.enter_context(mock.patch.object(Path, "resolve", resolve))
+        original_relative = Path.is_relative_to
+        self.stack.enter_context(mock.patch.object(Path, "is_relative_to",
+            lambda path, other: original_relative(path, root / "nginx" if other == Path("/etc/nginx") else other)))
         self.output = self.stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
 
-    def prepared(self):
+    def prepared(self, exact_record=False):
         operation = FixtureRelease(release.REVIEWED_SHA)
-        operation.prepare()
+        def allocate(**_kwargs):
+            record = release.BACKUP / "passenger-stage-eoszulb3"
+            record.mkdir()
+            return str(record)
+        with mock.patch.object(release.tempfile, "mkdtemp", side_effect=allocate) if exact_record else contextlib.nullcontext():
+            operation.prepare()
         return operation.record
 
-    def activation(self):
-        operation = FixtureRelease(release.REVIEWED_SHA, self.prepared())
+    def activation(self, exact_record=False):
+        operation = FixtureRelease(release.REVIEWED_SHA, self.prepared(exact_record))
         operation.preflight()
+        return operation
+
+    def rolled_back(self):
+        operation = self.activation(exact_record=True)
+        self.host.failure = "wrong_public_build"
+        with self.assertRaisesRegex(release.Stop, "wrong frontend build ID"):
+            operation.activate()
+        operation.recover()
+        self.host.failure = None
         return operation
 
     def test_exact_reviewed_sha_paths_and_content_are_required(self):
@@ -209,6 +239,11 @@ class PassengerReleaseTests(unittest.TestCase):
         with mock.patch.object(release, "Release") as constructor:
             with self.assertRaises(release.Stop):
                 release.main(["--prepare", "--frontend-sha", "1" * 40])
+            with self.assertRaises(release.Stop):
+                release.main(["--prepare", "--frontend-sha", release.REVIEWED_SHA, "--retry-after-rollback"])
+            with self.assertRaises(release.Stop):
+                release.main(["--activate", "--frontend-sha", release.REVIEWED_SHA, "--record",
+                              str(release.BACKUP / "passenger-stage-other"), "--retry-after-rollback"])
             constructor.assert_not_called()
 
     def test_preparation_builds_once_without_changing_live_state(self):
@@ -282,7 +317,10 @@ class PassengerReleaseTests(unittest.TestCase):
         self.host.failure = "wrong_public_build"
         with self.assertRaisesRegex(release.Stop, "wrong frontend build ID"):
             operation.activate()
+        # The old worker response may also outlive the rollback reload briefly.
+        self.host.page_responses[("origin", "3003")] = [True]
         operation.recover()
+        self.assertEqual(self.sleep.call_args_list, [mock.call(2), mock.call(2), mock.call(2)])
         self.assertEqual(self.host.active_port, "3003")
         self.assertEqual(release.SITE.read_bytes(), operation.rollback)
         self.assertIn(str(operation.assets).encode(), release.SITE.read_bytes())
@@ -290,6 +328,118 @@ class PassengerReleaseTests(unittest.TestCase):
         self.assertEqual(self.host.rows, self.host.original_rows)
         self.assertEqual(self.host.backend_pid, 901)
         self.assertTrue((operation.work / "FRONTEND_ROLLED_BACK.json").is_file())
+
+    def test_polling_accepts_transient_old_build_with_fresh_nonces_and_safe_metadata(self):
+        operation = self.activation()
+        self.host.page_responses[("origin", "3004")] = [False]
+        operation.activate()
+        self.assertTrue(operation.complete)
+        self.sleep.assert_called_once_with(2)
+        reports = [json.loads(line.removeprefix("FRONTEND_READINESS ")) for line in self.output.getvalue().splitlines()
+                   if line.startswith("FRONTEND_READINESS ")]
+        self.assertEqual([(item["attempt"], item["target"], item["build_id"], item["result"]) for item in reports],
+                         [(1, "origin", "old", "failed"), (2, "origin", "expected", "passed"), (2, "public", "expected", "passed")])
+        self.assertTrue(all(item["direction"] == "activation" and item["http_status"] == 200
+                            and item["cf-cache-status"] == "DYNAMIC" and item["x-nextjs-cache"] == "HIT"
+                            and item["age"] == 0 and item["cache-control"] == "private, no-cache, max-age=0" for item in reports))
+        nonces = [parse_qs(url.query)["act_release_check"][0] for target, url in self.host.requests if target == "origin" and url.path == "/en"]
+        self.assertEqual(len(nonces), 2)
+        self.assertNotEqual(nonces[0], nonces[1])
+        self.assertFalse(list(operation.work.glob(".readiness-headers-*")))
+        self.assertFalse(any(secret in self.output.getvalue() for secret in
+                             ("PRIVATE_HEADER_VALUE", "PRIVATE_COOKIE_VALUE", "PRIVATE_AUTH_VALUE", "PRIVATE_SYNTHETIC_VALUE")))
+
+    def test_build_and_cache_classifications_never_emit_unrecognised_values(self):
+        operation = self.activation()
+        cases = ((self.host.html(True), "expected"), (self.host.html(False), "old"),
+                 (b"no build marker", "missing"), (b"NEW_BUILD OLD_BUILD", "mixed"))
+        for body, expected in cases:
+            with self.subTest(expected=expected):
+                self.assertEqual(operation.build_classification(body), expected)
+        self.assertEqual(release.cache_metadata(b"Age: secret\r\nCF-Cache-Status: secret\r\nX-Nextjs-Cache: secret\r\n"
+                                               b"Cache-Control: private=secret, no-store, max-age=30, extension=secret\r\n"
+                                               b"Set-Cookie: secret\r\n"), {"cache-control": "no-store, max-age=30"})
+
+    def test_retry_reuses_prepared_build_and_preserves_original_activation_history(self):
+        original = self.rolled_back()
+        (original.record / "activation-console.log").write_text("original failure console remains unchanged\n")
+        before = release.tree(original.record)
+        retry = FixtureRelease(release.REVIEWED_SHA, original.record, retry_after_rollback=True)
+        retry.preflight()
+        self.assertEqual(retry.work, original.record / "activation-retry")
+        self.assertEqual(retry.original, original.rollback)
+        self.assertEqual((retry.front, retry.assets, retry.build_id), (original.front, original.assets, original.build_id))
+        self.assertEqual({key: value for key, value in retry.baseline.items() if key != "old_site_hash"},
+                         {key: value for key, value in original.baseline.items() if key != "old_site_hash"})
+        self.assertEqual(retry.baseline["old_site_hash"], release.sha(original.rollback))
+        retry.activate()
+        self.assertTrue(retry.complete)
+        self.assertEqual(self.host.commands.count("frontend-build"), 1)
+        self.assertEqual(self.host.commands.count("npm-ci"), 1)
+        self.assertEqual(self.host.rows[:3], self.host.original_rows)
+        self.assertEqual(self.host.backend_pid, 901)
+        after = release.tree(original.record)
+        self.assertTrue(all(after[path] == digest for path, digest in before.items()))
+        self.assertTrue(all(path in before or path.startswith("activation-retry/") for path in after))
+        with self.assertRaisesRegex(release.Stop, "already attempted"):
+            FixtureRelease(release.REVIEWED_SHA, original.record, retry_after_rollback=True).preflight()
+        self.assertEqual(release.tree(original.record), after)
+
+    def test_retry_rejects_incomplete_tampered_and_preexisting_attempt_records(self):
+        original = self.rolled_back()
+        prior = original.record / "activation"
+        attempts = self.host.commands.count("pm2-start-candidate")
+        def refused():
+            retry = FixtureRelease(release.REVIEWED_SHA, original.record, retry_after_rollback=True)
+            with self.assertRaises(release.Stop):
+                retry.preflight()
+            self.assertIsNone(retry.work)
+        for name in ("ACTIVATED", "RECOVERY_INCOMPLETE"):
+            with self.subTest(state=name):
+                path = prior / (name + ".json")
+                path.write_text("{}\n")
+                refused()
+                path.unlink()
+        receipt = prior / "FRONTEND_ROLLED_BACK.json"
+        data = receipt.read_bytes()
+        receipt.unlink()
+        refused()
+        receipt.write_bytes(data.replace(b'"FRONTEND_ROLLED_BACK"', b'"NOT_COMPLETE"'))
+        refused()
+        receipt.write_bytes(data)
+        routing = original.record / "rollback.conf"
+        data = routing.read_bytes()
+        routing.write_bytes(data + b"# unreviewed\n")
+        refused()
+        routing.write_bytes(data)
+        (original.record / "activation-retry").mkdir()
+        before = release.tree(original.record)
+        refused()
+        self.assertEqual(release.tree(original.record), before)
+        self.assertEqual(self.host.commands.count("pm2-start-candidate"), attempts)
+
+    def test_retry_rejects_routing_backend_retained_process_dump_and_artifact_drift(self):
+        original = self.rolled_back()
+        attempts = self.host.commands.count("pm2-start-candidate")
+        def refused():
+            retry = FixtureRelease(release.REVIEWED_SHA, original.record, retry_after_rollback=True)
+            with self.assertRaises(release.Stop):
+                retry.preflight()
+            self.assertIsNone(retry.work)
+        for path in (release.SITE, release.DUMP, original.front / ".env",
+                     original.front / ".next/static/chunks/passenger-new.js", original.record / "assets-manifest.json"):
+            with self.subTest(path=path.name):
+                before = path.read_bytes()
+                path.write_bytes(before + b"\n")
+                refused()
+                path.write_bytes(before)
+        with mock.patch.object(self.host, "backend_pid", self.host.backend_pid + 1):
+            refused()
+        self.host.rows[0]["pid"] += 10
+        refused()
+        self.host.rows[0]["pid"] -= 10
+        self.assertEqual(self.host.commands.count("pm2-start-candidate"), attempts)
+        self.assertFalse((original.record / "activation-retry").exists())
 
     def test_partial_start_cleanup_is_owned_and_absent_unacknowledged_start_is_not_claimed_clean(self):
         operation = self.activation()

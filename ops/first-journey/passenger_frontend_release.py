@@ -6,6 +6,7 @@ The existing 3a82c16 frontend remains the rollback on 3003. Backend d77e896 is
 read-only throughout. No migration, booking, payment, GPS or customer request.
 Prepare: --prepare --frontend-sha <reviewed full SHA>
 Activate: --activate --frontend-sha <same SHA> --record <prepared private record>
+Retry the recorded rollback once: add --retry-after-rollback (eoszulb3 only).
 """
 from __future__ import annotations
 
@@ -22,6 +23,7 @@ import os
 from pathlib import Path, PurePosixPath
 import pwd
 import re
+import secrets
 import shutil
 import signal
 import stat
@@ -289,9 +291,33 @@ def html_assets(body):
     return parser.paths
 
 
+def cache_metadata(raw):
+    """Return only bounded cache hints, never arbitrary headers or cookies."""
+    result = {}
+    flags = {"public", "private", "no-cache", "no-store", "must-revalidate", "proxy-revalidate", "immutable", "no-transform"}
+    for line in raw.decode("ascii", "replace").splitlines():
+        name, separator, value = line.partition(":")
+        name, value = name.lower(), value.strip()
+        if not separator:
+            continue
+        if name == "age" and re.fullmatch(r"[0-9]{1,12}", value):
+            result[name] = int(value)
+        elif name == "cf-cache-status" and value in {"HIT", "MISS", "DYNAMIC", "EXPIRED", "STALE", "BYPASS", "REVALIDATED", "UPDATING", "NONE", "UNKNOWN"}:
+            result[name] = value
+        elif name == "x-nextjs-cache" and value in {"HIT", "MISS", "STALE", "REVALIDATED"}:
+            result[name] = value
+        elif name == "cache-control":
+            directives = [item.strip().lower() for item in value[:512].split(",")]
+            safe = [item for item in directives if item in flags or re.fullmatch(r"(?:max-age|s-maxage|stale-while-revalidate|stale-if-error)=[0-9]{1,12}", item)]
+            if safe:
+                result[name] = ", ".join(safe)
+    return result
+
+
 class Release:
-    def __init__(self, revision, record=None):
+    def __init__(self, revision, record=None, retry_after_rollback=False):
         self.revision, self.record, self.work = revision, record, None
+        self.retry_after_rollback = retry_after_rollback
         self.phase, self.sequence = "preflight", 0
         self.start_attempted = self.start_acknowledged = self.dump_attempted = False
         self.route_attempted = self.reload_attempted = self.complete = False
@@ -402,9 +428,15 @@ class Release:
                 and prior.get("backend_sha") == BACK_SHA and prior.get("frontend_release") == str(OLD_FRONT)
                 and prior.get("backend_release") == str(BACK_FRONT) and prior.get("public_assets") == str(OLD_ASSETS),
                 "The pinned prior tracking activation record differs.")
+        expected_site = prior.get("candidate_sha256")
+        if self.retry_after_rollback:
+            require(self.record == BACKUP / "passenger-stage-eoszulb3"
+                    and sha(self.original) == expected_site,
+                    "Retry provenance does not match the original tracking routing.")
+            expected_site = sha(self.rollback)
         self.site = SITE.resolve(strict=True)
         require(str(self.site) == prior.get("live_site_resolved") and self.site.is_relative_to(Path("/etc/nginx"))
-                and sha(regular(self.site)) == prior.get("candidate_sha256")
+                and sha(regular(self.site)) == expected_site
                 and regular(OLD_FRONT / ".next/BUILD_ID").decode().strip() == prior.get("frontend_build_id"),
                 "Current frontend routing or build differs from the activated 3a82c16 release.")
         old_manifest = regular(PRIOR / "assets-manifest.json")
@@ -474,6 +506,7 @@ class Release:
             self.command("nginx-validate-" + name, ["/usr/sbin/nginx", "-t", "-c", path, "-p", "/etc/nginx/"], log=True)
 
     def prepare(self):
+        require(not self.retry_after_rollback, "A rollback retry may not rebuild the prepared frontend.")
         self.capture_baseline()
         self.unused_port()
         private(BACKUP)
@@ -546,9 +579,36 @@ class Release:
         print("FRONTEND_SHA=" + self.revision, flush=True)
         print("BACKEND_UNCHANGED=" + BACK_SHA, flush=True)
 
+    def retry_history(self, plan):
+        require(self.record == BACKUP / "passenger-stage-eoszulb3" and self.revision == REVIEWED_SHA,
+                "Retry is restricted to the approved eoszulb3 passenger frontend.")
+        previous = self.record / "activation"
+        private(previous)
+        require(all(not (previous / (state + ".json")).exists()
+                    and not (previous / (state + ".json")).is_symlink()
+                    for state in ("ACTIVATED", "RECOVERY_INCOMPLETE")),
+                "Previous activation is successful or recovery is incomplete; retry refused.")
+        receipts = {}
+        for state in ("NGINX_RELOAD_STARTED", "FRONTEND_ROLLED_BACK"):
+            raw = regular(previous / (state + ".json"))
+            receipt = json.loads(raw)
+            require(receipt.get("state") == state and receipt.get("frontend_sha") == REVIEWED_SHA
+                    and receipt.get("backend_sha") == BACK_SHA and receipt.get("backend_changed") is False
+                    and receipt.get("journey_accepted") is False,
+                    "The previous frontend rollback receipt differs; retry refused.")
+            receipts[state] = sha(raw)
+        dump = regular(previous / "dump.pm2.before")
+        require(sha(dump) == plan["baseline"]["dump_hash"] and regular(DUMP) == dump,
+                "Original PM2 startup preimage was not restored; retry refused.")
+        return {"original_activation": str(previous), "original_plan_sha256": sha(regular(self.record / "plan.json")),
+                "receipts": receipts, "dump_sha256": sha(dump), "original_configs": plan["configs"]}
+
     def preflight(self):
         self.paths()
         private(self.record)
+        work = self.record / ("activation-retry" if self.retry_after_rollback else "activation")
+        require(not work.exists() and not work.is_symlink(),
+                "Activation was already attempted; review its record before retrying.")
         plan = json.loads(regular(self.record / "plan.json"))
         require(plan.get("schema") == 1 and plan.get("state") == "PREPARED_NOT_ACTIVE"
                 and plan.get("frontend_sha") == self.revision and plan.get("prior_frontend_sha") == OLD_SHA
@@ -557,8 +617,16 @@ class Release:
                 and plan.get("name") == self.name and plan.get("port") == 3004, "Prepared plan does not match this exact release.")
         require(set(plan.get("manifests", {})) == {"source", "build", "assets"}
                 and set(plan.get("configs", {})) == {"original", "candidate", "rollback"}, "Prepared evidence is incomplete.")
+        self.original, self.candidate, self.rollback = [regular(self.record / (name + ".conf")) for name in ("original", "candidate", "rollback")]
+        require({name: sha(data) for name, data in zip(("original", "candidate", "rollback"), (self.original, self.candidate, self.rollback))} == plan["configs"]
+                and route_pair(self.original, self.assets) == (self.candidate, self.rollback), "Prepared routing exceeds the reviewed change.")
+        expected_baseline = copy.deepcopy(plan["baseline"])
+        if self.retry_after_rollback:
+            self.retry_provenance = self.retry_history(plan)
+            require(expected_baseline["old_site_hash"] == sha(self.original), "Original routing baseline differs.")
+            expected_baseline["old_site_hash"] = sha(self.rollback)
         self.capture_baseline()
-        require(self.baseline == plan["baseline"] and str(self.site) == plan["site"], "Activation baseline drifted since preparation.")
+        require(self.baseline == expected_baseline and str(self.site) == plan["site"], "Activation baseline drifted since preparation.")
         self.require_source()
         self.unused_port()
         self.environment_files_unchanged()
@@ -577,18 +645,20 @@ class Release:
                         "Prepared build or assets changed.")
             if name == "assets":
                 self.asset_map = manifest
-        self.original, self.candidate, self.rollback = [regular(self.record / (name + ".conf")) for name in ("original", "candidate", "rollback")]
-        require({name: sha(data) for name, data in zip(("original", "candidate", "rollback"), (self.original, self.candidate, self.rollback))} == plan["configs"]
-                and route_pair(self.original, self.assets) == (self.candidate, self.rollback), "Prepared routing exceeds the reviewed change.")
         self.build_id = plan["build_id"].encode()
         require(regular(self.front / ".next/BUILD_ID").strip() == self.build_id, "Prepared build ID changed.")
         self.dump_before = regular(DUMP)
         self.saved_before = json.loads(self.dump_before)
-        self.work = self.record / "activation"
-        require(not self.work.exists() and not self.work.is_symlink(), "Activation was already attempted; review its record before retrying.")
-        self.work.mkdir(mode=0o700)
+        # Claim only a newly created journal. A refused duplicate never writes
+        # STOPPED_BEFORE_ACTIVATION into somebody else's previous attempt.
+        work.mkdir(mode=0o700)
+        self.work = work
+        if self.retry_after_rollback:
+            self.original = self.rollback
+            write_new(self.work / "retry-provenance.json", encoded(self.retry_provenance))
         write_new(self.work / "dump.pm2.before", self.dump_before)
         self.journal("PREFLIGHT_COMPLETE")
+        print("PRIVATE_ACTIVATION_RECORD=" + str(self.work), flush=True)
 
     def pm2_payload(self):
         return {"socket": str(PM2_HOME / "rpc.sock"), "pid_file": str(PM2_HOME / "pm2.pid"), "daemon_pid": self.daemon,
@@ -611,6 +681,14 @@ class Release:
         require(path.startswith("/") and not any(char in path for char in ("\r", "\n")), "Invalid release-readiness path.")
         args = ["/usr/bin/curl", "--silent", "--show-error", "--noproxy", "*", "--connect-timeout", "3", "--max-time", "8",
                 "--max-filesize", "16777216", "-H", "Accept-Encoding: identity", "-H", "Cache-Control: no-cache", "-w", "\n%{http_code}"]
+        page_metadata = target in ("origin", "public") and path == "/en"
+        header_file = None
+        if page_metadata:
+            self.response_metadata = {}
+            descriptor, filename = tempfile.mkstemp(prefix=".readiness-headers-", dir=self.work)
+            os.close(descriptor)
+            header_file = Path(filename)
+            args += ["--dump-header", header_file]
         if target in ("3003", "3004"):
             args += ["-H", "Host: " + DOMAIN, "-H", "X-Forwarded-Proto: https", "http://127.0.0.1:" + target + path]
         else:
@@ -618,24 +696,58 @@ class Release:
             if target == "origin":
                 # Preserve the reviewed origin-certificate exception on loopback only.
                 args += ["--insecure", "--resolve", DOMAIN + ":443:127.0.0.1"]
-            args += [ORIGIN + path + ("&" if "?" in path else "?") + "act_release_check=" + self.record.name]
-        body, code = self.command("frontend-integrity", args, timeout=12).rsplit(b"\n", 1)
+            nonce = getattr(self, "probe_nonce", None) or secrets.token_hex(12)
+            args += [ORIGIN + path + ("&" if "?" in path else "?") + "act_release_check=" + self.record.name + "-" + nonce]
+        try:
+            body, code = self.command("frontend-integrity", args, timeout=12).rsplit(b"\n", 1)
+            if page_metadata and re.fullmatch(rb"[0-9]{3}", code):
+                self.response_metadata["http_status"] = int(code)
+        finally:
+            if header_file is not None:
+                try:
+                    with header_file.open("rb") as stream:
+                        self.response_metadata.update(cache_metadata(stream.read(32768)))
+                finally:
+                    header_file.unlink(missing_ok=True)
         require(code == b"200", "Frontend release-readiness request failed.")
         return body
 
+    def build_classification(self, body):
+        current = self.build_id in body
+        previous = self.baseline["old_build_id"].encode() in body
+        return "mixed" if current and previous else "expected" if current else "old" if previous else "missing"
+
     def verify_public(self, new):
         expected = self.new_paths if new else self.old_paths
-        for target in ("origin", "public"):
-            body = self.http(target)
-            require(html_assets(body) == expected, "Public routing serves unexpected build assets.")
-            if self.new_paths == self.old_paths:
-                selected = self.build_id if new else self.baseline["old_build_id"].encode()
-                other = self.baseline["old_build_id"].encode() if new else self.build_id
-                require(selected != other and selected in body and other not in body,
-                        "Public routing serves the wrong frontend build ID.")
-            for asset in self.check_assets:
-                require(sha(self.http(target, quote(asset, safe="/._-"))) == self.asset_map[asset.removeprefix("/_next/static/")],
-                        "Public old/new build asset differs from the prepared bytes.")
+        for attempt in range(1, 4):
+            self.probe_nonce = secrets.token_hex(12)
+            try:
+                for target in ("origin", "public"):
+                    report = {"direction": "activation" if new else "rollback", "attempt": attempt, "target": target,
+                              "required_build": "expected" if new else "old", "build_id": "missing", "check": "page_request", "result": "failed"}
+                    self.response_metadata = {}
+                    try:
+                        body = self.http(target)
+                        report["build_id"] = self.build_classification(body)
+                        report["check"] = "asset_paths"
+                        require(html_assets(body) == expected, "Public routing serves unexpected build assets.")
+                        if self.new_paths == self.old_paths:
+                            report["check"] = "build_id"
+                            require(self.build_id != self.baseline["old_build_id"].encode()
+                                    and report["build_id"] == report["required_build"],
+                                    "Public routing serves the wrong frontend build ID.")
+                        report["check"] = "asset_hashes"
+                        for asset in self.check_assets:
+                            require(sha(self.http(target, quote(asset, safe="/._-"))) == self.asset_map[asset.removeprefix("/_next/static/")],
+                                    "Public old/new build asset differs from the prepared bytes.")
+                        report["result"] = "passed"
+                    finally:
+                        print("FRONTEND_READINESS " + json.dumps(report | self.response_metadata, sort_keys=True), flush=True)
+                return
+            except (Stop, OSError, ValueError):
+                if attempt == 3:
+                    raise
+                time.sleep(2)
 
     def activate(self):
         self.invariants(sha(self.original))
@@ -736,9 +848,13 @@ def main(argv=None):
     mode.add_argument("--activate", action="store_true", help="Only after approval of the exact built frontend SHA.")
     parser.add_argument("--frontend-sha", required=True)
     parser.add_argument("--record", type=Path)
+    parser.add_argument("--retry-after-rollback", action="store_true",
+                        help="One reviewed retry of eoszulb3 after its completed frontend rollback; no rebuild.")
     args = parser.parse_args(argv)
     require(args.frontend_sha == REVIEWED_SHA, "Supply the exact reviewed passenger-page frontend SHA.")
     require((args.prepare and args.record is None) or (args.activate and args.record is not None), "Only activation accepts a prepared record.")
+    require(not args.retry_after_rollback or (args.activate and args.record == BACKUP / "passenger-stage-eoszulb3"),
+            "Rollback retry requires --activate and the exact eoszulb3 record.")
     require(os.geteuid() == 0, "Use the existing authorised root Hostinger terminal.")
     os.umask(0o077)
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
@@ -746,7 +862,7 @@ def main(argv=None):
         raise Stop("Operator interrupted the release.")
     signal.signal(signal.SIGINT, interrupt)
     signal.signal(signal.SIGTERM, interrupt)
-    operation = Release(args.frontend_sha, args.record)
+    operation = Release(args.frontend_sha, args.record, args.retry_after_rollback)
     with Path("/run/lock/act-backend-deploy.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
