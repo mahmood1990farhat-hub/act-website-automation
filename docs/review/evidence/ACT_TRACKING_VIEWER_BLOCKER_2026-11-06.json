@@ -47,10 +47,11 @@
   "next_diagnostic": {
     "script": "ops/first-journey/read_tracking_connection.py",
     "scope": "Tokenless synthetic-trip-0 refusal probes over public TLS, verified-hostname loopback TLS, and the existing Unix socket; bounded sanitized exception-category summary",
-    "host_execution": "PENDING owner output",
+    "host_execution": "Owner-supplied output: all three anonymous refusal paths PASS at 15:02; see ACT_TRACKING_CONNECTION_HOST_RESULT_2026-11-06.json",
     "credentials_or_coordinates_sent": false,
     "booking_or_service_changes": false,
-    "requires_deployment_approval": false
+    "requires_deployment_approval": false,
+    "next_scope": "Signed-in viewer startup and authentication acknowledgement; no routing change justified"
   },
   "separate_driver_display_correction": {
     "cause": "StringCurrency converted the parsed fare to an integer before applying the existing two-decimal formatter",
