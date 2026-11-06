@@ -1,0 +1,94 @@
+{
+  "date": "2026-11-06",
+  "checkpoint": "Existing Android driver to authenticated website tracking",
+  "result": "BLOCKED - viewer startup or authentication acknowledgement did not complete",
+  "evidence_source": "Owner-supplied screenshots; not an independent server or browser-session inspection",
+  "raw_screenshots_published": false,
+  "application_sources": {
+    "delivered_driver_apk_source": "862f1ea7f3f7f13a46c932fe55c0622735a64b38",
+    "owner_activated_frontend": "3a82c16f1eb648f274759b2567db4fe433720d17",
+    "owner_activated_backend": "d77e896af9daca5a39b7a85d5b76c5821e008d23"
+  },
+  "observed": {
+    "website_surface": "Dashboard Trips detail modal in an iPhone web browser; not native iPhone-app acceptance",
+    "test_trip_id": 34,
+    "website_status_label": "Upcoming",
+    "map_tiles_rendered": true,
+    "tracking_banner": "Trip tracking is unavailable.",
+    "fresh_driver_marker_confirmed": false,
+    "website_total_display": "GBP 112.06",
+    "earlier_driver_fare_display": "GBP 112.00"
+  },
+  "source_findings": {
+    "unavailable_entry_paths": [
+      "Invalid or missing configured API origin/trip ID prevents URL construction",
+      "Browser WebSocket constructor throws",
+      "15 seconds expire before viewer-role auth_ok; this includes connection opening and authentication acknowledgement"
+    ],
+    "excluded_as_sufficient_explanations": [
+      "Missing token or auth_error selects the separate unauthorized banner",
+      "Ordinary socket error/close selects the separate disconnected banner",
+      "After successful viewer authentication, missing GPS selects waiting and expired GPS selects stale"
+    ],
+    "trip_id_and_token": "The dashboard passes the selected trip ID and existing REST login token unchanged; numeric ID 34 is accepted by the helper",
+    "local_compiled_bundle": "The previously verified local production client chunks contain the literal ACT HTTPS origin and viewer_auth handling; this does not independently establish the host-served chunk",
+    "map_center": "Without a current driver location, the map uses the route preview midpoint; its visible geography is not driver-location evidence",
+    "confirmed_tracking_source_defect": null
+  },
+  "activation_check_limit": {
+    "already_proved": "The tokenless direct Unix-socket check received auth_error and close 4403 from the new consumer",
+    "not_proved": [
+      "Public HTTPS to WebSocket upgrade path",
+      "Authenticated browser connection and acknowledgement",
+      "Real database access checks and Redis channel-layer group join for an authorized viewer",
+      "Fresh driver publication, passenger-web receipt, navigation return, recovery or completion"
+    ]
+  },
+  "next_diagnostic": {
+    "script": "ops/first-journey/read_tracking_connection.py",
+    "scope": "Tokenless synthetic-trip-0 refusal probes over public TLS, verified-hostname loopback TLS, and the existing Unix socket; bounded sanitized exception-category summary",
+    "host_execution": "PENDING owner output",
+    "credentials_or_coordinates_sent": false,
+    "booking_or_service_changes": false,
+    "requires_deployment_approval": false
+  },
+  "separate_driver_display_correction": {
+    "cause": "StringCurrency converted the parsed fare to an integer before applying the existing two-decimal formatter",
+    "fix": "Remove only the intermediate integer conversion",
+    "commit": "9507334003a1f126869bc22b9a960dfaf0b12746",
+    "pull_request": "https://github.com/mahmood1990farhat-hub/act-driver-app/pull/17",
+    "status": "Committed and source reviewed; unmerged; runtime/native build pending; not in the delivered APK",
+    "verification": "Pinned baseline and one-line diff reviewed; git apply --check passed; GitHub source readback matched",
+    "payment_data_changed": false
+  },
+  "acceptance": {
+    "phone_acceptance_and_basic_map_rendering": "Previously evidenced, retained",
+    "admin_live_tracking": "FAILED this checkpoint",
+    "passenger_web_live_tracking": "NOT YET PASSED",
+    "complete_controlled_journey": "NOT YET PASSED",
+    "instructions": "Keep Start, Complete and Cancel untouched while resolving this connection; do not repeat installation or acceptance solely for this diagnosis"
+  },
+  "diagnostic_verification": {
+    "focused_offline_checks": 6,
+    "result": "PASS",
+    "command": "python3 -B -m unittest discover -s ops/first-journey -p test_read_tracking_connection.py -v",
+    "python_3_11_grammar": "PASS",
+    "script_sha256": "67915d5e1e702e811aa27c225f027668e1ff414d5976631e0c1488c48e1a767a",
+    "test_sha256": "cc940718102e134ae4dc45b2b3f3c49a926e359e2ea64978bc096b3d419f1c8e",
+    "host_network_or_authenticated_gps_test": "NOT RUN",
+    "limitations": [
+      "The diagnostic is run from the server; this is not the phone network path.",
+      "Anonymous refusal does not exercise valid-JWT database access or Redis group membership.",
+      "The last 20 minutes and at most 200 journal entries may omit the original failure.",
+      "Exception-category matches are not attributed to a specific trip or connection."
+    ],
+    "local_runtime": "Python 3.12.14; Python 3.11 grammar separately checked; no host run claimed",
+    "independent_review": {
+      "result": "No blocking defect found",
+      "bootstrap_check": "Exact exec(compile(bytes, ...), {'__name__': '__main__'}) delivery form exercised offline with real fork and mocked network/journal; all three fixture paths returned PASS",
+      "tls_assertions": "CERT_REQUIRED, hostname checking enabled, no keylog, same ACT domain SNI for public and loopback paths",
+      "writes_or_secret_output": "No settings, service or booking writes; no credentials, GPS, raw HTTP payload or raw journal output",
+      "scope_note": "Bounded raw journal messages are read into memory to count categories; matches are not proof of this viewer failure"
+    }
+  }
+}
