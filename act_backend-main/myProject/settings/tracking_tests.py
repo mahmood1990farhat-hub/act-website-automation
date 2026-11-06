@@ -13,7 +13,11 @@ if DATABASES["default"]["HOST"] != "127.0.0.1" or DATABASES["default"]["NAME"] !
 DEBUG = False
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 ROOT_URLCONF = "apps.trips.tests.tracking_test_urls"
-MIDDLEWARE = []
+MIDDLEWARE = [
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+]
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 CELERY_BROKER_URL = "memory://"
