@@ -2,9 +2,9 @@
 
 ## Status and purpose
 
-Prepared on 6 November 2026 after the owner's phone showed Trip #34 under **Accepted**. This runbook covers only the shared website/backend changes needed for the existing Android driver's next GPS stage. It is not a deployment receipt or permission to activate. Keep the phone at Accepted until coordinated activation and access checks pass.
+Prepared on 6 November 2026 after the owner's phone showed Trip #34 under **Accepted**. This runbook covers the shared website/backend changes needed for the existing Android driver's next GPS stage. The owner subsequently approved the exact source pair and supplied the successful final Hostinger activation receipt. The pair is now **activated**, with the owner-supplied evidence recorded below. Actual phone GPS and full journey acceptance remain outstanding.
 
-The exact prepared candidates are below. All 19 backend CI cases passed, and the owner has now supplied the successful inactive Hostinger staging receipt. [Backend PR #116](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/116) records its CI result; [frontend PR #115](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/115) records the 38 focused checks and full build. The staged pair remains unmerged and not activated; the screenshot is not activation approval.
+The exact activated application sources are below. All 19 backend CI cases, 38 frontend effect cases and 27 activation-helper cases have passed; their evidence is retained without another application-suite run. [Backend PR #116](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/116) and [frontend PR #115](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/115) remain open, draft and unmerged. Deployment of the approved exact commits is a separate status from merging or accepting the complete journey.
 
 | Component | Candidate | Required base |
 | --- | --- | --- |
@@ -12,9 +12,9 @@ The exact prepared candidates are below. All 19 backend CI cases passed, and the
 | Website tracking viewers | `3a82c16f1eb648f274759b2567db4fe433720d17` | PR #114 at `0bb77ab75aed11babf37108054c06c27e77ed701`, itself based on serving `892317fcf938fad5fa6cd9a833a79e900dcc4d8f` |
 | Android driver | Existing delivered `862f1ea7f3f7f13a46c932fe55c0622735a64b38` | Existing app and retained test signer; no new APK for this release |
 
-The backend keeps the existing driver authentication protocol. The website adds authenticated viewer messages on the existing WebSocket route. Backend and website candidates must be activated together before the journey test. Older website clients may fail to show tracking; they must never receive an anonymous compatibility bypass. Refresh the passenger/admin page after activation.
+The backend keeps the existing driver authentication protocol. The website adds authenticated viewer messages on the existing WebSocket route. The pair has been activated together. Older website clients may fail to show tracking; they must never receive an anonymous compatibility bypass. Refresh the passenger/admin page before the connected tracking check.
 
-## Retained deployment facts
+## Pre-activation deployment facts retained for recovery
 
 These are previous operator evidence and source references. The staging operation must refuse drift before modifying anything; they are not a fresh server-state claim.
 
@@ -84,7 +84,7 @@ Recheck the staging receipt and all recorded preimages under the release lock. A
 - If the backend restart/readiness fails before GPS testing: restore the previous `current` target and restart `act.service`, retaining all data and the rotated configuration. This restores the old viewer-access gap, so the phone remains at Accepted and the GPS test remains blocked. Never report this as a safe-to-track state. If real GPS has already begun, halt that tracking test before a backend rollback; restoring the older consumer must not silently reopen viewer access during an active test.
 - Do not restore old databases, secrets, credentials, uploads or payment settings; do not cancel/complete bookings as a deployment recovery action. A concurrent Nginx/current-pointer change is a stop condition, not permission to overwrite another change.
 
-## Exact approval statement to present only after staging succeeds
+## Exact approval statement subsequently approved by the owner
 
 “Approve activating backend `d77e896af9daca5a39b7a85d5b76c5821e008d23` and website `3a82c16f1eb648f274759b2567db4fe433720d17` for the ACT tracking test: switch the backend release and restart `act.service`, start and persist the new loopback frontend, and reload Nginx with the reviewed three upstream changes and static-asset union. Preserve the current website releases for the documented rollback. This approval changes tracking access and display only; it does not authorize payment-mode changes, booking edits, messages, driver approvals, migrations, automation changes, a new APK or wider driver release.”
 
@@ -104,7 +104,7 @@ The owner's Hostinger screenshot shows `TRACKING RELEASES BUILT AND ROUTING PREP
 
 This is owner-supplied evidence, not an independent shell session by the assistant. The helper reaches that sentinel only after the connected frontend build, inactive candidate/rollback Nginx validation, final drift guards and saved `plan.json`. It has not started the new frontend, changed backend `current`, reloaded routing or sent a booking request. The private receipt remains on the host and is the input for the subsequent activation helper. [Sanitised host evidence](evidence/ACT_TRACKING_HOST_STAGING_2026-11-06.json).
 
-The next decision is approval of the already staged source pair and exact service/routing actions. No new APK, repeated Accept action, or further capacity/package inventory is required by this receipt.
+At that stage, the next decision was approval of the staged source pair and exact service/routing actions. That approval and the later activation result are recorded below. No new APK, repeated Accept action, or further capacity/package inventory was required by the staging receipt.
 
 ## Concrete activation helper
 
@@ -128,4 +128,12 @@ Terminal hangup and closed output do not interrupt the transaction. Each consequ
 
 The finished helper's SHA256 is `e22d945f4d7d9ca2fa06f07bd3e5b02746ef7d7c505d227512e241a3bdec81ab`. All **27 focused helper checks passed**, with no failures, errors or skips. Python 3.11 grammar and all four embedded Node syntax checks also passed. The tests exercise actual helper functions and embedded JavaScript using temporary files, simulated services and an isolated JavaScript VM; they do not count as installed-PM2 integration or live activation. [Check evidence](evidence/ACT_TRACKING_ACTIVATION_CHECKS_2026-11-06.json), [test log](evidence/ACT_TRACKING_ACTIVATION_CHECKS_2026-11-06.log), and [independent review](ACT_TRACKING_ACTIVATION_REVIEW_2026-11-06.md).
 
-The helper's preparation and local checks do not constitute activation approval or a host execution receipt. The owner's successful staging result is the latest deployment milestone until a later activation receipt is supplied.
+The helper's preparation and local checks alone do not constitute activation approval or a host execution receipt. The later approval and successful host execution are recorded separately below.
+
+## Owner-approved activation completed — 6 November
+
+The owner explicitly replied **Approve** to activating backend `d77e896af9daca5a39b7a85d5b76c5821e008d23` and website `3a82c16f1eb648f274759b2567db4fe433720d17` with the reviewed service/routing actions. The subsequent Hostinger screenshot shows the pinned helper at commit `9868b8da5194ce901e03c6d937a773e0d26cb18d`, its matching SHA256, successful preimage verification, authenticated-backend readiness, and **`TRACKING BACKEND AND WEBSITE ACTIVATED - JOURNEY ACCEPTANCE NOT YET RUN`**. Both exact application SHAs and the private activation-record path were printed, then the root prompt returned.
+
+This is owner-supplied server evidence. The final helper sentinel follows backend source/readiness checks, tokenless WebSocket refusal, new frontend startup/persistence, preservation of both old frontend processes, reviewed Nginx installation/reload, origin/public build and asset checks, protected API checks, final identity checks and the private `ACTIVATED` receipt. No additional server inventory, repeat activation or rebuild is required by this result. [Sanitised activation evidence](evidence/ACT_TRACKING_HOST_ACTIVATION_2026-11-06.json).
+
+The next task is the existing Android app's On The Way and fresh-location check, starting from the already accepted Trip #34. The deployment helper sent no phone GPS and changed no booking status. Signed-in web tracking, vehicle heading, navigation return, connection recovery and actual completion still need the controlled phone journey. The original long-route booking may support preliminary app checks; it does not replace the agreed short-route completed-journey test. Native passenger/iPhone and full website acceptance remain separate gates.
