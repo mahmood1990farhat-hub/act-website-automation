@@ -83,10 +83,38 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: act_backend-main/requirements.txt
-      - name: Install GeoDjango system libraries
+      - name: Ensure GeoDjango runtime libraries
+        timeout-minutes: 5
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gdal-bin libgdal-dev libgeos-dev
+          set -euo pipefail
+          exec > >(tee ../tracking-access-evidence/native-libraries.txt) 2>&1
+          if python - <<'PY'
+          import ctypes
+          from ctypes.util import find_library
+          for name in ("gdal", "geos_c"):
+              library = find_library(name)
+              if not library:
+                  raise SystemExit(1)
+              ctypes.CDLL(library)
+          print("Required GeoDjango runtime libraries are already loadable")
+          PY
+          then
+            :
+          else
+            sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+            sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o DPkg::Lock::Timeout=30 install -y --no-install-recommends libgdal34t64 libgeos-c1t64
+          fi
+          python - <<'PY'
+          import ctypes
+          from ctypes.util import find_library
+          for name in ("gdal", "geos_c"):
+              library = find_library(name)
+              if not library:
+                  raise SystemExit(f"Required GeoDjango library is missing: {name}")
+              ctypes.CDLL(library)
+              print(f"Loaded required runtime library: {name}")
+          PY
       - name: Install unchanged backend dependencies
         run: pip install -r requirements.txt
       - name: Run only tracking access and lifecycle tests
