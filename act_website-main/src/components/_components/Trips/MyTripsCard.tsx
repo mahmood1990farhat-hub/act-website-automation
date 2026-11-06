@@ -565,6 +565,8 @@ export default function MyTripsCard({
 											<MapViewtest
 												tripId={data.id}
 												routePolyline={data.route_polyline}
+												token={token}
+												locale={locale}
 											/>
 										) : (
 											<div className="h-full rounded overflow-hidden">
