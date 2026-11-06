@@ -1,7 +1,7 @@
 {
   "date": "2026-11-06",
   "checkpoint": "Existing Android driver to authenticated website tracking",
-  "result": "BLOCKED - viewer startup or authentication acknowledgement did not complete",
+  "result": "Initial owner iPhone failure recorded; a later fresh admin browser session passed live receipt, with the earlier session cause still unconfirmed",
   "evidence_source": "Owner-supplied screenshots; not an independent server or browser-session inspection",
   "raw_screenshots_published": false,
   "application_sources": {
@@ -51,7 +51,7 @@
     "credentials_or_coordinates_sent": false,
     "booking_or_service_changes": false,
     "requires_deployment_approval": false,
-    "next_scope": "Signed-in viewer startup and authentication acknowledgement; no routing change justified"
+    "next_scope": "Fresh admin live receipt observed; owner iPhone reopen and remaining controlled-journey checks"
   },
   "separate_driver_display_correction": {
     "cause": "StringCurrency converted the parsed fare to an integer before applying the existing two-decimal formatter",
@@ -64,7 +64,7 @@
   },
   "acceptance": {
     "phone_acceptance_and_basic_map_rendering": "Previously evidenced, retained",
-    "admin_live_tracking": "FAILED this checkpoint",
+    "admin_live_tracking": "PASS in a later fresh authenticated cloud Chrome session; original iPhone recheck pending",
     "passenger_web_live_tracking": "NOT YET PASSED",
     "complete_controlled_journey": "NOT YET PASSED",
     "instructions": "Keep Start, Complete and Cancel untouched while resolving this connection; do not repeat installation or acceptance solely for this diagnosis"
@@ -91,5 +91,6 @@
       "writes_or_secret_output": "No settings, service or booking writes; no credentials, GPS, raw HTTP payload or raw journal output",
       "scope_note": "Bounded raw journal messages are read into memory to count categories; matches are not proof of this viewer failure"
     }
-  }
+  },
+  "latest_checkpoint": "ACT_TRACKING_ADMIN_LIVE_RECEIPT_2026-11-06.json"
 }
