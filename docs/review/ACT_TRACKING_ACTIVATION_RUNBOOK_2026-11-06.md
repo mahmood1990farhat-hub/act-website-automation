@@ -4,7 +4,7 @@
 
 Prepared on 6 November 2026 after the owner's phone showed Trip #34 under **Accepted**. This runbook covers only the shared website/backend changes needed for the existing Android driver's next GPS stage. It is not a deployment receipt or permission to activate. Keep the phone at Accepted until coordinated activation and access checks pass.
 
-The exact prepared candidates are below. Backend test execution and the inactive Hostinger staging receipt must succeed before an activation decision. [Backend PR #116](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/116) records its current CI result; [frontend PR #115](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/115) records the 38 focused checks and full build.
+The exact prepared candidates are below. All 19 backend CI cases passed, and the owner has now supplied the successful inactive Hostinger staging receipt. [Backend PR #116](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/116) records its CI result; [frontend PR #115](https://github.com/mahmood1990farhat-hub/act-website-automation/pull/115) records the 38 focused checks and full build. The staged pair remains unmerged and not activated; the screenshot is not activation approval.
 
 | Component | Candidate | Required base |
 | --- | --- | --- |
@@ -96,4 +96,36 @@ The subsequent journey still needs an agreed short route, correct test recipient
 
 The existing dotenv files and captured public PM2 overrides are resolved privately. A separate root-private `frontend-public-environment.json` is retained so later activation uses the same effective public values. Build output is private. The build is not claimed to run in a network-isolated environment; no new operating-system namespace or container prerequisite is imposed.
 
-Twelve finite helper checks passed, including source/archive scope, configuration-mode checks, collision/link refusal, drift refusal, new-directory permissions without following shared links, and passive RPC behavior. Python 3.11 grammar and both embedded Node snippets also passed. These are local helper checks; the helper has not run on Hostinger, and no connected release or actual Nginx validation result is claimed yet.
+Twelve finite helper checks passed, including source/archive scope, configuration-mode checks, collision/link refusal, drift refusal, new-directory permissions without following shared links, and passive RPC behavior. Python 3.11 grammar and both embedded Node snippets also passed. The original helper-review JSON preserves the historical prepared-but-not-executed state; the later host result is recorded separately below.
+
+## Owner's successful host preparation receipt — 6 November
+
+The owner's Hostinger screenshot shows `TRACKING RELEASES BUILT AND ROUTING PREPARED - NOT ACTIVATED`, backend `d77e896af9daca5a39b7a85d5b76c5821e008d23`, and frontend `3a82c16f1eb648f274759b2567db4fe433720d17`. The root prompt returned before the terminal displayed `Lost connection to the server`. Preparation had therefore completed; do not rerun the build just because the terminal session subsequently disconnected.
+
+This is owner-supplied evidence, not an independent shell session by the assistant. The helper reaches that sentinel only after the connected frontend build, inactive candidate/rollback Nginx validation, final drift guards and saved `plan.json`. It has not started the new frontend, changed backend `current`, reloaded routing or sent a booking request. The private receipt remains on the host and is the input for the subsequent activation helper. [Sanitised host evidence](evidence/ACT_TRACKING_HOST_STAGING_2026-11-06.json).
+
+The next decision is approval of the already staged source pair and exact service/routing actions. No new APK, repeated Accept action, or further capacity/package inventory is required by this receipt.
+
+## Concrete activation helper
+
+`ops/first-journey/activate_existing_tracking.py` consumes that existing private record with `--activate --record /root/act-release-backup/tracking-stage-<record-suffix>`. The source pair is fixed in the helper. It performs no build and takes no credentials from chat. The operator command must be pinned to the committed helper's SHA256 and issued only after the owner approves the exact pair above.
+
+Before its first live change, the helper checks the staged plan, reviewed source files, current backend, saved frontend build/configuration, both retained PM2 identities, the saved process list, port 3003, routing bytes and combined assets. It captures the current preimages privately and revalidates the prepared routing. These are guards within the approved activation, not another general server inventory or a repeat of the application suites.
+
+The only application service it restarts is `act.service`. Its tokenless WebSocket probe sends `viewer_auth` without an access token to trip ID 0 and requires `auth_error` followed by close code 4403. That refusal happens before any trip lookup; the probe carries no coordinates, does not authenticate, and does not modify a booking. Existing signed-in driver/viewer behavior remains a controlled-journey acceptance check.
+
+The new frontend receives the captured public build configuration and a unique activation marker. The helper guards PM2's start operation against daemon creation or restarting an existing process, appends the new launch definition while preserving the two saved definitions, and read-checks the result. Recovery can remove only the candidate carrying this operation's marker. It then installs the prepared Nginx file at the resolved site target, validates it, reloads Nginx and compares the website build, protected API response and old/new static assets through the origin and public HTTPS routes.
+
+Terminal hangup and closed output do not interrupt the transaction. Each consequential step has a private journal entry before mutation; command timeouts are bounded. An operator interruption requests recovery. A prior activation journal blocks blind reruns, including when the terminal disconnects before the final output is seen. A later result inspection should read that saved journal; do not rebuild or rerun activation to discover its status.
+
+| Final receipt | Meaning and next action |
+| --- | --- |
+| `ACTIVATED` | Exact website/backend pair passed runtime readiness and routing checks. Refresh the web viewers, then begin the separately controlled phone journey checks. |
+| `STOPPED_BEFORE_ACTIVATION` | A guard refused before any live activation action. Review the specific saved result; serving services were not switched by this attempt. |
+| `BACKEND_ROLLED_BACK_GPS_BLOCKED` | The new backend did not pass readiness. Previous backend restored; keep the phone test at Accepted. |
+| `FRONTEND_ROLLED_BACK_AUTHENTICATED_BACKEND_RETAINED` | Previous website retained/restored, with the healthy new backend kept. The coordinated website/GPS test remains blocked. |
+| `RECOVERY_INCOMPLETE` | A recovery check failed or detected a concurrent change. Preserve the journal and current files for targeted review; do not blindly rerun activation or restore data. |
+
+The finished helper's SHA256 is `e22d945f4d7d9ca2fa06f07bd3e5b02746ef7d7c505d227512e241a3bdec81ab`. All **27 focused helper checks passed**, with no failures, errors or skips. Python 3.11 grammar and all four embedded Node syntax checks also passed. The tests exercise actual helper functions and embedded JavaScript using temporary files, simulated services and an isolated JavaScript VM; they do not count as installed-PM2 integration or live activation. [Check evidence](evidence/ACT_TRACKING_ACTIVATION_CHECKS_2026-11-06.json), [test log](evidence/ACT_TRACKING_ACTIVATION_CHECKS_2026-11-06.log), and [independent review](ACT_TRACKING_ACTIVATION_REVIEW_2026-11-06.md).
+
+The helper's preparation and local checks do not constitute activation approval or a host execution receipt. The owner's successful staging result is the latest deployment milestone until a later activation receipt is supplied.
