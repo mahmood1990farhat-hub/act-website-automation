@@ -1,0 +1,119 @@
+{
+  "recorded_on": "2026-11-06",
+  "scope": "Passenger website Details crash during the existing controlled Android-to-web journey test",
+  "source_parent": "465c380a970042ca7191ddfc6260f893591155ad",
+  "currently_deployed_frontend": "3a82c16f1eb648f274759b2567db4fe433720d17",
+  "currently_deployed_backend": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "status_at_recording": {
+    "source": "local candidate; commit receipt supplied by enclosing Git commit",
+    "focused_checks": "passed",
+    "next_build": "completed compilation, TypeScript, page generation and route emission",
+    "merged": false,
+    "deployed": false,
+    "passenger_phone_acceptance": "blocked pending deployment and fresh passenger Details check"
+  },
+  "owner_observations": [
+    {
+      "screen": "admin-style Trip Details on iPhone",
+      "phone_display_time": "15:29",
+      "observation": "Live driver location banner with vehicle marker; earlier unavailable view has recovered",
+      "limit": "A still image does not demonstrate continuous movement or complete journey acceptance; this is not the passenger card"
+    },
+    {
+      "screen": "passenger All trips",
+      "phone_display_time": "15:33",
+      "trip_id": 34,
+      "observation": "Driver on the way, correct route and fare shown; missing phone placeholder and vehicle class under Brand"
+    },
+    {
+      "screen": "passenger Details follow-up",
+      "observation": "Next client-side exception page",
+      "limit": "No stack trace was provided by the phone"
+    }
+  ],
+  "reproduced_defect": {
+    "exception": "ReferenceError: google is not defined",
+    "call_site": "Installed @react-google-maps/api GoogleMap.getInstance during componentDidMount",
+    "cause": "The passenger active/driver_on_the_way Details branch mounted the shared live map without the existing Google Maps SDK loader guard. Dashboard layout and static passenger maps already have the guard.",
+    "attribution_limit": "A matching source defect was reproduced; the phone screenshot alone does not prove its JavaScript stack."
+  },
+  "changes": [
+    "Wrap only passenger live Details map with existing ProviderMap; preserve tracking provider and socket hook.",
+    "Read canonical registered driver phone with existing guest phone fallback in summary, details and contact display.",
+    "Read registered vehicle make, vehicle_number and year_of_manufacture with existing guest brand, registration_number and year fallbacks.",
+    "Label vehicle type Vehicle class / Arabic equivalent, separately from vehicle make."
+  ],
+  "verification": {
+    "baseline_git_blob": "ab51322af6e63c5770cfc1ea99ddde51e292ff5b",
+    "baseline_test": {
+      "command": "ACT_PASSENGER_CARD_SOURCE=<isolated published MyTripsCard.tsx> node --test tests/passenger-trip-details.cjs",
+      "passed": 1,
+      "failed": 5,
+      "failures": [
+        "on-way Details throws google is not defined",
+        "active Details throws google is not defined",
+        "Maps load failure Details throws google is not defined",
+        "registered canonical phone missing",
+        "Arabic class label missing"
+      ],
+      "passed_case": "guest field compatibility"
+    },
+    "candidate_test": {
+      "command": "node --test tests/passenger-trip-details.cjs",
+      "passed": 6,
+      "failed": 0,
+      "cases": [
+        "on-way Details waits for SDK then mounts",
+        "active Details waits for SDK then mounts",
+        "Maps failure displays error and Details stays closable",
+        "registered driver and vehicle fields, class and pence",
+        "guest fallback compatibility",
+        "Arabic vehicle class label"
+      ]
+    },
+    "test_method": "Actual card, ProviderMap, tracking-map source and installed GoogleMap class mount; controlled hooks, SDK state, native map objects and effects. No real account, HTTP submission, GPS or browser used.",
+    "next_build": {
+      "command": "node node_modules/next/dist/bin/next build",
+      "node": "24.22.1",
+      "next": "16.1.6",
+      "environment": "Synthetic public Maps and Stripe test placeholders; compile verification only, not a provider-configured deployable host artifact",
+      "log": "ACT_PASSENGER_DETAILS_FIX_2026-11-06-build.log",
+      "result": "Compiled successfully; TypeScript, static page generation and final route list complete; .next/BUILD_ID exists",
+      "process_exit_receipt": "Not retained after output truncation; successful build conclusion based on the complete saved build log and generated BUILD_ID"
+    },
+    "git_diff_check": "passed",
+    "broader_suites": "Previously completed tracking, backend and Android suites were not repeated."
+  },
+  "unchanged_boundaries": [
+    "Shared Google Maps loader",
+    "Frontend tracking hook/provider",
+    "Backend application and services",
+    "Driver APK",
+    "Trip state actions and cancellation",
+    "Payment, pricing and booking records",
+    "Dependencies and lockfile"
+  ],
+  "delivery_gate": "Build an inactive frontend release from the committed candidate using the existing host configuration; obtain owner approval for that concrete frontend-only activation. Then re-open Details in an authenticated passenger browser.",
+  "remaining_acceptance": [
+    "Passenger Details opens and live marker is visible on the phone",
+    "Movement/freshness and external Google Maps return",
+    "Brief connection loss and recovery",
+    "Pickup, start, completion and tracking shutdown",
+    "Final status agreement across driver, passenger web and admin",
+    "Full fresh-booking and payment journey remains separate from this old-trip checkpoint"
+  ],
+  "files": [
+    {
+      "path": "act_website-main/src/components/_components/Trips/MyTripsCard.tsx",
+      "sha256": "cfa7b6ab379acfa85af95c45295b14d6d0285ee436627cc601dddc57bad43892"
+    },
+    {
+      "path": "act_website-main/tests/passenger-trip-details.cjs",
+      "sha256": "9a2f524acc6107bef5caddcdc3789ca51041cfc8146fabef2ac48f213245ea67"
+    },
+    {
+      "path": "docs/review/evidence/ACT_PASSENGER_DETAILS_FIX_2026-11-06-build.log",
+      "sha256": "3dda11e203f038db211e7e10b5cbaf796169421ab62de7afac1ccf05902c4eac"
+    }
+  ]
+}
