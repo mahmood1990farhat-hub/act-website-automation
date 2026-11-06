@@ -1,6 +1,6 @@
 "use client";
 
-import { useTripTracking } from "@/hooks/use-trip-tracking";
+import { trackingStatusText, useTripTracking } from "@/hooks/use-trip-tracking";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 
 const containerStyle = {
@@ -8,15 +8,15 @@ const containerStyle = {
 	height: "400px",
 };
 
-export default function TripGoogleMap({ tripId }: { tripId: string }) {
-	const { location, connected } = useTripTracking(tripId);
+export default function TripGoogleMap({ tripId, token, locale = "en" }: { tripId: string; token?: string; locale?: string }) {
+	const { location, status } = useTripTracking(tripId, token);
 
 
 
 	if (!location) {
 		return (
-			<div className="h-[400px] flex items-center justify-center border">
-				Waiting for driver location...
+			<div role="status" dir={locale === "ar" ? "rtl" : "ltr"} className="h-[400px] flex items-center justify-center border">
+				{trackingStatusText(status, locale)}
 			</div>
 		);
 	}
@@ -26,12 +26,12 @@ export default function TripGoogleMap({ tripId }: { tripId: string }) {
 			<div className="flex items-center gap-2">
 				<div
 					className={`w-3 h-3 rounded-full ${
-						connected ? "bg-green-500" : "bg-red-500"
+						status === "live" ? "bg-green-500" : "bg-red-500"
 					}`}
 				/>
 
-				<span className="text-sm">
-					{connected ? "Live Tracking" : "Disconnected"}
+				<span role="status" dir={locale === "ar" ? "rtl" : "ltr"} className="text-sm">
+					{trackingStatusText(status, locale)}
 				</span>
 			</div>
 

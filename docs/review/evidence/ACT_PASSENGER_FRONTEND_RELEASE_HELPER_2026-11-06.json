@@ -1,0 +1,61 @@
+{
+  "recorded_on": "2026-11-06",
+  "purpose": "Build and activate the already-reviewed passenger Details correction as a frontend-only release",
+  "frontend_candidate": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+  "current_frontend_and_rollback": "3a82c16f1eb648f274759b2567db4fe433720d17",
+  "backend_preserved": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "source_comparison": "GitHub compare confirms exactly one modified frontend application file (MyTripsCard.tsx) and one new focused passenger test relative to the currently deployed frontend.",
+  "files": [
+    {
+      "path": "ops/first-journey/passenger_frontend_release.py",
+      "sha256": "a62921418cbeafc865a31a087675ae5241a64ae9e68d981e523ae7a59e86e8b5",
+      "bytes": 48090
+    },
+    {
+      "path": "ops/first-journey/test_passenger_frontend_release.py",
+      "sha256": "f3f3b52b562975efcba5ae1477ff61d0615383070c669623dbc766345e7ef611",
+      "bytes": 18082
+    }
+  ],
+  "verification": {
+    "command": "python3 -B -m unittest discover -s ops/first-journey -p test_passenger_frontend_release.py -v",
+    "passed": 8,
+    "failed": 0,
+    "exit_code": 0,
+    "reported_test_seconds": 0.187,
+    "coverage": [
+      "Exact reviewed SHA, application paths and content hashes",
+      "Inactive preparation builds once and preserves live state",
+      "Three frontend routes and full current-plus-candidate asset union",
+      "Candidate runtime environment and source drift refusal",
+      "Three retained PM2 definitions and selected build identity",
+      "Wrong public build rolls back to the existing frontend with combined assets",
+      "Owned partial-start cleanup and unresolved startup refusal",
+      "Concurrent routing or backend changes withhold automatic overwrite"
+    ],
+    "additional_checks": [
+      "Python 3.11 grammar parse",
+      "Node syntax checks for embedded PM2_READ, PM2_START, PM2_REMOVE and ENV_READ",
+      "git diff --check",
+      "Independent source review against the previous deployed staging and activation contracts"
+    ],
+    "limits": "Isolated filesystem and host/process/network fixtures. No live Hostinger, PM2 RPC, Nginx activation, provider configuration or phone acceptance was exercised by these local tests."
+  },
+  "review_findings_resolved": [
+    "Public verification distinguishes builds even when homepage assets match",
+    "Prior loopback-only origin certificate handling preserved; public HTTPS verification retained",
+    "Candidate runtime environment copies checked for drift",
+    "Nested asset directories readable under private staging umask"
+  ],
+  "prepare_effect": "Exports the pinned frontend, installs unchanged locked dependencies and builds an inactive release with the existing private configuration; prepares and validates route and rollback files. Starts no listener and changes no active route.",
+  "activation_effect": "Only after owner approval: starts the prepared frontend on loopback 3004, appends its saved PM2 definition, switches the three frontend upstreams and static alias, and verifies selected HTML/assets. Keeps all existing frontend processes and the tracking backend.",
+  "recovery_effect": "Returns frontend routing to 3003 and restores saved startup definitions while retaining combined assets; removes only the owned candidate. Concurrent drift prevents automatic overwrite. No backend write or restart path exists.",
+  "status_at_recording": {
+    "helper": "ready for commit and handoff",
+    "host_preparation": "not run",
+    "activation": "not run",
+    "approval": "existing approval covered the earlier tracking pair; this new frontend activation requires approval after the concrete build is prepared",
+    "journey_acceptance": "not passed"
+  },
+  "next": "Owner runs only the pinned --prepare command, returns its bounded final output, then reviews activation of the prepared frontend revision. Reopen passenger Details after activation and continue the controlled journey."
+}

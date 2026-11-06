@@ -1,0 +1,84 @@
+{
+  "recorded_on": "2026-11-06",
+  "checkpoint": "Passenger website Details loading and initial live driver-location receipt on the owner's phone",
+  "result": "PASS - bounded passenger web Details and live-receipt checkpoint",
+  "evidence_source": {
+    "type": "Four owner-supplied passenger website screenshots",
+    "visible_phone_clock": "9:49",
+    "time_limit": "AM/PM and an independent server timestamp are not shown.",
+    "browser_scope": "Owner's iPhone mobile browser, passenger website view; not a native passenger or iPhone application acceptance",
+    "raw_screenshots_published": false
+  },
+  "page": "https://airportandcitytransfer.com/en/my-trips",
+  "test_trip_id": 34,
+  "visible_observations": {
+    "trip_list_status": "Driver on the way",
+    "details_trip_id": 34,
+    "details_status": "Driver on the way",
+    "details_modal_rendered": true,
+    "scrolled_details_map_rendered": true,
+    "previous_white_application_error_absent_in_captures": true,
+    "map_banner": "Live driver location",
+    "car_marker_visible": true,
+    "driver_phone_populated_in_list": true,
+    "driver_phone_populated_in_contact_display": true,
+    "vehicle_fields_populated": [
+      "make",
+      "model",
+      "registration",
+      "vehicle class",
+      "year",
+      "colour"
+    ],
+    "make_and_vehicle_class_have_distinct_labels": true,
+    "contact_action_tested": false
+  },
+  "interpretation_from_reviewed_source": {
+    "path": "act_website-main/src/hooks/use-trip-tracking.ts",
+    "viewer_authentication": "The hook requires viewer-role auth_ok before processing a location and entering live.",
+    "receipt_freshness": "Entering live requires valid coordinates and a server-received timestamp within 30 seconds, allowing at most five seconds of future clock skew.",
+    "evidence_limit": "Protocol frames, measurement timestamps, continuous motion and physical GPS accuracy were not independently captured. The interpretation combines the rendered live banner with the reviewed deployed hook.",
+    "repaired_details_path": "The passenger Details modal and live map are visibly rendered after the deployed ProviderMap correction; this passes this phone retest, not every browser or network case."
+  },
+  "source_context": {
+    "frontend_application": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+    "backend": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+    "basis": "Previously recorded owner-approved host activation; these phone screenshots are not separate package/version receipts.",
+    "delivered_driver_candidate": "862f1ea7f3f7f13a46c932fe55c0622735a64b38",
+    "driver_installed_revision_visible_in_these_images": false
+  },
+  "privacy": {
+    "raw_coordinates_or_map_area_recorded": false,
+    "phone_number_or_registration_recorded": false,
+    "credentials_or_raw_socket_frames_recorded": false,
+    "raw_screenshots_committed": false
+  },
+  "retained_display_observation": {
+    "issue": "Trip list uses miles while Details uses kilometres.",
+    "priority": "Minor consistency item; does not block the observed Details/live-receipt checkpoint.",
+    "source_context": "The existing Details card converts distance_miles using factor 1.61. No unit or route change is made in this receipt."
+  },
+  "remaining_acceptance": [
+    "Android external navigation launch and return to the same trip, including passenger freshness during the handoff",
+    "Actual movement, heading and map-camera behaviour",
+    "Brief connection loss and recovery",
+    "Fresh short-route website test booking, assignment, physical pickup, start and completion",
+    "Tracking shutdown and matching final driver, passenger website and admin statuses",
+    "Full website release acceptance and separate native passenger/iPhone acceptance"
+  ],
+  "next_smallest_phone_check": [
+    "While parked, keep the passenger's Trip #34 Details open on the second phone.",
+    "In the Android driver app, tap Navigate to pickup and allow the external navigation app to open.",
+    "Keep the passenger viewer open, note its actual live/stale/waiting/disconnected state during the handoff, then return to ACT.",
+    "Confirm ACT returns to the same trip without a crash or lost journey state, and report the passenger banner after return.",
+    "Use a new short local booking for subsequent pickup/start/completion; this navigation handoff does not require travel to the historic pickup."
+  ],
+  "change_scope": "Documentation only. No application source, dependency, backend, deployment, APK, booking, payment or notification action was taken to record this result.",
+  "verification_scope": "Screenshot review and retained deployed-source interpretation. Previously completed test suites were not repeated.",
+  "github_status_at_recording": {
+    "website_pr": 115,
+    "driver_pr": 16,
+    "state": "Both open, draft and unmerged; host-deployed source and phone evidence are recorded separately from merge status."
+  },
+  "complete_connected_journey_accepted": false
+}

@@ -1246,6 +1246,8 @@ export default function TripsDashboard({
 										<MapViewtest
 											tripId={detailsTrips.id}
 											routePolyline={detailsTrips.route_polyline}
+											token={token}
+											locale={locale}
 										/>
 									) : (
 										<div className="h-full rounded overflow-hidden">
