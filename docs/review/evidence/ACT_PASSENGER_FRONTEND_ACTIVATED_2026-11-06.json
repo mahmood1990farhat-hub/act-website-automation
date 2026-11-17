@@ -1,0 +1,91 @@
+{
+  "recorded_on": "2026-11-06",
+  "purpose": "Record the successful owner-approved activation of the existing passenger Details correction after the guarded retry",
+  "source": {
+    "type": "Owner-supplied Hostinger terminal screenshot",
+    "visible_phone_clock": "9:39",
+    "time_limit": "The screenshot does not display AM/PM or an independent server timestamp.",
+    "independent_host_session": false,
+    "raw_screenshot_published": false
+  },
+  "authorization": "The owner's existing explicit approval covers activation of this exact prepared frontend; this retry did not expand the application or backend scope.",
+  "application_frontend_revision": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+  "helper": {
+    "commit": "23f57a6766d9c3fedd8b88ccae04c1adc5c69553",
+    "path": "ops/first-journey/passenger_frontend_release.py",
+    "sha256": "2c880f9e116dad51b5acf973f49b992dbe8c8af4fca1883bd8f718b440151254",
+    "mode": "--activate --retry-after-rollback",
+    "prepared_record_reference": "passenger-stage-eoszulb3",
+    "new_attempt_reference": "activation-retry"
+  },
+  "visible_readiness_results": [
+    {
+      "attempt": 1,
+      "target": "origin",
+      "direction": "activation",
+      "http_status": 200,
+      "required_build": "expected",
+      "build_id": "old",
+      "check": "build_id",
+      "result": "failed",
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "attempt": 2,
+      "target": "origin",
+      "direction": "activation",
+      "http_status": 200,
+      "required_build": "expected",
+      "build_id": "expected",
+      "check": "asset_hashes",
+      "result": "passed",
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "attempt": 2,
+      "target": "public",
+      "direction": "activation",
+      "http_status": 200,
+      "required_build": "expected",
+      "build_id": "expected",
+      "check": "asset_hashes",
+      "result": "passed",
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC"
+    }
+  ],
+  "final_console_result": "PASSENGER FRONTEND ACTIVATED - BACKEND UNCHANGED - JOURNEY NOT YET ACCEPTED",
+  "returned_shell_prompt": true,
+  "interpretation": {
+    "activation": "Succeeded according to the owner-supplied console receipt",
+    "new_frontend_port": 3004,
+    "port_evidence": "The reviewed helper and prepared plan assign the approved candidate to loopback port 3004; the port is not repeated in this screenshot.",
+    "backend_revision_preserved": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+    "backend_evidence": "The final receipt explicitly reports backend unchanged. The exact backend SHA comes from the established deployment record and reviewed helper's identity checks, not a SHA printed in this screenshot.",
+    "previous_frontend_retained": "3a82c16f1eb648f274759b2567db4fe433720d17",
+    "observed_retry_behavior": "The first origin response contained the old build. On the second bounded readiness attempt, origin and public responses contained the expected build and passed asset-hash verification.",
+    "earlier_failure_limit": "This retry demonstrates a transient old origin response. It does not independently establish the precise target or all causes of the earlier failed attempt.",
+    "cache_limit": "The successful public response was classified DYNAMIC. No Cloudflare-caching fault is established.",
+    "deployment_step_complete": true,
+    "passenger_phone_details_retest_passed": false,
+    "complete_connected_journey_accepted": false,
+    "native_passenger_or_iphone_acceptance": false
+  },
+  "development_status": {
+    "application_source": "Committed and locally verified at 02e59f9; now owner-reported deployed",
+    "helper_source": "Committed and locally verified at 23f57a6; now owner-reported successfully executed",
+    "pull_request": 115,
+    "pull_request_state_at_recording": "Open, draft, unmerged",
+    "this_change": "Documentation-only receipt; no application, helper, backend or APK change",
+    "prior_checks": "Six focused passenger Details cases and production-build evidence, thirteen focused helper cases and independent review remain recorded in their existing evidence files. Unchanged suites were not repeated."
+  },
+  "next_phone_check": [
+    "Refresh or reopen /en/my-trips using the eligible passenger account.",
+    "While stationary, keep the Android driver's tracking screen for the same Trip #34 open.",
+    "Open passenger Trip #34 Details and confirm the page remains open and Maps loads.",
+    "Capture the actual tracking banner and marker, including waiting, stale or error wording if shown; do not presume authenticated GPS delivery.",
+    "Observe driver phone and vehicle-class/make values in the same view if available; stored values and contact actions are not established by deployment."
+  ],
+  "remaining_acceptance": "Passenger-phone Details and authenticated fresh location, movement/heading, navigation return, connection recovery, pickup/start, completion, GPS shutdown and final cross-view statuses remain outstanding for the complete controlled journey. Existing old Trip #34 supports preliminary checks; it is not a replacement for the agreed fresh short-route website-to-completed-journey test.",
+  "owner_next_action": "No repeat activation command, rebuild, new approval or APK reinstall is required for this completed website deployment step."
+}

@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-06",
+  "recorded_at_utc": "2026-11-06T15:15:12Z",
+  "checkpoint": "Existing Android driver to authenticated admin website location receipt",
+  "result": "PASS - bounded admin live-receipt checkpoint only",
+  "evidence_source": "Direct browser observation after owner-completed secure admin sign-in",
+  "browser_scope": "Fresh cloud Chrome session; not the owner's earlier iPhone Safari session",
+  "page": "https://airportandcitytransfer.com/en/dashboard/trips",
+  "test_trip_id": 34,
+  "trip_status_label": "Upcoming",
+  "fare_display": "GBP 112.06",
+  "observations": [
+    {
+      "elapsed_ms_from_open": 443,
+      "visible_state": "Trip Details; ID: 34; Upcoming; Connecting to trip tracking..."
+    },
+    {
+      "elapsed_ms_from_open": 9439,
+      "visible_state": "Live driver location; Google Maps loaded; trip ID/status unchanged"
+    }
+  ],
+  "console_observations": {
+    "WebSocket_error_or_warning_matches": 0,
+    "Content_Security_Policy_error_or_warning_matches": 0,
+    "scope": "Only these filtered console categories were read; absence of all browser errors is not claimed"
+  },
+  "interpretation_from_reviewed_hook": {
+    "viewer_authentication_acknowledgement": "Required before the hook can process location and enter live",
+    "location": "The hook accepted in-range coordinates and a server-receipt timestamp within its freshness window",
+    "gps_measurement_age": "Server receipt freshness does not independently prove the measurement age or physical accuracy of phone GPS",
+    "protocol_frames": "Not independently captured; the conclusion is from the rendered state and reviewed hook behavior"
+  },
+  "privacy": {
+    "credentials_entered_through_secure_form": true,
+    "passwords_tokens_cookies_read_or_published": false,
+    "raw_tracking_frames_or_coordinates_recorded": false,
+    "screenshots_or_private_trip_details_published": false
+  },
+  "actions": "Admin sign-in, Trips page and View Details only; no Start, Complete, Cancel, booking creation, assignment, payment or notification action",
+  "application_change": "None; no new build, install, merge, deployment, routing change or backend patch used to obtain this result",
+  "running_source_context_from_prior_owner_activation": {
+    "frontend": "3a82c16f1eb648f274759b2567db4fe433720d17",
+    "backend": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+    "note": "This browser observation is not a separate package/version receipt"
+  },
+  "earlier_iphone_failure": {
+    "banner": "Trip tracking is unavailable.",
+    "root_cause": "UNCONFIRMED",
+    "recovery_property": "Closing and reopening the details mounts a new tracking connection after an earlier terminal error",
+    "owner_iphone_recheck": "PENDING; do not attribute the earlier error to expired credentials or a network cause without evidence"
+  },
+  "remaining_acceptance": [
+    "Reopen the owner's iPhone web view once and observe current tracking status",
+    "The eligible passenger's website tracking view",
+    "Actual phone heading, Google Maps launch/return and brief connection loss/recovery",
+    "Fresh owner-controlled short-route booking through pickup, start, completion and matching final statuses",
+    "Tracking shutdown, duplicate-booking/charge checks and the separate full release gates"
+  ]
+}

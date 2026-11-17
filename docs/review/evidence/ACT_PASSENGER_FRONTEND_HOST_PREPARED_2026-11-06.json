@@ -1,0 +1,39 @@
+{
+  "recorded_at_utc": "2026-11-06T17:49:47Z",
+  "source": "Owner-supplied Hostinger read-only status screenshot, phone display 17:48 on 6 November 2026; independently read by two reviewers",
+  "frontend_candidate": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+  "helper_commit": "936fffe5f0f9f6d2348d53434753bcda7f3a95aa",
+  "helper_sha256": "a62921418cbeafc865a31a087675ae5241a64ae9e68d981e523ae7a59e86e8b5",
+  "private_record_reference": "passenger-stage-eoszulb3",
+  "observed_output": {
+    "PREPARATION_STARTED": "PREPARATION_STARTED",
+    "PREPARED_NOT_ACTIVE": "PREPARED_NOT_ACTIVE",
+    "PREPARATION_FAILED": "NOT_PRESENT",
+    "plan": "PREPARED_NOT_ACTIVE",
+    "RELEASE_LOCK_PID": "NONE_REPORTED",
+    "CANDIDATE_PROCESS_PID": "NONE_OBSERVED"
+  },
+  "interpretation": "Preparation completed and saved its plan after the terminal disconnected. The read-only inspection validated the receipt/plan state and exact candidate SHA. Rebuilding is not required.",
+  "evidence_limits": "Owner-supplied status evidence, not a direct host session. This inspection did not revalidate all prepared bytes or prove activation or phone acceptance. Existing activation preflight revalidates the record, built artifacts, private configuration and running baseline before switching.",
+  "status": {
+    "application_source": "committed and locally tested",
+    "host_build": "prepared",
+    "activation": "not performed",
+    "pull_request": "draft and unmerged",
+    "passenger_phone_retest": "pending"
+  },
+  "proposed_activation": {
+    "candidate_frontend": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+    "current_frontend_and_rollback": "3a82c16f1eb648f274759b2567db4fe433720d17",
+    "new_loopback_port": 3004,
+    "retained_frontend_port": 3003,
+    "effect": "Start the already-built candidate, append its saved PM2 definition, switch three frontend upstreams plus the static asset alias, and verify the selected HTML/assets.",
+    "backend_preserved": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+    "backend_restart": false,
+    "android_install": false,
+    "booking_or_payment_mutation": false,
+    "recovery": "Retain current frontend processes and complete asset union; use existing guarded frontend-only rollback if verification fails."
+  },
+  "approval": "Required now for this exact prepared frontend activation under the owner ACT production-change instruction. Prior approval covered the earlier tracking pair, not this new frontend revision.",
+  "next_after_approval": "Use the pinned existing helper with --activate, candidate02e59f9 and this exact private record. After successful activation, reopen Trip34 Details in the passenger account and continue the controlled journey."
+}

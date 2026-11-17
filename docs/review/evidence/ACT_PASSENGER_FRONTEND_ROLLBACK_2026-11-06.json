@@ -1,0 +1,36 @@
+{
+  "recorded_on": "2026-11-06",
+  "source": "Owner-supplied Hostinger screenshot with phone display 21:19; helper console output, not an independently connected host inspection",
+  "approved_frontend_candidate": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65",
+  "attempt_helper_commit": "936fffe5f0f9f6d2348d53434753bcda7f3a95aa",
+  "attempt_helper_sha256": "a62921418cbeafc865a31a087675ae5241a64ae9e68d981e523ae7a59e86e8b5",
+  "private_record_reference": "passenger-stage-eoszulb3",
+  "reported_result": [
+    "STOP [switch frontend routing]: Public routing serves the wrong frontend build ID.",
+    "FRONTEND RETURNED TO 3a82c16 ON 3003 - BACKEND UNCHANGED"
+  ],
+  "interpretation": {
+    "activation": "Failed strict website-build verification and reported successful frontend rollback",
+    "frontend_after_recovery": "3a82c16f1eb648f274759b2567db4fe433720d17 on port 3003",
+    "backend_after_recovery": "d77e896af9daca5a39b7a85d5b76c5821e008d23 preserved",
+    "prepared_candidate": "The helper retains candidate release/build and combined assets; it removes only its candidate PM2 process and restores prior startup definitions.",
+    "passenger_fix_live": false,
+    "journey_accepted": false
+  },
+  "code_analysis": {
+    "inferred_completed_steps": "This failure follows local port-3004 candidate identity verification, candidate startup persistence, candidate routing installation and Nginx reload.",
+    "inferred_identity_path": "The exact error is emitted when old/new homepage asset paths match and the public/origin response fails selected-build-ID presence or other-build-ID absence.",
+    "confirmed_helper_regression": "The prior activation helper used up to three full strict readiness attempts with two-second pauses after reload. The new frontend-only helper used one immediate verification.",
+    "host_root_cause": "Unconfirmed: the old error did not record whether origin or public failed, or whether its response was old, missing, mixed or unrelated. Reload settling and edge/cache behavior remain hypotheses.",
+    "primary_reload_reference": "https://nginx.org/en/docs/control.html"
+  },
+  "recovery_constraints": [
+    "Do not rerun original activation or remove its console log/activation journal.",
+    "Retain exact approved application and existing build; no rebuild or new Android APK.",
+    "Retain backend and all existing frontend processes.",
+    "A retry must validate the exact original prepared plan/manifests, successful rollback receipt and live rollback.conf before creating a new exclusive attempt journal.",
+    "Restore bounded strict readiness checks and safe per-attempt target/build classification; persistent mismatches still require rollback."
+  ],
+  "current_work": "Corrective helper and focused regression checks are in progress. No further host action has been taken.",
+  "authorization": "Owner approval remains for activation of this exact prepared frontend with backend and application scope unchanged; this receipt is not evidence of a successful retry."
+}

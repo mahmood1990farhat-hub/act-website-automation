@@ -1,0 +1,76 @@
+{
+  "recorded_at": "2026-11-06T12:09:45.589358+00:00",
+  "base": "0bb77ab75aed11babf37108054c06c27e77ed701",
+  "branch": "draft/act-tracking-viewer-frontend-20261106",
+  "application_files_changed": 5,
+  "test_files_changed": 1,
+  "source_sha256": {
+    "act_website-main/src/components/_components/Trips/MyTripsCard.tsx": "f38fdabc769744cacdcd17cf21324eaa1c669ab28779aa672da029bdda2f197f",
+    "act_website-main/src/components/_components/dashboard/TripsDashboard.tsx": "bd80ef526ce2f51779f07d102d0cd7b8e9a69517280ff78bbfdc2a41275b3e48",
+    "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-map.tsx": "952ffed05df3453739044b92e1d2d1a14d5acf032bd303eba3863f745c44ae04",
+    "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-provider.tsx": "50beb5a60fb2ae8f15556adcedc0a95a9a84ec4ae64a0216d89ecefed6829cac",
+    "act_website-main/src/hooks/use-trip-tracking.ts": "9aef2a2d731933d4074b355b4b3db291ec1b16edd7b65078575003130182cc02",
+    "act_website-main/tests/tracking-environment/effects.cjs": "b62cdd4ad5f93433abe791b0eeec60adc008701b9bca1227f5bb213fa64ecb7a"
+  },
+  "package_lock_sha256": "5d1885fe1ce46c3c3f06bfb0c53b5647144d44c9fc2766e681d3ee335b77e05b",
+  "checks": [
+    {
+      "command": "node tests/tracking-environment/effects.cjs",
+      "working_directory": "act_website-main",
+      "exit_code": 0,
+      "passed": 38,
+      "failed": 0,
+      "coverage": "Actual hook and provider source with controlled WebSocket, Maps, timers and animation; 17 affected existing cases plus 21 viewer authentication/freshness/terminal/recovery cases."
+    },
+    {
+      "command": "node node_modules/next/dist/bin/next build",
+      "working_directory": "act_website-main",
+      "exit_code": 0,
+      "node": "24.22.1",
+      "next": "16.1.6",
+      "api_origin": "https://airportandcitytransfer.com",
+      "provider_configuration": "Synthetic Maps and Stripe placeholders; no real provider credentials supplied.",
+      "warning": "Existing middleware filename deprecation; no new build errors.",
+      "log": "ACT_TRACKING_VIEWER_FRONTEND_2026-11-06-build.log"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "unchanged": [
+    "package manifest and dependency lock",
+    "tracking URL helper",
+    "backend",
+    "native applications",
+    "checkout and payment behavior",
+    "driver publishing protocol"
+  ],
+  "acceptance_limits": {
+    "browser_exercised": false,
+    "real_websocket_exercised": false,
+    "real_gps_exercised": false,
+    "installed_or_deployed": false,
+    "production_settings_changed": false,
+    "current_websocket_viewer_compatibility": "Requires the matching backend viewer_auth role and received_at timestamp repair before connected use."
+  },
+  "checked_source_sha256": {
+    "act_website-main/src/components/_components/Trips/MyTripsCard.tsx": "f38fdabc769744cacdcd17cf21324eaa1c669ab28779aa672da029bdda2f197f",
+    "act_website-main/src/components/_components/dashboard/TripsDashboard.tsx": "bd80ef526ce2f51779f07d102d0cd7b8e9a69517280ff78bbfdc2a41275b3e48",
+    "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-map.tsx": "952ffed05df3453739044b92e1d2d1a14d5acf032bd303eba3863f745c44ae04",
+    "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-provider.tsx": "e580fe84db79fdd69a076ecc159d15e0c3059d978505d2607e9375e092ffca74",
+    "act_website-main/src/hooks/use-trip-tracking.ts": "79d8ff58d0224778c2b804d9168467e8d192e3fcce00a837f2c47efb910287d4",
+    "act_website-main/tests/tracking-environment/effects.cjs": "b62cdd4ad5f93433abe791b0eeec60adc008701b9bca1227f5bb213fa64ecb7a"
+  },
+  "post_verification_edits": [
+    {
+      "path": "act_website-main/src/hooks/use-trip-tracking.ts",
+      "change": "Comment wording only: socket message instead of encrypted socket message; helper also supports local HTTP/WS."
+    },
+    {
+      "path": "act_website-main/src/components/_components/dashboard/tracking/trip-tracking-provider.tsx",
+      "change": "Add minHeight:300px to mapContainerStyle to prevent auto-height map collapse; no behavior/state logic change."
+    }
+  ],
+  "checks_not_repeated_for_comment_style_edits": true
+}

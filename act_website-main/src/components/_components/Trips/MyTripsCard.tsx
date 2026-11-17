@@ -15,6 +15,7 @@ import { Locale } from "../../../../i18n.config";
 import { Button } from "@/components/ui/button";
 import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 import MapViewtest from "../dashboard/tracking/trip-tracking-provider";
+import ProviderMap from "@/providers/ProviderMap";
 
 type typeProps = {
 	data: any;
@@ -56,6 +57,10 @@ export default function MyTripsCard({
 	const [cancelling, setCancelling] = useState(false);
 	const queryClient = useQueryClient();
 	const [openDetails, setOpenDetails] = useState(false);
+	const driverPhone = data?.driver_info?.phone_number || data?.guest_driver_phone || "-";
+	const vehicleMake = data?.vehicle_info?.make || data?.vehicle_info?.brand;
+	const vehicleRegistration = data?.vehicle_info?.vehicle_number || data?.vehicle_info?.registration_number;
+	const vehicleYear = data?.vehicle_info?.year_of_manufacture || data?.vehicle_info?.year;
 
 	const CancelTrip = async () => {
 		if (cancelling) return;
@@ -169,7 +174,7 @@ export default function MyTripsCard({
 							</span>
 						</div>
 						<p className="text-white font-semibold text-sm md:text-base">
-							{data?.guest_driver_phone || "-"}
+							{driverPhone}
 						</p>
 					</div>
 				</div>
@@ -192,7 +197,7 @@ export default function MyTripsCard({
 							</div>
 						)}
 
-						{data?.vehicle_info?.brand && (
+						{vehicleMake && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
@@ -200,11 +205,11 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.brand || "-"}
+									{vehicleMake}
 								</p>
 							</div>
 						)}
-						{data?.vehicle_info?.registration_number && (
+						{vehicleRegistration && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
@@ -212,7 +217,7 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.registration_number}
+									{vehicleRegistration}
 								</p>
 							</div>
 						)}
@@ -220,7 +225,7 @@ export default function MyTripsCard({
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
-										{tripCardTrans?.brand || "Brand"}
+										{tripCardTrans?.vehicleClass || (locale === "ar" ? "فئة السيارة" : "Vehicle class")}
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
@@ -228,7 +233,7 @@ export default function MyTripsCard({
 								</p>
 							</div>
 						)}
-						{data?.vehicle_info?.year && (
+						{vehicleYear && (
 							<div className="bg-background/30 rounded-lg p-3 border border-muted/10">
 								<div className="flex items-center gap-2 mb-1">
 									<span className="text-gray-400 text-xs font-medium">
@@ -236,7 +241,7 @@ export default function MyTripsCard({
 									</span>
 								</div>
 								<p className="text-white font-semibold text-sm md:text-base">
-									{data?.vehicle_info?.year || "-"}
+									{vehicleYear}
 								</p>
 							</div>
 						)}
@@ -515,7 +520,7 @@ export default function MyTripsCard({
 												</span>
 											</div>
 											<p className="text-white font-semibold text-sm md:text-base">
-												{data?.driver_info?.phone_number || "-"}
+												{driverPhone}
 											</p>
 										</div>
 
@@ -562,10 +567,14 @@ export default function MyTripsCard({
 									<div className="h-full rounded-xl overflow-hidden border border-muted/20 shadow-lg">
 										{data.status === "active" ||
 										data.status === "driver_on_the_way" ? (
+											<ProviderMap>
 											<MapViewtest
 												tripId={data.id}
 												routePolyline={data.route_polyline}
+												token={token}
+												locale={locale}
 											/>
+											</ProviderMap>
 										) : (
 											<div className="h-full rounded overflow-hidden">
 												<MapView routePolyline={data.route_polyline} />
@@ -585,7 +594,7 @@ export default function MyTripsCard({
 								>
 									<IoChatbubbleEllipsesSharp className="text-xl" />
 									{tripCardTrans?.contactDriver || "Contact Driver"}
-									<span dir="ltr">{data?.driver_info?.phone_number}</span>
+									<span dir="ltr">{driverPhone}</span>
 								</Button>
 								<Button
 									variant="secondary"

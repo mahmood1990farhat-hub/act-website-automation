@@ -1,0 +1,72 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  · serverActions
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.0s
+  Running TypeScript ...
+  Collecting page data using 8 workers ...
+  Generating static pages using 8 workers (0/8) ...
+  Generating static pages using 8 workers (2/8) 
+  Generating static pages using 8 workers (4/8) 
+  Generating static pages using 8 workers (6/8) 
+✓ Generating static pages using 8 workers (8/8) in 212.2ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/about-us
+├ ƒ /[locale]/admin
+├ ƒ /[locale]/admin/login
+├ ƒ /[locale]/auth
+├ ƒ /[locale]/complaints
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/dashboard/complaints
+├ ƒ /[locale]/dashboard/driver-onboarding
+├ ƒ /[locale]/dashboard/drivers
+├ ƒ /[locale]/dashboard/earnings
+├ ƒ /[locale]/dashboard/lost-luggage
+├ ƒ /[locale]/dashboard/monitor-trip
+├ ƒ /[locale]/dashboard/offices
+├ ƒ /[locale]/dashboard/overview
+├ ƒ /[locale]/dashboard/passengers
+├ ƒ /[locale]/dashboard/pinned-trips
+├ ƒ /[locale]/dashboard/pricing
+├ ƒ /[locale]/dashboard/settings
+├ ƒ /[locale]/dashboard/static-files
+├ ƒ /[locale]/dashboard/trips
+├ ƒ /[locale]/dashboard/trips-complaints
+├ ƒ /[locale]/dashboard/vehicles
+├ ƒ /[locale]/download-app
+├ ƒ /[locale]/driver
+├ ƒ /[locale]/driver-application-status
+├ ƒ /[locale]/driver-password-setup
+├ ƒ /[locale]/driver/acceptable-trips
+├ ƒ /[locale]/driver/driver-settings
+├ ƒ /[locale]/driver/monitor-trip
+├ ƒ /[locale]/driver/new-requests
+├ ƒ /[locale]/driver/profile
+├ ƒ /[locale]/driver/upcoming-trips
+├ ƒ /[locale]/gatwick-airport-transfer
+├ ƒ /[locale]/heathrow-airport-transfer
+├ ƒ /[locale]/london-city-airport-transfer
+├ ƒ /[locale]/lost-property
+├ ƒ /[locale]/luton-airport-transfer
+├ ƒ /[locale]/my-trips
+├ ƒ /[locale]/profile
+├ ƒ /[locale]/stansted-airport-transfer
+├ ƒ /[locale]/upload-documents
+├ ƒ /api/place-details
+├ ƒ /api/places
+├ ○ /robots.txt
+└ ○ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

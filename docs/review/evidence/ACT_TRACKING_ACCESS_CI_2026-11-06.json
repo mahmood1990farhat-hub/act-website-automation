@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-11-06T12:33:02Z",
+  "repository": "mahmood1990farhat-hub/act-website-automation",
+  "backend_pr": 116,
+  "tested_revision": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "running_baseline_reported_by_owner": "82c0b14ad2a71e1ce3d8d1df3527431b698ac461",
+  "workflow_run": 42218059898,
+  "workflow_job": 127892938381,
+  "result": "success",
+  "system_checks": "No issues; 0 silenced",
+  "test_suite": "apps.trips.tests.test_tracking_access",
+  "passed": 19,
+  "failed": 0,
+  "elapsed_seconds": 8.252,
+  "execution": "Real Django models, SimpleJWT validation, ASGI routing and Channels groups with isolated PostGIS; only Redis storage replaced by a local dictionary.",
+  "source_sha256": {
+    "act_backend-main/apps/trips/consumers.py": "d10d943b079041e0998daae2e4ece3a90c1b125f64107ef4676c1d51d9c55bed",
+    "act_backend-main/apps/trips/tests/test_tracking_access.py": "06ffd48f51e5cd6190501177374a07a316cbb48c6f9de42fc7e31080cea00566",
+    "act_backend-main/myProject/settings/tracking_tests.py": "e2cf3bd66a7bb92e004d58b50fc7e80fe5dc38d306a19a48ab12aed0d7dfe1ce",
+    ".github/workflows/tracking-viewer-access.yml": "271376bd42451c2037644e8c86596855bc0232f73a7e850b311859fd279b3176"
+  },
+  "artifact": {
+    "id": 13501374903,
+    "size_bytes": 7629,
+    "sha256": "3f10a2eddc31403c7df31cc2a809978e0caeb5cb218f63426536bd52e5461789"
+  },
+  "prior_setup_corrections": [
+    {
+      "revision": "a0de3ee28f921c4dc14fec2d509c156fa6991e65",
+      "reason": "Retain the three middleware components required by Django admin system checks in isolated test settings; no checks silenced."
+    },
+    {
+      "revision": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+      "reason": "Probe native libraries and install required runtime libraries with bounded package operations; no dependency manifest or application change."
+    }
+  ],
+  "app_and_test_behavior_changed_by_setup_corrections": false,
+  "deployed": false,
+  "real_phone_gps_exercised": false,
+  "connected_journey_passed": false
+}

@@ -1,7 +1,7 @@
 /*
  * Controlled effect simulation of the actual tracking consumers.
  * No application/server/browser/provider is started. Every WebSocket, Maps
- * component and animation frame is a local recording fake. This is not browser,
+ * component, clock and animation frame is a local recording fake. This is not browser,
  * connected journey, native-device or environment-isolation acceptance.
  */
 const assert = require('node:assert/strict');
@@ -37,6 +37,7 @@ const plain = value => value === undefined ? undefined : JSON.parse(JSON.stringi
 const LOCATION = {lat: 51.501, lng: -0.141};
 const NEXT_LOCATION = {lat: 51.503, lng: -0.139};
 const ROUTE = [[51.49, -0.16], [51.50, -0.15]];
+const TOKEN = 'synthetic-viewer-token';
 const cases = [];
 const test = (name, run) => cases.push({name, run});
 
@@ -47,12 +48,15 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
   const refWrites = [];
   const logs = [];
   const frames = new Map();
+  const timers = new Map();
   let frameId = 0;
+  let timerId = 0;
+  let clock = Date.parse('2026-11-06T12:10:00.000Z');
   let cursor = 0;
   let pending = [];
   let dirty = false;
   let activeEffect = null;
-  let props = {tripId: '101', routePolyline: '', ...initialProps};
+  let props = {tripId: '101', routePolyline: '', token: TOKEN, locale: 'en', ...initialProps};
   let output;
   let renderFunction;
 
@@ -102,9 +106,11 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
 
   class RecordingWebSocket {
     constructor(url) {
+      if (props.transportFailure === 'construct') throw new Error('Synthetic socket construction failure');
       this.url = url;
       this.ownerEffect = activeEffect;
       this.closeCalls = 0;
+      this.messages = [];
       this.onopen = null;
       this.onmessage = null;
       this.onclose = null;
@@ -115,11 +121,22 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
       this.closeCalls += 1;
       if (this.onclose) this.onclose({type: 'close'});
     }
+    send(message) {
+      if (props.transportFailure === 'send') throw new Error('Synthetic socket send failure');
+      this.messages.push(JSON.parse(message));
+    }
   }
 
   const jsx = (type, properties, key) => ({type, props: properties || {}, key});
   const context = vm.createContext({
     URL,
+    Date: class extends Date { static now() { return clock; } },
+    setTimeout(callback, delay) {
+      const id = ++timerId;
+      timers.set(id, {callback, deadline: clock + delay});
+      return id;
+    },
+    clearTimeout(id) { timers.delete(id); },
     process: {env: {NEXT_PUBLIC_API_BASE_URL: apiBaseUrl}},
     WebSocket: RecordingWebSocket,
     console: Object.fromEntries(['log', 'warn', 'error'].map(level => [level, (...args) => logs.push({level, args})])),
@@ -150,6 +167,7 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
         },
       };
       if (specifier === '@/lib/trip-tracking-url') return load('helper');
+      if (specifier === '@/hooks/use-trip-tracking') return load('hook');
       throw new Error(`Unexpected import blocked: ${specifier}`);
     };
     const wrapper = new vm.Script(`(function(require, module, exports) {\n${compiled[name]}\n})`, {filename: sourcePaths[name]});
@@ -157,7 +175,7 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
     return module.exports;
   }
   const actual = load(kind);
-  renderFunction = kind === 'provider' ? () => actual.default(props) : () => actual.useTripTracking(props.tripId);
+  renderFunction = kind === 'provider' ? () => actual.default(props) : () => actual.useTripTracking(props.tripId, props.token);
 
   function render() {
     cursor = 0;
@@ -192,16 +210,38 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
   const harness = {
     kind, sockets, stateWrites, refWrites, logs,
     get output() { return output; },
+    get now() { return clock; },
+    get timerCount() { return timers.size; },
     update(next) {
       props = {...props, ...next};
       render();
       return flush();
     },
     flush,
-    emitLocation(socket, location = LOCATION) {
+    emit(socket, data) {
       assert.equal(typeof socket.onmessage, 'function');
-      socket.onmessage({data: JSON.stringify(kind === 'provider' ? {location: {...location, heading: 91}} : location)});
+      socket.onmessage({data: JSON.stringify(data)});
       flush();
+    },
+    authenticate(socket = sockets.at(-1)) {
+      socket.onopen({type: 'open'});
+      this.emit(socket, {type: 'auth_ok', role: 'viewer'});
+    },
+    emitLocation(socket, location = LOCATION, age = 0) {
+      this.emit(socket, {type: 'location', location: {...location, heading: 91, received_at: new Date(clock - age).toISOString()}});
+    },
+    advanceTime(milliseconds) {
+      const target = clock + milliseconds;
+      for (;;) {
+        const next = [...timers.entries()].sort((a, b) => a[1].deadline - b[1].deadline)[0];
+        if (!next || next[1].deadline > target) break;
+        const [id, {callback, deadline}] = next;
+        clock = deadline;
+        timers.delete(id);
+        callback();
+        flush();
+      }
+      clock = target;
     },
     advanceFrame() {
       const next = frames.entries().next();
@@ -226,6 +266,7 @@ function createHarness(kind, apiBaseUrl, initialProps = {}) {
         }
       }
       assert.equal(frames.size, 0, 'Unmount left a synthetic animation frame scheduled');
+      assert.equal(timers.size, 0, 'Unmount left a location freshness timer scheduled');
     },
   };
   return harness;
@@ -236,12 +277,26 @@ function withHarness(kind, base, props, run) {
   try { run(harness); } finally { harness.unmount(); }
 }
 
+function elements(node, predicate) {
+  if (!node || typeof node !== 'object') return [];
+  if (Array.isArray(node)) return node.flatMap(child => elements(child, predicate));
+  return [...(predicate(node) ? [node] : []), ...elements(node.props?.children, predicate)];
+}
+const mapElement = h => elements(h.output, node => node.type === 'GoogleMap')[0];
+const carMarkers = h => elements(h.output, node => node.type === 'Marker' && node.props.icon?.url === '/images/car2.svg');
+const statusMessage = h => elements(h.output, node => node.props?.role === 'status')[0]?.props.children;
+
+function assertStatus(h, status, message) {
+  if (h.kind === 'hook') assert.equal(h.output.status, status);
+  else assert.equal(statusMessage(h), message);
+}
+
 function assertReset(h) {
   if (h.kind === 'hook') {
     assert.equal(h.output.location, null);
     assert.equal(h.output.connected, false);
   } else {
-    assert.deepEqual(plain(h.output.props.center), {lat: 0, lng: 0});
+    assert.equal(carMarkers(h).length, 0, 'Old driver marker remains displayed');
     assert.ok(!h.refs().some(value => JSON.stringify(value) === JSON.stringify(LOCATION)), 'Previous trip target remained in a map ref');
   }
 }
@@ -277,7 +332,7 @@ for (const kind of ['provider', 'hook']) {
     withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
       const socket = h.sockets[0];
       const captured = Object.fromEntries(['onopen', 'onmessage', 'onclose', 'onerror'].map(name => [name, socket[name]]));
-      if (socket.onopen) socket.onopen({type: 'open'});
+      h.authenticate(socket);
       h.emitLocation(socket);
       assert.ok(h.stateWrites.length > 0, 'Expected active-session state writes');
       const cleanup = h.cleanupFor(socket);
@@ -286,7 +341,7 @@ for (const kind of ['provider', 'hook']) {
       for (const name of ['onopen', 'onmessage', 'onclose', 'onerror']) assert.equal(socket[name], null, `${name} remains attached`);
       const baseline = {state: h.stateWrites.length, refs: h.refWrites.length, logs: h.logs.length};
       if (captured.onopen) captured.onopen({type: 'open'});
-      captured.onmessage({data: JSON.stringify(kind === 'provider' ? {location: NEXT_LOCATION} : NEXT_LOCATION)});
+      captured.onmessage({data: JSON.stringify({type: 'location', location: {...NEXT_LOCATION, received_at: new Date(h.now).toISOString()}})});
       if (captured.onclose) captured.onclose({type: 'close'});
       if (captured.onerror) captured.onerror({type: 'error'});
       assert.deepEqual({state: h.stateWrites.length, refs: h.refWrites.length, logs: h.logs.length}, baseline);
@@ -296,7 +351,7 @@ for (const kind of ['provider', 'hook']) {
   test(`${kind}: changing trips closes the old socket and clears old display state`, () => {
     withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
       const first = h.sockets[0];
-      if (first.onopen) first.onopen({type: 'open'});
+      h.authenticate(first);
       h.emitLocation(first);
       if (kind === 'provider') h.advanceFrame();
       h.update({tripId: '202'});
@@ -323,7 +378,7 @@ for (const kind of ['provider', 'hook']) {
   test(`${kind}: valid-to-invalid trip transition closes without fallback`, () => {
     withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
       const first = h.sockets[0];
-      if (first.onopen) first.onopen({type: 'open'});
+      h.authenticate(first);
       h.emitLocation(first);
       if (kind === 'provider') h.advanceFrame();
       h.update({tripId: ''});
@@ -336,16 +391,220 @@ for (const kind of ['provider', 'hook']) {
 
 test('provider: a different trip with the same polyline resets pending targets and route position', () => {
   withHarness('provider', 'https://staging.example.invalid/api', {routePolyline: 'synthetic-route-a'}, h => {
+    h.authenticate();
     h.emitLocation(h.sockets[0]);
     h.advanceFrame();
-    assert.notDeepEqual(plain(h.output.props.center), {lat: ROUTE[0][0], lng: ROUTE[0][1]});
+    assert.deepEqual(plain(mapElement(h).props.center), LOCATION);
     h.update({tripId: '202'});
-    assert.deepEqual(plain(h.output.props.center), {lat: ROUTE[0][0], lng: ROUTE[0][1]});
+    assert.deepEqual(plain(mapElement(h).props.center), {lat: ROUTE[1][0], lng: ROUTE[1][1]});
+    assert.equal(carMarkers(h).length, 0, 'Route preview fabricated a driver marker');
     assert.ok(!h.refs().some(value => JSON.stringify(value) === JSON.stringify(LOCATION)), 'Previous pending location survived a same-polyline trip change');
   });
 });
 
-console.log('Controlled effect simulation: real source, fake transport/Maps/animation; no browser or connected acceptance.');
+for (const kind of ['provider', 'hook']) {
+  test(`${kind}: missing viewer token opens no socket and explains sign-in requirement`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {token: undefined}, h => {
+      assert.equal(h.sockets.length, 0);
+      assertReset(h);
+      assertStatus(h, 'unauthorized', 'Tracking access was not authorised. Sign in again to the account for this trip.');
+    });
+  });
+
+  test(`${kind}: transport open sends viewer authentication but never grants location access`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      const socket = h.sockets[0];
+      assert.equal(socket.url.includes(TOKEN), false, 'Viewer token leaked into URL');
+      socket.onopen({type: 'open'});
+      assert.deepEqual(socket.messages, [{type: 'viewer_auth', access: TOKEN}]);
+      h.emitLocation(socket);
+      h.emit(socket, {type: 'auth_ok', role: 'driver'});
+      h.emitLocation(socket);
+      assertReset(h);
+      assert.equal(h.timerCount, 1, 'Unauthenticated socket must have a bounded authentication timeout');
+      assertStatus(h, 'connecting', 'Connecting to trip tracking…');
+      assert.equal(JSON.stringify(h.logs).includes(TOKEN), false, 'Viewer token leaked into logs');
+    });
+  });
+
+  test(`${kind}: viewer confirmation accepts the real nested location envelope including zero coordinates`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      h.authenticate();
+      assertStatus(h, 'waiting', 'Waiting for a fresh driver location…');
+      if (kind === 'hook') assert.equal(h.output.connected, true);
+      h.emitLocation(h.sockets[0], {lat: 0, lng: 0});
+      if (kind === 'provider') {
+        h.advanceFrame();
+        assert.deepEqual(plain(carMarkers(h)[0].props.position), {lat: 0, lng: 0});
+      } else {
+        assert.deepEqual(plain(h.output.location), {lat: 0, lng: 0, heading: 91});
+      }
+      assertStatus(h, 'live', 'Live driver location');
+    });
+  });
+
+  test(`${kind}: legacy, invalid and old coordinates cannot become a fresh driver position`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      const socket = h.sockets[0];
+      h.authenticate(socket);
+      for (const data of [null, {}, {type: 'location', location: LOCATION},
+        {type: 'location', location: {...LOCATION, received_at: 'invalid'}},
+        {type: 'location', location: {lat: '51', lng: -1, received_at: new Date(h.now).toISOString()}},
+        {type: 'location', location: {lat: 91, lng: 0, received_at: new Date(h.now).toISOString()}},
+        {type: 'location', location: {lat: 0, lng: 181, received_at: new Date(h.now).toISOString()}}]) h.emit(socket, data);
+      socket.onmessage({data: 'invalid JSON'});
+      h.emitLocation(socket, LOCATION, 30_000);
+      h.emitLocation(socket, LOCATION, -6_000);
+      if (kind === 'provider') assert.equal(carMarkers(h).length, 0);
+      else assert.equal(h.output.location, null);
+      assert.equal(h.timerCount, 0);
+      assertStatus(h, 'waiting', 'Waiting for a fresh driver location…');
+    });
+  });
+
+  test(`${kind}: cached receipt age limits remaining freshness and a fresh update recovers`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      const socket = h.sockets[0];
+      h.authenticate(socket);
+      h.emitLocation(socket, LOCATION, 20_000);
+      if (kind === 'provider') h.advanceFrame();
+      h.advanceTime(9_999);
+      assertStatus(h, 'live', 'Live driver location');
+      h.advanceTime(1);
+      assertStatus(h, 'stale', 'Driver location is out of date. Waiting for an update…');
+      if (kind === 'provider') {
+        assert.equal(carMarkers(h).length, 0);
+        h.advanceFrame();
+        assert.equal(carMarkers(h).length, 0, 'Animation revived an expired position');
+      } else {
+        assert.equal(h.output.location, null);
+        assert.equal(h.output.connected, true, 'Stale GPS must not pretend the authorised socket disconnected');
+      }
+      h.emitLocation(socket, NEXT_LOCATION);
+      if (kind === 'provider') {
+        h.advanceFrame();
+        assert.deepEqual(plain(carMarkers(h)[0].props.position), NEXT_LOCATION);
+      }
+      assertStatus(h, 'live', 'Live driver location');
+      assert.equal(h.timerCount, 1);
+    });
+  });
+
+  test(`${kind}: refusal, completion and cancellation clear the position and cannot be undone by late frames`, () => {
+    for (const [frame, status, message] of [
+      [{type: 'auth_error'}, 'unauthorized', 'Tracking access was not authorised. Sign in again to the account for this trip.'],
+      [{type: 'ended', reason: 'completed'}, 'completed', 'Trip completed. Tracking has stopped.'],
+      [{type: 'ended', reason: 'cancelled'}, 'cancelled', 'Trip cancelled. Tracking has stopped.'],
+    ]) {
+      withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+        const socket = h.sockets[0];
+        h.authenticate(socket);
+        h.emitLocation(socket);
+        if (kind === 'provider') h.advanceFrame();
+        h.emit(socket, frame);
+        assert.equal(socket.closeCalls, 1);
+        assertReset(h);
+        assertStatus(h, status, message);
+        h.emit(socket, {type: 'auth_ok', role: 'viewer'});
+        h.emitLocation(socket, NEXT_LOCATION);
+        if (kind === 'provider') h.advanceFrame();
+        assertReset(h);
+        assertStatus(h, status, message);
+        assert.equal(h.timerCount, 0);
+      });
+    }
+  });
+
+  test(`${kind}: socket disconnection removes the last marker and displays a recovery instruction`, () => {
+    for (const callback of ['onclose', 'onerror']) {
+      withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+        const socket = h.sockets[0];
+        h.authenticate(socket);
+        h.emitLocation(socket);
+        if (kind === 'provider') h.advanceFrame();
+        socket[callback]({type: callback});
+        h.flush();
+        assertReset(h);
+        assertStatus(h, 'disconnected', 'Tracking disconnected. Reopen the trip to reconnect.');
+        assert.equal(h.sockets.length, 1, 'Failure unexpectedly opened another socket');
+        assert.equal(h.timerCount, 0);
+      });
+    }
+  });
+
+  test(`${kind}: changing the viewer token closes the prior session and requires new authorisation`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      const old = h.sockets[0];
+      h.authenticate(old);
+      h.emitLocation(old);
+      if (kind === 'provider') h.advanceFrame();
+      h.update({token: 'synthetic-replacement-token'});
+      assertReset(h);
+      assert.equal(old.closeCalls, 1);
+      assert.equal(old.onmessage, null);
+      assert.equal(h.timerCount, 1, 'Only the replacement authentication timeout should remain');
+      const replacement = h.sockets[1];
+      replacement.onopen({type: 'open'});
+      assert.deepEqual(replacement.messages, [{type: 'viewer_auth', access: 'synthetic-replacement-token'}]);
+      h.emitLocation(replacement);
+      assertReset(h);
+      h.emit(replacement, {type: 'auth_ok', role: 'viewer'});
+      h.emitLocation(replacement);
+      assertStatus(h, 'live', 'Live driver location');
+    });
+  });
+
+  test(`${kind}: synchronous transport failures leave a recoverable state without leaking timers`, () => {
+    for (const transportFailure of ['construct', 'send']) {
+      withHarness(kind, 'https://staging.example.invalid/api', {transportFailure}, h => {
+        if (transportFailure === 'send') {
+          h.sockets[0].onopen({type: 'open'});
+          h.flush();
+          assert.equal(h.sockets[0].closeCalls, 1);
+          assertStatus(h, 'disconnected', 'Tracking disconnected. Reopen the trip to reconnect.');
+        } else {
+          assert.equal(h.sockets.length, 0);
+          assertStatus(h, 'unavailable', 'Trip tracking is unavailable.');
+        }
+        assertReset(h);
+        assert.equal(h.timerCount, 0);
+      });
+    }
+  });
+
+  test(`${kind}: an unacknowledged viewer handshake times out and ignores a late acknowledgement`, () => {
+    withHarness(kind, 'https://staging.example.invalid/api', {}, h => {
+      const socket = h.sockets[0];
+      socket.onopen({type: 'open'});
+      h.advanceTime(14_999);
+      assertStatus(h, 'connecting', 'Connecting to trip tracking…');
+      h.advanceTime(1);
+      assertStatus(h, 'unavailable', 'Trip tracking is unavailable.');
+      assert.equal(socket.closeCalls, 1);
+      assert.equal(h.timerCount, 0);
+      h.emit(socket, {type: 'auth_ok', role: 'viewer'});
+      h.emitLocation(socket);
+      assertReset(h);
+      assertStatus(h, 'unavailable', 'Trip tracking is unavailable.');
+    });
+  });
+}
+
+test('provider: the route is visible without a fabricated driver marker and status follows Arabic locale', () => {
+  withHarness('provider', 'https://staging.example.invalid/api', {routePolyline: 'synthetic-route-a', locale: 'ar'}, h => {
+    assert.equal(carMarkers(h).length, 0);
+    assert.equal(elements(h.output, node => node.type === 'Polyline').length, 1);
+    assert.equal(elements(h.output, node => node.type === 'Marker').length, 2);
+    assert.equal(statusMessage(h), 'جارٍ الاتصال بتتبع الرحلة…');
+    assert.equal(elements(h.output, node => node.props?.role === 'status')[0].props.dir, 'rtl');
+    h.authenticate();
+    assert.equal(statusMessage(h), 'في انتظار موقع حديث للسائق…');
+    h.emit(h.sockets[0], {type: 'ended', reason: 'completed'});
+    assert.equal(statusMessage(h), 'اكتملت الرحلة. توقف التتبع.');
+  });
+});
+
+console.log('Controlled effect simulation: real source, fake transport/Maps/clock/animation; no browser or connected acceptance.');
 let failed = 0;
 for (const [index, entry] of cases.entries()) {
   try {

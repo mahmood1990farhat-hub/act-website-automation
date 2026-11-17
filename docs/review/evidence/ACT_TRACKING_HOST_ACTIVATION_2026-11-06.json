@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-06",
+  "state": "ACTIVATED_OWNER_EVIDENCED",
+  "evidence_type": "owner_supplied_Hostinger_terminal_screenshot",
+  "independent_host_execution_by_assistant": false,
+  "owner_approval": "The owner replied Approve to the exact staged backend/frontend activation plan before executing the pinned command.",
+  "backend_sha": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "frontend_application_sha": "3a82c16f1eb648f274759b2567db4fe433720d17",
+  "activation_helper_commit": "9868b8da5194ce901e03c6d937a773e0d26cb18d",
+  "activation_helper_sha256": "e22d945f4d7d9ca2fa06f07bd3e5b02746ef7d7c505d227512e241a3bdec81ab",
+  "observed_output": [
+    "STAGED PAIR AND RECOVERY PREIMAGES VERIFIED",
+    "AUTHENTICATED BACKEND READY; PHONE GPS TEST HAS NOT STARTED",
+    "TRACKING BACKEND AND WEBSITE ACTIVATED - JOURNEY ACCEPTANCE NOT YET RUN"
+  ],
+  "observed_final_state": {
+    "exact_backend_and_frontend_shas_printed": true,
+    "private_activation_record_printed": true,
+    "root_prompt_returned": true,
+    "stop_or_recovery_failure_displayed": false
+  },
+  "helper_success_path": {
+    "basis": "The pinned helper emits the observed final sentinel only after these checks and actions complete. Private server logs and configuration values were not copied into this public record.",
+    "backend_current_switched_and_act_service_restarted": true,
+    "running_backend_source_and_protected_HTTP_readiness_checked": true,
+    "tokenless_websocket_auth_error_and_close_4403_checked": true,
+    "new_loopback_frontend_started_and_saved": true,
+    "both_prior_frontend_processes_and_saved_definitions_preserved": true,
+    "reviewed_nginx_routes_installed_validated_and_reloaded": true,
+    "origin_and_public_website_build_assets_and_protected_API_checked": true,
+    "final_source_pair_and_runtime_identities_checked": true,
+    "ACTIVATED_private_receipt_written": true
+  },
+  "development_record": {
+    "frontend_pr": 115,
+    "backend_pr": 116,
+    "driver_pr": 16,
+    "pull_requests_still_open_draft_and_unmerged_at_recording": true,
+    "new_APK_built_or_required_for_this_activation": false,
+    "application_suites_repeated_for_this_receipt": false
+  },
+  "acceptance_remaining": [
+    "Driver phone On The Way and first fresh real GPS update.",
+    "Authorised signed-in passenger/admin viewing of the same booking.",
+    "Vehicle heading, external navigation return and connection-loss recovery.",
+    "Controlled short-route pickup, start, completion and matching final driver/web/admin status.",
+    "Tracking shutdown on the actual phone and no duplicate booking or charge."
+  ],
+  "scope_limits": [
+    "The deployment receipt does not establish a completed real-phone journey or full website release acceptance.",
+    "Passenger-native and iPhone acceptance remain separate.",
+    "The helper did not submit bookings, publish phone GPS, send application messages, change payment mode or edit driver profiles."
+  ],
+  "next_step": "Return to the existing Android test app and continue from the already Accepted Trip 34. Do not rebuild, reinstall, rerun activation or repeat acceptance solely to begin this phone check."
+}

@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { decode } from "@googlemaps/polyline-codec";
-import { buildTripTrackingUrl } from "@/lib/trip-tracking-url";
+import { trackingStatusText, useTripTracking } from "@/hooks/use-trip-tracking";
 
 type Props = {
 	tripId: string;
 	routePolyline: string;
+	token?: string;
+	locale?: string;
 };
 
-const MapViewtest = ({ tripId, routePolyline }: Props) => {
+const MapViewtest = ({ tripId, routePolyline, token, locale = "en" }: Props) => {
+	const { location, status } = useTripTracking(tripId, token);
 	const mapRef = useRef<google.maps.Map | null>(null);
 
 	const [path, setPath] = useState<google.maps.LatLngLiteral[]>([]);
@@ -44,62 +47,26 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 			const decoded = decode(routePolyline, 5);
 			const formattedPath = decoded.map(([lat, lng]) => ({ lat, lng }));
 			setPath(formattedPath);
-
-			if (formattedPath.length > 0) {
-				const mid = Math.floor(formattedPath.length / 2);
-				lastCenterRef.current = formattedPath[mid];
-				setCurrentLocation(formattedPath[0]);
-				setTraveledPath([formattedPath[0]]);
-			}
 		}
 	}, [routePolyline, tripId]);
 
-	// فتح WebSocket لتلقي تحديثات الموقع
+	// Only authenticated, recent positions from the existing tracking hook
+	// become animation targets. A route preview is never a driver position.
 	useEffect(() => {
-		const url = buildTripTrackingUrl(
-			process.env.NEXT_PUBLIC_API_BASE_URL,
-			tripId,
-		);
-		if (!url) return;
-		const socket = new WebSocket(url);
-		let disposed = false;
-
-		socket.onmessage = (event) => {
-			if (disposed) return;
-			try {
-				const data = JSON.parse(event.data);
-				if (data.location) {
-					const { lat, lng, heading: h } = data.location;
-					if (lat && lng) {
-						targetLocationRef.current = { lat, lng };
-						targetHeadingRef.current = h !== null ? h : null;
-
-						// أضف النقطة الجديدة للمسار المقطوع
-						setTraveledPath((prev) => [...prev, { lat, lng }]);
-					}
-				}
-			} catch (err) {
-				console.error("WebSocket error:", err);
-			}
-		};
-
-		socket.onclose = () => {
-			if (!disposed) console.log("WebSocket closed");
-		};
-		socket.onerror = (err) => {
-			if (!disposed) console.error("WebSocket error:", err);
-		};
-
-		return () => {
-			disposed = true;
-			socket.onmessage = null;
-			socket.onclose = null;
-			socket.onerror = null;
-			socket.close();
+		if (!location) {
 			targetLocationRef.current = null;
 			targetHeadingRef.current = null;
-		};
-	}, [tripId]);
+			lastCenterRef.current = null;
+			setCurrentLocation(null);
+			setTraveledPath([]);
+			setHeading(0);
+			return;
+		}
+		const point = { lat: location.lat, lng: location.lng };
+		targetLocationRef.current = point;
+		targetHeadingRef.current = location.heading;
+		setTraveledPath((prev) => [...prev, point]);
+	}, [location]);
 
 	// حرك
 	useEffect(() => {
@@ -154,14 +121,16 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 	}, [currentLocation]);
 
 	return (
+		<div className="relative h-full min-h-[300px] w-full">
 		<GoogleMap
 			mapContainerStyle={{
 				width: "100%",
 				height: "100%",
+				minHeight: "300px",
 
 				borderRadius: "8px",
 			}}
-			center={currentLocation || { lat: 0, lng: 0 }}
+			center={currentLocation || path[Math.floor(path.length / 2)] || { lat: 0, lng: 0 }}
 			zoom={15}
 			onLoad={(map) => {
 				mapRef.current = map;
@@ -241,6 +210,15 @@ const MapViewtest = ({ tripId, routePolyline }: Props) => {
 				/>
 			)}
 		</GoogleMap>
+		<p
+			role="status"
+			aria-live="polite"
+			dir={locale === "ar" ? "rtl" : "ltr"}
+			className="absolute top-3 left-3 right-3 rounded-md bg-background/95 px-3 py-2 text-sm text-foreground shadow"
+		>
+			{trackingStatusText(status, locale)}
+		</p>
+		</div>
 	);
 };
 

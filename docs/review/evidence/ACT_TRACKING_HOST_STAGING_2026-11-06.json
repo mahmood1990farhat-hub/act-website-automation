@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-06",
+  "state": "STAGED_NOT_ACTIVE",
+  "evidence_type": "owner_supplied_Hostinger_terminal_screenshot",
+  "independent_host_execution_by_assistant": false,
+  "backend_sha": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "frontend_application_sha": "3a82c16f1eb648f274759b2567db4fe433720d17",
+  "staging_helper_commit": "f596fcf4a44ed75770f83b694780a123be8aed77",
+  "staging_helper_sha256": "5f83e03ee8478a2ed70a5242f6957aa91b46fcb108620f6b32e7ef7fec59281e",
+  "observed_output": [
+    "Preparing separate backend and frontend releases; current services remain untouched.",
+    "Building the connected frontend in its new release directory.",
+    "TRACKING RELEASES BUILT AND ROUTING PREPARED - NOT ACTIVATED",
+    "No application listeners started, services controlled, live routing changed or bookings submitted."
+  ],
+  "observed_order": [
+    "Successful final staging sentinel and exact backend/frontend SHAs",
+    "Private staging-record path printed",
+    "Root shell prompt returned",
+    "Hosting terminal reported Lost connection to the server"
+  ],
+  "interpretation": "The helper completed before the terminal connection was lost. Its success path includes the connected frontend build and syntax validation of the inactive candidate and rollback Nginx configurations. Do not repeat the build solely because the terminal disconnected afterward.",
+  "private_plan": "Retained on the owner-controlled host; values and configuration files are not reproduced in this public evidence.",
+  "activation_approved_by_this_screenshot": false,
+  "candidate_application_listener_started": false,
+  "backend_current_pointer_switched": false,
+  "public_routing_switched": false,
+  "candidate_deployed": false,
+  "journey_acceptance": {
+    "trip_34_phone_acceptance": "Previously evidenced; do not repeat acceptance.",
+    "real_phone_GPS_tracking": "Not yet accepted.",
+    "website_to_completed_journey": "Not yet accepted."
+  },
+  "next_step": "Finish the exact activation and recovery helper, then request the owner's approval for the staged source pair. Activation must consume the existing private plan and refuse source, process, or routing drift before changing services."
+}

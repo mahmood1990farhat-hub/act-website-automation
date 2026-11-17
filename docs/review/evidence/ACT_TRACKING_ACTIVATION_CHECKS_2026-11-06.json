@@ -1,0 +1,56 @@
+{
+  "recorded_at_utc": "2026-11-06T13:44:19.531475+00:00",
+  "state": "LOCAL_ACTIVATION_HELPER_CHECKS_PASSED_NOT_ACTIVATED",
+  "backend_sha": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "frontend_application_source_sha": "3a82c16f1eb648f274759b2567db4fe433720d17",
+  "helper": {
+    "repository_path": "ops/first-journey/activate_existing_tracking.py",
+    "sha256": "e22d945f4d7d9ca2fa06f07bd3e5b02746ef7d7c505d227512e241a3bdec81ab",
+    "independently_reviewed_sha256": "e22d945f4d7d9ca2fa06f07bd3e5b02746ef7d7c505d227512e241a3bdec81ab"
+  },
+  "tests": {
+    "repository_path": "ops/first-journey/test_activate_existing_tracking.py",
+    "sha256": "51b5149c94f2598b83014805c1866c3d670532e00b9755a0a4346ed46935d2cd",
+    "runner": "Python unittest; temporary files, mocked host transports, isolated JavaScript VM and one owned local child process",
+    "cases_run": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 1.216617,
+    "python_version": "3.12.14",
+    "log_sha256": "c3d489f9ba0ca0490450e59cbed31faa246ab84f676bbbe780e9bf1edf87edc2"
+  },
+  "syntax_checks": {
+    "python_3_11_grammar": [
+      "activate_existing_tracking.py",
+      "test_activate_existing_tracking.py"
+    ],
+    "embedded_node_snippets": [
+      "PM2_READ_ONLY",
+      "NODE_ENV_READ",
+      "PM2_START",
+      "PM2_REMOVE_CANDIDATE"
+    ],
+    "node_version": "v24.22.1"
+  },
+  "covered": [
+    "Exact staged source pair, path, application scope and loopback launch guards; required CLI activation flag and record.",
+    "Current-pointer drift, modified consumer and prior activation journal stop before service/process commands.",
+    "Atomic site and pointer replacement: preimages, concurrent edits, enabled symlink, ownership, mode, xattrs and hardlink refusal.",
+    "Captured public-environment validation and private command output; no terminal disclosure of synthetic private values.",
+    "Actual PM2_START JavaScript with SDK normalization/config mutation, retained-process drift, wrong launch, missing public values and unapproved-method refusal.",
+    "Actual PM2 cleanup JavaScript: owned activation nonce only; foreign same-name candidate is retained; unacknowledged absent prepare cannot be called clean recovery.",
+    "Tokenless WebSocket probe sends only viewer_auth, verifies the upgrade, requires auth_error then close 4403 and refuses location/success payloads without echoing them.",
+    "Actual activation/recovery ordering: early backend failure restores the old pointer and only act.service; later frontend failure retains and rechecks the authenticated backend.",
+    "Public rollback uses port 3002 with the combined asset union; concurrent routing changes withhold candidate cleanup.",
+    "PM2 persistence retains existing parsed definitions; partial failure restores exact previous bytes; concurrent dump changes are not overwritten.",
+    "SIGHUP/closed-stdout resilience, deliberate-interrupt recovery while release lock is held, and killing/reaping an owned command group on timeout."
+  ],
+  "limitations": [
+    "The activation helper has not been executed on Hostinger. These checks do not establish live deployment, real installed PM2 behavior, public routing or phone GPS acceptance.",
+    "The PM2 JavaScript tests run the actual embedded code against protocol mocks. They are not a full installed-PM2 integration test.",
+    "Recovery tests use temporary files and simulated service/HTTP/PM2 readiness; no actual systemd, Nginx, production processes, backend records or provider APIs were accessed.",
+    "No application suite was repeated. Existing web/backend/mobile test evidence remains separate from these operations-helper checks.",
+    "No live booking, charge, notification, driver profile, production setting or phone journey was changed by these checks."
+  ]
+}
