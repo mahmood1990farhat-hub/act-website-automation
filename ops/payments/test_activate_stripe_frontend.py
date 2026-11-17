@@ -62,6 +62,38 @@ class Safety(unittest.TestCase):
             self.assertEqual(obj['payment_attempted'],False)
             with self.assertRaises(FileExistsError):m.journal(p,'TEST_STATE')
 
+    def test_private_record_has_both_nginx_configs_before_validation(self):
+        # Real exclusive writes into a private temp dir. nginx/systemctl/PM2
+        # are not executed. The old script failed this regression on rollback.
+        with tempfile.TemporaryDirectory() as root:
+            base=Path(root)
+            record=base/'activation-record'
+            master=base/'nginx.conf';master.write_bytes(b'synthetic master')
+            site=base/'sites-enabled/site.conf'
+            site.parent.mkdir();site.write_bytes(b'original site')
+            seen=[]
+            def validation_master(master_bytes,entries,cfg):
+                self.assertTrue(cfg.is_file(), 'nginx site include must exist before nginx -t')
+                self.assertEqual(cfg.read_bytes(), b'new-site' if 'proposed' in cfg.name else b'old-site')
+                seen.append(cfg.name)
+                return b'synthetic validation master'
+            prior=SimpleNamespace(MASTER=master,SITE=site,validation_master=validation_master)
+            obj=m.Release(None,prior,object())
+            obj.original=b'old-site';obj.proposed=b'new-site';obj.original_dump=b'old-pm2'
+            obj.plan={'source_sha':'a'*40,'backend_sha':'b'*40,
+                      'old_build_id':'previousbuild','new_build_id':'replacementbuild'}
+            with patch.object(m,'RECORD',record),patch.object(m,'command',return_value=b'') as cli:
+                obj.private_record()
+            self.assertEqual(seen,['nginx.proposed.conf','nginx.rollback.conf'])
+            self.assertEqual((record/'nginx.proposed.conf').read_bytes(),b'new-site')
+            self.assertEqual((record/'nginx.rollback.conf').read_bytes(),b'old-site')
+            self.assertTrue((record/'BOTH_NGINX_CONFIGS_VALIDATED.json').is_file())
+            self.assertEqual(cli.call_count,2)
+            self.assertTrue(all(call.args[0][0]=='/usr/sbin/nginx' for call in cli.call_args_list))
+            # Do not allow a second attempt to overwrite the preserved record.
+            with patch.object(m,'RECORD',record), self.assertRaises(FileExistsError):
+                obj.private_record()
+
     def test_candidate_identity_uses_prior_removal_marker(self):
         with tempfile.TemporaryDirectory() as root:
             stage=SimpleNamespace(CANDIDATE=Path(root),
