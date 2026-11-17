@@ -66,5 +66,28 @@ The prior unpaid test PaymentIntent is **GBP 5.44**, while the accepted ACT mini
 - Frontend build: **prepared on VPS, verified read-only by owner terminal; inactive**.
 - Current production: **unchanged**; live frontend still carries expired key, so payment confirmation remains blocked.
 - Frontend PR #115 and Stripe PR #117: **open, draft, unmerged**.
-- New activation helper: **not yet implemented/committed/tested**.
+- New activation helper: **committed and locally safety-tested; VPS read-only validation and separate production approval remain required**.
 - Production switch and further payment attempts: **not approved**.
+
+## 17 November — live-switch preflight and owner-gated activation source
+
+Owner VPS read-only result (the previously pinned script):
+```
+OK
+PASS: PROPOSED_THREE_UPSTREAM_AND_ONE_ASSET_ALIAS_SWITCH
+PASS: EXACT_NGINX_ROLLBACK_PREIMAGE
+PASS: CURRENT_AND_SAVED_PM2_PROCESSES_PRESERVED
+PASS: NEW_FRONTEND_PORT_UNUSED
+PASS: STAGED_STRIPE_FRONTEND_STILL_VERIFIED
+NO_CHANGES; NO_ACTIVATION_COMMAND
+```
+
+**Code now committed on the existing draft PR #115:**
+- `ops/payments/activate_stripe_frontend.py` (source SHA-256 `6dee62263996e963d927b303311db5557fe563529be6ecccbfb86d0332923774`; Git blob `072dacf97c008c3904763f89380adbcd0173d8a4`)
+- `ops/payments/test_activate_stripe_frontend.py` (source SHA-256 `f6cc13a33fb200bfa42355c176bd275e784cad70b5d20fbf005d9cadd820a3c7`; Git blob `04e90491151424a5d3043f9304b8ee536309c1f9`)
+
+The source and test blobs match the locally verified bytes exactly. **22 new isolated local Python tests passed**. They cover the read-only CLI, test-mode/key handling boundary, approval/TTY/lock checks, immutable private release records, exact candidate-bound PM2 marker, Nginx/PM2 rollback/refusal on drift, bounded page checks, interruption/recovery outputs, and refusing any payment operation. No hosted CI or VPS execution of this new activation helper is claimed.
+
+The helper `--check` is read-only. The separate `--activate` path has **NOT** been authorised, executed or runtime-tested on the VPS. It is gated by live preflight, root TTY, a separate exact approval phrase and existing release lock. It revalidates the candidate's test public key with provider **GETs** before switching, then uses the previously reviewed PM2 start/remove guards bound to the *new* root-private activation record. It preserves the running 3004 frontend; starts only the distinct 3005 candidate; saves the original PM2 and Nginx preimages; validates proposed+rollback Nginx configs; routes only the three frontend upstreams and one static alias; and attempts an automatic, candidate-only rollback if the activation fails. Recovery-incomplete is an explicit STOP, not a success.
+
+**Remaining gate:** independently run only SHA-pinned new `--check` and the 22 affected offline tests on the VPS; review the result and explicit owner approval of the exact frontend-only production switch **before providing or executing any `--activate` command**. The GBP 5.44 versus GBP 40 discrepancy remains open; no new payment/card submission is approved. No backend/webhook/Android/automation changes, PR merge or production routing change occurred in this source preparation.
