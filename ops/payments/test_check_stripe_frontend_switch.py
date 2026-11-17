@@ -55,7 +55,7 @@ class ReadOnlySwitchTests(unittest.TestCase):
 
     def test_existing_new_route_that_defeats_exact_inverse_refused(self):
         data=nginx_config()+b'  proxy_pass http://127.0.0.1:3005;\n'
-        with self.assertRaisesRegex(v.Stop,'NGINX_ROLLBACK_NOT_EXACT'):
+        with self.assertRaisesRegex(v.Stop,'PROPOSED_FRONTEND_ROUTES_INVALID'):
             v.propose_config(data,Path('/old-assets'),Path('/new-assets'))
 
     def test_invalid_encoding_is_not_leaked(self):
@@ -101,6 +101,7 @@ class ReadOnlySwitchTests(unittest.TestCase):
             site,stage,verifier,old=self.fixture(td)
             before=site.resolve().read_bytes()
             with patch.object(v.os,'geteuid',return_value=0), \
+                 patch.object(Path,'is_relative_to',return_value=True), \
                  patch.object(v,'SITE',site), \
                  patch.object(v,'load_pinned',side_effect=[verifier,old]), \
                  patch.object(v,'run',return_value=b''), \
@@ -114,6 +115,7 @@ class ReadOnlySwitchTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             site,stage,verifier,old=self.fixture(td)
             with patch.object(v.os,'geteuid',return_value=0), \
+                 patch.object(Path,'is_relative_to',return_value=True), \
                  patch.object(v,'SITE',site), \
                  patch.object(v,'load_pinned',side_effect=[verifier,old]), \
                  patch.object(v,'run',return_value=b'LISTEN 0 128') as run, \
@@ -127,6 +129,7 @@ class ReadOnlySwitchTests(unittest.TestCase):
             site,stage,verifier,old=self.fixture(td)
             stage.local_state.return_value={'nginx_sha256':'0'*64}
             with patch.object(v.os,'geteuid',return_value=0), \
+                 patch.object(Path,'is_relative_to',return_value=True), \
                  patch.object(v,'SITE',site), \
                  patch.object(v,'load_pinned',side_effect=[verifier,old]), \
                  patch.object(v,'check_pm2') as pm:
