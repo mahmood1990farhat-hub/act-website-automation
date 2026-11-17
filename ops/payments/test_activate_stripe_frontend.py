@@ -110,7 +110,8 @@ class Safety(unittest.TestCase):
                  patch.object(m,'process_rows',return_value=[{}, {}, {}, {}]),\
                  patch.object(m,'verify_public') as pub,\
                  patch.object(m,'journal'):
-                obj.rollback()
+                with contextlib.redirect_stdout(io.StringIO()):
+                    obj.rollback()
             self.assertEqual(obj.site.read_bytes(),b'old-site')
             self.assertEqual(obj.prior.DUMP.read_bytes(),b'old-dump')
             encoded=json.loads([kw['data'] for args,kw in calls if args[-2]=='node script'][0])
