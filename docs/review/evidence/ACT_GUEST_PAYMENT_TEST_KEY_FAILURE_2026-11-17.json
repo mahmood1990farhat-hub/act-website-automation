@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-11-17",
+  "issue": "Guest booking cannot advance from Confirm Booking Details to payment",
+  "tracker": "https://github.com/mahmood1990farhat-hub/act-website-automation/issues/99",
+  "relevant_records": {
+    "backend_pr": 116,
+    "backend_head_and_recorded_deployed_source": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+    "frontend_pr": 115,
+    "frontend_pr_head": "83691bf9974bd49eeeca41abb91bd67a2895c734",
+    "frontend_recorded_deployed_source": "02e59f95b5fd85d6ad07e881f3f2671a01a7bd65"
+  },
+  "reproduction": {
+    "website": "https://airportandcitytransfer.com/en",
+    "authentication": "Fresh guest session; Login was displayed",
+    "quote": "Succeeded for a short local route with pickup on 2026-11-19 at 12:09",
+    "endpoint": "POST /api/trips/initiate-guest-payment/?locale=en",
+    "first_independent_failure_utc": "2026-11-17T09:16:22.193Z",
+    "http_status": 500,
+    "payment_form_opened": false,
+    "payment_submitted": false,
+    "response_message": "An unexpected error occurred. Please try again.",
+    "confirmed_response_reason": "Expired API Key provided",
+    "rejected_key_classification": "Stripe test secret (value and suffix omitted)",
+    "reason_obtained_from": "Existing Django browsable API response after a bounded synthetic guest request",
+    "live_stripe_configuration_changed": false,
+    "key_value_retrieved_or_saved": false
+  },
+  "stripe_read_checks": {
+    "connected_account": "ACT test account",
+    "livemode": false,
+    "recent_payment_intents": 0,
+    "time_window_start_utc": "2026-11-17T09:10:00Z",
+    "frontend_publishable_key_mode": "test"
+  },
+  "approval": {
+    "source": "Owner explicitly replied Approved in the ACT Website & Mobile Apps development conversation",
+    "date": "2026-11-17",
+    "scope": [
+      "Replace only expired backend STRIPE_SECRET_KEY with a valid test secret from the same ACT account/test environment",
+      "Restart act.service to reload the configured secret",
+      "Verify guest website payment form opens in test mode"
+    ]
+  },
+  "preservation": {
+    "application_source_changed": false,
+    "deployment_workflow_started": false,
+    "prs_merged": false,
+    "migrations_applied": false,
+    "webhook_signing_secret_changed": false,
+    "frontend_publishable_key_changed": false,
+    "billing_changed": false,
+    "driver_apk_rebuilt": false,
+    "automation_or_dispatch_changed": false,
+    "pending_payment_rows_deleted": false,
+    "note": "Existing initiation creates an unpaid PendingPayment before Stripe; failed attempts may retain such rows. No cleanup performed."
+  },
+  "recovery_helper": {
+    "path": "ops/payments/replace_expired_test_key.py",
+    "default": "Read-only source/readiness check",
+    "apply": "Hidden terminal input; Stripe GET account/test-mode verification; guarded single-value replacement; private backup; act.service restart",
+    "helper_sha256": "6b412d93c7bd563901c9fe0b031c718b76671ba4e906e5144b00e6dc546b99fe",
+    "test_source_sha256": "4c48675285e4c2d5b062c9c574a52c68dbceb88ff21d8fd2134b364dab0cc6bf",
+    "local_validation": {
+      "result": "passed",
+      "tests": 28,
+      "framework": "Python unittest",
+      "scope": "20 existing recovery checks plus 8 focused metadata cases; synthetic keys, real temporary filesystem xattrs, mocked provider/systemd calls",
+      "real_host_or_provider_calls": false,
+      "review": "Independent read-only source review of the exact revised helper found no material blocker",
+      "unchanged_application_suites_rerun": false
+    },
+    "host_executed": true,
+    "checkout_restored": false,
+    "host_execution_scope": "Owner ran original helper --check only; stopped before any change or service restart",
+    "host_apply_executed": false,
+    "owner_read_only_result": {
+      "date": "2026-11-17",
+      "helper_sha256": "3645e1062f6b69293815ab9f1730a2c9f0f6d5ce53be351ac331e378feafe36d",
+      "status": "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW",
+      "stage": "UNCHANGED",
+      "exit_code": 1,
+      "attribute_name": "user.security.m.metadata",
+      "attribute_bytes": 79,
+      "attribute_value_recorded": false,
+      "env_changed": false,
+      "service_restarted": false,
+      "source": "Owner report and uploaded terminal screenshot; no direct VPS access in this session"
+    },
+    "attribute_review": {
+      "supported_name": "user.security.m.metadata",
+      "vendor_explanation": "Monarx documents this name as opaque metadata normally managed by its malware scanner. Hostinger provides a Monarx-integrated VPS scanner.",
+      "on_host_writer_verified": false,
+      "qualification": "The name alone cannot identify who last wrote this specific instance. Other tools can write or preserve attributes in the user namespace.",
+      "handling": "Copy the exact bytes to the private backup and atomic replacement, verify reads, reject other names and changes; do not remove attributes or change scanner configuration.",
+      "concurrency": "A scanner refresh can cause a guarded stop; do not attribute such drift to malicious activity or automatically restore the expired key.",
+      "sources": [
+        "https://support.monarx.com/en/articles/17640278-what-is-the-user-security-m-metadata-extended-attribute",
+        "https://www.hostinger.com/support/8450363-hostinger-vps-malware-scanner/"
+      ]
+    },
+    "previous_local_validation": {
+      "result": "passed",
+      "tests": 20,
+      "framework": "Python unittest",
+      "scope": "Synthetic keys, temporary files, mocked provider and systemd calls; subprocess coverage for command-line secret redaction",
+      "real_host_or_provider_calls": false,
+      "review": "Independent read-only source review, followed by root review and a fixed argparse redaction guard covered by the final test run",
+      "unchanged_application_suites_rerun": false
+    },
+    "revision_host_executed": false
+  }
+}
