@@ -212,6 +212,8 @@ class Release:
             'activated':False}))
         for label,contents in [('proposed',self.proposed),('rollback',self.original)]:
             cfg=RECORD/('nginx.'+label+'.conf')
+            if label=='rollback':
+                write_new(cfg,contents)
             # Validate a safe synthetic full master config; don't alter live Nginx.
             master=self.prior.validation_master(regular(self.prior.MASTER),
                                                sorted(self.prior.SITE.parent.iterdir()),cfg)
