@@ -3,6 +3,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -132,7 +133,8 @@ class BuildSafetyTests(unittest.TestCase):
                 self.assertEqual(dest.stat().st_mode & 0o777,0o755)
                 self.assertEqual((dest/'current.js').stat().st_mode & 0o777,0o644)
                 (new/'legacy.js').write_text('different')
-                with self.assertRaisesRegex(FileExistsError,'File exists'):
+                shutil.rmtree(dest)
+                with self.assertRaisesRegex(p.Stop,'ASSET_COLLISION_CONTENT_MISMATCH'):
                     p.copy_asset_union()
 
     def test_local_state_declines_drift_and_no_stage(self):
