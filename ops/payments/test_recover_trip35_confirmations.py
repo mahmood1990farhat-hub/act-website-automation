@@ -41,6 +41,29 @@ class Trip35GuardTests(unittest.TestCase):
         self.assertIn('ADMIN_EMAIL_RECORDED:', x.DJANGO_STATUS)
         self.assertNotIn('passenger_email', x.DJANGO_STATUS)
 
+    def test_django_uses_backend_environment_without_credential_output(self):
+        current = Path('/tmp/act-synthetic-current')
+        test_env = (b'DB_PASSWORD=private-synthetic-value\0EMAIL_HOST_PASSWORD=mail-secret\0'
+                    b'LD_PRELOAD=/tmp/unsafe.so\0PYTHONPATH=/tmp/unsafe\0')
+        with patch.object(x,'systemd',return_value={'ActiveState':'active','MainPID':'123'}),\
+             patch.object(Path,'resolve',return_value=current),\
+             patch.object(Path,'read_bytes',return_value=test_env),\
+             patch.object(x,'command',return_value=Mock(returncode=0,stdout=b'PASS: synthetic')) as run:
+            x.django(current,x.DJANGO_READ,readonly=True)
+            env=run.call_args.kwargs['env']
+            self.assertEqual(env['DB_PASSWORD'],'private-synthetic-value')
+            self.assertEqual(env['EMAIL_HOST_PASSWORD'],'mail-secret')
+            self.assertNotIn('LD_PRELOAD',env)
+            self.assertNotIn('PYTHONPATH',env)
+            self.assertEqual(env['PGOPTIONS'],'-c default_transaction_read_only=on')
+            self.assertIn('runuser',str(run.call_args.args[0][0]))
+        with patch.object(x,'systemd',return_value={'ActiveState':'active','MainPID':'123'}),\
+             patch.object(Path,'resolve',return_value=current),\
+             patch.object(Path,'read_bytes',return_value=test_env),\
+             patch.object(x,'command',return_value=Mock(returncode=0,stdout=b'PASS: synthetic')) as run:
+            x.django(current,x.DJANGO_SEND,readonly=False)
+            self.assertNotIn('PGOPTIONS',run.call_args.kwargs['env'])
+
     def test_git_blob_matches_real_git_sha(self):
         with tempfile.TemporaryDirectory() as td:
             p=Path(td)/'file.py';p.write_text('hello\n')
