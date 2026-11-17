@@ -84,7 +84,7 @@ NO_CHANGES; NO_ACTIVATION_COMMAND
 
 **Code now committed on the existing draft PR #115:**
 - `ops/payments/activate_stripe_frontend.py` (source SHA-256 `6dee62263996e963d927b303311db5557fe563529be6ecccbfb86d0332923774`; Git blob `072dacf97c008c3904763f89380adbcd0173d8a4`)
-- `ops/payments/test_activate_stripe_frontend.py` (source SHA-256 `f6cc13a33fb200bfa42355c176bd275e784cad70b5d20fbf005d9cadd820a3c7`; Git blob `04e90491151424a5d3043f9304b8ee536309c1f9`)
+- `ops/payments/test_activate_stripe_frontend.py` (source SHA-256 `8c52056ab1a9abc3060982310abdc457881ca0855d1f53ccd917a4ebaca7d7bc`; Git blob `25d063f4b86ac4e11ed4e07505d54d1a1484f632`)
 
 The source and test blobs match the locally verified bytes exactly. **22 new isolated local Python tests passed**. They cover the read-only CLI, test-mode/key handling boundary, approval/TTY/lock checks, immutable private release records, exact candidate-bound PM2 marker, Nginx/PM2 rollback/refusal on drift, bounded page checks, interruption/recovery outputs, and refusing any payment operation. No hosted CI or VPS execution of this new activation helper is claimed.
 
