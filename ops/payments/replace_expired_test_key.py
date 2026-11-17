@@ -37,6 +37,9 @@ BACKEND_SHA = "d77e896af9daca5a39b7a85d5b76c5821e008d23"
 CONSUMER_SHA256 = "d10d943b079041e0998daae2e4ece3a90c1b125f64107ef4676c1d51d9c55bed"
 KEY_LINE = re.compile(rb"(?m)^[ \t]*(?:export[ \t]+)?STRIPE_SECRET_KEY[ \t]*=[ \t]*([^\r\n]*)")
 KEY_VALUE = re.compile(rb"(?:(['\"])(sk_test_[A-Za-z0-9]{16,240})\1|(sk_test_[A-Za-z0-9]{16,240}))([ \t]*(?:#.*)?)\Z")
+# Monarx documents this exact name as opaque scanner metadata. Its presence
+# does not prove who wrote it. Preserve bytes; never remove or interpret them.
+REVIEWED_ENV_XATTRS = frozenset({"user.security.m.metadata"})
 MUTATION_STAGE = "UNCHANGED"
 
 
@@ -68,6 +71,34 @@ class FileSnapshot:
     uid: int
     gid: int
     mode: int
+    xattrs: tuple = ()
+
+
+def file_attributes(fd):
+    try:
+        names = tuple(sorted(os.listxattr(fd)))
+        require(set(names) <= REVIEWED_ENV_XATTRS, "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW")
+        return tuple((name, os.getxattr(fd, name)) for name in names)
+    except (OSError, AttributeError):
+        raise Refusal("ENV_ATTRIBUTE_CHECK_UNAVAILABLE") from None
+
+
+def preserve_attributes(fd, expected):
+    # Unknown attributes on a new file must not be stripped or overwritten.
+    file_attributes(fd)
+    require({name for name, _ in expected} <= REVIEWED_ENV_XATTRS,
+            "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW")
+    try:
+        for name, value in expected:
+            os.setxattr(fd, name, value)
+    except (OSError, AttributeError):
+        raise Refusal("ENV_ATTRIBUTE_PRESERVATION_FAILED") from None
+    require(file_attributes(fd) == expected, "ENV_ATTRIBUTE_COPY_NOT_VERIFIED")
+
+
+def file_state(info):
+    return (info.st_dev, info.st_ino, info.st_size, info.st_uid, info.st_gid,
+            info.st_mode, info.st_nlink, info.st_mtime_ns, info.st_ctime_ns)
 
 
 def root_directory(path):
@@ -88,14 +119,13 @@ def read_env():
         info = os.fstat(fd)
         require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1, "ENV_NOT_SINGLE_REGULAR_FILE")
         require(info.st_size <= 262144 and not info.st_mode & 0o007, "ENV_SIZE_OR_PERMISSIONS_UNSAFE")
-        try:
-            require(not os.listxattr(fd), "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW")
-        except (OSError, AttributeError):
-            raise Refusal("ENV_ATTRIBUTE_CHECK_UNAVAILABLE") from None
+        attributes = file_attributes(fd)
         data = os.read(fd, 262145)
-        require(len(data) == info.st_size, "ENV_CHANGED_WHILE_READING")
-        return FileSnapshot(data, (info.st_dev, info.st_ino, info.st_mtime_ns),
-                            info.st_uid, info.st_gid, stat.S_IMODE(info.st_mode))
+        final_attributes = file_attributes(fd)
+        require(len(data) == info.st_size and attributes == final_attributes
+                and file_state(info) == file_state(os.fstat(fd)), "ENV_CHANGED_WHILE_READING")
+        return FileSnapshot(data, (info.st_dev, info.st_ino, info.st_mtime_ns, info.st_ctime_ns),
+                            info.st_uid, info.st_gid, stat.S_IMODE(info.st_mode), attributes)
     finally:
         os.close(fd)
 
@@ -218,19 +248,20 @@ def hidden_key():
 
 
 def same_file(expected, current):
-    return (expected.identity, expected.uid, expected.gid, expected.mode, expected.data) == (
-        current.identity, current.uid, current.gid, current.mode, current.data)
+    return (expected.identity, expected.uid, expected.gid, expected.mode, expected.data, expected.xattrs) == (
+        current.identity, current.uid, current.gid, current.mode, current.data, current.xattrs)
 
 
 def atomic_replace(snapshot, data):
     require(same_file(snapshot, read_env()), "ENV_CHANGED_NO_UPDATE")
     fd, temp_name = tempfile.mkstemp(prefix=".act-stripe-", dir=ENV_FILE.parent)
     try:
-        os.fchown(fd, snapshot.uid, snapshot.gid)
-        os.fchmod(fd, snapshot.mode)
         with os.fdopen(fd, "wb") as stream:
+            os.fchown(stream.fileno(), snapshot.uid, snapshot.gid)
+            os.fchmod(stream.fileno(), snapshot.mode)
             stream.write(data)
             stream.flush()
+            preserve_attributes(stream.fileno(), snapshot.xattrs)
             os.fsync(stream.fileno())
         require(same_file(snapshot, read_env()), "ENV_CHANGED_NO_UPDATE")
         os.replace(temp_name, ENV_FILE)
@@ -244,7 +275,7 @@ def atomic_replace(snapshot, data):
             os.unlink(temp_name)
 
 
-def backup(data):
+def backup(snapshot):
     if not BACKUP_ROOT.exists():
         BACKUP_ROOT.mkdir(mode=0o700)
     root_directory(BACKUP_ROOT)
@@ -252,8 +283,9 @@ def backup(data):
     path = directory / "backend.env.before"
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, "wb") as stream:
-        stream.write(data)
+        stream.write(snapshot.data)
         stream.flush()
+        preserve_attributes(stream.fileno(), snapshot.xattrs)
         os.fsync(stream.fileno())
     return str(path)
 
@@ -265,7 +297,7 @@ def apply(snapshot, before, status, new_key):
     updated = replacement_bytes(snapshot.data, new_key)
     require(service_snapshot(snapshot) == before, "SERVICE_CHANGED_NO_UPDATE")
     require(same_file(snapshot, read_env()), "ENV_CHANGED_NO_UPDATE")
-    backup_path = backup(snapshot.data)
+    backup_path = backup(snapshot)
     print("PRIVATE_BACKUP=" + backup_path, flush=True)
     MUTATION_STAGE = "CONFIG_UPDATE_STARTED"
     try:
@@ -278,7 +310,8 @@ def apply(snapshot, before, status, new_key):
     try:
         require(service_snapshot(snapshot) == before, "SERVICE_DRIFT")
         written = read_env()
-        require(written.data == updated and (written.uid, written.gid, written.mode) ==
+        require(written.data == updated and written.xattrs == snapshot.xattrs
+                and (written.uid, written.gid, written.mode) ==
                 (snapshot.uid, snapshot.gid, snapshot.mode), "ENV_DRIFT")
     except Exception:
         raise Refusal("KEY_UPDATED_SERVICE_OR_ENV_CHANGED_NOT_RESTARTED_BACKUP_RETAINED") from None
@@ -294,7 +327,9 @@ def apply(snapshot, before, status, new_key):
     for attempt in range(3):
         try:
             after = read_env()
-            require(after.data == updated, "POST_UPDATE_ENV_DRIFT")
+            require(after.data == updated and after.xattrs == snapshot.xattrs
+                    and (after.uid, after.gid, after.mode) ==
+                    (snapshot.uid, snapshot.gid, snapshot.mode), "POST_UPDATE_ENV_DRIFT")
             running = service_snapshot(after)
             require(running["pid"] != before["pid"] and running["release"] == before["release"]
                     and running["key_source"] == before["key_source"], "RESTART_IDENTITY_UNCONFIRMED")
@@ -332,6 +367,7 @@ def main():
         print(json.dumps({"status": "READY_FOR_TEST_SECRET_REPLACEMENT", "service": SERVICE,
                           "env_file": str(ENV_FILE), "key_source": before["key_source"],
                           "existing_key_mode": "test", "backend_sha": BACKEND_SHA,
+                          "preserved_file_attributes": [name for name, _ in snapshot.xattrs],
                           "readiness_http": status}))
         if args.apply:
             apply(snapshot, before, status, hidden_key())

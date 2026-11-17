@@ -59,9 +59,47 @@
     "path": "ops/payments/replace_expired_test_key.py",
     "default": "Read-only source/readiness check",
     "apply": "Hidden terminal input; Stripe GET account/test-mode verification; guarded single-value replacement; private backup; act.service restart",
-    "helper_sha256": "3645e1062f6b69293815ab9f1730a2c9f0f6d5ce53be351ac331e378feafe36d",
-    "test_source_sha256": "3b953138354e73f9b5c2248502ab455286cac8b68a6b0d94cefe6f795a739ab2",
+    "helper_sha256": "6b412d93c7bd563901c9fe0b031c718b76671ba4e906e5144b00e6dc546b99fe",
+    "test_source_sha256": "4c48675285e4c2d5b062c9c574a52c68dbceb88ff21d8fd2134b364dab0cc6bf",
     "local_validation": {
+      "result": "passed",
+      "tests": 28,
+      "framework": "Python unittest",
+      "scope": "20 existing recovery checks plus 8 focused metadata cases; synthetic keys, real temporary filesystem xattrs, mocked provider/systemd calls",
+      "real_host_or_provider_calls": false,
+      "review": "Independent read-only source review of the exact revised helper found no material blocker",
+      "unchanged_application_suites_rerun": false
+    },
+    "host_executed": true,
+    "checkout_restored": false,
+    "host_execution_scope": "Owner ran original helper --check only; stopped before any change or service restart",
+    "host_apply_executed": false,
+    "owner_read_only_result": {
+      "date": "2026-11-17",
+      "helper_sha256": "3645e1062f6b69293815ab9f1730a2c9f0f6d5ce53be351ac331e378feafe36d",
+      "status": "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW",
+      "stage": "UNCHANGED",
+      "exit_code": 1,
+      "attribute_name": "user.security.m.metadata",
+      "attribute_bytes": 79,
+      "attribute_value_recorded": false,
+      "env_changed": false,
+      "service_restarted": false,
+      "source": "Owner report and uploaded terminal screenshot; no direct VPS access in this session"
+    },
+    "attribute_review": {
+      "supported_name": "user.security.m.metadata",
+      "vendor_explanation": "Monarx documents this name as opaque metadata normally managed by its malware scanner. Hostinger provides a Monarx-integrated VPS scanner.",
+      "on_host_writer_verified": false,
+      "qualification": "The name alone cannot identify who last wrote this specific instance. Other tools can write or preserve attributes in the user namespace.",
+      "handling": "Copy the exact bytes to the private backup and atomic replacement, verify reads, reject other names and changes; do not remove attributes or change scanner configuration.",
+      "concurrency": "A scanner refresh can cause a guarded stop; do not attribute such drift to malicious activity or automatically restore the expired key.",
+      "sources": [
+        "https://support.monarx.com/en/articles/17640278-what-is-the-user-security-m-metadata-extended-attribute",
+        "https://www.hostinger.com/support/8450363-hostinger-vps-malware-scanner/"
+      ]
+    },
+    "previous_local_validation": {
       "result": "passed",
       "tests": 20,
       "framework": "Python unittest",
@@ -70,7 +108,6 @@
       "review": "Independent read-only source review, followed by root review and a fixed argparse redaction guard covered by the final test run",
       "unchanged_application_suites_rerun": false
     },
-    "host_executed": false,
-    "checkout_restored": false
+    "revision_host_executed": false
   }
 }

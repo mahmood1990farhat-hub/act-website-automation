@@ -21,6 +21,8 @@ sys.modules[spec.name] = recovery
 spec.loader.exec_module(recovery)
 OLD = "sk_test_" + "A" * 32
 NEW = "sk_test_" + "B" * 32
+MONARX_ATTRIBUTE = "user.security.m.metadata"
+SYNTHETIC_METADATA = b"M" * 79
 
 
 class RecoveryTests(unittest.TestCase):
@@ -113,14 +115,141 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(self.env.read_bytes(), newer)
 
     def test_extended_attributes_refuse_instead_of_being_dropped(self):
-        with patch.object(recovery.os, "listxattr", return_value=["system.posix_acl_access"]):
-            with self.assertRaisesRegex(recovery.Refusal, "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW"):
-                recovery.read_env()
+        for name in ["system.posix_acl_access", "user.unreviewed.metadata"]:
+            with self.subTest(attribute=name), patch.object(recovery.os, "listxattr", return_value=[name]):
+                with self.assertRaisesRegex(recovery.Refusal, "ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW"):
+                    recovery.read_env()
 
     def test_attribute_check_failure_is_not_ignored(self):
         with patch.object(recovery.os, "listxattr", side_effect=OSError("not supported")):
             with self.assertRaisesRegex(recovery.Refusal, "ENV_ATTRIBUTE_CHECK_UNAVAILABLE"):
                 recovery.read_env()
+
+    def test_reviewed_metadata_preserved_on_backup_and_replacement(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        snapshot = recovery.read_env()
+        self.assertEqual(snapshot.xattrs, ((MONARX_ATTRIBUTE, SYNTHETIC_METADATA),))
+        with patch.object(recovery, "BACKUP_ROOT", self.root / "backup"):
+            saved = Path(recovery.backup(snapshot))
+        replacement = recovery.replacement_bytes(snapshot.data, NEW)
+        recovery.atomic_replace(snapshot, replacement)
+        self.assertEqual(saved.read_bytes(), self.original)
+        self.assertEqual(os.getxattr(saved, MONARX_ATTRIBUTE), SYNTHETIC_METADATA)
+        self.assertEqual(stat.S_IMODE(saved.stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(saved.parent.stat().st_mode), 0o700)
+        self.assertEqual(self.env.read_bytes(), replacement)
+        self.assertEqual(os.getxattr(self.env, MONARX_ATTRIBUTE), SYNTHETIC_METADATA)
+        current = self.env.stat()
+        self.assertEqual((current.st_uid, current.st_gid, stat.S_IMODE(current.st_mode)),
+                         (snapshot.uid, snapshot.gid, snapshot.mode))
+
+    def test_unreadable_reviewed_metadata_refuses_without_value_disclosure(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        with patch.object(recovery.os, "getxattr", side_effect=OSError(NEW)):
+            with self.assertRaises(recovery.Refusal) as failure:
+                recovery.read_env()
+        self.assertEqual(str(failure.exception), "ENV_ATTRIBUTE_CHECK_UNAVAILABLE")
+        self.assertNotIn(NEW, str(failure.exception))
+        self.assertEqual(self.env.read_bytes(), self.original)
+
+    def test_same_length_metadata_change_refuses_before_replacement(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        snapshot = recovery.read_env()
+        old_mtime = self.env.stat().st_mtime_ns
+        newer_metadata = b"N" * len(SYNTHETIC_METADATA)
+        os.setxattr(self.env, MONARX_ATTRIBUTE, newer_metadata)
+        self.assertEqual(self.env.stat().st_mtime_ns, old_mtime)
+        with self.assertRaisesRegex(recovery.Refusal, "ENV_CHANGED_NO_UPDATE"):
+            recovery.atomic_replace(snapshot, recovery.replacement_bytes(snapshot.data, NEW))
+        self.assertEqual(self.env.read_bytes(), self.original)
+        self.assertEqual(os.getxattr(self.env, MONARX_ATTRIBUTE), newer_metadata)
+        self.assertFalse(list(self.root.glob(".act-stripe-*")))
+
+    def test_removed_metadata_refuses_before_replacement(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        snapshot = recovery.read_env()
+        # Simulates an external writer; the recovery helper never removes xattrs.
+        os.removexattr(self.env, MONARX_ATTRIBUTE)
+        with self.assertRaisesRegex(recovery.Refusal, "ENV_CHANGED_NO_UPDATE"):
+            recovery.atomic_replace(snapshot, recovery.replacement_bytes(snapshot.data, NEW))
+        self.assertEqual(self.env.read_bytes(), self.original)
+        self.assertEqual(os.listxattr(self.env), [])
+
+    def test_metadata_change_during_snapshot_read_refuses(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        original_read = os.read
+        def change_after_read(fd, size):
+            result = original_read(fd, size)
+            os.setxattr(self.env, MONARX_ATTRIBUTE, b"N" * len(SYNTHETIC_METADATA))
+            return result
+        with patch.object(recovery.os, "read", side_effect=change_after_read):
+            with self.assertRaisesRegex(recovery.Refusal, "ENV_CHANGED_WHILE_READING"):
+                recovery.read_env()
+        self.assertEqual(self.env.read_bytes(), self.original)
+
+    def test_attribute_copy_must_be_read_back_and_verified(self):
+        destination = self.root / "destination"
+        destination.write_bytes(b"synthetic destination")
+        with destination.open("rb") as stream, patch.object(recovery.os, "setxattr"):
+            with self.assertRaisesRegex(recovery.Refusal, "ENV_ATTRIBUTE_COPY_NOT_VERIFIED"):
+                recovery.preserve_attributes(stream.fileno(), ((MONARX_ATTRIBUTE, SYNTHETIC_METADATA),))
+        self.assertEqual(self.env.read_bytes(), self.original)
+
+    def test_attribute_preservation_failure_never_replaces_source_or_restarts(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        snapshot = recovery.read_env()
+        before = {"pid": 123, "release": "/expected", "key_source": "django-shared-env"}
+        original_setxattr = os.setxattr
+        for failed_destination in ["backup", "replacement"]:
+            with self.subTest(destination=failed_destination), contextlib.ExitStack() as stack:
+                def fail_target(fd, name, value, *args, **kwargs):
+                    target = os.readlink(f"/proc/self/fd/{fd}")
+                    is_backup = target.endswith("backend.env.before")
+                    if is_backup == (failed_destination == "backup"):
+                        raise OSError(NEW)
+                    return original_setxattr(fd, name, value, *args, **kwargs)
+                stack.enter_context(patch.object(recovery, "require_expired_current_key"))
+                stack.enter_context(patch.object(recovery, "validate_key"))
+                stack.enter_context(patch.object(recovery, "service_snapshot", return_value=before))
+                stack.enter_context(patch.object(recovery, "BACKUP_ROOT", self.root / "backup"))
+                stack.enter_context(patch.object(recovery.os, "setxattr", side_effect=fail_target))
+                restart = stack.enter_context(patch.object(recovery.subprocess, "run"))
+                output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+                with self.assertRaises(recovery.Refusal) as failure:
+                    recovery.apply(snapshot, before, 401, NEW)
+                self.assertEqual(str(failure.exception), "ENV_ATTRIBUTE_PRESERVATION_FAILED")
+                restart.assert_not_called()
+                self.assertEqual(self.env.read_bytes(), self.original)
+                self.assertEqual(os.getxattr(self.env, MONARX_ATTRIBUTE), SYNTHETIC_METADATA)
+                self.assertFalse(list(self.root.glob(".act-stripe-*")))
+                self.assertNotIn(NEW, output.getvalue() + str(failure.exception))
+
+    def test_post_write_metadata_drift_keeps_backup_and_stops_before_restart(self):
+        os.setxattr(self.env, MONARX_ATTRIBUTE, SYNTHETIC_METADATA)
+        snapshot = recovery.read_env()
+        before = {"pid": 123, "release": "/expected", "key_source": "django-shared-env"}
+        service_calls = 0
+        def service_state(_snapshot):
+            nonlocal service_calls
+            service_calls += 1
+            if service_calls == 2:
+                os.setxattr(self.env, MONARX_ATTRIBUTE, b"N" * len(SYNTHETIC_METADATA))
+            return before
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(patch.object(recovery, "require_expired_current_key"))
+            stack.enter_context(patch.object(recovery, "validate_key"))
+            stack.enter_context(patch.object(recovery, "service_snapshot", side_effect=service_state))
+            stack.enter_context(patch.object(recovery, "BACKUP_ROOT", self.root / "backup"))
+            restart = stack.enter_context(patch.object(recovery.subprocess, "run"))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaisesRegex(recovery.Refusal, "KEY_UPDATED_SERVICE_OR_ENV_CHANGED_NOT_RESTARTED"):
+                recovery.apply(snapshot, before, 401, NEW)
+            restart.assert_not_called()
+        self.assertEqual(recovery.key_span(self.env.read_bytes())[2], NEW)
+        saved = list((self.root / "backup").glob("*/backend.env.before"))
+        self.assertEqual(len(saved), 1)
+        self.assertEqual(saved[0].read_bytes(), self.original)
+        self.assertEqual(os.getxattr(saved[0], MONARX_ATTRIBUTE), SYNTHETIC_METADATA)
 
     def test_service_environment_source_must_be_proven(self):
         release = self.root / "releases" / "expected" / "backend"
@@ -201,9 +330,10 @@ class RecoveryTests(unittest.TestCase):
         self.assertFalse(list(self.root.glob(".act-stripe-*")))
 
     def test_private_exclusive_backup_retains_original_bytes(self):
+        snapshot = recovery.read_env()
         with patch.object(recovery, "BACKUP_ROOT", self.root / "backup"):
-            one = Path(recovery.backup(self.original))
-            two = Path(recovery.backup(self.original))
+            one = Path(recovery.backup(snapshot))
+            two = Path(recovery.backup(snapshot))
         self.assertNotEqual(one, two)
         self.assertEqual(one.read_bytes(), self.original)
         self.assertEqual(stat.S_IMODE(one.stat().st_mode), 0o600)

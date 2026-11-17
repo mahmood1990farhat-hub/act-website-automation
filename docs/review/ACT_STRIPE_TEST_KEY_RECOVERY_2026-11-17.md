@@ -35,15 +35,27 @@ The helper validates the candidate key with read-only Stripe requests before mak
 
 If the restart or readiness check fails after writing, retain the private backup and the fixed failure status for review. Do not run a second update or automatically restore the already-expired key. The helper must not send payment requests, restart Celery, run migrations, publish notifications or change Google/Stripe billing.
 
+## Read-only host result and metadata review
+
+The owner ran the original pinned helper with `--check`. It stopped with `ENV_EXTENDED_ATTRIBUTES_REQUIRE_REVIEW; STAGE=UNCHANGED`, exit 1. The owner confirmed that the environment file was unchanged and `act.service` was not restarted. The terminal screenshot lists one attribute, `user.security.m.metadata`, with 79 bytes. Its value was not printed or retained in this record.
+
+Monarx documents this exact attribute name as metadata normally managed by its malware scanner. Hostinger documents using Monarx for its VPS malware scanner. This is consistent with expected scanner operation, but the name alone does not prove which process last wrote the specific value on this host. The Monarx article also states that other tools can set or copy attributes in the `user.` namespace. No direct host audit or scanner-presence check has been performed by this session.
+
+The revised helper supports only this reviewed attribute. It snapshots the opaque bytes, includes them and the change timestamp in drift checks, copies and verifies them on the private backup and temporary replacement, and checks the installed result. All other file attributes and default directory ACLs still require review. No attributes are deleted, no scanner is disabled or reconfigured, and metadata values never appear in status output.
+
+The deployment lock does not coordinate with the malware scanner. If its metadata changes during recovery, the helper can stop conservatively. A post-write stop retains the new configuration and private backup for review; it does not silently restore the expired key or retry the service restart. Such a stop is not evidence of compromise.
+
 ## Verification and status
 
-The helper passed **20 focused Python unittest cases** using synthetic keys, temporary files and mocked subprocess/provider calls. The final added case verifies that even incorrect command-line key entry is never echoed by argparse. Independent source review and root review of the final redaction correction are complete. These results do not establish successful Hostinger execution or restored checkout. Unchanged application suites were not repeated.
+The revised helper passed **28 focused Python unittest cases** in one run: the 20 existing recovery checks plus 8 focused metadata cases. Real temporary filesystem attributes verified preservation of a synthetic 79-byte value. Other cases cover unreadable attributes, same-length drift, removal, changes during reads, failed copies, read-back mismatch, unknown/ACL attributes and post-write drift. Stripe and systemd calls were mocked. An independent read-only source review of the exact revised helper found no material blocker. These results do not establish successful Hostinger application or restored checkout. Unchanged website/Android suites were not repeated.
 
-Helper SHA-256: `3645e1062f6b69293815ab9f1730a2c9f0f6d5ce53be351ac331e378feafe36d`.
+Helper SHA-256: `6b412d93c7bd563901c9fe0b031c718b76671ba4e906e5144b00e6dc546b99fe`.
+
+Test source SHA-256: `4c48675285e4c2d5b062c9c574a52c68dbceb88ff21d8fd2134b364dab0cc6bf`.
 
 After owner execution reports a successful configuration update and backend readiness, make one fresh guest booking attempt through the passenger website and verify that the Stripe payment form opens in test mode. Stop before paying for this specific recovery check. The separate controlled booking-to-completed-journey acceptance remains open.
 
-**Current status:** failure diagnosed; limited repair approved; recovery helper prepared and locally verified for the owner terminal handoff. The running server has not been changed and guest checkout is not yet confirmed restored. The source is retained on the separate `draft/act-stripe-test-key-recovery-20261117` branch based on the existing deployed backend; no application implementation is replaced.
+**Current status:** failure diagnosed; limited repair approved; original read-only host check stopped safely; metadata-preserving revision tested and independently reviewed, awaiting owner execution. The server key has not been replaced, the service has not been restarted, and guest checkout is not yet confirmed restored. Work remains in draft PR #117 on `draft/act-stripe-test-key-recovery-20261117`, based on the existing deployed backend.
 
 ## Sources
 
@@ -52,3 +64,5 @@ After owner execution reports a successful configuration update and backend read
 - [Existing staging helper](https://github.com/mahmood1990farhat-hub/act-website-automation/blob/83691bf9974bd49eeeca41abb91bd67a2895c734/ops/first-journey/stage_existing_tracking.py).
 - [Recorded activation checks](https://github.com/mahmood1990farhat-hub/act-website-automation/blob/83691bf9974bd49eeeca41abb91bd67a2895c734/ops/first-journey/activate_existing_tracking.py).
 - [Stripe key handling](https://docs.stripe.com/keys-best-practices).
+- [Monarx attribute documentation](https://support.monarx.com/en/articles/17640278-what-is-the-user-security-m-metadata-extended-attribute).
+- [Hostinger VPS malware scanner](https://www.hostinger.com/support/8450363-hostinger-vps-malware-scanner/).
