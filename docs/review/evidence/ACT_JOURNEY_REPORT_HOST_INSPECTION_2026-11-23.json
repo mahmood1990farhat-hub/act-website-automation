@@ -1,0 +1,40 @@
+{
+  "recorded_date": "2026-11-23",
+  "evidence_source": "Owner-supplied output from the requested read-only Hostinger inspection; no direct assistant host session",
+  "approval": {
+    "application_commit": "370dc89af105788ef598d0475c1ace20fd05826f",
+    "migration": "trips.0009_journey_timestamps",
+    "record": "https://github.com/mahmood1990farhat-hub/act-website-automation/pull/120#issuecomment-7101672916"
+  },
+  "installed_deploy_helper_sha256": "b78040592358dce9b5c48d735adff95601158494b0780b76fad998ad42c0c1f2",
+  "current_release": "/var/www/atg/atg-backend/releases/20261106-tracking-d77e896-oe9oh1vi/backend",
+  "recorded_application_commit": "d77e896af9daca5a39b7a85d5b76c5821e008d23",
+  "retained_venv": "/var/www/atg/atg-backend/releases/20261015T-ready-735c966/backend/.venv",
+  "shared_resource_links_match": true,
+  "act_service": {
+    "active_state": "active",
+    "sub_state": "running",
+    "working_directory": "/var/www/atg/atg-backend/current",
+    "main_pid_at_inspection": 639485
+  },
+  "firebase_arrangement": {
+    "identified": true,
+    "relative_path": true,
+    "file_exists": true,
+    "credential_content_inspected_or_recorded": false
+  },
+  "database_transaction_read_only": "on",
+  "applied_trips_migrations": [
+    "0001_initial",
+    "0002_alter_trip_status",
+    "0003_trip_booking_confirmation_pdf_and_more",
+    "0004_booking_details_persistence",
+    "0005_booking_confirmation_delivery_state",
+    "0006_driver_details_reminder",
+    "0007_external_driver_passenger_identity",
+    "0008_refund_outcome_tracking"
+  ],
+  "inspection_completed": true,
+  "deployment_or_migration_performed": false,
+  "consequence": "Preserve the retained virtual environment, shared resources and relative Firebase file. Prepare a backend-only rollout for the approved application commit; do not run the generic installer that creates a new environment and prunes releases."
+}

@@ -1,0 +1,17 @@
+{
+  "verified_utc": "2026-11-23T14:48:02.137613+00:00",
+  "scope": "Local offline operational validation; no host/database/network/provider actions",
+  "helper_sha256": "f78f138ec818c5c67988fe4956df137330519c6e867d9d04a2b9d13a78332b82",
+  "test_sha256": "c2146e288712688222efb49bd4b55e0394272bdebc508dcb46de11041a7551d2",
+  "helper_bytes": 39541,
+  "test_bytes": 28556,
+  "tests_passed": 18,
+  "duration_seconds": 0.407,
+  "python": "3.12.14",
+  "python_3_11_parent_and_embedded_task_syntax": "passed",
+  "command": "python3 -B -m unittest discover -s ops/journey_report -p test_deploy_completed_report.py -v",
+  "application_commit": "370dc89af105788ef598d0475c1ace20fd05826f",
+  "application_ci_tests": 37,
+  "production_deployment_performed": false,
+  "review": "Independent source review plus root review of final logging/interruption guards; final exact helper tested locally"
+}
