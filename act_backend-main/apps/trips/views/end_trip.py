@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 from apps.accounts.permissions import IsNormalDriver, IsVerifiedAndProfileCompleted
 from apps.trips.models import Trip
 from django.utils.translation import gettext as _, activate
@@ -119,8 +121,14 @@ class CompleteTripView(EMADBaseView):
                 else:
                     if locked_trip.status != "active":
                         raise ValidationError(_("Only active trips can be completed."))
+                    if not locked_trip.is_paid:
+                        raise ValidationError(_("Trip payment not confirmed. Cannot complete trip."))
                     locked_trip.status = "completed"
-                    locked_trip.save(update_fields=['status'])
+                    # Preserve any original event time; retries and the legacy
+                    # ledger repair path must never manufacture a later time.
+                    if locked_trip.completed_at is None:
+                        locked_trip.completed_at = timezone.now()
+                    locked_trip.save(update_fields=['status', 'completed_at'])
 
                     from apps.earnings.services.earnings_calculator import EarningsCalculator
                     earnings, revenue = EarningsCalculator.calculate_and_record_earnings(locked_trip)
@@ -182,6 +190,7 @@ class CompleteTripView(EMADBaseView):
                 locale
             )
             return create_error_response(message, locale=locale, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 

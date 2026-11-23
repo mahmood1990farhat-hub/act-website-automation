@@ -11,7 +11,7 @@ from .guest_driver_car import GuestDriverCarSerializer
 from apps.vehicle.serializers import VehicleSerializer
 from apps.earnings.services.commission_resolver import CommissionResolver
 from django.utils import timezone
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta, date, time, timezone as datetime_timezone
 from decimal import Decimal
 import re
 
@@ -30,7 +30,7 @@ class TripSerializer(serializers.ModelSerializer):
         model = Trip
         fields = '__all__'
         read_only_fields = [
-            'id', 'status', 'created_at', 'cost', 'route_polyline', 'is_paid', 
+            'id', 'status', 'created_at', 'started_at', 'completed_at', 'cost', 'route_polyline', 'is_paid',
             'stripe_payment_intent', 'expected_trip_duration_minutes', 'distance_miles', 
             'passenger', 'base_driver', 'office',
             'cancelled_by_driver', 'cancellation_reason', 'cancelled_at'  # Read-only cancellation fields
@@ -438,6 +438,75 @@ class TripWithStopPointSerializer(serializers.ModelSerializer):
                 "phone_number": user.phone_number
             }
         }
+
+
+class DriverTripDetailSerializer(TripWithStopPointSerializer):
+    """Completed-journey report on the existing owner-authorised detail API."""
+
+    journey_report = serializers.SerializerMethodField()
+
+    def get_journey_report(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        driver = getattr(user, "base_driver", None) if user and user.is_authenticated else None
+        if obj.status != "completed" or driver is None or obj.base_driver_id != driver.pk:
+            return None
+
+        started, completed = obj.started_at, obj.completed_at
+        duration = None
+        if started is None and completed is None:
+            timing_status = "not_recorded"
+        elif started is None or completed is None:
+            timing_status = "partial"
+        elif completed < started:
+            timing_status = "invalid_order"
+        else:
+            timing_status = "recorded"
+            duration = int((completed - started).total_seconds())
+
+        timestamp = serializers.DateTimeField(
+            format="iso-8601", default_timezone=datetime_timezone.utc,
+        )
+        ledger = getattr(obj, "driver_earning", None)
+        earnings = None
+        # A reassignment must not reveal another driver's persisted earnings.
+        if ledger is not None and ledger.driver_id == driver.pk:
+            earnings = {
+                "amount": format(ledger.net_amount, ".2f"),
+                "currency": ledger.currency,
+                "status": ledger.status,
+                "recorded_at": timestamp.to_representation(ledger.created_at),
+            }
+        vehicle = obj.car_type
+        return {
+            "schema_version": 1,
+            "trip_id": obj.pk,
+            "reference": str(obj.pk),
+            "status": obj.status,
+            "scheduled_pickup": {
+                "date": obj.trip_date.isoformat(),
+                "time": obj.trip_time.isoformat(),
+            },
+            "pickup_address": obj.pickup_str,
+            "dropoff_address": obj.dropoff_str,
+            "vehicle_class": None if vehicle is None else {
+                "id": vehicle.pk,
+                "code": vehicle.code,
+                "name_en": vehicle.name_en,
+                "name_ar": vehicle.name_ar,
+            },
+            # Existing ACT booking amounts are denominated in GBP. This is the
+            # booked fare, not an estimate of the driver's net earnings.
+            "booked_fare": None if obj.cost is None else {
+                "amount": format(obj.cost, ".2f"), "currency": "GBP",
+            },
+            "started_at": timestamp.to_representation(started) if started else None,
+            "completed_at": timestamp.to_representation(completed) if completed else None,
+            "actual_duration_seconds": duration,
+            "timing_status": timing_status,
+            "driver_earnings": earnings,
+        }
+
 
 
 
