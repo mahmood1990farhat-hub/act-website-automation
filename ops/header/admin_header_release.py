@@ -531,6 +531,9 @@ class Release:
 
     def candidate_config(self):
         runtime = copy.deepcopy(self.current['pm2_env'].get('env', {}))
+        # PM2 God.prepare assigns a new UUID for each process. It is daemon
+        # metadata, not an application setting to inherit from the old process.
+        runtime.pop('unique_id', None)
         runtime.update(self.public)
         runtime.update({'NODE_ENV': 'production', 'NEXT_TELEMETRY_DISABLED': '1',
                         'ACT_TRACKING_ACTIVATION': str(RECORD), 'ACT_ADMIN_HEADER_RELEASE': PATCH_SHA})
@@ -548,6 +551,15 @@ class Release:
              and env.get('env', {}).get('ACT_TRACKING_ACTIVATION') == str(RECORD)
              and all(env.get('env', {}).get(k) == v for k, v in expected['env'].items()),
              'CANDIDATE_CONFIGURATION_MISMATCH')
+        unique_id = env.get('env', {}).get('unique_id')
+        need(isinstance(unique_id, str) and re.fullmatch(
+            r'[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}',
+            unique_id) is not None, 'CANDIDATE_PROCESS_IDENTITY_INVALID')
+        need(unique_id != self.current['pm2_env'].get('env', {}).get('unique_id'),
+             'CANDIDATE_PROCESS_IDENTITY_REUSED')
+        if hasattr(self, 'candidate_unique_id'):
+            need(unique_id == self.candidate_unique_id, 'CANDIDATE_PROCESS_IDENTITY_CHANGED')
+        self.candidate_unique_id = unique_id
 
     def start(self):
         self.guard(self.original, candidate=False)

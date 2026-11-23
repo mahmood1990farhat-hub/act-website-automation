@@ -30,6 +30,9 @@ ROOT = Path(__file__).resolve().parents[2]
 TEST_KEY = "pk_test_" + "T" * 40
 STALE_KEY = "pk_test_" + "S" * 40
 LIVE_KEY = "pk_live_" + "L" * 40
+OLD_PM2_ID = "11111111-1111-4111-8111-111111111111"
+NEW_PM2_ID = "22222222-2222-4222-8222-222222222222"
+OTHER_PM2_ID = "33333333-3333-4333-8333-333333333333"
 EXPECTED_BEFORE = {
     "en": "2f0b301b1f607e162321c6f4d911f6f503da130286728b465fa453562ea803b8",
     "ar": "d87bf013da744564cb81ded97843d8df6d7704f14ed80bfea4004bddceeed7f9",
@@ -377,12 +380,120 @@ class RollbackOwnership(unittest.TestCase):
         obj.proposed = b"candidate-route"; obj.rollback_config = b"old-port-new-union"
         obj.original_dump = b"original-dump"; obj.new_dump = b"candidate-dump"
         obj.ids = [{"name": "retained-frontend", "pid": 123}]
-        obj.current = {"pm2_env": {"env": public_environment()}}
+        obj.current = {"pm2_env": {"env": dict(public_environment(), unique_id=OLD_PM2_ID)}}
         obj.public = public_environment()
         obj.guard = Mock(return_value=[])
         obj.command = Mock(return_value=b"")
         obj.verify_public = Mock()
         return obj, record, dump, writes
+
+    def test_new_pm2_unique_id_is_not_inherited_or_compared_as_application_configuration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            obj, record, _, _ = self.fixture(directory)
+            obj.current["pm2_env"]["env"].update({
+                "unique_id": OLD_PM2_ID, "ACT_EXISTING_SETTING": "preserve-me",
+                "PRIVATE_EXISTING_SETTING": "synthetic-private-value", "PORT": "3005",
+            })
+            retained = json.loads(json.dumps(obj.current))
+            with patch.object(m, "RECORD", record):
+                config = obj.candidate_config()
+                self.assertNotIn("unique_id", config["env"])
+                self.assertEqual(config["env"]["ACT_EXISTING_SETTING"], "preserve-me")
+                self.assertEqual(config["env"]["PRIVATE_EXISTING_SETTING"], "synthetic-private-value")
+                self.assertEqual(config["env"]["PORT"], str(m.PORT))
+                self.assertEqual({key: config["env"][key] for key in obj.public}, obj.public)
+                candidate = {"name": m.NAME, "pid": 456, "pm2_env": {
+                    "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
+                    "exec_interpreter": config["interpreter"], "args": config["args"],
+                    "env": dict(config["env"], unique_id=NEW_PM2_ID), "status": "online",
+                }}
+                obj.verify_candidate_row(candidate)
+                obj.verify_candidate_row(candidate, healthy=False)
+            self.assertEqual(obj.current, retained)
+
+    def test_unique_id_exception_does_not_allow_application_or_ownership_environment_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            obj, record, _, _ = self.fixture(directory)
+            obj.current["pm2_env"]["env"].update({
+                "unique_id": OLD_PM2_ID, "ACT_EXISTING_SETTING": "preserve-me",
+                "PRIVATE_EXISTING_SETTING": "synthetic-private-value", "PORT": "3005",
+            })
+            with patch.object(m, "RECORD", record):
+                config = obj.candidate_config()
+                candidate = {"name": m.NAME, "pid": 456, "pm2_env": {
+                    "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
+                    "exec_interpreter": config["interpreter"], "args": config["args"],
+                    "env": dict(config["env"], unique_id=NEW_PM2_ID), "status": "online",
+                }}
+                # This exact baseline previously failed only because PM2 replaced unique_id.
+                obj.verify_candidate_row(candidate)
+                for key in config["env"]:
+                    with self.subTest(environment_name=key):
+                        changed = json.loads(json.dumps(candidate))
+                        changed["pm2_env"]["env"][key] = "unexpected-value"
+                        with self.assertRaises(m.Stop):
+                            obj.verify_candidate_row(changed)
+
+    def test_candidate_requires_a_new_canonical_pm2_uuid(self):
+        invalid = (None, "", 123, {}, "not-a-uuid", OLD_PM2_ID,
+                   "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA",
+                   "22222222-2222-1222-8222-222222222222",
+                   "22222222-2222-4222-7222-222222222222")
+        for value in invalid:
+            for healthy in (True, False):
+                with self.subTest(value=value, healthy=healthy), tempfile.TemporaryDirectory() as directory:
+                    obj, record, _, _ = self.fixture(directory)
+                    with patch.object(m, "RECORD", record):
+                        config = obj.candidate_config()
+                        candidate = {"name": m.NAME, "pid": 456, "pm2_env": {
+                            "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
+                            "exec_interpreter": config["interpreter"], "args": config["args"],
+                            "env": dict(config["env"]), "status": "online",
+                        }}
+                        if value is not None:
+                            candidate["pm2_env"]["env"]["unique_id"] = value
+                        with self.assertRaises(m.Stop):
+                            obj.verify_candidate_row(candidate, healthy=healthy)
+                        self.assertFalse(hasattr(obj, "candidate_unique_id"))
+
+    def test_first_accepted_candidate_id_is_pinned_for_launch_and_recovery(self):
+        with tempfile.TemporaryDirectory() as directory:
+            obj, record, _, _ = self.fixture(directory)
+            with patch.object(m, "RECORD", record):
+                config = obj.candidate_config()
+                candidate = {"name": m.NAME, "pid": 456, "pm2_env": {
+                    "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
+                    "exec_interpreter": config["interpreter"], "args": config["args"],
+                    "env": dict(config["env"], unique_id=NEW_PM2_ID), "status": "online",
+                }}
+                obj.verify_candidate_row(candidate)
+                self.assertEqual(obj.candidate_unique_id, NEW_PM2_ID)
+                obj.verify_candidate_row(candidate)
+                changed = json.loads(json.dumps(candidate))
+                changed["pm2_env"]["env"]["unique_id"] = OTHER_PM2_ID
+                for healthy in (True, False):
+                    with self.subTest(healthy=healthy), self.assertRaises(m.Stop):
+                        obj.verify_candidate_row(changed, healthy=healthy)
+                self.assertEqual(obj.candidate_unique_id, NEW_PM2_ID)
+
+    def test_refused_configuration_does_not_pin_an_unaccepted_candidate_id(self):
+        with tempfile.TemporaryDirectory() as directory:
+            obj, record, _, _ = self.fixture(directory)
+            with patch.object(m, "RECORD", record):
+                config = obj.candidate_config()
+                refused = {"name": m.NAME, "pid": 456, "pm2_env": {
+                    "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
+                    "exec_interpreter": config["interpreter"], "args": config["args"],
+                    "env": dict(config["env"], unique_id=OTHER_PM2_ID), "status": "online",
+                }}
+                refused["pm2_env"]["env"]["ACT_TRACKING_ACTIVATION"] = "/unrelated/record"
+                with self.assertRaises(m.Stop):
+                    obj.verify_candidate_row(refused)
+                self.assertFalse(hasattr(obj, "candidate_unique_id"))
+                accepted = json.loads(json.dumps(refused))
+                accepted["pm2_env"]["env"] = dict(config["env"], unique_id=NEW_PM2_ID)
+                obj.verify_candidate_row(accepted)
+                self.assertEqual(obj.candidate_unique_id, NEW_PM2_ID)
 
     def test_restores_only_owned_route_and_dump_retaining_asset_union(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -454,7 +565,7 @@ class RollbackOwnership(unittest.TestCase):
                 env = {
                     "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
                     "exec_interpreter": config["interpreter"], "args": config["args"],
-                    "env": dict(config["env"]), "status": "errored",
+                    "env": dict(config["env"], unique_id=NEW_PM2_ID), "status": "errored",
                 }
                 crashed = {"name": m.NAME, "pid": 0, "pm2_env": env}
                 with self.assertRaises(m.Stop):
@@ -485,7 +596,8 @@ class RollbackOwnership(unittest.TestCase):
             obj.prior.tree = lambda path: obj.assets_before
             obj.prior.identity = lambda row: {"name": row["name"], "pid": row["pid"]}
             obj.prior.one = lambda rows, name: next(row for row in rows if row["name"] == name)
-            old = {"name": "retained-frontend", "pid": 123, "pm2_env": {"env": public_environment()}}
+            old = {"name": "retained-frontend", "pid": 123, "pm2_env": {
+                "env": dict(public_environment(), unique_id=OLD_PM2_ID)}}
             obj.current = old
             obj.public_environment = Mock(return_value=obj.public)
             # Exercise the real guard instead of the fixture's boundary stub.
@@ -496,7 +608,7 @@ class RollbackOwnership(unittest.TestCase):
                 crashed = {"name": m.NAME, "pid": 0, "pm2_env": {
                     "pm_cwd": config["cwd"], "pm_exec_path": config["script"],
                     "exec_interpreter": config["interpreter"], "args": config["args"],
-                    "env": config["env"], "status": "errored",
+                    "env": dict(config["env"], unique_id=NEW_PM2_ID), "status": "errored",
                 }}
                 obj.rows = Mock(return_value=[old, crashed])
                 self.assertEqual(obj.guard(obj.proposed, candidate=None), [old, crashed])
