@@ -1,0 +1,152 @@
+{
+  "recorded_date": "2026-11-23",
+  "purpose": "Approved ACT Admin header shortcut: release readiness and owner-confirmed frontend baseline",
+  "repository": "mahmood1990farhat-hub/act-website-automation",
+  "pull_request": 119,
+  "application_patch_sha": "4c69a03b2e38636ed3ea54f6d3f1a8bf0ab1e0e7",
+  "base_frontend_branch": "draft/act-tracking-viewer-frontend-20261106",
+  "base_frontend_head": "3340e49bd3692b804475afadc838ac11a153c457",
+  "approval": {
+    "received": true,
+    "date": "2026-11-23",
+    "owner_response": "yes",
+    "prompt": "Do you approve publishing this header-only change?",
+    "scope": "Two approved Admin navigation entries and the necessary scoped frontend build/activation.",
+    "exclusions": [
+      "PR merge",
+      "backend release or restart",
+      "credential changes",
+      "payment attempts",
+      "mobile app release",
+      "automation activation"
+    ]
+  },
+  "application_change": {
+    "files": [
+      "act_website-main/src/dictionaries/en/home.json",
+      "act_website-main/src/dictionaries/ar/home.json"
+    ],
+    "added_lines": 10,
+    "entries": {
+      "en": {
+        "name": "Admin",
+        "url": "/en/admin",
+        "protected": false
+      },
+      "ar": {
+        "name": "الإدارة",
+        "url": "/ar/admin",
+        "protected": false
+      }
+    },
+    "existing_shared_desktop_and_mobile_header": true,
+    "existing_admin_authentication_and_guards_preserved": true
+  },
+  "owner_supplied_readonly_snapshot": {
+    "frontend_port": "3005",
+    "active_release": "/var/www/atg/front-end/releases/stripe-pk-02e59f9-20261117",
+    "build_id": "nhzNjHZ3-jrJtY8-rHjVp",
+    "nginx_sha256": "6821267a448cb32532eb04b1fcbe9bb1a202325d8f583566abf8b3a2ed72eb10",
+    "menu_sha256": {
+      "en": "2f0b301b1f607e162321c6f4d911f6f503da130286728b465fa453562ea803b8",
+      "ar": "d87bf013da744564cb81ded97843d8df6d7704f14ed80bfea4004bddceeed7f9"
+    },
+    "matches_reviewed_preimage": true,
+    "independent_host_execution_by_this_session": false
+  },
+  "menu_after_sha256": {
+    "en": "a6d114637a04bd19c6c5e040ec0aa8a39d14e96754a028fb697cb0e7d04898b5",
+    "ar": "74d793c730338dae888c65fe3dcf5323f8249e661ea5fc3c05fa494898ec64f8"
+  },
+  "local_application_verification": {
+    "exact_original_dictionary_preservation": "passed",
+    "git_diff_check": "passed",
+    "next_route_type_generation": "passed",
+    "typescript_no_emit": "passed",
+    "header_render_with_mocked_next_navigation": "passed: two correct Admin anchors per locale, before Login",
+    "production_build": "passed",
+    "production_build_environment": "Existing dependency lock; synthetic public API, Stripe test and Maps values. No real provider requests or credentials.",
+    "built_server_http": {
+      "/en/about-us": {
+        "status": 200,
+        "admin_anchors": 2,
+        "build_id_matches": true,
+        "referenced_static_assets": 22
+      },
+      "/ar/about-us": {
+        "status": 200,
+        "admin_anchors": 2,
+        "build_id_matches": true,
+        "referenced_static_assets": 22
+      },
+      "/en/admin": {
+        "status": 200,
+        "password_inputs": 1,
+        "build_id_matches": true,
+        "referenced_static_assets": 28
+      },
+      "/ar/admin": {
+        "status": 200,
+        "password_inputs": 1,
+        "build_id_matches": true,
+        "referenced_static_assets": 28
+      }
+    },
+    "visual_browser_check": "not completed: local Chromium socket restriction",
+    "real_admin_login": "not performed",
+    "production_click_check": "pending deployment",
+    "existing_build_warning": "Next middleware-to-proxy deprecation"
+  },
+  "release_helper": {
+    "path": "ops/header/admin_header_release.py",
+    "sha256": "e48d7b22c86db69ceba167914f6d19d0405a81d30c846520ca93376e107bf01a",
+    "uses_pinned_pure_utilities_from": "ops/first-journey/passenger_frontend_release.py",
+    "utility_sha256": "2c880f9e116dad51b5acf973f49b992dbe8c8af4fca1883bd8f718b440151254",
+    "does_not_invoke_historic_release_state_machine": true,
+    "source_basis": "Copy of the active frontend, preserving its current files; only the two hash-pinned menu entries are patched. This is not represented as a pristine checkout of the patch commit.",
+    "configuration": "Recover current effective public values from active PM2 plus Next environment resolution; match the current compiled Stripe test key and preserve runtime application environment. No stale receipt substitution.",
+    "candidate_port": 3006,
+    "preservation": [
+      "Existing frontend processes and saved definitions",
+      "Active source and dependency lock",
+      "Current backend release, service identity and configuration",
+      "Existing and new static assets during rollback"
+    ],
+    "activation_checks": [
+      "Existing deployment lock",
+      "Exact owner-confirmed routing/menu/build preimages",
+      "Both proposed and rollback Nginx configurations",
+      "Candidate English and Arabic menus and admin sign-in forms",
+      "Origin and public HTTP build/asset/menu checks",
+      "Retained process, backend, configuration and source drift guards"
+    ],
+    "rollback": "Restore only this attempt's owned routing and saved PM2 change; retain combined static assets; remove only the identified candidate; refuse unexpected concurrent changes.",
+    "private_records": true,
+    "repeat_deploy_refused": true,
+    "audit": "Independent read-only code review completed; no remaining blocker found."
+  },
+  "release_helper_tests": {
+    "path": "ops/header/test_admin_header_release.py",
+    "sha256": "bc40dc7d0145313f751a94be245743f8870fd1a64afcfa6297bde9222e7f64c5",
+    "command": "python3 -B -m unittest discover -s ops/header -p test_admin_header_release.py -q",
+    "passed": 32,
+    "failed": 0,
+    "scope": "Offline temporary fixtures and mocked host command boundaries.",
+    "regressions": [
+      "Recovery accepts an owned failed candidate without relaxing the launch health gate",
+      "Recovery journal stages take precedence over an earlier success marker"
+    ],
+    "python_syntax": "passed",
+    "whitespace": "passed",
+    "actual_pm2_nginx_host_execution": "not performed"
+  },
+  "status": {
+    "application_committed": true,
+    "pr_open": true,
+    "pr_draft": true,
+    "pr_merged": false,
+    "frontend_deployment_approved": true,
+    "frontend_deployment_executed": false,
+    "production_result": "Awaiting owner execution and resulting release receipt."
+  }
+}

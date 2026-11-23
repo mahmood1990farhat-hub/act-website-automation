@@ -1,0 +1,66 @@
+{
+  "recorded_date": "2026-11-23",
+  "repository": "mahmood1990farhat-hub/act-website-automation",
+  "pull_request": 119,
+  "application_patch_sha": "4c69a03b2e38636ed3ea54f6d3f1a8bf0ab1e0e7",
+  "executed_completion_commit": "a069b02d0b3d64e106a3bc3bffada2ce98c3bf71",
+  "scope": "Owner-approved English and Arabic Admin shortcuts in the existing desktop header and mobile menu.",
+  "owner_execution": {
+    "source": "Owner-provided terminal output in the ACT Website & Mobile Apps development conversation.",
+    "helper_checksum_checks": {
+      "admin_header_release.py": "OK",
+      "finish_admin_header_candidate.py": "OK"
+    },
+    "helper_sha256": {
+      "admin_header_release.py": "461583a79fa8ab3b692ea394e3aeab225a0a167d969df1ceb769ab151f425f10",
+      "finish_admin_header_candidate.py": "cd2fe330ad519d4c0efbf55b3099389c8e33079a873aeccbfb6c8ac462dd0938"
+    },
+    "terminal_result": [
+      "ADMIN_HEADER_DEPLOYED; ENGLISH_AND_ARABIC_VERIFIED; STRIPE_TEST_CONFIGURATION_PRESERVED",
+      "BACKEND_UNCHANGED; PREVIOUS_FRONTEND_RETAINED"
+    ],
+    "assistant_direct_vps_execution": false
+  },
+  "successful_script_path": {
+    "existing_candidate_reused": true,
+    "another_build_or_process_start": false,
+    "candidate_saved_and_nginx_activated": true,
+    "english_and_arabic_public_pages": "Origin and public HTTPS checks passed with expected Admin links and candidate build identity.",
+    "admin_sign_in_pages": "Both locale routes returned the existing sign-in form with a password field.",
+    "assets": "Referenced asset sets and local tree integrity checked; one JavaScript and one CSS response per locale byte-hash checked against candidate files.",
+    "stripe": "Existing test publishable frontend configuration preserved and matched against compiled assets.",
+    "backend": "Service identity, release pointer, environment-file hash and release metadata hash preserved against the baseline; no backend restart.",
+    "previous_frontend": "Retained with source, assets and existing process definitions preserved."
+  },
+  "independent_live_browser_check": {
+    "date": "2026-11-23",
+    "entry_url": "https://airportandcitytransfer.com/en",
+    "observed_header": "Admin appears after download app and before Login.",
+    "action": "Clicked the visible Admin header link.",
+    "resulting_url": "https://airportandcitytransfer.com/en/admin",
+    "observed_result": [
+      "Admin Login",
+      "Please enter your admin credentials to access the dashboard",
+      "Email and Password fields",
+      "Login as Admin button"
+    ],
+    "credentials_entered": false,
+    "administrator_authentication_tested": false,
+    "arabic_browser_click_tested": false,
+    "mobile_browser_viewport_tested": false
+  },
+  "limits": [
+    "The owner receipt is not a fresh independent SSH inspection.",
+    "No Stripe payment or full booking-to-completed-journey acceptance was performed in this header task.",
+    "The helper's Stripe checks concern the preserved frontend test configuration, not a new backend secret-key or provider-account inspection."
+  ],
+  "status": {
+    "admin_link_live": true,
+    "english_live_click_to_sign_in_passed": true,
+    "pr_open": true,
+    "pr_draft": true,
+    "pr_merged": false,
+    "original_attempt_and_private_completion_records_retained": true,
+    "repeat_deployment_needed": false
+  }
+}

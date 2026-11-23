@@ -1,0 +1,98 @@
+{
+  "recorded_date": "2026-11-23",
+  "repository": "mahmood1990farhat-hub/act-website-automation",
+  "pull_request": 119,
+  "application_patch_sha": "4c69a03b2e38636ed3ea54f6d3f1a8bf0ab1e0e7",
+  "inspected_branch_head_before_correction": "996bdc7676e14860b80fca7c395c4421d6e8183b",
+  "approval": "The owner's existing 23 November approval to publish the two Admin header entries remains the scope. No PR merge, backend change, key change or automation activation is included.",
+  "owner_execution": {
+    "executed_release_commit": "71d5633162c881a27d313d20354ae9f5c3ef09d7",
+    "executed_helper_sha256": "e48d7b22c86db69ceba167914f6d19d0405a81d30c846520ca93376e107bf01a",
+    "checksum_check": "passed",
+    "terminal_result": "STOPPED: RECOVERY_INCOMPLETE; PRESERVE_PRIVATE_RECORD; DO_NOT_REPEAT_DEPLOY",
+    "completed_journal_stages": [
+      "PREPARATION_STARTED",
+      "CANDIDATE_BUILT_AND_CONFIGS_VALIDATED",
+      "CANDIDATE_START_ATTEMPTED"
+    ],
+    "nginx_matches": "before",
+    "saved_process_configuration_unchanged": true,
+    "http": {
+      "3005": 200,
+      "3006": 200
+    },
+    "routing_or_persistence_mutation_reached": false
+  },
+  "owner_focused_diagnostic": {
+    "script_commit": "996bdc7676e14860b80fca7c395c4421d6e8183b",
+    "script_sha256": "2e53d11de9fb016c1c9db35612c4b91d4cbb49b2a82b7d4382ba828d50dc642c",
+    "candidate_check": "CANDIDATE_CONFIGURATION_MISMATCH",
+    "candidate_launch_differences": [],
+    "candidate_environment_differences": {
+      "unique_id": {
+        "expected_type": "str",
+        "actual_type": "str"
+      }
+    },
+    "retained_launch_differences": {
+      "act": [],
+      "act-preview-892317f": [],
+      "act-tracking-3a82c16": [],
+      "act-passenger-02e59f9": [],
+      "act-stripe-pk-02e59f9": []
+    },
+    "active_public_configuration_unchanged": true,
+    "active_source_unchanged": true,
+    "backend_unchanged": true,
+    "pm2_start_reported_failure": false
+  },
+  "confirmed_defect": {
+    "description": "The release script copied the retained PM2 process environment, including its unique_id, then required the new process to preserve that daemon-generated identity. PM2 generates a distinct UUID when preparing a process. The same mistaken check blocked both activation validation and recovery.",
+    "primary_sources": [
+      "https://github.com/Unitech/pm2/blob/master/lib/God.js",
+      "https://github.com/Unitech/pm2/blob/master/lib/Utility.js"
+    ],
+    "source_review": "PM2 God.prepare assigns env.env.unique_id using Utility.generateUUID; the generator emits a lowercase UUIDv4. Both source files were inspected through the GitHub connector on 23 November 2026.",
+    "scope": "Deployment helper only. The approved website application files are unchanged."
+  },
+  "correction": {
+    "helper": "ops/header/admin_header_release.py",
+    "helper_sha256": "461583a79fa8ab3b692ea394e3aeab225a0a167d969df1ceb769ab151f425f10",
+    "behavior": "Omit only inherited unique_id from candidate configuration. Require a distinct canonical UUIDv4 on the actual candidate, pin it only after complete configuration validation, and reject later identity drift. Preserve exact checks for every other expected runtime setting and ownership/launch field.",
+    "original_helper_regression_tests": {
+      "passed": 37,
+      "failed": 0
+    },
+    "tests_added": [
+      "New process UUID accepted without mutating retained configuration",
+      "All other runtime and ownership setting changes refused",
+      "Missing, malformed or reused UUID refused",
+      "Later UUID drift refused in activation and recovery checks",
+      "Rejected configuration cannot establish the candidate identity"
+    ]
+  },
+  "continuation": {
+    "helper": "ops/header/finish_admin_header_candidate.py",
+    "scope": "Validate and finish with the existing candidate on port3006. No installation, rebuild, process start/removal or service restart.",
+    "original_record": "/root/act-release-backup/admin-header-4c69a03-20261123",
+    "completion_record": "/root/act-release-backup/admin-header-4c69a03-20261123-finish",
+    "preservation": "Original attempt remains immutable. Current source, candidate source, build IDs, compiled test key, public settings, backend identity and routing are matched against the recorded plan. Retained launch definitions are matched against the original saved PM2 dump.",
+    "runtime_baseline": "Original live PID/socket/master-config baselines were not persisted by the first helper. The continuation explicitly records a fresh guarded runtime snapshot after validating all retained plan invariants; it does not invent historical identities.",
+    "verification": "Bilingual desktop/mobile Admin anchors, existing admin sign-in forms, build IDs and served assets before persistence/switch; origin and public checks afterwards.",
+    "rollback": "Restore only this continuation's owned routing/saved configuration; preserve both already-running frontends and the static asset union.",
+    "deployment_executed": false,
+    "helper_sha256": "cd2fe330ad519d4c0efbf55b3099389c8e33079a873aeccbfb6c8ac462dd0938",
+    "validation": "53 focused offline tests passed: 37 corrected release-helper tests and 16 continuation tests. Independent read-only review found no remaining blocker.",
+    "test_command": "python3 -B -m unittest ops/header/test_admin_header_release.py ops/header/test_finish_admin_header_candidate.py -q",
+    "test_scope": "Temporary artifacts with real pinned atomic-file and manifest utilities; host process/listener/HTTP/Nginx boundaries mocked. Tests cover original-record preservation, exact candidate reuse, source/configuration drift, runtime environment and file metadata preservation, switch and rollback retaining the candidate, safe failure codes, status precedence and lock replacement.",
+    "production_result": "Not yet executed. Local tests do not claim actual Nginx/PM2 activation or a live browser pass."
+  },
+  "status": {
+    "application_unchanged": true,
+    "pr_open": true,
+    "pr_draft": true,
+    "pr_merged": false,
+    "admin_link_confirmed_live": false,
+    "next_action": "Owner executes the pinned completion command after final local verification; then inspect resulting receipt and live click behavior."
+  }
+}
