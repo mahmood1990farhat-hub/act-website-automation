@@ -74,6 +74,11 @@ class Trip(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Actual server-observed lifecycle transitions. Historical journeys remain
+    # null; booking dates and ledger creation times are not substitutes.
+    started_at = models.DateTimeField(null=True, blank=True, editable=False)
+    completed_at = models.DateTimeField(null=True, blank=True, editable=False)
+
     airport = models.ForeignKey(
         Airport, 
         on_delete=models.SET_NULL,
@@ -225,6 +230,7 @@ class StopPoint(models.Model):
 
     def __str__(self):
         return f"StopPoint for Trip #{self.trip_id} at {self.point_lat},{self.point_lng}"
+
 
 
 
