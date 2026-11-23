@@ -1,0 +1,64 @@
+{
+  "recorded_date": "2026-11-23",
+  "evidence_source": "Owner-supplied Hostinger terminal output from execution of the checksum-pinned rollout helper",
+  "direct_assistant_host_access": false,
+  "approved_application_commit": "370dc89af105788ef598d0475c1ace20fd05826f",
+  "executed_helper_commit": "a049f340e95640c3a148a76d4539acf3492ca1a5",
+  "executed_helper_path": "ops/journey_report/deploy_completed_report.py",
+  "helper_sha256": "f78f138ec818c5c67988fe4956df137330519c6e867d9d04a2b9d13a78332b82",
+  "helper_checksum_result": "OK",
+  "approval_record": "https://github.com/mahmood1990farhat-hub/act-website-automation/pull/120#issuecomment-7101672916",
+  "private_host_record": "/root/act-release-backup/completed-report-370dc89",
+  "observed_markers": [
+    "EXACT_BACKEND_STAGED_RESOURCES_PRESERVED",
+    "PRIVATE_DATABASE_BACKUP_VERIFIED",
+    "TRIPS_0009_APPLIED_LEGACY_DATA_PRESERVED",
+    "COMPLETED_REPORT_BACKEND_DEPLOYED_VERIFIED",
+    "BACKEND_SHA=370dc89af105788ef598d0475c1ace20fd05826f",
+    "TRIP37_COMPLETED_PAID_ASSIGNED_LEDGERS_1_1_TIMES_NOT_RECORDED"
+  ],
+  "result": "Owner-evidenced successful approved backend deployment and migration",
+  "migration": "trips.0009_journey_timestamps",
+  "verification_scope": "The pinned helper's success path includes source and resource validation, verified private backup, migration-before-activation, actual running-process source, protected HTTP refusal, read-only schema/ledger checks and legacy report serialization.",
+  "trip37": {
+    "status": "completed",
+    "paid": true,
+    "driver_assigned": true,
+    "driver_earning_records": 1,
+    "company_revenue_records": 1,
+    "historical_started_at": null,
+    "historical_completed_at": null,
+    "historical_duration": null
+  },
+  "preserved_by_helper": [
+    "Previous backend release",
+    "Retained virtual environment",
+    "Shared resources",
+    "Existing Firebase credential arrangement",
+    "Current frontend and admin-header update",
+    "PM2, Nginx and worker configuration"
+  ],
+  "runtime_action": "Only act.service restarted for backend activation",
+  "database_restore_performed": false,
+  "live_trip_payment_or_notification_actions_performed_by_helper": false,
+  "application_pr": {
+    "number": 120,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "deployed": true
+  },
+  "operational_pr": {
+    "number": 121,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "executed_helper_commit": "a049f340e95640c3a148a76d4539acf3492ca1a5"
+  },
+  "driver_v10": {
+    "artifact": "ACT-Driver-v10-Journey-Report-SIGNED.apk",
+    "status": "Already built, signed and verified; installation and phone report acceptance not yet reported"
+  },
+  "next_step": "Owner update-installs the retained v10 APK, opens Trip37's journey report, then accepts a fresh controlled journey for actual timestamps",
+  "private_backups_logs_credentials_or_trip_addresses_included": false
+}
