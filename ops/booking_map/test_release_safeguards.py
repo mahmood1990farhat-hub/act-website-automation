@@ -49,7 +49,7 @@ class BookingMapReleaseTests(unittest.TestCase):
         read = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute) and node.func.attr == 'rsplit']
         self.assertTrue(any(node.args and isinstance(node.args[0], ast.Constant)
-                            and node.args[0].value == b'\\n' for node in read))
+                            and node.args[0].value == b'\n' for node in read))
         # Python should interpret one escaped newline in source, not literal backslash+n.
         self.assertIn("result.rsplit(b'\\n', 1)", FRONT)
         self.assertNotIn("result.rsplit(b'\\\\n', 1)", FRONT)
