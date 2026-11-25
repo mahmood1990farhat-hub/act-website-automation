@@ -1,10 +1,12 @@
 from django.urls import path
 from .views import * 
 from .views.initiate_payment import InitiateGuestPaymentView
+from .views.route_preview import RoutePreviewView
 from .views.download_confirmation import download_booking_confirmation
 
 
 urlpatterns = [
+    path('route-preview/', RoutePreviewView.as_view(), name='trip-route-preview'),
     path('booking-confirmation/<uuid:token>/', download_booking_confirmation, name='download-booking-confirmation'),
     path('calculate-trip-cost/' , CalculateTripCostView.as_view()), 
     path('initiate-payment/', InitiatePaymentView.as_view()),

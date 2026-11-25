@@ -74,6 +74,11 @@ class Trip(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Actual server-observed lifecycle transitions. Historical journeys remain
+    # null; booking dates and ledger creation times are not substitutes.
+    started_at = models.DateTimeField(null=True, blank=True, editable=False)
+    completed_at = models.DateTimeField(null=True, blank=True, editable=False)
+
     airport = models.ForeignKey(
         Airport, 
         on_delete=models.SET_NULL,
@@ -155,6 +160,16 @@ class Trip(models.Model):
     cancellation_reason = models.TextField(blank=True, null=True, help_text="Reason for cancellation")
     cancelled_at = models.DateTimeField(null=True, blank=True, help_text="When the trip was cancelled")
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        # The guard shares the driver lock with suspension, cessation and vehicle
+        # replacement, then re-reads eligibility before a new assignment commits.
+        from django.db import router
+        from apps.drivers.operational_safety import guard_trip_save
+        database = using or router.db_for_write(type(self), instance=self)
+        with guard_trip_save(self, update_fields=update_fields, using=database):
+            return super().save(force_insert=force_insert, force_update=force_update,
+                                using=database, update_fields=update_fields)
+
     def cancel_by_driver(self, driver, cancellation_reason=None):
         """
         Reusable method to cancel a trip by a driver (or admin on behalf of driver).
@@ -215,6 +230,7 @@ class StopPoint(models.Model):
 
     def __str__(self):
         return f"StopPoint for Trip #{self.trip_id} at {self.point_lat},{self.point_lng}"
+
 
 
 

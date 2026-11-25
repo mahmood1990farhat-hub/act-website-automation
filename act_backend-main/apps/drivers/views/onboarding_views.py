@@ -243,7 +243,7 @@ class AdminOnboardingRequestsListView(EMADBaseView):
         ordering = request.GET.get('ordering', '-created_at')
         
         # Build queryset
-        queryset = DriverOnboardingRequest.objects.all()
+        queryset = DriverOnboardingRequest.objects.select_related('unified_application')
         
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -444,6 +444,11 @@ class AdminOnboardingRequestActionView(EMADBaseView):
                 'error': _('Onboarding request not found.')
             }, status=status.HTTP_404_NOT_FOUND)
         
+        if hasattr(onboarding_request, 'unified_application'):
+            return Response({
+                'error': 'Use the unified admin verification action for this application.'
+            }, status=status.HTTP_409_CONFLICT)
+
         if onboarding_request.status != 'pending':
             return Response({
                 'error': _('This request has already been processed.')

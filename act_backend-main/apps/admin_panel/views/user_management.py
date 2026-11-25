@@ -14,6 +14,7 @@ from utils.common.error_handlers import (
     create_not_found_response,
     get_bilingual_error_message
 )
+from apps.drivers.operational_safety import handle_unified_account_action
 import logging
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,12 @@ class ActivateDeactivateUserView(EMADBaseView):
                 locale
             )
             return create_error_response(message, locale, status_code=status.HTTP_400_BAD_REQUEST)
+
+        # Unified approved accounts share assignment/lifecycle row locking. The
+        # legacy behaviour below remains unchanged for every other account.
+        protected = handle_unified_account_action(user.id, action, request.user)
+        if protected is not None:
+            return protected
         
         # Perform action
         if action == 'activate':

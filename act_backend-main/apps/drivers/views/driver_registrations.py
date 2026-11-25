@@ -33,8 +33,16 @@ class CompleteNormalDriverInfoView(EMADBaseView):
     def handle_post(self, request):
         activate(get_locale(request=request))
         user = request.user
+        # The legacy completion endpoint must not create a second driver or
+        # copy unified applicants' private identity documents to public media.
+        onboarding = getattr(user, "driver_onboarding_request", None)
+        if onboarding is not None and hasattr(onboarding, "unified_application"):
+            return Response(
+                {"detail": "Use your unified ACT application status and correction process."},
+                status=status.HTTP_409_CONFLICT,
+            )
         user.is_active = True
-        
+
         if hasattr(user, 'base_driver'):
             raise ValidationError({"detail": "This user already has a base driver account."})
         nested_data = self.prepare_data(request.data)

@@ -18,7 +18,7 @@ from ..serializers.user_update import (
     AdminUpdateDriverSerializer,
     AdminUpdatePassengerSerializer
 )
-from apps.drivers.models import NormalDriver
+from apps.drivers.models import NormalDriver, UnifiedDriverApplication
 from apps.passengers.models import Passenger
 import logging
 
@@ -61,14 +61,56 @@ class UpdateDriverInfoView(EMADBaseView):
             )
             return create_not_found_response(message, locale)
         
+        # Unified driver vehicle changes must use the verified replacement
+        # path so historical keeper/vehicle periods cannot be overwritten.
+        # Legacy drivers and passenger/driver identity edits are unaffected.
+        unified_approved = UnifiedDriverApplication.objects.filter(
+            onboarding_request__user_id=driver.driver.user_id,
+            driver_available_from__isnull=False,
+        ).exists()
+        nested_vehicle = request.data.get('vehicle_data')
+        vehicle_requested = bool(
+            nested_vehicle not in (None, "", {}, "{}", "null")
+            or any(key in request.data for key in (
+                'vehicle_make', 'vehicle_model', 'vehicle_color',
+            ))
+        )
+        if unified_approved and vehicle_requested:
+            return Response({
+                "detail": "Verified unified drivers must replace vehicles through the protected ACT review."
+            }, status=status.HTTP_409_CONFLICT)
+
         # Prepare data for serializer
         data = {
             'user_data': request.data.get('user_data', {}),
             'vehicle_data': request.data.get('vehicle_data', {}),
             'bank_details_data': request.data.get('bank_details_data', {}),
         }
-        
+        # Existing driver edit endpoint also accepts flat multipart fields, so
+        # the admin can securely upload a photo and update the same driver's
+        # passenger-facing identity without repeating driver onboarding.
+        vehicle_fields = {
+            'vehicle_make': 'make',
+            'vehicle_model': 'model',
+            'vehicle_color': 'color',
+        }
+        if any(key in request.data for key in vehicle_fields):
+            vehicle_data = data['vehicle_data']
+            if not isinstance(vehicle_data, dict):
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({'vehicle_data': 'Expected an object.'})
+            vehicle_data = dict(vehicle_data)
+            for posted, model_field in vehicle_fields.items():
+                if posted in request.data:
+                    vehicle_data[model_field] = request.data[posted]
+            data['vehicle_data'] = vehicle_data
+
+        if 'pco_licence_number' in request.data:
+            data['pco_licence_number'] = request.data['pco_licence_number']
+
         # Handle file uploads
+        if 'driver_photo' in request.FILES:
+            data['driver_photo'] = request.FILES['driver_photo']
         if 'pco' in request.FILES:
             data['pco'] = request.FILES['pco']
         if 'dbs' in request.FILES:
