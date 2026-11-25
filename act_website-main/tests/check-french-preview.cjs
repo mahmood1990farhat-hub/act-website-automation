@@ -40,6 +40,8 @@ async function main(){
    if(url.origin!==origin)return route.abort();
    if(url.pathname==='/api/places')return route.fulfill({json:{status:'OK',predictions:[{description:'Synthetic Heathrow Airport, London, UK',place_id:'synthetic-only',reference:'synthetic-only',matched_substrings:[]}]}});
    if(url.pathname==='/api/place-details')return route.fulfill({json:{result:{geometry:{location:{lat:51.5074,lng:-0.1278}}}}});
+   if(url.pathname==='/api/trips/route-preview/')return route.fulfill({json:{route_proof:'synthetic-route-proof',route_polyline:'_p~iF~ps|U_ulLnnqC'}});
+   if(url.pathname.endsWith('/api/trips/calculate-trip-cost/'))assert.equal(req.postDataJSON().route_proof,'synthetic-route-proof');
    if(url.pathname.endsWith('/api/trips/calculate-trip-cost/'))return route.fulfill({json:{distance_miles:20,distance_meters:32187,route_polyline:'',car_type:[{id:900001,name_en:'Preview vehicle — synthetic data',name_ar:'سيارة تجريبية',desc_en:'Synthetic vehicle for private preview only.',icon_url:'/images/logo.svg',max_passengers_count:4,base_trip_cost:80,transfer_fare:80,min_adjustment:0,airport_vat:0,airport_access_fee:0,regular_vat:0,total_cost:80,expected_trip_duration_minutes:50}]}});
    if(url.pathname.startsWith('/api/')||req.method()!=='GET')return route.abort();
    return route.continue();
@@ -117,10 +119,13 @@ async function main(){
   console.log('PASS',device,'French navigation, dates, simulated quote, passenger validation, flight, notes and review; stopped before booking');
   await context.close();
  }
- assert.equal(requests.length,2,'Only the two simulated quotes may be attempted');
- assert.ok(requests.every(r=>r.path.endsWith('/api/trips/calculate-trip-cost/')));
+ const previews=requests.filter(r=>r.method==='POST'&&r.path==='/api/trips/route-preview/');
+ const quotes=requests.filter(r=>r.method==='POST'&&r.path.endsWith('/api/trips/calculate-trip-cost/'));
+ assert.equal(previews.length,2,'One route preview per viewport');
+ assert.equal(quotes.length,2,'One explicit price request per viewport');
+ assert.equal(requests.length,previews.length+quotes.length,'No booking, payment or other write requests');
  assert.deepEqual(errors.filter(e=>e!=='Failed to load Stripe.js'),[]);
- const result={status:'PASS',airportPages:5,viewports:2,simulatedQuotes:requests.length,realBookings:0,payments:0,knownOfflineStripeErrors:errors.filter(e=>e==='Failed to load Stripe.js').length,limitations:['Network isolated; real Maps/Stripe/backend not accepted','Policy source claims still require review','Screenshots compare English and French in the same candidate build, not a new production capture']};
+ const result={status:'PASS',airportPages:5,viewports:2,simulatedRoutePreviews:previews.length,simulatedQuotes:quotes.length,realBookings:0,payments:0,knownOfflineStripeErrors:errors.filter(e=>e==='Failed to load Stripe.js').length,limitations:['Network isolated; real Maps/Stripe/backend not accepted','Policy source claims still require review','Screenshots compare English and French in the same candidate build, not a new production capture']};
  fs.writeFileSync(out+'/result.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 }
 main().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{if(browser)await browser.close();server.kill('SIGTERM');});
