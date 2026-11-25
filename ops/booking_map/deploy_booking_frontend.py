@@ -415,9 +415,9 @@ class Release:
             '/usr/bin/curl', '-sS', '--noproxy', '*', '--max-time', '8',
             '--unix-socket', '/run/act.sock', '-H', 'Host: airportandcitytransfer.com',
             '-H', 'Content-Type: application/json', '-H', 'X-Forwarded-Proto: https',
-            '--data-binary', '{}', '-w', '\\n%{http_code}',
+            '--data-binary', '{}', '-w', '\n%{http_code}',
             'http://localhost/api/trips/route-preview/'], timeout=12)
-        response, code = result.rsplit(b'\\n', 1)
+        response, code = result.rsplit(b'\n', 1)
         need(code == b'400' and json.loads(response).get('code') == 'invalid_route',
              'ROUTE_PREVIEW_API_NOT_READY')
         self.master_hash = digest(regular(MASTER))
