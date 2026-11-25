@@ -36,6 +36,27 @@ class BookingMapReleaseTests(unittest.TestCase):
                          '74d793c730338dae888c65fe3dcf5323f8249e661ea5fc3c05fa494898ec64f8')
         self.assertIn('DEPLOYED_ADMIN_LINK_MISSING', FRONT)
 
+    def test_new_source_files_are_added_instead_of_replaced(self):
+        import ast
+        program = ast.parse(FRONT)
+        declared = {}
+        for node in program.body:
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id in ('EXPECTED_ADDED', 'EXPECTED_CHANGED'):
+                        declared[target.id] = ast.literal_eval(node.value)
+        self.assertEqual(declared['EXPECTED_ADDED'], {
+            'src/components/_components/bookTaxi/route-preview.ts',
+            'tests/check-route-map-pins.cjs',
+            'tests/check-route-preview.cjs',
+        })
+        self.assertTrue(declared['EXPECTED_ADDED'].issubset(declared['EXPECTED_CHANGED']))
+        self.assertIn("'--name-status'", FRONT)
+        self.assertIn("and status in ('A', 'M')", FRONT)
+        self.assertIn("not target.exists() and not target.is_symlink()", FRONT)
+        self.assertIn("write_new(target, new, 0o644)", FRONT)
+        self.assertIn("os.chown(target, owner.st_uid, owner.st_gid)", FRONT)
+
     def test_frontend_retention(self):
         self.assertIn("PORT = 'act-booking-map-c1638d3', 3007", FRONT)
         self.assertIn("self.prior.atomic_file(self.site, self.proposed", FRONT)

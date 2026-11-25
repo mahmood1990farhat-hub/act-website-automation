@@ -64,6 +64,11 @@ SOURCE_SHA = PATCH_SHA
 REPO = FRONT / 'airportandcitytransfer_repo'
 SUBTREE = 'act_website-main'
 FRONT_TREE = '4c55b72da7637591a276b26ee953bba70dad819d'
+EXPECTED_ADDED = {
+    'src/components/_components/bookTaxi/route-preview.ts',
+    'tests/check-route-map-pins.cjs',
+    'tests/check-route-preview.cjs',
+}
 EXPECTED_CHANGED = {
     'src/components/_components/bookTaxi/LocationSelector.tsx',
     'src/components/_components/bookTaxi/MapView.tsx',
@@ -515,19 +520,39 @@ class Release:
         approved_tree = self.command('git-tree', ['git','-C',REPO,'rev-parse',
                                                   SOURCE_SHA+':'+SUBTREE]).decode().strip()
         need(approved_tree == FRONT_TREE, 'REVIEWED_FRONTEND_TREE_DIFFERS')
-        changed = self.command('git-diff', ['git','-C',REPO,'diff','--name-only',
+        changed = self.command('git-diff', ['git','-C',REPO,'diff','--name-status',
                                             SOURCE_BASE_SHA,SOURCE_SHA,'--',SUBTREE]).decode().splitlines()
-        need({name.removeprefix(SUBTREE+'/') for name in changed} == EXPECTED_CHANGED,
+        observed = {}
+        for entry in changed:
+            status, separator, path = entry.partition('\\t')
+            need(separator == '\\t' and status in ('A', 'M')
+                 and path.startswith(SUBTREE + '/'), 'FRONTEND_DIFF_STATUS_INVALID')
+            name = path.removeprefix(SUBTREE + '/')
+            need(name not in observed, 'FRONTEND_DIFF_DUPLICATE_FILE')
+            observed[name] = status
+        need(set(observed) == EXPECTED_CHANGED
+             and {name for name, status in observed.items() if status == 'A'} == EXPECTED_ADDED,
              'FRONTEND_CHANGED_FILES_EXCEED_SCOPE')
         updated = dict(self.source)
         for name in sorted(EXPECTED_CHANGED):
-            old = self.command('git-old', ['git','-C',REPO,'show',
-                               SOURCE_BASE_SHA+':'+SUBTREE+'/'+name])
             target = CANDIDATE/name
-            need(digest(old) == digest(regular(target)), 'DEPLOYED_FILE_NOT_GIT_BASELINE')
             new = self.command('git-new', ['git','-C',REPO,'show',
                                SOURCE_SHA+':'+SUBTREE+'/'+name])
-            self.prior.atomic_file(target, new, digest(old))
+            if name in EXPECTED_ADDED:
+                need(not target.exists() and not target.is_symlink(),
+                     'ADDED_FILE_ALREADY_EXISTS')
+                directory = target.parent
+                need(directory.is_dir() and not directory.is_symlink()
+                     and directory.resolve(strict=True).is_relative_to(CANDIDATE),
+                     'ADDED_FILE_PARENT_UNEXPECTED')
+                owner = directory.stat()
+                write_new(target, new, 0o644)
+                os.chown(target, owner.st_uid, owner.st_gid)
+            else:
+                old = self.command('git-old', ['git','-C',REPO,'show',
+                                   SOURCE_BASE_SHA+':'+SUBTREE+'/'+name])
+                need(digest(old) == digest(regular(target)), 'DEPLOYED_FILE_NOT_GIT_BASELINE')
+                self.prior.atomic_file(target, new, digest(old))
             updated[name] = digest(new)
         return updated
 
