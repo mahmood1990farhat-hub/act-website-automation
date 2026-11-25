@@ -1,4 +1,4 @@
-type QuoteRoutePoint = {
+export type QuoteRoutePoint = {
   type: "pickup" | "stop" | "dropoff";
   point: any | null;
 };
@@ -26,6 +26,44 @@ export const hasValidCoordinates = (point: any) => {
   );
 };
 
+type Coordinate = { lat: number; lng: number };
+
+export const isSelectedRoutePoint = ({ point }: QuoteRoutePoint) =>
+  Boolean(point?.id || point?.place_id) && hasValidCoordinates(point);
+
+function routeRequest(locations: Coordinate[]) {
+  const stops = locations.slice(1, -1);
+  return {
+    pickup_location: locations[0],
+    dropoff_location: locations[locations.length - 1],
+    ...(stops.length > 0 && {
+      stop_points: stops.map(({ lat, lng }) => ({ point_lat: lat, point_lng: lng })),
+    }),
+  };
+}
+
+function orderedRoutePoints(points: QuoteRoutePoint[]) {
+  return [
+    points.find(p => p.type === "pickup"),
+    ...points.filter(p => p.type === "stop"),
+    points.find(p => p.type === "dropoff"),
+  ];
+}
+
+export function selectedPreviewRoute(points: QuoteRoutePoint[]) {
+  const ordered = orderedRoutePoints(points);
+  const located = ordered.filter(p => p && isSelectedRoutePoint(p));
+  const endpointsReady = [ordered[0], ordered[ordered.length - 1]].every(p => p && isSelectedRoutePoint(p));
+  const locations: Coordinate[] = endpointsReady
+    ? located.map(p => ({ lat: p!.point.coordinates.lat, lng: p!.point.coordinates.lng }))
+    : [];
+  return {
+    locations,
+    // A blank or unresolved stop invalidates the old road line, but keep the selected pins.
+    requestKey: locations.length === ordered.length ? JSON.stringify(routeRequest(locations)) : null,
+  };
+}
+
 const isNonNegativeInteger = (value: number) => Number.isInteger(value) && value >= 0;
 
 export const hasValidQuoteCounts = (formDetails: QuoteFormDetails) =>
@@ -49,14 +87,8 @@ export function buildTripQuoteRequest({
   routePoints: QuoteRoutePoint[];
   formDetails: QuoteFormDetails;
 }) {
-  const pickup = routePoints.find((point) => point.type === "pickup")?.point;
-  const dropoff = routePoints.find((point) => point.type === "dropoff")?.point;
-  // Validate every selected stop at the payload boundary as well as in the UI.
-  // Never submit missing or invalid coordinates for an added stop.
-  const hasInvalidStop = routePoints.some(
-    (point) => point.type === "stop" && !hasValidCoordinates(point.point)
-  );
-  if (!hasValidCoordinates(pickup) || !hasValidCoordinates(dropoff) || hasInvalidStop) {
+  const ordered = orderedRoutePoints(routePoints);
+  if (ordered.some(p => !hasValidCoordinates(p?.point))) {
     throw new Error(locationValidationMessage);
   }
   if (!hasValidQuoteCounts(formDetails)) {
@@ -64,8 +96,7 @@ export function buildTripQuoteRequest({
   }
 
   const request: Record<string, unknown> = {
-    pickup_location: pickup.coordinates,
-    dropoff_location: dropoff.coordinates,
+    ...routeRequest(ordered.map(p => p!.point.coordinates)),
     trip_date: normalizeTripDate(formDetails.date),
     trip_time: formDetails.time,
     passengers_count: formDetails.numberOfPassengers,
@@ -75,12 +106,5 @@ export function buildTripQuoteRequest({
       additional_requirements: { meet_and_greet: false },
     },
   };
-  const stopPoints = routePoints
-    .filter((point) => point.type === "stop")
-    .map((point) => ({
-      point_lat: point.point?.coordinates?.lat,
-      point_lng: point.point?.coordinates?.lng,
-    }));
-  if (stopPoints.length) request.stop_points = stopPoints;
   return request;
 }

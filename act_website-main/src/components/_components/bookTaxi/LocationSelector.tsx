@@ -1,6 +1,6 @@
 "use client";
 import { customerText } from "@/lib/customer-text";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { Locale } from "../../../../i18n.config";
 import { PiMapPinLineFill } from "react-icons/pi";
 import { toast } from "react-toastify";
@@ -25,20 +25,11 @@ const UK_BOUNDS = {
   southwest: { lat: 49.162090, lng: -13.413930 }
 };
 
-const fetchPlaceDetails = async (placeId: string) => {
-  try {
-    const res = await fetch(`/api/place-details?place_id=${placeId}`);
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || data.message || "Failed to fetch place details");
-    }
-
-    return data.result?.geometry?.location;
-  } catch (err) {
-    console.error("Failed to fetch place details", err);
-    return null;
-  }
+const fetchPlaceDetails = async (placeId: string, signal: AbortSignal) => {
+  const res = await fetch(`/api/place-details?place_id=${encodeURIComponent(placeId)}`, { signal });
+  if (!res.ok) throw new Error("Failed to fetch place details");
+  const data = await res.json();
+  return data.result?.geometry?.location;
 };
 
 const hasValidCoordinates = (coordinates?: { lat: number; lng: number }) => {
@@ -187,12 +178,14 @@ const isUKRelated = (description: string) => {
 
 export default function LocationSelector({
   value = "",
+  selectedPlace,
   setValue,
   locale,
   locationType
 }: {
   value?: string;
-  setValue: (data: PlaceSuggestion) => void;
+  selectedPlace: PlaceSuggestion | null;
+  setValue: (data: PlaceSuggestion, expectedPlace?: PlaceSuggestion) => void;
   locale: Locale;
   locationType: 'pickup' | 'dropoff' | 'stop';
 }) {
@@ -201,8 +194,9 @@ export default function LocationSelector({
   const [options, setOptions] = useState<PlaceSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingCoordinates, setPendingCoordinates] = useState<Set<string>>(new Set());
-  const [isSelectingLocation, setIsSelectingLocation] = useState(false);
+  const commitSelection = useRef(setValue);
+  useLayoutEffect(() => { commitSelection.current = setValue; }, [setValue]);
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLUListElement | null>(null);
@@ -213,8 +207,10 @@ export default function LocationSelector({
   const isUKWide = locationType === 'dropoff' || locationType === 'stop';
 
   useEffect(() => {
-    if (isSelectingLocation) {
-      setIsSelectingLocation(false);
+    if (selectedPlace?.place_id) {
+      setOptions([]);
+      setIsSearching(false);
+      setError(null);
       return;
     }
 
@@ -323,80 +319,44 @@ export default function LocationSelector({
         abortControllerRef.current.abort();
       }
     };
-  }, [value, locale, locationType, isLondonOnly]);
+  }, [value, selectedPlace?.place_id, locale, locationType, isLondonOnly]);
 
-  const handleLocationSelect = async (location: any) => {
-    // Immediately populate the field and hide options
-    setIsSelectingLocation(true);
+  const handleLocationSelect = (location: PlaceSuggestion) => {
     setValue({ ...location, coordinates: undefined });
     setShowOptions(false);
-
-    // Add to pending coordinates set
-    const newPending = new Set(pendingCoordinates);
-    newPending.add(location.place_id);
-    setPendingCoordinates(newPending);
-
-    // Fetch coordinates in the background
-    try {
-      const coordinates = await fetchPlaceDetails(location.place_id);
-      if (hasValidCoordinates(coordinates)) {
-        // Verify the location is within the appropriate bounds
-        let isValidLocation = false;
-        let errorMessage = "";
-
-        if (isLondonOnly) {
-          // Allow locations inside London bounds OR specific London-area airports
-          isValidLocation =
-            isInLondon(coordinates) ||
-            isPickupExceptionLocation(location.description);
-          errorMessage = isRTL
-            ? "الموقع المختار خارج لندن. يُرجى اختيار موقع داخل لندن فقط."
-            : customerText(locale, "Selected location is outside London. Please choose a location within London only.");
-        } else {
-          isValidLocation = isInUK(coordinates);
-          errorMessage = isRTL
-            ? "الموقع المختار خارج المملكة المتحدة. يُرجى اختيار موقع داخل المملكة المتحدة فقط."
-            : customerText(locale, "Selected location is outside the UK. Please choose a location within the UK only.");
-        }
-
-        if (!isValidLocation) {
-          toast.error(errorMessage);
-          // Clear the selection
-          setValue({
-            description: "",
-            place_id: "",
-            matched_substrings: [],
-            reference: "",
-            coordinates: { lat: 0, lng: 0 },
-          });
-        } else {
-          // Update with real coordinates
-          setValue({ ...location, coordinates });
-        }
-      } else {
-        toast.error(
-          isRTL
-            ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
-            : customerText(locale, "Failed to get location details. Please try selecting again.")
-        );
-        setValue(emptyPlaceSuggestion);
-      }
-    } catch (err) {
-      console.error("Error fetching place details:", err);
-      toast.error(
-        isRTL
-          ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى."
-          : customerText(locale, "Failed to get location details. Please try selecting again.")
-      );
-        setValue(emptyPlaceSuggestion);
-    } finally {
-      // Remove from pending set
-      const newPending = new Set(pendingCoordinates);
-      newPending.delete(location.place_id);
-      setPendingCoordinates(newPending);
-      setIsSelectingLocation(false);
-    }
   };
+
+  // The selected object belongs to this field. Moving it to another field starts
+  // validation there, and an old response cannot overwrite newer input.
+  useEffect(() => {
+    if (!selectedPlace?.place_id || hasValidCoordinates(selectedPlace.coordinates)) return;
+    const controller = new AbortController();
+    async function resolvePlace(selection: PlaceSuggestion) {
+      try {
+        const coordinates = await fetchPlaceDetails(selection.place_id, controller.signal);
+        if (controller.signal.aborted) return;
+        if (!hasValidCoordinates(coordinates)) throw new Error("Missing place coordinates");
+        const valid = isLondonOnly
+          ? isInLondon(coordinates) || isPickupExceptionLocation(selection.description)
+          : isInUK(coordinates);
+        if (valid) {
+          commitSelection.current({ ...selection, coordinates }, selection);
+        } else {
+          const message = isLondonOnly
+            ? (isRTL ? "الموقع المختار خارج لندن. يُرجى اختيار موقع داخل لندن فقط." : customerText(locale, "Selected location is outside London. Please choose a location within London only."))
+            : (isRTL ? "الموقع المختار خارج المملكة المتحدة. يُرجى اختيار موقع داخل المملكة المتحدة فقط." : customerText(locale, "Selected location is outside the UK. Please choose a location within the UK only."));
+          toast.error(message);
+          commitSelection.current(emptyPlaceSuggestion, selection);
+        }
+      } catch {
+        if (controller.signal.aborted) return;
+        toast.error(isRTL ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى." : customerText(locale, "Failed to get location details. Please try selecting again."));
+        commitSelection.current(emptyPlaceSuggestion, selection);
+      }
+    }
+    void resolvePlace(selectedPlace);
+    return () => controller.abort();
+  }, [selectedPlace, locale, isRTL, isLondonOnly]);
 
   const handleInputChange = (inputValue: string) => {
     setValue({
@@ -432,9 +392,7 @@ export default function LocationSelector({
     }
     // Delay closing to allow click events to fire
     setTimeout(() => {
-      if (!isSelectingLocation) {
-        setShowOptions(false);
-      }
+      setShowOptions(false);
     }, 200);
   };
 
@@ -488,11 +446,6 @@ export default function LocationSelector({
               <span className="text-sm font-medium text-gray-800 hover:text-primary transition-colors">
                 {location.description}
               </span>
-              {pendingCoordinates.has(location.place_id) && (
-                <div className="ml-auto">
-                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
             </li>
           ))}
 

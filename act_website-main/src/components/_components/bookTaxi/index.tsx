@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { customerText } from "@/lib/customer-text";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { PlaceSuggestion } from "./LocationSelector";
 import RoutePoints from "./RoutePoints";
 import ChooseCar from "./ChooseCar";
@@ -14,6 +14,10 @@ import ConfirmFlightDetails from "./ConfirmFlightDetails";
 import PaymentDsetails from "./PaymentDsetails";
 import BookingConfirmation from "./BookingConfirmation";
 import MapView from "./MapView";
+import { selectedPreviewRoute } from "./quote-request";
+import { routePreviewQuery, getQuoteProof } from "./route-preview";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { runtimeText } from "@/lib/customer-runtime";
 import Auth from "../auth/Auth";
 import Link from "next/link";
 import PassengerDetails from "./PassengerDetails";
@@ -230,6 +234,14 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
   const [clientSecret, setClientSecret] = useState<string>('')
   const [paymentTotal, setPaymentTotal] = useState<number | null>(null);
   const [step, setStep] = useState<number>(1);
+  const route = useMemo(() => selectedPreviewRoute(routePoints), [routePoints]);
+  const [quotedRouteKey, setQuotedRouteKey] = useState<string | null>(null);
+  const quoteForSelection = route.requestKey && quotedRouteKey === route.requestKey ? rideOptions : null;
+  const queryClient = useQueryClient();
+  const preview = useQuery({
+    ...routePreviewQuery(route.requestKey),
+    enabled: step === 1 && route.requestKey !== null && quotedRouteKey !== route.requestKey,
+  });
   const [restoredDraft, setRestoredDraft] = useState(false);
   useEffect(() => {
     try {
@@ -294,7 +306,7 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
               dir={directionFor(locale)}
             >
               {step === 1 ? (
-                <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)] gap-8 xl:items-start">
+                <div className="mx-auto grid max-w-3xl grid-cols-1 gap-y-1 xl:max-w-none xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)] xl:gap-8 xl:items-start">
                   <RoutePoints
                     locale={locale}
                     routePoints={routePoints}
@@ -308,7 +320,11 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                       }));
                     }}
                     formDetails={formDetails}
-                    setTripData={(res) => setRideOptions(res)}
+                    getRouteProof={() => getQuoteProof(queryClient, route.requestKey)}
+                    setTripData={(res) => {
+                      setRideOptions(res);
+                      setQuotedRouteKey(route.requestKey);
+                    }}
                     resetQuoteState={() => {
                       setRideOptions(null);
                       setSelectedCar(undefined);
@@ -317,15 +333,15 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                     }}
                     nextStep={() => setStep(2)}
                   />
-                  <aside className="hidden xl:block sticky top-24">
-                    <div className="rounded-2xl border border-white/15 bg-black/35 p-5 text-white shadow-2xl backdrop-blur-md">
-                      <div className="mb-4">
+                  <aside aria-label={runtimeText(locale, "routeMapLabel")} className={`order-2 xl:order-none xl:sticky xl:top-24 ${route.locations.length ? "block" : "hidden xl:block"}`}>
+                    <div className="rounded-2xl border border-white/15 bg-black/35 p-2 xl:p-5 text-white shadow-2xl backdrop-blur-md">
+                      <div className="mb-4 hidden xl:block">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd100]">
                           {customerText(locale, "Journey summary")}
                         </p>
                         <h2 className="mt-1 text-2xl font-bold">{customerText(locale, "Your journey")}</h2>
                       </div>
-                      <div className="space-y-3 text-sm">
+                      <div className="hidden space-y-3 text-sm xl:block">
                         {routePoints.find((point) => point.type === "pickup")?.point?.description && (
                           <div className="rounded-xl bg-white/5 p-3">
                             <p className="text-white/55">{customerText(locale, "Pickup")}</p>
@@ -348,29 +364,29 @@ export default function BookTaxi({ home, locale, auth, policy_and_terms }: typeP
                           <div className="rounded-xl bg-white/5 p-3"><p className="text-white/55">{customerText(locale, "Small luggage")}</p><p className="mt-1 font-semibold">{formDetails.smallSuitcase}</p></div>
                         </div>
                       </div>
-                      {rideOptions?.route_polyline ? (
+                      {route.locations.length > 0 ? (
                         <>
-                          <div className="mt-4 h-[320px] overflow-hidden rounded-xl border border-white/10">
-                            <MapView routePolyline={rideOptions.route_polyline} />
+                          <div className="h-52 overflow-hidden rounded-xl border border-white/10 xl:mt-4 xl:h-[320px]">
+                            <MapView routePolyline={quoteForSelection?.route_polyline || preview.data?.route_polyline} locations={route.locations} />
                           </div>
+                          {!quoteForSelection && preview.isError && <p role="status" className="mt-2 text-sm">{runtimeText(locale, "previewRouteUnavailable")}</p>}
+                          {quoteForSelection && (
                           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                             <div className="rounded-xl bg-white/5 p-3">
                               <p className="text-white/55">{customerText(locale, "Distance")}</p>
-                              <p className="mt-1 font-semibold">{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(rideOptions.distance_miles)} mi</p>
+                              <p className="mt-1 font-semibold">{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(quoteForSelection.distance_miles)} mi</p>
                             </div>
                             <div className="rounded-xl bg-white/5 p-3">
                               <p className="text-white/55">{customerText(locale, "Estimated journey time")}</p>
-                              <p className="mt-1 font-semibold">{rideOptions.expected_trip_duration_minutes ? `${Math.round(rideOptions.expected_trip_duration_minutes)} min` : "—"}</p>
+                              <p className="mt-1 font-semibold">{quoteForSelection.expected_trip_duration_minutes ? `${Math.round(quoteForSelection.expected_trip_duration_minutes)} min` : "—"}</p>
                             </div>
                           </div>
+                          )}
                         </>
                       ) : (
                         <div className="mt-4 flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-8 text-center">
                           <MapPin className="mb-4 h-9 w-9 text-[#ffd100]" />
-                          <p className="text-lg font-semibold">{customerText(locale, "Your route map will appear after the price is calculated")}</p>
-                          <p className="mt-2 text-sm leading-6 text-white/60">
-                            {customerText(locale, "Your journey details update here as you complete the booking form.")}
-                          </p>
+                          <p className="text-lg font-semibold">{runtimeText(locale, "selectRouteLocations")}</p>
                         </div>
                       )}
                     </div>
