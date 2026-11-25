@@ -9,9 +9,10 @@ for(const expected of [
 'customerText(locale, "Passengers")',
 'customerText(locale, "Large luggage")',
 'customerText(locale, "Small luggage")',
-'<MapView routePolyline={rideOptions.route_polyline} />',
-'rideOptions.expected_trip_duration_minutes'
+'locations={route.locations}',
+'quoteForSelection.expected_trip_duration_minutes'
 ]) assert.ok(index.includes(expected),"missing journey-summary behavior: "+expected);
-assert.ok(index.includes('className="hidden xl:block sticky top-24"'),"summary must not crowd current mobile form");
+assert.equal((index.match(/<MapView\s/g) || []).length, 1, "one shared map for all viewport sizes");
+assert.ok(index.includes('route.locations.length ? "block" : "hidden xl:block"'), "small screens show the map only after both endpoints are selected");
 assert.ok(map.includes("mapRef.current.fitBounds(bounds);"),"map must refit after async path decode");
-console.log("PASS progressive desktop journey summary and map-refit wiring");
+console.log("PASS responsive pre-quote journey summary and map-refit wiring");

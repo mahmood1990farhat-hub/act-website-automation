@@ -1,0 +1,49 @@
+name: Check booking map preview
+on:
+  push:
+    branches: [draft/booking-map-before-price-20261125]
+    paths: ['act_website-main/**', '.github/workflows/booking-map-preview.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  booking-map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: synthetic-test-only
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3001
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_synthetic
+    defaults:
+      run:
+        working-directory: act_website-main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: act_website-main/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Check route preview and quote behaviour
+        run: |
+          node tests/check-route-map-pins.cjs
+          node tests/check-route-preview.cjs
+          node tests/check-booking-journey-summary.cjs
+          node tests/check-quote-coordinate-validation.cjs
+          node tests/check-quote-state-invalidation.cjs
+      - name: Build the passenger website and check types
+        run: |
+          npm run build
+          npx --no-install tsc --noEmit
+      - name: Install Chromium for the existing booking browser test
+        run: |
+          sudo install -d -o "$(id -u)" -g "$(id -g)" /opt/browser-test
+          npm install --prefix /opt/browser-test --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          /opt/browser-test/node_modules/.bin/playwright install --with-deps chromium
+      - name: Test address selection in English and Arabic with simulated services
+        run: node tests/check-client-booking.cjs

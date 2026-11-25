@@ -2,7 +2,7 @@
 import { runtimeText } from "@/lib/customer-runtime";
 import { customerText } from "@/lib/customer-text";
 import { bookingText } from "./booking-text";
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import LocationSelector, { PlaceSuggestion } from "./LocationSelector";
 import { IoLocation } from "react-icons/io5";
 import { BiCurrentLocation } from "react-icons/bi";
@@ -20,7 +20,7 @@ import CarLoading from "../loading/CarLoading";
 import { ArrowUpDown } from "lucide-react";
 import {
   buildTripQuoteRequest,
-  hasValidCoordinates,
+  isSelectedRoutePoint,
   locationValidationMessage,
 } from "./quote-request";
 
@@ -63,6 +63,7 @@ type TaxiFormProps = {
   };
   setTripData: (rs: calculatTripCost) => void;
   resetQuoteState: () => void;
+  getRouteProof: () => Promise<string | undefined>;
   nextStep: () => void;
 };
 
@@ -74,6 +75,7 @@ export default function RoutePoints({
   setValue,
   setTripData,
   resetQuoteState,
+  getRouteProof,
   formDetails,
   nextStep,
 }: TaxiFormProps) {
@@ -87,6 +89,12 @@ export default function RoutePoints({
   const selectedTime = timeParts.length === 2 && timeParts.every(Number.isFinite) ? { hour: timeParts[0], minute: timeParts[1] } : undefined;
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  const quoteVersion = useRef(0);
+  const quotePending = useRef(false);
+  const inputKey = JSON.stringify([routePoints, formDetails.date, formDetails.time, formDetails.adults,
+    formDetails.children, formDetails.infants, formDetails.largeSuitcase, formDetails.smallSuitcase]);
+  useLayoutEffect(() => () => { quoteVersion.current++; }, [inputKey]);
 
   const tripCalculationErrorMessage =
     customerText(locale, "We could not calculate this journey. Please check the pickup and drop-off addresses and try again.");
@@ -115,22 +123,11 @@ export default function RoutePoints({
   };
 
   const swapPointsBetween = (index1: number, index2: number) => {
-    const newRoutePoints = [...routePoints];
-    const tempPoint = newRoutePoints[index1].point;
-    newRoutePoints[index1].point = newRoutePoints[index2].point;
-    newRoutePoints[index2].point = tempPoint;
-    setRoutePoints(newRoutePoints);
-  };
-
-  const isValidRoutePoint = (routePoint: RoutePoint) => {
-    const point = routePoint.point;
-
-    if (!point) return false;
-
-    const hasAirportId = Boolean(point.id);
-    const hasPlaceId = Boolean(point.place_id);
-
-    return (hasAirportId || hasPlaceId) && hasValidCoordinates(point);
+    setRoutePoints(points => points.map((p, i) => {
+      if (i === index1) return { ...p, point: points[index2].point };
+      if (i === index2) return { ...p, point: points[index1].point };
+      return p;
+    }));
   };
 
   const getBackendErrorMessage = (errorBody: any, statusCode: number) => {
@@ -142,7 +139,7 @@ export default function RoutePoints({
   };
 
   const validateForm = () => {
-    const hasInvalidPoints = routePoints.some((point) => !isValidRoutePoint(point));
+    const hasInvalidPoints = routePoints.some((point) => !isSelectedRoutePoint(point));
     const hasEmptyDate = formDetails.date === "";
     const hasEmptyTime = formDetails.time === "";
 
@@ -178,6 +175,7 @@ export default function RoutePoints({
   };
 
   const onSubmit = async () => {
+    if (quotePending.current) return;
     setSubmitError("");
 
     if (!validateForm()) {
@@ -194,6 +192,8 @@ export default function RoutePoints({
     }
 
     // Only a valid fresh quote request invalidates previous downstream state.
+    const version = quoteVersion.current;
+    quotePending.current = true;
     resetQuoteState();
     setIsLoading(true);
 
@@ -208,6 +208,10 @@ export default function RoutePoints({
         formDetails: { ...formDetails, ...inputValues },
       });
 
+      const proof = await getRouteProof();
+      if (version !== quoteVersion.current) return;
+      if (proof) bodyData.route_proof = proof;
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/trips/calculate-trip-cost/`,
         {
@@ -221,6 +225,7 @@ export default function RoutePoints({
 
       const responseBody = await response.json().catch(() => null);
 
+      if (version !== quoteVersion.current) return;
       if (!response.ok) {
         throw new Error(getBackendErrorMessage(responseBody, response.status));
       }
@@ -228,18 +233,20 @@ export default function RoutePoints({
       setTripData(responseBody as calculatTripCost);
       nextStep();
     } catch (error: any) {
+      if (version !== quoteVersion.current) return;
       console.error("Trip calculation error:", error);
       const message = error instanceof Error && error.message ? error.message : tripCalculationErrorMessage;
       setSubmitError(message);
       setOpenModal(true);
     } finally {
+      quotePending.current = false;
       setIsLoading(false);
     }
   };
 
-  const updateRoutePoint = (pointId: number, data: any) => {
+  const updateRoutePoint = (pointId: number, data: PlaceSuggestion, expected?: PlaceSuggestion) => {
     setRoutePoints((prev) =>
-      prev.map((p) => (p.id === pointId ? { ...p, point: data } : p))
+      prev.map((p) => (p.id === pointId && (!expected || p.point === expected) ? { ...p, point: data } : p))
     );
   };
 
@@ -259,7 +266,7 @@ export default function RoutePoints({
   };
 
   return (
-    <div className="max-w-3xl max-xl:mx-auto">
+    <div className="contents xl:block">
       <h1 className={`text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'} text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-2`}>
         {book_Taxi.title}
       </h1>
@@ -267,11 +274,11 @@ export default function RoutePoints({
         {book_Taxi.subtitle}
       </p>
 
-      <div>
+      <div className="contents xl:block">
         {routePoints.map((item, index) => (
           <div
             key={item.id}
-            className={`flex w-full gap-2 ${index === routePoints.length - 2 && item.type === "stop"
+            className={`order-1 flex w-full gap-2 ${index === routePoints.length - 2 && item.type === "stop"
                 ? "slide-down"
                 : ""
               }`}
@@ -283,11 +290,12 @@ export default function RoutePoints({
               <LocationSelector
                 locale={locale}
                 value={item.point?.description || ""}
+                selectedPlace={item.point}
                 locationType={item?.type}
-                setValue={(data) => updateRoutePoint(item.id, data)}
+                setValue={(data, expected) => updateRoutePoint(item.id, data, expected)}
               />
               </label>
-                {isRequired && !isValidRoutePoint(item) && <span className="absolute bottom-0.5 text-red-600 font-semibold px-2">
+                {isRequired && !isSelectedRoutePoint(item) && <span className="absolute bottom-0.5 text-red-600 font-semibold px-2">
                   {book_Taxi.form.error}
                 </span>}
 
@@ -363,7 +371,7 @@ export default function RoutePoints({
         ))}
 
         {/* Date & Time Section */}
-        <div className="flex w-full gap-2 my-1">
+        <div className="order-3 flex w-full gap-2 my-1">
           <div className="w-full space-y-4">
             <div
               onClick={() => setIsRequired(false)}

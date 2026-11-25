@@ -1,5 +1,8 @@
 {
   "en": {
+    "routeMapLabel": "Journey map",
+    "selectRouteLocations": "Select a pickup and drop-off to see your route.",
+    "previewRouteUnavailable": "The road route is unavailable. You can still request a price.",
     "selectDate": "Select date",
     "selectTime": "Select time",
     "hour": "Hour",
@@ -69,6 +72,9 @@
     "bookingFinalisingDelayed": "Your payment was successful, but booking confirmation is taking longer than expected. Please don’t pay again; ACT will continue processing the paid booking and send confirmation when it is ready."
   },
   "ar": {
+    "routeMapLabel": "خريطة الرحلة",
+    "selectRouteLocations": "اختر موقع الاستلام ووجهة الوصول لعرض المسار.",
+    "previewRouteUnavailable": "تعذّر عرض مسار القيادة. لا يزال بإمكانك طلب السعر.",
     "selectDate": "اختر التاريخ",
     "selectTime": "اختر الوقت",
     "hour": "الساعة",
@@ -138,6 +144,9 @@
     "bookingFinalisingDelayed": "تم الدفع بنجاح، لكن تأكيد الحجز يستغرق وقتًا أطول من المتوقع. يرجى عدم الدفع مرة أخرى؛ ستواصل ACT معالجة الحجز المدفوع وإرسال التأكيد عند اكتماله."
   },
   "fr": {
+    "routeMapLabel": "Carte du trajet",
+    "selectRouteLocations": "Sélectionnez le lieu de départ et la destination pour voir votre itinéraire.",
+    "previewRouteUnavailable": "L’itinéraire routier est indisponible. Vous pouvez toujours demander un tarif.",
     "selectDate": "Choisir une date",
     "selectTime": "Choisir une heure",
     "hour": "Heure",
@@ -207,6 +216,9 @@
     "bookingFinalisingDelayed": "Votre paiement a réussi, mais la confirmation de la réservation prend plus de temps que prévu. Ne payez pas à nouveau ; ACT poursuivra le traitement de la réservation payée et enverra la confirmation lorsqu’elle sera prête."
   },
   "de": {
+    "routeMapLabel": "Streckenkarte",
+    "selectRouteLocations": "Wählen Sie Abholort und Ziel aus, um Ihre Route zu sehen.",
+    "previewRouteUnavailable": "Die Fahrstrecke ist nicht verfügbar. Sie können weiterhin einen Preis anfordern.",
     "selectDate": "Datum auswählen",
     "selectTime": "Uhrzeit auswählen",
     "hour": "Stunde",
@@ -276,6 +288,9 @@
     "bookingFinalisingDelayed": "Ihre Zahlung war erfolgreich, aber die Buchungsbestätigung dauert länger als erwartet. Bitte zahlen Sie nicht erneut; ACT verarbeitet die bezahlte Buchung weiter und sendet die Bestätigung, sobald sie bereit ist."
   },
   "es": {
+    "routeMapLabel": "Mapa del trayecto",
+    "selectRouteLocations": "Selecciona el punto de recogida y el destino para ver la ruta.",
+    "previewRouteUnavailable": "No se puede mostrar la ruta por carretera. Puedes solicitar el precio igualmente.",
     "selectDate": "Seleccionar fecha",
     "selectTime": "Seleccionar hora",
     "hour": "Hora",
@@ -345,6 +360,9 @@
     "bookingFinalisingDelayed": "El pago se realizó correctamente, pero la confirmación de la reserva está tardando más de lo previsto. No vuelva a pagar; ACT seguirá procesando la reserva pagada y enviará la confirmación cuando esté lista."
   },
   "tr": {
+    "routeMapLabel": "Yolculuk haritası",
+    "selectRouteLocations": "Rotanızı görmek için alış ve varış noktalarını seçin.",
+    "previewRouteUnavailable": "Sürüş rotası gösterilemiyor. Yine de fiyat alabilirsiniz.",
     "selectDate": "Tarih seçin",
     "selectTime": "Saat seçin",
     "hour": "Saat",
@@ -414,6 +432,9 @@
     "bookingFinalisingDelayed": "Ödemeniz başarılı oldu ancak rezervasyon onayı beklenenden uzun sürüyor. Lütfen tekrar ödeme yapmayın; ACT ücretli rezervasyonu işlemeye devam edecek ve hazır olduğunda onayı gönderecektir."
   },
   "zh-CN": {
+    "routeMapLabel": "行程地图",
+    "selectRouteLocations": "请选择上车点和下车点以查看路线。",
+    "previewRouteUnavailable": "暂时无法显示行车路线。您仍可查询价格。",
     "selectDate": "选择日期",
     "selectTime": "选择时间",
     "hour": "小时",
