@@ -524,8 +524,8 @@ class Release:
                                             SOURCE_BASE_SHA,SOURCE_SHA,'--',SUBTREE]).decode().splitlines()
         observed = {}
         for entry in changed:
-            status, separator, path = entry.partition('\\t')
-            need(separator == '\\t' and status in ('A', 'M')
+            status, separator, path = entry.partition('\t')
+            need(separator == '\t' and status in ('A', 'M')
                  and path.startswith(SUBTREE + '/'), 'FRONTEND_DIFF_STATUS_INVALID')
             name = path.removeprefix(SUBTREE + '/')
             need(name not in observed, 'FRONTEND_DIFF_DUPLICATE_FILE')
