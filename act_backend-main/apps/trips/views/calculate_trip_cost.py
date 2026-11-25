@@ -10,6 +10,7 @@ from ..serializers import TripSerializer
 from utils.common import get_locale , remove_empty_values , is_past_datetime , get_route_with_distance , validate_int_value
 from utils.calculate_cost import calculate_total_cost
 from utils.utils_trip import prepare_trip_data
+from apps.trips.services.route_preview import read_route_proof
 from apps.pricing.services.extra_service_resolver import apply_meet_and_greet_pricing
 from utils.common.error_handlers import (
     create_validation_error_response,
@@ -51,6 +52,7 @@ class CalculateTripCostView(EMADBaseView):
         activate(locale)
 
         raw_data = remove_empty_values(request.data)
+        raw_data.pop('route_proof', None)
         data = prepare_trip_data(data=raw_data, locale=locale)
         
         serializer = TripSerializer(data=data, context={'request': request, 'locale': locale})
@@ -63,7 +65,7 @@ class CalculateTripCostView(EMADBaseView):
             )
             return create_validation_error_response(serializer.errors, locale, custom_message)
 
-        res = get_route_with_distance(
+        res = read_route_proof(request.data) or get_route_with_distance(
             pickup_lat=data.get('pickup_lat'),
             pickup_lng=data.get('pickup_lng'),
             dropoff_lat=data.get('dropoff_lat'),

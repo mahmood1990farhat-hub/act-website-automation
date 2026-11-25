@@ -281,6 +281,22 @@ class DriverOnboardingQuestionnaireSerializer(serializers.ModelSerializer):
 
 class DriverOnboardingRequestSerializer(serializers.ModelSerializer):
     """Serializer for admin review of onboarding requests"""
+    submission_mode = serializers.SerializerMethodField()
+    awaiting_vehicle = serializers.SerializerMethodField()
+
+    def get_submission_mode(self, obj):
+        try:
+            obj.unified_application
+            return "unified"
+        except Exception:
+            return "legacy"
+
+    def get_awaiting_vehicle(self, obj):
+        try:
+            return bool(obj.unified_application.awaiting_vehicle)
+        except Exception:
+            return False
+
     
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_username = serializers.CharField(source='user.username', read_only=True)
@@ -303,7 +319,7 @@ class DriverOnboardingRequestSerializer(serializers.ModelSerializer):
             'notification_method', 'has_tfl_licence', 'willing_dbs_check',
             'agrees_policies', 'status', 'admin_notes', 'rejection_reason',
             'reviewed_by', 'reviewed_at', 'created_at', 'user_email', 'user_username',
-            'files_need_modification', 'modification_confirmed'
+            'files_need_modification', 'modification_confirmed', 'submission_mode', 'awaiting_vehicle'
         ]
         read_only_fields = ['id', 'created_at', 'reviewed_by', 'reviewed_at']
 

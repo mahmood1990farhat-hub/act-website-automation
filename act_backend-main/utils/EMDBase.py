@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound, ParseError
+from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound, ParseError, APIException
 from utils.common.locale_utils import get_locale
 from utils.common.error_handlers import (
     create_validation_error_response,
@@ -72,6 +72,11 @@ class EMADBaseView(APIView):
         except NotFound as e:
             locale = get_locale(request=request)
             return create_not_found_response(str(e), locale)
+
+        except APIException:
+            # Let DRF preserve intentional conflict/status responses (e.g. an
+            # assignment raced with driver suspension) instead of disguising as 500.
+            raise
         
         except Exception as e:
             locale = get_locale(request=request)

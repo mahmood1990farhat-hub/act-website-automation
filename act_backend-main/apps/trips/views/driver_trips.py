@@ -13,6 +13,7 @@ from utils.common.error_handlers import (
 )
 from ..models import Trip
 from ..serializers import TripWithStopPointSerializer
+from ..serializers.trip import DriverTripDetailSerializer
 from apps.drivers.models import BaseDriver
 from django.db.models import Q
 import logging
@@ -148,7 +149,8 @@ class DriverTripDetailView(EMADBaseView):
                 'airport',
                 'base_driver__user',
                 'base_driver__normal_driver__vehicle',
-                'cancelled_by_driver_id__user'
+                'cancelled_by_driver_id__user',
+                'driver_earning'
             ).prefetch_related('stop_points').get(id=trip_id)
             
             # Additional validation: Verify trip ownership
@@ -177,7 +179,7 @@ class DriverTripDetailView(EMADBaseView):
             )
             return create_not_found_response(message, locale)
 
-        serializer = TripWithStopPointSerializer(
+        serializer = DriverTripDetailSerializer(
             trip,
             context={'request': request, 'account_type': 'normal_driver'}
         )
@@ -188,10 +190,13 @@ class DriverTripDetailView(EMADBaseView):
             locale
         )
 
-        return Response({
+        response = Response({
             'success': True,
             'message': message,
             'data': serializer.data,
             'pagination': None
         }, status=status.HTTP_200_OK)
+        response['Cache-Control'] = 'private, no-store'
+        return response
+
 

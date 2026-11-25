@@ -110,7 +110,10 @@ class DriverLoginView(EMADBaseView):
             'onboarding_status': {
                 'status': onboarding_request.status,
                 'next_step': self.get_next_step_message(onboarding_request.status),
-                'can_upload_documents': onboarding_request.status == 'step1_approved'
+                'can_upload_documents': onboarding_request.status == 'step1_approved',
+                'submission_mode': 'unified' if hasattr(onboarding_request, 'unified_application') else 'legacy',
+                'awaiting_vehicle': bool(onboarding_request.unified_application.awaiting_vehicle)
+                    if hasattr(onboarding_request, 'unified_application') else False
             }
         })
     
