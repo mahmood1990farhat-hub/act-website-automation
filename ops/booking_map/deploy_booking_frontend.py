@@ -402,6 +402,24 @@ class Release:
         self.source = source_tree(ACTIVE)
         self.assets_before = self.prior.tree(OLD_ASSETS)
         self.backend_baseline = self.backend()
+        # Only activate a frontend that can talk to the already deployed,
+        # owner-approved additive route-preview API. The deliberately invalid
+        # payload is rejected before Google and creates no booking or charge.
+        need(self.backend_baseline['cwd'] ==
+             '/var/www/atg/atg-backend/releases/20261125-route-c1638d3/backend',
+             'EXPECTED_ROUTE_PREVIEW_BACKEND_NOT_ACTIVE')
+        backend_receipt = json.loads(regular(Path(self.backend_baseline['cwd']) / 'release.json'))
+        need(backend_receipt.get('git_sha') == PATCH_SHA,
+             'EXPECTED_ROUTE_PREVIEW_BACKEND_SOURCE_DIFFERS')
+        result = self.command('preview-backend-readiness', [
+            '/usr/bin/curl', '-sS', '--noproxy', '*', '--max-time', '8',
+            '--unix-socket', '/run/act.sock', '-H', 'Host: airportandcitytransfer.com',
+            '-H', 'Content-Type: application/json', '-H', 'X-Forwarded-Proto: https',
+            '--data-binary', '{}', '-w', '\\n%{http_code}',
+            'http://localhost/api/trips/route-preview/'], timeout=12)
+        response, code = result.rsplit(b'\\n', 1)
+        need(code == b'400' and json.loads(response).get('code') == 'invalid_route',
+             'ROUTE_PREVIEW_API_NOT_READY')
         self.master_hash = digest(regular(MASTER))
         self.entries = sorted(SITE.parent.iterdir())
         self.other_nginx_hash = self.other_nginx()
@@ -534,7 +552,7 @@ class Release:
             'PATH': str(NODE_DIR) + ':/usr/bin:/bin', 'NODE_ENV': 'production',
             'NEXT_TELEMETRY_DISABLED': '1', 'npm_config_update_notifier': 'false',
         }
-        emit('BUILDING_ADMIN_HEADER_CANDIDATE; CURRENT_WEBSITE_STILL_RUNNING')
+        emit('BUILDING_BOOKING_MAP_CANDIDATE; CURRENT_WEBSITE_STILL_RUNNING')
         self.command('npm-ci', ['/usr/sbin/runuser', '-u', 'act', '--', NPM, 'ci', '--include=dev',
             '--ignore-scripts', '--no-audit', '--no-fund'], cwd=CANDIDATE, env=env, timeout=600, log=True)
         self.command('next-build', ['/usr/sbin/runuser', '-u', 'act', '--', NODE,
@@ -747,7 +765,7 @@ def main(argv=None):
             release = Release(prior)
             release.snapshot()
             if args.check:
-                emit('ADMIN_HEADER_PREFLIGHT_PASSED; READ_ONLY; NO_CHANGES')
+                emit('BOOKING_MAP_PREFLIGHT_PASSED; READ_ONLY; NO_CHANGES')
                 return 0
             # Approval was supplied in the ACT development chat for this exact patch.
             signal.signal(signal.SIGHUP, signal.SIG_IGN)
@@ -770,7 +788,7 @@ def main(argv=None):
                 return 1
         return 0
     except Stop as exc:
-        emit('STOPPED: ' + str(exc) + '; NO_NEW_ACTIVATION')
+        emit('STOPPED: ' + str(exc) + '; NO_NEW_BOOKING_MAP_ACTIVATION')
         return 1
     except (Exception, KeyboardInterrupt):
         emit('STOPPED: PREFLIGHT_UNAVAILABLE; NO_NEW_ACTIVATION; NO_SECRET_DETAILS_PRINTED')

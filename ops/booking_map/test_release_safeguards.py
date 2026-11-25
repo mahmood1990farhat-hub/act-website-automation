@@ -30,6 +30,13 @@ class BookingMapReleaseTests(unittest.TestCase):
         self.assertIn("self.prior.atomic_file(DUMP, self.original_dump", FRONT)
         self.assertIn("STRIPE_TEST_CONFIGURATION_PRESERVED", FRONT)
         self.assertNotIn("3005", FRONT)
+    def test_requires_new_backend_and_nonbillable_probe(self):
+        self.assertIn('EXPECTED_ROUTE_PREVIEW_BACKEND_NOT_ACTIVE', FRONT)
+        self.assertIn('EXPECTED_ROUTE_PREVIEW_BACKEND_SOURCE_DIFFERS', FRONT)
+        self.assertIn("'http://localhost/api/trips/route-preview/'", FRONT)
+        self.assertIn("'invalid_route'", FRONT)
+        self.assertIn("'-w', '\\\\n%{http_code}'", FRONT)
+
     def test_preflight_and_recovery_guards(self):
         self.assertIn("SITE_HASH = '02a38a93c8176069b252412b8e8c898d05eb349b75f6f0abe24fd7e8eac961be'", FRONT)
         self.assertIn("CURRENT.is_symlink()", BACK)
