@@ -23,6 +23,19 @@ class BookingMapReleaseTests(unittest.TestCase):
         self.assertIn("FRONT_TREE = '4c55b72da7637591a276b26ee953bba70dad819d'", FRONT)
         self.assertIn("SOURCE_BASE_SHA = 'ed1fce2a1c3c5aa8aac36f050d231b250658cca4'", FRONT)
         self.assertIn("EXPECTED_CHANGED = {", FRONT)
+    def test_deployed_admin_menu_hashes_are_used_for_both_locales(self):
+        import ast
+        tree = ast.parse(FRONT)
+        assign = next(node for node in tree.body if isinstance(node, ast.Assign)
+                      and any(isinstance(target, ast.Name) and target.id == 'MENU_BEFORE'
+                              for target in node.targets))
+        pins = ast.literal_eval(assign.value)
+        self.assertEqual(pins['en'],
+                         'a6d114637a04bd19c6c5e040ec0aa8a39d14e96754a028fb697cb0e7d04898b5')
+        self.assertEqual(pins['ar'],
+                         '74d793c730338dae888c65fe3dcf5323f8249e661ea5fc3c05fa494898ec64f8')
+        self.assertIn('DEPLOYED_ADMIN_LINK_MISSING', FRONT)
+
     def test_frontend_retention(self):
         self.assertIn("PORT = 'act-booking-map-c1638d3', 3007", FRONT)
         self.assertIn("self.prior.atomic_file(self.site, self.proposed", FRONT)

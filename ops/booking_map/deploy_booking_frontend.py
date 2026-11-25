@@ -49,7 +49,7 @@ DOMAIN = 'airportandcitytransfer.com'
 OLD_BUILD = '-angEHlLmt_IsegNoYcd1'
 SITE_HASH = '02a38a93c8176069b252412b8e8c898d05eb349b75f6f0abe24fd7e8eac961be'
 MENU_BEFORE = {
-    'en': '2f0b301b1f607e162321c6f4d911f6f503da130286728b465fa453562ea803b8',
+    'en': 'a6d114637a04bd19c6c5e040ec0aa8a39d14e96754a028fb697cb0e7d04898b5',
     'ar': '74d793c730338dae888c65fe3dcf5323f8249e661ea5fc3c05fa494898ec64f8',
 }
 MENU_AFTER = {
