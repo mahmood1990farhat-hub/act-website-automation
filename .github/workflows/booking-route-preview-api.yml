@@ -1,0 +1,77 @@
+name: Check booking route preview API
+on:
+  push:
+    branches: [draft/booking-route-preview-api-20261125]
+    paths: ['act_backend-main/**', '.github/workflows/booking-route-preview-api.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  route-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: act_tracking_test
+          POSTGRES_USER: act
+          POSTGRES_PASSWORD: isolated_tracking_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U act -d act_tracking_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACT_TRACKING_ACCESS_TESTS: "1"
+      DJANGO_SETTINGS_MODULE: myProject.settings.journey_report_tests
+      SECRET_KEY: isolated-tracking-tests-never-use-in-production
+      DEBUG: "False"
+      DB_NAME: act_tracking_test
+      DB_USER: act
+      DB_PASSWORD: isolated_tracking_test
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: isolated-test-not-a-real-key
+      TWILIO_VERIFY_SERVICE_SID: VA00000000000000000000000000000000
+      GOOGLE_MAPS_API_KEY: isolated-test-not-a-real-key
+      STRIPE_SECRET_KEY: sk_test_isolated_not_a_real_key
+      STRIPE_WEBHOOK_SECRET: whsec_isolated_not_a_real_secret
+      FIREBASE_CREDENTIALS_PATH: tests/no-firebase-credentials.json
+      REDIS_URL: redis://127.0.0.1:1/0
+      CELERY_BROKER_URL: memory://
+      EMAIL_HOST: localhost
+      EMAIL_PORT: "1"
+      EMAIL_USE_TLS: "False"
+      EMAIL_HOST_USER: ci@example.invalid
+      EMAIL_HOST_PASSWORD: isolated-test-not-a-real-key
+      ADMIN_EMAIL: admin@example.invalid
+      APP_BASE_URL: https://api.example.invalid
+      ACT_PUBLIC_WEBSITE_URL: https://website.example.invalid
+      ACT_EMAIL_ASSETS_BASE_URL: https://api.example.invalid/static/email-assets
+      N8N_ENABLED: "False"
+    defaults:
+      run:
+        working-directory: act_backend-main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: act_backend-main/requirements.txt
+      - name: Ensure GeoDjango can import its native libraries
+        run: |
+          if ! python -c 'from ctypes import CDLL; from ctypes.util import find_library; assert all(find_library(n) and CDLL(find_library(n)) for n in ("gdal", "geos_c"))'; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends libgdal34t64 libgeos-c1t64
+          fi
+      - run: pip install -r requirements.txt
+      - name: Test preview and fare reuse with simulated directions
+        run: python manage.py test apps.trips.tests.test_route_preview --verbosity 2 --noinput
