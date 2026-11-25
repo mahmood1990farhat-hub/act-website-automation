@@ -1,0 +1,19 @@
+name: Verify ACT booking map deployment helpers
+on:
+  push:
+    branches: [draft/booking-map-combined-release-20261125]
+    paths: ['ops/booking_map/**', '.github/workflows/booking-map-deployment-checks.yml']
+permissions:
+  contents: read
+jobs:
+  helper-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -B -m unittest discover -s ops/booking_map -p 'test_*.py' -v
+      - run: python -B -m py_compile ops/booking_map/deploy_route_backend.py ops/booking_map/deploy_booking_frontend.py
