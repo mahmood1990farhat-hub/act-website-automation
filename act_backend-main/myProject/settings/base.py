@@ -63,6 +63,9 @@ MIDDLEWARE = [
     "silk.middleware.SilkyMiddleware",
 ]
 
+# Preview can be abandoned before booking. Avoid retaining its coordinates in the request profiler.
+SILKY_IGNORE_PATHS = ['/api/trips/route-preview/']
+
 ROOT_URLCONF = 'myProject.urls'
 
 TEMPLATES = [
