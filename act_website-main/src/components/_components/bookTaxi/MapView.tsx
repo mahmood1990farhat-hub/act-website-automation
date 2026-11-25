@@ -80,7 +80,7 @@ function MapView({ routePolyline, locations }: Props) {
 
 export default function GuardedMapView(props: Props) {
   return (
-    <ProviderMap>
+    <ProviderMap loadingHeight="h-full">
       <MapView {...props} />
     </ProviderMap>
   );

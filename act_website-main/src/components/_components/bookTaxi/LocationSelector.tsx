@@ -178,17 +178,24 @@ const isUKRelated = (description: string) => {
 
 export default function LocationSelector({
   value = "",
-  selectedPlace,
+  selectedPlace: controlledPlace,
   setValue,
   locale,
   locationType
 }: {
   value?: string;
-  selectedPlace: PlaceSuggestion | null;
+  selectedPlace?: PlaceSuggestion | null;
   setValue: (data: PlaceSuggestion, expectedPlace?: PlaceSuggestion) => void;
   locale: Locale;
   locationType: 'pickup' | 'dropoff' | 'stop';
 }) {
+  // Booking owns selected objects. Text-only callers (e.g. the driver postcode)
+  // keep the selected place here while their form stores the description.
+  const [localPlace, setLocalPlace] = useState<PlaceSuggestion | null>(null);
+  const textOnly = controlledPlace === undefined;
+  const selectedPlace = textOnly
+    ? (localPlace?.description === value ? localPlace : null)
+    : controlledPlace;
   const isRTL = locale === 'ar';
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState<PlaceSuggestion[]>([]);
@@ -322,7 +329,9 @@ export default function LocationSelector({
   }, [value, selectedPlace?.place_id, locale, locationType, isLondonOnly]);
 
   const handleLocationSelect = (location: PlaceSuggestion) => {
-    setValue({ ...location, coordinates: undefined });
+    const selection = { ...location, coordinates: undefined };
+    if (textOnly) setLocalPlace(selection);
+    setValue(selection);
     setShowOptions(false);
   };
 
@@ -331,6 +340,10 @@ export default function LocationSelector({
   useEffect(() => {
     if (!selectedPlace?.place_id || hasValidCoordinates(selectedPlace.coordinates)) return;
     const controller = new AbortController();
+    const finish = (place: PlaceSuggestion, expected: PlaceSuggestion) => {
+      if (textOnly) setLocalPlace(place);
+      commitSelection.current(place, expected);
+    };
     async function resolvePlace(selection: PlaceSuggestion) {
       try {
         const coordinates = await fetchPlaceDetails(selection.place_id, controller.signal);
@@ -340,25 +353,26 @@ export default function LocationSelector({
           ? isInLondon(coordinates) || isPickupExceptionLocation(selection.description)
           : isInUK(coordinates);
         if (valid) {
-          commitSelection.current({ ...selection, coordinates }, selection);
+          finish({ ...selection, coordinates }, selection);
         } else {
           const message = isLondonOnly
             ? (isRTL ? "الموقع المختار خارج لندن. يُرجى اختيار موقع داخل لندن فقط." : customerText(locale, "Selected location is outside London. Please choose a location within London only."))
             : (isRTL ? "الموقع المختار خارج المملكة المتحدة. يُرجى اختيار موقع داخل المملكة المتحدة فقط." : customerText(locale, "Selected location is outside the UK. Please choose a location within the UK only."));
           toast.error(message);
-          commitSelection.current(emptyPlaceSuggestion, selection);
+          finish(emptyPlaceSuggestion, selection);
         }
       } catch {
         if (controller.signal.aborted) return;
         toast.error(isRTL ? "تعذّر الحصول على تفاصيل الموقع. يُرجى محاولة التحديد مرة أخرى." : customerText(locale, "Failed to get location details. Please try selecting again."));
-        commitSelection.current(emptyPlaceSuggestion, selection);
+        finish(emptyPlaceSuggestion, selection);
       }
     }
     void resolvePlace(selectedPlace);
     return () => controller.abort();
-  }, [selectedPlace, locale, isRTL, isLondonOnly]);
+  }, [selectedPlace, textOnly, locale, isRTL, isLondonOnly]);
 
   const handleInputChange = (inputValue: string) => {
+    if (textOnly) setLocalPlace(null);
     setValue({
       description: inputValue,
       place_id: "",
